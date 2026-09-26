@@ -1,0 +1,10 @@
+{
+  "name": "FoodWell",
+  "short_name": "FoodWell",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f8f5",
+  "theme_color": "#78c7a5",
+  "lang": "th",
+  "icons": []
+}
