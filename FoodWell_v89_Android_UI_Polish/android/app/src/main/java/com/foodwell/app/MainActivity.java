@@ -51,14 +51,21 @@ public class MainActivity extends ComponentActivity {
     }
 
     private void showHealthStatus() {
-        Toast.makeText(this, health.isAvailable() ? "Health Connect พร้อมใช้งาน" : "ยังไม่พร้อมใช้งาน", Toast.LENGTH_SHORT).show();
+        // JavascriptInterface calls arrive on a background thread; Toast needs the UI thread.
+        runOnUiThread(() -> Toast.makeText(this, health.isAvailable() ? "Health Connect พร้อมใช้งาน" : "ยังไม่พร้อมใช้งาน", Toast.LENGTH_SHORT).show());
     }
 
     public final class NativeHealthApi {
         @JavascriptInterface public String availability() { return health.isAvailable() ? "available" : "unavailable"; }
         @JavascriptInterface public void requestPermissions() {
             if (!health.isAvailable()) { showHealthStatus(); return; }
-            permissionLauncher.launch(health.requestedReadPermissions());
+            runOnUiThread(() -> {
+                try {
+                    permissionLauncher.launch(health.requestedReadPermissions());
+                } catch (RuntimeException e) {
+                    showHealthStatus();
+                }
+            });
         }
         @JavascriptInterface public String bridgeVersion() { return "v89"; }
     }
