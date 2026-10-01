@@ -1,6 +1,5 @@
 package com.foodwell.app;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -10,12 +9,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.health.connect.client.PermissionController;
 import java.util.Set;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ComponentActivity {
     WebView web;
     HealthConnectBridge health;
     ActivityResultLauncher<Set<String>> permissionLauncher;

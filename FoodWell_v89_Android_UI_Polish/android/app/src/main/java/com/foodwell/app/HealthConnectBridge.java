@@ -1,12 +1,7 @@
 package com.foodwell.app;
 
 import android.content.Context;
-import android.os.Build;
 import androidx.health.connect.client.HealthConnectClient;
-import androidx.health.connect.client.PermissionController;
-import androidx.health.connect.client.permission.HealthPermission;
-import androidx.health.connect.client.records.StepsRecord;
-import androidx.health.connect.client.records.HeartRateRecord;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,8 +22,9 @@ public final class HealthConnectBridge {
 
     public Set<String> requestedReadPermissions() {
         Set<String> permissions = new HashSet<>();
-        permissions.add(HealthPermission.getReadPermission(StepsRecord.class));
-        permissions.add(HealthPermission.getReadPermission(HeartRateRecord.class));
+        // Same strings HealthPermission.getReadPermission() returns; avoids Kotlin KClass interop from Java.
+        permissions.add("android.permission.health.READ_STEPS");
+        permissions.add("android.permission.health.READ_HEART_RATE");
         return permissions;
     }
 
