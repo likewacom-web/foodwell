@@ -69,6 +69,16 @@ jobs:
             grep -A 40 -E "FATAL EXCEPTION|AndroidRuntime" logcat.txt | head -120 || true
             echo "===== FoodWell process ====="
             adb shell pidof com.foodwell.app || (echo "::error::FoodWell is not running after launch (crashed)" && exit 1)
+            echo "===== Health Connect: grant read permissions, relaunch, expect a sync ====="
+            for p in READ_STEPS READ_HEART_RATE READ_SLEEP READ_EXERCISE; do adb shell pm grant com.foodwell.app android.permission.health.$p || echo "grant $p failed"; done
+            adb shell am force-stop com.foodwell.app
+            adb logcat -c
+            adb shell am start -W -n com.foodwell.app/.MainActivity
+            sleep 15
+            adb logcat -d > logcat-hc.txt || true
+            grep -E "FoodWellHC|FATAL EXCEPTION" -A 8 logcat-hc.txt | head -60 || true
+            adb shell pidof com.foodwell.app || (echo "::error::FoodWell crashed after Health Connect permissions were granted" && exit 1)
+            if [ "${{ matrix.api-level }}" -ge 34 ]; then grep -q "FoodWellHC: synced" logcat-hc.txt || (echo "::error::No Health Connect sync logged" && exit 1); fi
 
       - name: Upload logcat
         if: always()
@@ -77,5 +87,6 @@ jobs:
           name: logcat-screen-api-${{ matrix.api-level }}
           path: |
             FoodWell_v89_Android_UI_Polish/android/logcat.txt
+            FoodWell_v89_Android_UI_Polish/android/logcat-hc.txt
             FoodWell_v89_Android_UI_Polish/android/screen.png
           if-no-files-found: ignore
