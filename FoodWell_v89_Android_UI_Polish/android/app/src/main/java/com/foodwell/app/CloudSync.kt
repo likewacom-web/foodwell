@@ -36,6 +36,16 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
     }
     val configured get() = app != null && webClientId != null
 
+    /** Why sign-in can't work yet, in Thai for the page; null when ready. */
+    val notReadyReason: String?
+        get() = when {
+            app == null -> NOT_CONFIGURED
+            // google-services.json only carries the web OAuth client after Google sign-in is
+            // enabled in Firebase Authentication (and SHA-1 added); without it there's no ID token.
+            webClientId == null -> NO_WEB_CLIENT
+            else -> null
+        }
+
     private val webClientId: String? by lazy {
         val id = activity.resources.getIdentifier("default_web_client_id", "string", activity.packageName)
         if (id == 0) null else activity.getString(id)
@@ -53,7 +63,7 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
     }
 
     suspend fun signIn(): JSONObject {
-        val clientId = webClientId ?: throw IllegalStateException(NOT_CONFIGURED)
+        val clientId = webClientId ?: throw IllegalStateException(notReadyReason ?: NO_WEB_CLIENT)
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(GetSignInWithGoogleOption.Builder(clientId).build())
             .build()
@@ -161,5 +171,6 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
         // Characters per document part: Thai text is up to 3 bytes/char in UTF-8, keep well under 1 MiB.
         private const val CHUNK = 250_000
         const val NOT_CONFIGURED = "แอปนี้ยังไม่ได้เชื่อม Firebase (ต้องมีไฟล์ google-services.json) · ดู FIREBASE_SYNC.md"
+        const val NO_WEB_CLIENT = "Firebase ยังไม่ได้เปิด Google sign-in · เปิดที่ Authentication → Sign-in method → Google และใส่ SHA-1 แล้วดาวน์โหลด google-services.json ใหม่"
     }
 }

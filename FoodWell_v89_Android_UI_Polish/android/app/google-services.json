@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "332415252418",
+    "project_id": "foodwell-30b9f",
+    "storage_bucket": "foodwell-30b9f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:332415252418:android:3963601be23293c10ac85b",
+        "android_client_info": {
+          "package_name": "com.foodwell.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX2m2jCTg0Gabrt4tv0Nccx5cWXIoWtGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

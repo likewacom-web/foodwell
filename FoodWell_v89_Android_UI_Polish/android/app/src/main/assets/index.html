@@ -1542,7 +1542,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  let meta={};try{meta=JSON.parse(localStorage.getItem(META)||'{}')}catch(e){}
  const saveMeta=()=>origSet.call(localStorage,META,JSON.stringify(meta));
  let device=localStorage.getItem(DEV);if(!device){device='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);origSet.call(localStorage,DEV,device)}
- let configured=false,user=null,applying=false,firstSnapshot=true,state='idle',lastSync=null,lastError='',timer=null;
+ let configured=false,notReady='',user=null,applying=false,firstSnapshot=true,state='idle',lastSync=null,lastError='',timer=null;
  const dirty=new Set();
 
  Storage.prototype.setItem=function(k,v){
@@ -1584,7 +1584,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const box=document.getElementById('fw96');if(!box)return;
   const head='<div class="fw96-head"><span style="font-size:24px">☁️</span><h3>ซิงก์ข้อมูลหลายเครื่อง</h3></div>';
   if(!C()){box.innerHTML=head+'<div class="fw96-small">เข้าสู่ระบบด้วย Gmail เพื่อซิงก์ข้อมูลระหว่างมือถือ/แท็บเล็ตได้ เมื่อเปิดผ่านแอป FoodWell บน Android</div>';return}
-  if(!configured){box.innerHTML=head+'<div class="fw96-small">ยังไม่ได้เชื่อม Firebase ในแอปเวอร์ชันนี้ · ผู้พัฒนาต้องเพิ่มไฟล์ google-services.json ตามขั้นตอนใน FIREBASE_SYNC.md แล้ว build ใหม่</div>';return}
+  if(!configured){box.innerHTML=head+'<div class="fw96-small">'+esc(notReady||'ยังไม่ได้เชื่อม Firebase ในแอปเวอร์ชันนี้')+'</div>';return}
   if(!user){box.innerHTML=head+`<div class="fw96-small">เข้าสู่ระบบด้วย Gmail แล้วข้อมูลอาหาร น้ำ กิจกรรม แผนอาหาร และการตั้งค่า จะซิงก์ไปทุกเครื่องที่ใช้บัญชีเดียวกันโดยอัตโนมัติ<br>เครื่องที่เข้าสู่ระบบทีหลังจะใช้ข้อมูลล่าสุดจากคลาวด์</div>
    <div class="fw96-row"><button class="fw96-btn google" id="fw96-in"><b style="color:#4285f4">G</b> เข้าสู่ระบบด้วย Google</button></div>`;
    box.querySelector('#fw96-in').onclick=()=>{setBusy(true);C().signIn()};return}
@@ -1601,7 +1601,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   if(document.getElementById('fw96'))return;
   const card=document.createElement('section');card.id='fw96';card.className='fw96-card';
   const anchor=document.getElementById('fw70Backup');if(anchor)anchor.before(card);else (document.getElementById('more')||document.body).appendChild(card);
-  if(C()){try{const s=JSON.parse(C().status());configured=!!s.configured;user=s.user||null}catch(e){}}
+  if(C()){try{const s=JSON.parse(C().status());configured=!!s.configured;notReady=s.reason||'';user=s.user||null}catch(e){}}
   render();
   if(user){C().start()}
   try{if(sessionStorage.getItem('fwsync_reloaded')){sessionStorage.removeItem('fwsync_reloaded');setTimeout(()=>say('อัปเดตข้อมูลจากอีกเครื่องแล้ว ☁️'),600)}}catch(e){}

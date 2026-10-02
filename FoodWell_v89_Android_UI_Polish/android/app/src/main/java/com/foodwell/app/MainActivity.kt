@@ -214,11 +214,12 @@ class MainActivity : ComponentActivity() {
     inner class CloudApi {
         /** {configured, user|null} — called synchronously by the page on load. */
         @JavascriptInterface fun status(): String =
-            JSONObject().put("configured", cloud.configured).put("user", cloud.userJson() ?: JSONObject.NULL).toString()
+            JSONObject().put("configured", cloud.configured).put("reason", cloud.notReadyReason ?: "")
+                .put("user", cloud.userJson() ?: JSONObject.NULL).toString()
 
         @JavascriptInterface fun signIn() = runOnUiThread {
             if (!cloud.configured) {
-                callJs("onCloudError", JSONObject.quote(CloudSync.NOT_CONFIGURED))
+                callJs("onCloudError", JSONObject.quote(cloud.notReadyReason ?: CloudSync.NOT_CONFIGURED))
                 return@runOnUiThread
             }
             lifecycleScope.launch {
