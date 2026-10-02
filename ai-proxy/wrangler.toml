@@ -1,0 +1,5 @@
+# Optional: deploy from a computer with `npx wrangler deploy`,
+# then `npx wrangler secret put GEMINI_API_KEY` and `npx wrangler secret put APP_TOKEN`.
+name = "foodwell-ai"
+main = "worker.js"
+compatibility_date = "2026-09-01"
