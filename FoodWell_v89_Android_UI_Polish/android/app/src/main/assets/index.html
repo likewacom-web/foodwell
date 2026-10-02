@@ -1473,8 +1473,14 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   }catch(e){}
   window.scrollTo({top:0});
  }
+ // Gmail sign-in / sync card lives on the More page (#fw96)
+ function openAccount(){
+  if(typeof go==='function')go('more');
+  setTimeout(()=>{const c=document.getElementById('fw96');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})},60);
+ }
  const ITEMS=[
   {action:openOverview,icon:'🌿',label:'ภาพรวมวันนี้'},
+  {action:openAccount,icon:'☁️',label:'บัญชี / ซิงก์'},
   {sel:'#fw67-btn',icon:'🗓️',label:'แผนอาหาร'},
   {sel:'#fw71-btn',icon:'📊',label:'Meal Insights'},
   {sel:'#quickFab',icon:'⚡',label:'ทางลัด'}
