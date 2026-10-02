@@ -29,6 +29,8 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
 import java.io.File
 
@@ -39,6 +41,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cloud: CloudSync
+    private lateinit var huawei: HuaweiHealth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +60,8 @@ class MainActivity : ComponentActivity() {
             filePathCallback = null
         }
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
+        huawei = HuaweiHealth(this)
+        huawei.handleRedirect(intent?.data)
 
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -68,7 +73,10 @@ class MainActivity : ComponentActivity() {
             overScrollMode = WebView.OVER_SCROLL_NEVER
             setBackgroundColor(dark)
             webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView, url: String) = syncHealth(userInitiated = false)
+                override fun onPageFinished(view: WebView, url: String) {
+                    syncHealth(userInitiated = false)
+                    if (huawei.connected) syncHuawei(userInitiated = false)
+                }
             }
             // Without a WebChromeClient file chooser, <input type=file> (food photos, backup import) does nothing.
             webChromeClient = object : WebChromeClient() {
@@ -91,6 +99,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(NativeHealthApi(), "FoodWellHealth")
             addJavascriptInterface(FilesApi(), "FoodWellFiles")
             addJavascriptInterface(CloudApi(), "FoodWellCloud")
+            addJavascriptInterface(HuaweiApi(), "FoodWellHuawei")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -168,6 +177,9 @@ class MainActivity : ComponentActivity() {
                     return@launch
                 }
                 val data = health.readToday(granted)
+                if (huawei.connected) {
+                    HuaweiHealth.PROVIDED.forEach { data.remove(it); data.optJSONObject("sources")?.remove(it) }
+                }
                 Log.i(TAG, "synced $data")
                 callJs("onHealthConnectData", JSONObject.quote(data.toString()))
             } catch (e: Exception) {
@@ -207,6 +219,58 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface fun sync() = runOnUiThread { syncHealth(userInitiated = true) }
         @JavascriptInterface fun openSettings() = runOnUiThread { openHealthSettings() }
         @JavascriptInterface fun isAvailable(): Boolean = health.isAvailable()
+    }
+
+    // ---- Huawei Health (watch) via the Worker's Huawei Health Kit routes ------------------------
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (huawei.handleRedirect(intent.data)) {
+            callJs("onHuaweiStatus", JSONObject.quote(JSONObject().put("connected", true).toString()))
+            syncHuawei(userInitiated = true)
+        }
+    }
+
+    private fun syncHuawei(userInitiated: Boolean) {
+        lifecycleScope.launch {
+            try {
+                val data = withContext(Dispatchers.IO) { huawei.fetchToday() }
+                Log.i(TAG, "huawei synced $data")
+                callJs("onHealthConnectData", JSONObject.quote(data.toString()))
+                if (data.has("debug") && userInitiated) {
+                    callJs("onHuaweiStatus", JSONObject.quote(JSONObject().put("connected", true).put("debug", data.get("debug")).toString()))
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "huawei sync failed", e)
+                if (userInitiated) callJs("onHealthConnectError", JSONObject.quote("Huawei: ${e.message}"))
+            }
+        }
+    }
+
+    inner class HuaweiApi {
+        @JavascriptInterface fun status(): String = JSONObject().put("connected", huawei.connected).toString()
+
+        /** endpoint = the page's AI Endpoint (https://<worker>.workers.dev/?k=TOKEN). */
+        @JavascriptInterface fun connect(endpoint: String) = runOnUiThread {
+            val url = huawei.loginUrl(endpoint)
+            if (url == null) {
+                callJs("onHealthConnectError", JSONObject.quote("ตั้ง AI Endpoint (URL ของ Worker) ในหน้าเพิ่มเติมก่อน"))
+                return@runOnUiThread
+            }
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (e: ActivityNotFoundException) {
+                toast("ไม่พบเบราว์เซอร์")
+            }
+        }
+
+        @JavascriptInterface fun sync() = runOnUiThread { syncHuawei(userInitiated = true) }
+
+        @JavascriptInterface fun disconnect() = runOnUiThread {
+            huawei.disconnect()
+            callJs("onHuaweiStatus", JSONObject.quote(JSONObject().put("connected", false).toString()))
+            syncHealth(userInitiated = false)
+        }
     }
 
     // ---- Gmail sign-in + multi-device sync (Firebase) -----------------------------------------

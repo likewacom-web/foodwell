@@ -44,3 +44,7 @@ API key เก็บไว้ที่ Cloudflare เท่านั้น ไ�
 ## รูปแบบ API
 `POST` JSON `{ "image": "data:image/jpeg;base64,..." }`
 ตอบกลับ `{ "name", "candidates", "confidence", "kcal", "protein", "carbs", "fat", "fiber", "sugar", "sodium", "model" }`
+
+## Huawei Health (ไม่บังคับ)
+Worker เดียวกันนี้มีเส้นทาง `/huawei/*` สำหรับดึงข้อมูลนาฬิกา Huawei ผ่าน Huawei Health Kit
+ต้องเพิ่ม Secret `HUAWEI_CLIENT_ID` และ `HUAWEI_CLIENT_SECRET` · ขั้นตอนเต็มดูที่ [HUAWEI_HEALTH.md](../HUAWEI_HEALTH.md)

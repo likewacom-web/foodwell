@@ -1609,3 +1609,49 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
 })();
 </script>
+
+<!-- v98 Huawei Health (watch) via the FoodWell Worker's Huawei Health Kit routes; native bridge: window.FoodWellHuawei -->
+<style>
+.fw98-card{background:linear-gradient(135deg,rgba(255,80,80,.12),rgba(255,160,90,.08));border:1px solid rgba(255,120,100,.25);border-radius:20px;padding:16px;margin-bottom:10px}
+.fw98-card h2{margin:0 0 4px;font-size:18px}.fw98-small{font-size:12px;color:#a9abb3;line-height:1.55;margin-top:6px}
+.fw98-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.fw98-row button{flex:1}
+.fw98-warn{margin-top:8px;padding:9px 11px;border-radius:12px;background:#3a2a20;color:#f4c79b;font-size:12px;line-height:1.5}
+</style>
+<script>
+(function(){
+ const H=()=>window.FoodWellHuawei;
+ const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const say=m=>{if(typeof toast==='function')toast(m)};
+ function endpoint(){try{return (JSON.parse(localStorage.getItem('foodwell_mimo_style')||'{}').settings||{}).aiEndpoint||''}catch(e){return ''}}
+ let connected=false,debug=null;
+ function render(){
+  const box=document.getElementById('fw98');if(!box)return;
+  let html='<h2>⌚ Huawei Health</h2>';
+  if(!H()){box.innerHTML=html+'<div class="fw98-small">ดึงข้อมูลจากนาฬิกา Huawei (ก้าว แคลอรี่ ชีพจร) ได้เมื่อเปิดผ่านแอป FoodWell บน Android</div>';return}
+  const ep=endpoint();
+  if(connected){
+   html+='<div class="fw98-small">🟢 เชื่อมต่อบัญชี Huawei แล้ว · ใช้ค่า ก้าว / kcal กิจกรรม / ชีพจร จาก Huawei แทนตัวนับในมือถือ</div>'+
+    '<div class="fw98-row"><button class="primary" id="fw98-sync">↻ ซิงก์ Huawei</button><button class="secondary-btn" id="fw98-off">ยกเลิกการเชื่อมต่อ</button></div>';
+  }else{
+   html+='<div class="fw98-small">เชื่อมบัญชี Huawei ID เพื่อดึง ก้าว แคลอรี่ และชีพจร จากนาฬิกาโดยตรง (ผ่าน Huawei Health Kit)</div>'+
+    (ep?'':'<div class="fw98-warn">ต้องตั้ง <b>AI Endpoint</b> (URL ของ FoodWell Worker) ในหน้า เพิ่มเติม ก่อน และ Worker ต้องมี HUAWEI_CLIENT_ID / HUAWEI_CLIENT_SECRET</div>')+
+    '<div class="fw98-row"><button class="primary" id="fw98-on" '+(ep?'':'disabled')+'>เชื่อมต่อ Huawei</button></div>';
+  }
+  if(debug)html+='<div class="fw98-warn">ค่าบางอย่างยังอ่านจาก Huawei ไม่ได้: '+esc(Object.keys(debug).join(', '))+' · ส่งข้อความนี้ให้ผู้พัฒนา: <span style="opacity:.8">'+esc(JSON.stringify(debug).slice(0,300))+'</span></div>';
+  box.innerHTML=html;
+  box.querySelector('#fw98-on')?.addEventListener('click',()=>{say('กำลังเปิดหน้าล็อกอิน Huawei…');H().connect(endpoint())});
+  box.querySelector('#fw98-sync')?.addEventListener('click',()=>{say('กำลังซิงก์ Huawei…');H().sync()});
+  box.querySelector('#fw98-off')?.addEventListener('click',()=>{if(confirm('ยกเลิกการเชื่อมต่อ Huawei?')){H().disconnect()}});
+ }
+ window.onHuaweiStatus=raw=>{const x=JSON.parse(raw);const was=connected;connected=!!x.connected;debug=x.debug||null;render();
+  if(connected&&!was)say('เชื่อมต่อ Huawei แล้ว ✓');if(!connected&&was)say('ยกเลิกการเชื่อมต่อ Huawei แล้ว')};
+ function init(){
+  if(document.getElementById('fw98'))return;
+  const card=document.createElement('div');card.id='fw98';card.className='fw98-card';
+  const hero=document.querySelector('#watch .watch-hero');if(hero)hero.after(card);else (document.getElementById('watch')||document.body).appendChild(card);
+  if(H()){try{connected=!!JSON.parse(H().status()).connected}catch(e){}}
+  render();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
+})();
+</script>
