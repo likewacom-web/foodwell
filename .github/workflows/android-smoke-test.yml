@@ -70,7 +70,7 @@ jobs:
             echo "===== FoodWell process ====="
             adb shell pidof com.foodwell.app || (echo "::error::FoodWell is not running after launch (crashed)" && exit 1)
             echo "===== Health Connect: grant read permissions, relaunch, expect a sync ====="
-            for p in READ_STEPS READ_HEART_RATE READ_SLEEP READ_EXERCISE; do adb shell pm grant com.foodwell.app android.permission.health.$p || echo "grant $p failed"; done
+            for p in READ_STEPS READ_HEART_RATE READ_SLEEP READ_EXERCISE READ_ACTIVE_CALORIES_BURNED READ_TOTAL_CALORIES_BURNED; do adb shell pm grant com.foodwell.app android.permission.health.$p || echo "grant $p failed"; done
             adb shell am force-stop com.foodwell.app
             adb logcat -c
             adb shell am start -W -n com.foodwell.app/.MainActivity
