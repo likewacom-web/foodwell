@@ -25,10 +25,6 @@ public class MainActivity extends ComponentActivity {
         Window w = getWindow();
         w.setStatusBarColor(android.graphics.Color.rgb(16,17,22));
         w.setNavigationBarColor(android.graphics.Color.rgb(16,17,22));
-        if (android.os.Build.VERSION.SDK_INT >= 30) {
-            WindowInsetsController c = w.getInsetsController();
-            if (c != null) c.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
-        }
         health = new HealthConnectBridge(this);
         permissionLauncher = registerForActivityResult(
             PermissionController.createRequestPermissionResultContract(),
@@ -48,6 +44,11 @@ public class MainActivity extends ComponentActivity {
         web.addJavascriptInterface(new NativeHealthApi(), "FoodWellHealth");
         web.loadUrl("file:///android_asset/index.html");
         setContentView(web);
+        // getInsetsController() needs the DecorView, which exists only after setContentView().
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController c = w.getInsetsController();
+            if (c != null) c.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+        }
     }
 
     private void showHealthStatus() {
