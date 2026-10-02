@@ -21,7 +21,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -29,14 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.identity.AuthorizationRequest
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.common.api.Scope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 
@@ -46,8 +38,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var permissionLauncher: ActivityResultLauncher<Set<String>>
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
-    private lateinit var googleAuthLauncher: ActivityResultLauncher<IntentSenderRequest>
-    private var pendingGoogleAuth: ((String?, String?) -> Unit)? = null
+    private lateinit var cloud: CloudSync
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,16 +56,7 @@ class MainActivity : ComponentActivity() {
             filePathCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(r.resultCode, r.data))
             filePathCallback = null
         }
-        googleAuthLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { r ->
-            val cb = pendingGoogleAuth
-            pendingGoogleAuth = null
-            try {
-                val res = Identity.getAuthorizationClient(this).getAuthorizationResultFromIntent(r.data)
-                cb?.invoke(res.accessToken, null)
-            } catch (e: ApiException) {
-                cb?.invoke(null, if (r.resultCode == android.app.Activity.RESULT_CANCELED) "ยกเลิกการเข้าสู่ระบบ" else googleErrorText(e))
-            }
-        }
+        cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
 
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -108,7 +90,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(AndroidHealthConnectApi(), "AndroidHealthConnect")
             addJavascriptInterface(NativeHealthApi(), "FoodWellHealth")
             addJavascriptInterface(FilesApi(), "FoodWellFiles")
-            addJavascriptInterface(GoogleApi(), "FoodWellGoogle")
+            addJavascriptInterface(CloudApi(), "FoodWellCloud")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -227,106 +209,47 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface fun isAvailable(): Boolean = health.isAvailable()
     }
 
-    // ---- Google sign-in + Drive backup -------------------------------------------------------
+    // ---- Gmail sign-in + multi-device sync (Firebase) -----------------------------------------
 
-    /**
-     * Gets a Drive (appDataFolder) + profile access token through Google Identity Services.
-     * The Android OAuth client is matched by package name + signing SHA-1 in Google Cloud,
-     * so no client ID/secret is stored in the app. interactive=false never shows UI.
-     */
-    private fun googleToken(interactive: Boolean, onResult: (String?, String?) -> Unit) {
-        val request = AuthorizationRequest.builder()
-            .setRequestedScopes(GOOGLE_SCOPES.map { Scope(it) })
-            .build()
-        Identity.getAuthorizationClient(this).authorize(request)
-            .addOnSuccessListener { res ->
-                val pi = res.pendingIntent
-                if (res.hasResolution() && pi != null) {
-                    if (!interactive) {
-                        onResult(null, "ต้องเข้าสู่ระบบ Google อีกครั้ง")
-                    } else {
-                        pendingGoogleAuth = onResult
-                        googleAuthLauncher.launch(IntentSenderRequest.Builder(pi.intentSender).build())
-                    }
-                } else {
-                    onResult(res.accessToken, if (res.accessToken == null) "ไม่ได้รับสิทธิ์จาก Google" else null)
-                }
-            }
-            .addOnFailureListener { e -> onResult(null, googleErrorText(e)) }
-    }
+    inner class CloudApi {
+        /** {configured, user|null} — called synchronously by the page on load. */
+        @JavascriptInterface fun status(): String =
+            JSONObject().put("configured", cloud.configured).put("user", cloud.userJson() ?: JSONObject.NULL).toString()
 
-    private fun googleErrorText(e: Exception): String {
-        val code = (e as? ApiException)?.statusCode
-        return when (code) {
-            CommonStatusCodes.DEVELOPER_ERROR ->
-                "ยังไม่ได้ตั้งค่า Google Cloud ให้แอปนี้ (แพ็กเกจ com.foodwell.app + SHA-1) · ดู GOOGLE_SIGNIN.md"
-            CommonStatusCodes.NETWORK_ERROR -> "ไม่มีอินเทอร์เน็ต"
-            CommonStatusCodes.CANCELED -> "ยกเลิกการเข้าสู่ระบบ"
-            else -> "เข้าสู่ระบบไม่สำเร็จ${code?.let { " ($it)" } ?: ""}: ${e.message}"
-        }
-    }
-
-    private fun driveErrorText(e: Exception) = when {
-        e is GoogleDriveBackup.HttpError && e.apiNotEnabled -> "ยังไม่ได้เปิด Google Drive API ในโปรเจกต์ Google Cloud"
-        e is GoogleDriveBackup.HttpError && e.code == 401 -> "สิทธิ์หมดอายุ · ลองอีกครั้ง"
-        e is java.net.UnknownHostException -> "ไม่มีอินเทอร์เน็ต"
-        else -> "Google Drive ผิดพลาด: ${e.message}"
-    }
-
-    /** Runs a Drive call with a fresh token and reports the result to the page. */
-    private fun withDrive(interactive: Boolean, onErrorFn: String, block: suspend (String) -> Unit) {
-        googleToken(interactive) { token, err ->
-            if (token == null) {
-                callJs(onErrorFn, JSONObject.quote(err ?: "เข้าสู่ระบบไม่สำเร็จ"))
-                return@googleToken
+        @JavascriptInterface fun signIn() = runOnUiThread {
+            if (!cloud.configured) {
+                callJs("onCloudError", JSONObject.quote(CloudSync.NOT_CONFIGURED))
+                return@runOnUiThread
             }
             lifecycleScope.launch {
                 try {
-                    block(token)
+                    val user = cloud.signIn()
+                    callJs("onCloudUser", JSONObject.quote(user.toString()))
                 } catch (e: Exception) {
-                    Log.w(TAG, "drive failed", e)
-                    callJs(onErrorFn, JSONObject.quote(driveErrorText(e)))
+                    Log.w(TAG, "sign-in failed", e)
+                    callJs("onCloudError", JSONObject.quote(e.message ?: "เข้าสู่ระบบไม่สำเร็จ"))
                 }
-            }
-        }
-    }
-
-    inner class GoogleApi {
-        @JavascriptInterface fun signIn() = runOnUiThread {
-            withDrive(true, "onGoogleError") { token ->
-                val info = withContext(Dispatchers.IO) { GoogleDriveBackup.userInfo(token) }
-                val last = withContext(Dispatchers.IO) { GoogleDriveBackup.find(token) }
-                val out = JSONObject()
-                    .put("email", info.optString("email"))
-                    .put("name", info.optString("name"))
-                    .put("picture", info.optString("picture"))
-                    .put("lastBackup", last?.optString("modifiedTime") ?: JSONObject.NULL)
-                callJs("onGoogleSignedIn", JSONObject.quote(out.toString()))
             }
         }
 
         @JavascriptInterface fun signOut() = runOnUiThread {
-            googleToken(false) { token, _ ->
-                lifecycleScope.launch {
-                    if (token != null) withContext(Dispatchers.IO) { GoogleDriveBackup.revoke(token) }
-                    callJs("onGoogleSignedOut", "")
+            lifecycleScope.launch {
+                runCatching { cloud.signOut() }
+                callJs("onCloudUser", "null")
+            }
+        }
+
+        @JavascriptInterface fun start() = runOnUiThread { cloud.start() }
+
+        @JavascriptInterface fun push(key: String, value: String, updatedAt: Double, device: String) = runOnUiThread {
+            lifecycleScope.launch {
+                try {
+                    cloud.push(key, value, updatedAt.toLong(), device)
+                    callJs("onCloudPushed", JSONObject.quote(key))
+                } catch (e: Exception) {
+                    Log.w(TAG, "push failed", e)
+                    callJs("onCloudError", JSONObject.quote(cloud.errorText(e)))
                 }
-            }
-        }
-
-        /** interactive=false is used by the page's daily auto-backup so it never pops up UI. */
-        @JavascriptInterface fun backup(content: String, interactive: Boolean) = runOnUiThread {
-            withDrive(interactive, "onGoogleBackupError") { token ->
-                val f = withContext(Dispatchers.IO) { GoogleDriveBackup.upload(token, content) }
-                callJs("onGoogleBackupDone", JSONObject.quote(f.toString()))
-            }
-        }
-
-        @JavascriptInterface fun restore() = runOnUiThread {
-            withDrive(true, "onGoogleBackupError") { token ->
-                val content = withContext(Dispatchers.IO) { GoogleDriveBackup.download(token) }
-                if (content == null) callJs("onGoogleBackupError", JSONObject.quote("ยังไม่มีข้อมูลสำรองใน Google Drive"))
-                else callJs("onGoogleRestoreData", JSONObject.quote(content))
             }
         }
     }
@@ -365,6 +288,5 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val TAG = "FoodWellHC"
-        private val GOOGLE_SCOPES = listOf(GoogleDriveBackup.SCOPE_DRIVE_APPDATA, "openid", "email", "profile")
     }
 }
