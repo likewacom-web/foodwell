@@ -10,7 +10,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Huawei Health (watch) data through the FoodWell Cloudflare Worker's /huawei/* routes.
+ * Huawei Health (watch) data through the FoodWell Cloudflare Worker's /huawei/ routes.
  * The Worker holds the Huawei client secret and talks to Health Kit; the app only keeps the
  * user's refresh token and the Worker URL (the same "AI Endpoint" the page already stores).
  */
