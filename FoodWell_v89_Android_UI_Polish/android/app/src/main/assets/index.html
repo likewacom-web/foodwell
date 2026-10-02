@@ -1506,3 +1506,74 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
+
+<!-- v95 Google sign-in + Google Drive backup (Android app only; native bridge: window.FoodWellGoogle) -->
+<style>
+.fw95-card{margin:12px 0;padding:16px;border-radius:20px;background:linear-gradient(135deg,#1d2430,#191b22);border:1px solid #2e3a4d}
+.fw95-head{display:flex;align-items:center;gap:10px}.fw95-head h3{margin:0;font-size:17px}
+.fw95-small{font-size:12px;color:#9ea6b3;line-height:1.55;margin-top:6px}
+.fw95-user{display:flex;align-items:center;gap:12px;margin:12px 0;padding:10px;border-radius:16px;background:#ffffff0a}
+.fw95-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#2a2d35;display:grid;place-items:center;font-size:22px;flex:none}
+.fw95-user b{display:block;font-size:14px}.fw95-user small{color:#9ea6b3;font-size:12px;word-break:break-all}
+.fw95-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.fw95-btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;background:#2a2d35;color:#eee;font-family:inherit}
+.fw95-btn.primary{background:#f0a9c0;color:#2a1820}.fw95-btn.google{background:#fff;color:#1f1f1f;display:flex;align-items:center;gap:8px;width:100%;justify-content:center}
+.fw95-btn:disabled{opacity:.5}
+.fw95-toggle{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:13px}
+</style>
+<script>
+(function(){
+ const KEY='foodwell_google_v95';
+ const st=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}};
+ const put=x=>{try{localStorage.setItem(KEY,JSON.stringify(x))}catch(e){}};
+ const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const say=m=>{if(typeof toast==='function')toast(m);else alert(m)};
+ const native=()=>window.FoodWellGoogle;
+ let busy=false;
+ const fmt=iso=>iso?new Date(iso).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'ยังไม่เคยสำรอง';
+ // Every FoodWell key in this device's storage (main data, meal plans, settings…)
+ function snapshot(){const storage={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('foodwell')&&k!==KEY)storage[k]=localStorage.getItem(k)}
+  return JSON.stringify({app:'FoodWell',type:'full',version:95,exportedAt:new Date().toISOString(),storage})}
+ function setBusy(b){busy=b;document.querySelectorAll('#fw95 .fw95-btn').forEach(x=>x.disabled=b)}
+ function render(){
+  const box=document.getElementById('fw95');if(!box)return;const s=st();
+  if(!native()){box.innerHTML='<div class="fw95-head"><span style="font-size:24px">☁️</span><h3>Google Drive</h3></div><div class="fw95-small">เข้าสู่ระบบด้วย Gmail และสำรองข้อมูลไป Google Drive ได้เมื่อเปิดผ่านแอป FoodWell บน Android</div>';return}
+  if(!s.email){box.innerHTML=`<div class="fw95-head"><span style="font-size:24px">☁️</span><h3>สำรองข้อมูลไป Google Drive</h3></div>
+   <div class="fw95-small">เข้าสู่ระบบด้วย Gmail เพื่อเก็บข้อมูล FoodWell ไว้ใน Google Drive ของคุณ (พื้นที่ซ่อนของแอป ไม่ปะปนกับไฟล์อื่น) เปลี่ยนเครื่องหรือลบแอปแล้วกู้คืนได้</div>
+   <div class="fw95-row"><button class="fw95-btn google" id="fw95-in"><b style="color:#4285f4">G</b> เข้าสู่ระบบด้วย Google</button></div>`;
+   box.querySelector('#fw95-in').onclick=()=>{setBusy(true);native().signIn()};return}
+  const pic=s.picture?`<img class="fw95-avatar" src="${esc(s.picture)}" alt="" referrerpolicy="no-referrer">`:'<div class="fw95-avatar">👤</div>';
+  box.innerHTML=`<div class="fw95-head"><span style="font-size:24px">☁️</span><h3>Google Drive</h3></div>
+   <div class="fw95-user">${pic}<div style="min-width:0"><b>${esc(s.name||'บัญชี Google')}</b><small>${esc(s.email)}</small></div></div>
+   <div class="fw95-small">สำรองล่าสุด: <b>${esc(fmt(s.lastBackup))}</b></div>
+   <div class="fw95-row"><button class="fw95-btn primary" id="fw95-up">☁️ สำรองตอนนี้</button><button class="fw95-btn" id="fw95-down">⤓ กู้คืนจาก Drive</button></div>
+   <label class="fw95-toggle"><span>สำรองอัตโนมัติวันละครั้ง (เมื่อเปิดแอป)</span><input class="switch" type="checkbox" id="fw95-auto" ${s.auto?'checked':''}></label>
+   <div class="fw95-row"><button class="fw95-btn" id="fw95-out" style="background:transparent;color:#e88ea9;padding-left:0">ออกจากระบบ</button></div>`;
+  box.querySelector('#fw95-up').onclick=()=>{setBusy(true);say('กำลังสำรองข้อมูล…');native().backup(snapshot(),true)};
+  box.querySelector('#fw95-down').onclick=()=>{if(!confirm('กู้คืนจาก Google Drive จะแทนที่ข้อมูล FoodWell ในเครื่องนี้ทั้งหมด ต้องการทำต่อไหม?'))return;setBusy(true);native().restore()};
+  box.querySelector('#fw95-auto').onchange=e=>{const x=st();x.auto=e.target.checked;put(x);say(x.auto?'เปิดสำรองอัตโนมัติแล้ว':'ปิดสำรองอัตโนมัติแล้ว')};
+  box.querySelector('#fw95-out').onclick=()=>{if(confirm('ออกจากระบบ Google? (ข้อมูลในเครื่องและใน Drive ยังอยู่)')){setBusy(true);native().signOut()}};
+ }
+ // Callbacks from MainActivity (JSON strings)
+ window.onGoogleSignedIn=raw=>{setBusy(false);const u=JSON.parse(raw);put({...st(),email:u.email,name:u.name,picture:u.picture,lastBackup:u.lastBackup||null,auto:st().auto??true});render();say('เข้าสู่ระบบแล้ว: '+u.email)};
+ window.onGoogleSignedOut=()=>{setBusy(false);localStorage.removeItem(KEY);render();say('ออกจากระบบแล้ว')};
+ window.onGoogleError=msg=>{setBusy(false);render();say(msg)};
+ window.onGoogleBackupDone=raw=>{setBusy(false);const f=JSON.parse(raw);put({...st(),lastBackup:f.modifiedTime||new Date().toISOString()});render();if(!window.__fw95Silent)say('สำรองข้อมูลไป Google Drive แล้ว ✓');window.__fw95Silent=false};
+ window.onGoogleBackupError=msg=>{setBusy(false);render();if(!window.__fw95Silent)say(msg);window.__fw95Silent=false};
+ window.onGoogleRestoreData=raw=>{setBusy(false);try{const d=JSON.parse(raw);if(!d||d.app!=='FoodWell'||!d.storage)throw 0;
+   Object.keys(localStorage).filter(k=>k.startsWith('foodwell')&&k!==KEY).forEach(k=>localStorage.removeItem(k));
+   Object.entries(d.storage).forEach(([k,v])=>localStorage.setItem(k,v));
+   alert('กู้คืนข้อมูลจาก Google Drive แล้ว (สำรองเมื่อ '+fmt(d.exportedAt)+')');location.reload()}catch(e){say('ไฟล์สำรองใน Drive ไม่ถูกต้อง')}};
+ function init(){
+  if(document.getElementById('fw95'))return;
+  const card=document.createElement('section');card.id='fw95';card.className='fw95-card';
+  const anchor=document.getElementById('fw70Backup');if(anchor)anchor.before(card);else (document.getElementById('more')||document.body).appendChild(card);
+  render();
+  const s=st();
+  if(native()&&s.email&&s.auto!==false&&(!s.lastBackup||Date.now()-new Date(s.lastBackup).getTime()>20*3600e3)){
+   setTimeout(()=>{if(busy)return;window.__fw95Silent=true;native().backup(snapshot(),false)},4000);
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
+})();
+</script>
