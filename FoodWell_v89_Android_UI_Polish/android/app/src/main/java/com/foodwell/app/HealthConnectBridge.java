@@ -8,16 +8,19 @@ import java.util.Set;
 /** v83 Health Connect bridge. Keeps Health Connect access behind one native boundary. */
 public final class HealthConnectBridge {
     private final Context context;
-    private final HealthConnectClient client;
+    private HealthConnectClient client;
 
     public HealthConnectBridge(Context context) {
         this.context = context.getApplicationContext();
-        this.client = HealthConnectClient.getOrCreate(this.context);
     }
 
     public boolean isAvailable() {
-        int status = HealthConnectClient.getSdkStatus(context, "com.google.android.apps.healthdata");
-        return status == HealthConnectClient.SDK_AVAILABLE;
+        try {
+            int status = HealthConnectClient.getSdkStatus(context, "com.google.android.apps.healthdata");
+            return status == HealthConnectClient.SDK_AVAILABLE;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     public Set<String> requestedReadPermissions() {
@@ -28,7 +31,15 @@ public final class HealthConnectBridge {
         return permissions;
     }
 
-    public androidx.health.connect.client.HealthConnectClient getClient() {
+    /** Returns null when Health Connect is not installed/available; getOrCreate() throws in that case. */
+    public HealthConnectClient getClient() {
+        if (client == null && isAvailable()) {
+            try {
+                client = HealthConnectClient.getOrCreate(context);
+            } catch (RuntimeException e) {
+                client = null;
+            }
+        }
         return client;
     }
 }
