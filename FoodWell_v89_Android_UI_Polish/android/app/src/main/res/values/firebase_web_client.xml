@@ -2,5 +2,5 @@
 <resources>
     <!-- Firebase → Authentication → Sign-in method → Google → Web SDK configuration → Web client ID.
          Only used when google-services.json has no oauth_client. Leave empty if it does. -->
-    <string name="fw_web_client_id" translatable="false"></string>
+    <string name="fw_web_client_id" translatable="false">332415252418-37rsf3v5grh6q69i4cuantulvbj9so1l.apps.googleusercontent.com</string>
 </resources>
