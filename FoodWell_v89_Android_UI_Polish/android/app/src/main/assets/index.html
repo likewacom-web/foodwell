@@ -1753,3 +1753,62 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  setTimeout(inject,1100);
 })();
 </script>
+
+<!-- v92 Floating Menu: รวมปุ่มลอยด้านขวาทั้งหมดเป็นปุ่มกลมปุ่มเดียวแบบป๊อปอัพ -->
+<style>
+#fw65-btn,#fw66-btn,#fw67-btn,#fw68-btn,#fw69-btn,#fw71-btn,#quickFab,button[title="Offline Center"],button[onclick*="fw76ShowCategories"][style*="position:fixed"]{display:none!important}
+.fw92-fab{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:5900;width:60px;height:60px;border:0;border-radius:50%;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#24141b;font-size:28px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
+.fw92-fab:active{transform:scale(.92)}
+.fw92-fab.open{transform:rotate(45deg)}
+.fw92-backdrop{position:fixed;inset:0;z-index:5898;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.fw92-backdrop.show{opacity:1;pointer-events:auto}
+.fw92-menu{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(156px + env(safe-area-inset-bottom));z-index:5899;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
+.fw92-item{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;cursor:pointer;opacity:0;transform:translateY(14px) scale(.8);transition:opacity .18s ease,transform .18s ease;-webkit-tap-highlight-color:transparent}
+.fw92-menu.show{pointer-events:auto}
+.fw92-menu.show .fw92-item{opacity:1;transform:none}
+.fw92-label{background:#1a1c22;color:#f5f3f5;border:1px solid #2a2c33;border-radius:999px;padding:7px 12px;font:700 14px system-ui,sans-serif;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.fw92-icon{width:50px;height:50px;border-radius:50%;background:#f0a9c0;display:flex;align-items:center;justify-content:center;font-size:23px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.fw92-item:active .fw92-icon{transform:scale(.92)}
+@media (prefers-reduced-motion:reduce){.fw92-fab,.fw92-item,.fw92-backdrop{transition:none}}
+</style>
+<script>
+(function(){
+ // ปุ่มเดิมยังอยู่ใน DOM (ซ่อนไว้) — เมนูจะสั่ง .click() ปุ่มเดิม ฟีเจอร์เดิมจึงทำงานเหมือนเดิม
+ const ITEMS=[
+  {sel:'#fw65-btn',icon:'🗓️',label:'Smart Meal Planner'},
+  {sel:'#fw66-btn',icon:'📅',label:'แผนอาหาร 7 วัน'},
+  {sel:'#fw67-btn',icon:'🗓️',label:'ปฏิทินแผนอาหาร'},
+  {sel:'#fw71-btn',icon:'📊',label:'Meal Insights'},
+  {sel:'button[onclick*="fw76ShowCategories"][style*="position:fixed"]',icon:'🗂️',label:'หมวดอาหาร',after:()=>{const c=document.getElementById('fw76Categories');if(c&&c.offsetParent)c.scrollIntoView({behavior:'smooth',block:'start'})}},
+  {sel:'#fw68-btn',icon:'📋',label:'เทมเพลตแผนอาหาร'},
+  {sel:'#fw69-btn',icon:'🔄',label:'คัดลอกแผน'},
+  {sel:'button[title="Offline Center"]',icon:'📴',label:'Offline Center'},
+  {sel:'#quickFab',icon:'⚡',label:'ทางลัด'}
+ ];
+ let fab,menu,backdrop;
+ function close(){fab.classList.remove('open');fab.setAttribute('aria-expanded','false');menu.classList.remove('show');backdrop.classList.remove('show')}
+ function build(){
+  menu.innerHTML='';
+  ITEMS.forEach(it=>{
+   const target=document.querySelector(it.sel);if(!target)return;
+   const b=document.createElement('button');b.type='button';b.className='fw92-item';
+   b.innerHTML='<span class="fw92-label"></span><span class="fw92-icon"></span>';
+   b.querySelector('.fw92-label').textContent=it.label;b.querySelector('.fw92-icon').textContent=it.icon;
+   b.onclick=()=>{close();target.click();if(it.after)setTimeout(it.after,50)};
+   menu.appendChild(b);
+  });
+ }
+ function open(){build();fab.classList.add('open');fab.setAttribute('aria-expanded','true');menu.classList.add('show');backdrop.classList.add('show')}
+ function init(){
+  if(document.getElementById('fw92-fab'))return;
+  backdrop=document.createElement('div');backdrop.className='fw92-backdrop';backdrop.onclick=close;
+  menu=document.createElement('div');menu.className='fw92-menu';menu.setAttribute('role','menu');
+  fab=document.createElement('button');fab.id='fw92-fab';fab.className='fw92-fab';fab.type='button';
+  fab.textContent='＋';fab.setAttribute('aria-label','เมนูเพิ่มเติม');fab.setAttribute('aria-expanded','false');
+  fab.onclick=()=>fab.classList.contains('open')?close():open();
+  document.body.append(backdrop,menu,fab);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
