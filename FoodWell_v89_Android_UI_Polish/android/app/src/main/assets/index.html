@@ -262,7 +262,9 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <style>
 .core-home{display:grid;gap:12px;margin:12px 0}.core-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.core-card{padding:14px;border-radius:18px;background:var(--card,#17171d);border:1px solid rgba(255,255,255,.08)}.core-card strong{display:block;margin-bottom:5px}.core-card small{opacity:.72}.core-pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:rgba(255,105,160,.14);font-size:12px}.core-sync{display:flex;justify-content:space-between;align-items:center;gap:10px}.core-primary{width:100%;margin-top:10px}</style>
 <main>
-<section class="core-home">
+<section id="overview" class="page">
+<div class="page-title"><div><p>OVERVIEW</p><h1>ภาพรวม</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
+<div class="core-home">
   <div class="card">
     <div class="core-sync"><div><span class="core-pill">PHASE 1</span><h2 style="margin:8px 0 4px">ภาพรวมวันนี้</h2><small>ศูนย์กลางของ FoodWell</small></div><span style="font-size:30px">🌿</span></div>
     <div class="core-grid" style="margin-top:12px">
@@ -273,6 +275,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
     </div>
     <button class="primary core-primary" id="coreSync">🔄 ซิงก์ข้อมูลตอนนี้</button>
   </div>
+</div>
 </section>
 
 <section id="home" class="page active">
@@ -1774,7 +1777,21 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 <script>
 (function(){
  // ปุ่มเดิมยังอยู่ใน DOM (ซ่อนไว้) — เมนูจะสั่ง .click() ปุ่มเดิม ฟีเจอร์เดิมจึงทำงานเหมือนเดิม
+ // v93: การ์ด "ภาพรวมวันนี้" ย้ายไปอยู่หน้า #overview ของตัวเอง
+ function openOverview(){
+  if(typeof go==='function')go('overview');
+  try{const d=JSON.parse(localStorage.getItem('foodwell_mimo_style')||'{}');const today=new Date().toISOString().slice(0,10);
+   const foods=(Array.isArray(d.foods)?d.foods:[]).filter(f=>!f.date||f.date===today);
+   const water=Number(d.water||0);const moves=Array.isArray(d.moves)?d.moves:[];
+   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
+   set('coreFood',foods.length?foods.length+' รายการที่บันทึก':'ยังไม่มีรายการ');
+   set('coreWater',water?water.toLocaleString()+' ml':'ยังไม่มีการบันทึก');
+   set('coreMove',moves.length?moves.reduce((a,x)=>a+Number(x.min||0),0)+' นาที':'ยังไม่มีการบันทึก');
+  }catch(e){}
+  window.scrollTo({top:0});
+ }
  const ITEMS=[
+  {action:openOverview,icon:'🌿',label:'ภาพรวมวันนี้'},
   {sel:'#fw65-btn',icon:'🗓️',label:'Smart Meal Planner'},
   {sel:'#fw66-btn',icon:'📅',label:'แผนอาหาร 7 วัน'},
   {sel:'#fw67-btn',icon:'🗓️',label:'ปฏิทินแผนอาหาร'},
@@ -1790,11 +1807,11 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function build(){
   menu.innerHTML='';
   ITEMS.forEach(it=>{
-   const target=document.querySelector(it.sel);if(!target)return;
+   const target=it.sel?document.querySelector(it.sel):null;if(it.sel&&!target)return;
    const b=document.createElement('button');b.type='button';b.className='fw92-item';
    b.innerHTML='<span class="fw92-label"></span><span class="fw92-icon"></span>';
    b.querySelector('.fw92-label').textContent=it.label;b.querySelector('.fw92-icon').textContent=it.icon;
-   b.onclick=()=>{close();target.click();if(it.after)setTimeout(it.after,50)};
+   b.onclick=()=>{close();if(it.action)it.action();else target.click();if(it.after)setTimeout(it.after,50)};
    menu.appendChild(b);
   });
  }
