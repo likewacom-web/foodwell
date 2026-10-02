@@ -46,9 +46,14 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
             else -> null
         }
 
+    // default_web_client_id is generated from google-services.json once Google sign-in is enabled;
+    // fw_web_client_id (res/values/firebase_web_client.xml) is a manual fallback for when the
+    // downloaded file has no oauth_client yet.
     private val webClientId: String? by lazy {
-        val id = activity.resources.getIdentifier("default_web_client_id", "string", activity.packageName)
-        if (id == 0) null else activity.getString(id)
+        listOf("default_web_client_id", "fw_web_client_id").firstNotNullOfOrNull { name ->
+            val id = activity.resources.getIdentifier(name, "string", activity.packageName)
+            if (id == 0) null else activity.getString(id).takeIf { it.endsWith(".apps.googleusercontent.com") }
+        }
     }
     private val auth get() = FirebaseAuth.getInstance()
     private val db get() = FirebaseFirestore.getInstance()
