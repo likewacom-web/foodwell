@@ -772,6 +772,7 @@ $("todayHistory").onclick=()=>{const d=new Date().toISOString().slice(0,10);$("h
 function saveDayNote(){s.dayNote=$("dayNote").value;save();toast("บันทึกโน้ตแล้ว")}
 function exportData(){
  const blob=new Blob([JSON.stringify(s,null,2)],{type:"application/json"});
+ if(window.FoodWellFiles){toast(window.FoodWellFiles.saveText("foodwell-backup.json",JSON.stringify(s,null,2)));return}
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="foodwell-backup.json";a.click();URL.revokeObjectURL(a.href);toast("ส่งออกข้อมูลแล้ว")
 }
 
@@ -1167,6 +1168,9 @@ $("syncMoveWatch")&&( $("syncMoveWatch").onclick=()=>{ try{ if(window.AndroidHea
  function saveData(d){localStorage.setItem(KEY,JSON.stringify(d));}
  function exportBackup(){
    const d=getData(); const payload={app:'FoodWell',version:70,exportedAt:new Date().toISOString(),data:d};
+   const fname='FoodWell_backup_'+new Date().toISOString().slice(0,10)+'.json';
+   // In the APK, WebView can't download blob: links; the native bridge writes the file to Downloads.
+   if(window.FoodWellFiles){const msg=window.FoodWellFiles.saveText(fname,JSON.stringify(payload,null,2));if(typeof toast==='function')toast(msg);else alert(msg);return}
    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='FoodWell_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
  }

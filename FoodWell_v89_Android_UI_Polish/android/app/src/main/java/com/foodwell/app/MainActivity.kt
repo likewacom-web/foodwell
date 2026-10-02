@@ -1,14 +1,19 @@
 package com.foodwell.app
 
 import android.content.ActivityNotFoundException
+import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowInsetsController
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -16,6 +21,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,11 +30,14 @@ import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var web: WebView
     private lateinit var health: HealthConnectBridge
     private lateinit var permissionLauncher: ActivityResultLauncher<Set<String>>
+    private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +51,10 @@ class MainActivity : ComponentActivity() {
         permissionLauncher = registerForActivityResult(
             PermissionController.createRequestPermissionResultContract()
         ) { granted -> onPermissionResult(granted) }
+        fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+            filePathCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(r.resultCode, r.data))
+            filePathCallback = null
+        }
 
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -55,9 +68,26 @@ class MainActivity : ComponentActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView, url: String) = syncHealth(userInitiated = false)
             }
+            // Without a WebChromeClient file chooser, <input type=file> (food photos, backup import) does nothing.
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    view: WebView, callback: ValueCallback<Array<Uri>>, params: FileChooserParams
+                ): Boolean {
+                    filePathCallback?.onReceiveValue(null)
+                    filePathCallback = callback
+                    return try {
+                        fileChooserLauncher.launch(Intent.createChooser(params.createIntent(), null))
+                        true
+                    } catch (e: ActivityNotFoundException) {
+                        filePathCallback = null
+                        false
+                    }
+                }
+            }
             // The page calls window.AndroidHealthConnect.connect()/sync()/openSettings().
             addJavascriptInterface(AndroidHealthConnectApi(), "AndroidHealthConnect")
             addJavascriptInterface(NativeHealthApi(), "FoodWellHealth")
+            addJavascriptInterface(FilesApi(), "FoodWellFiles")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -174,6 +204,31 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface fun sync() = runOnUiThread { syncHealth(userInitiated = true) }
         @JavascriptInterface fun openSettings() = runOnUiThread { openHealthSettings() }
         @JavascriptInterface fun isAvailable(): Boolean = health.isAvailable()
+    }
+
+    /** WebView can't download blob: links, so backups are written to Downloads through this bridge. */
+    inner class FilesApi {
+        @JavascriptInterface
+        fun saveText(name: String, text: String): String = try {
+            val safe = name.replace(Regex("[^A-Za-z0-9._-]"), "_")
+            if (Build.VERSION.SDK_INT >= 29) {
+                val values = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, safe)
+                    put(MediaStore.Downloads.MIME_TYPE, "application/json")
+                }
+                val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                    ?: error("insert failed")
+                contentResolver.openOutputStream(uri)!!.use { it.write(text.toByteArray()) }
+                "บันทึกไฟล์สำรองไว้ในโฟลเดอร์ Download แล้ว: $safe"
+            } else {
+                val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: filesDir
+                val f = File(dir, safe).apply { writeText(text) }
+                "บันทึกไฟล์สำรองแล้ว: ${f.absolutePath}"
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "saveText failed", e)
+            "บันทึกไฟล์ไม่สำเร็จ: ${e.message}"
+        }
     }
 
     /** Older bridge name kept for compatibility. */

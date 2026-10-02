@@ -4,6 +4,12 @@ android { namespace 'com.foodwell.app'; compileSdk 35
     defaultConfig { applicationId 'com.foodwell.app'; minSdk 26; targetSdk 35; versionCode 89; versionName '89.0' }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = '17' }
+    // A fixed debug key checked into the repo: every CI build gets the same signature, so a new
+    // APK installs over the previous one instead of failing with "package conflicts".
+    signingConfigs {
+        debug { storeFile file('debug.keystore'); storePassword 'android'; keyAlias 'androiddebugkey'; keyPassword 'android' }
+    }
+    buildTypes { debug { signingConfig signingConfigs.debug } }
 }
 
 dependencies {
