@@ -62,6 +62,9 @@ jobs:
             adb shell am start -W -n com.foodwell.app/.MainActivity
             sleep 15
             adb logcat -d > logcat.txt || true
+            adb exec-out screencap -p > screen.png || true
+            echo "===== WebView bounds (should start below the status bar) ====="
+            adb shell dumpsys activity top | grep -E "WebView|FrameLayout|mStableInsets|statusBars|navigationBars" | head -20 || true
             echo "===== Crash log (AndroidRuntime) ====="
             grep -A 40 -E "FATAL EXCEPTION|AndroidRuntime" logcat.txt | head -120 || true
             echo "===== FoodWell process ====="
@@ -71,6 +74,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logcat-api-${{ matrix.api-level }}
-          path: FoodWell_v89_Android_UI_Polish/android/logcat.txt
+          name: logcat-screen-api-${{ matrix.api-level }}
+          path: |
+            FoodWell_v89_Android_UI_Polish/android/logcat.txt
+            FoodWell_v89_Android_UI_Polish/android/screen.png
           if-no-files-found: ignore
