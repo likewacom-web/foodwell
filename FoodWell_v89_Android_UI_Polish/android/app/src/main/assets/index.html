@@ -341,7 +341,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <section id="move" class="page">
 <div class="page-title"><div><p>MOVEMENT</p><h1>การเคลื่อนไหว</h1></div></div>
 <div class="card movement"><div class="move-icon">🏃‍♂️</div><h2>ขยับในแบบที่ชอบ</h2><p style="color:#92949e;font-size:12px">เดิน เล่นกีฬา ยืดเหยียด หรือกิจกรรมอื่น ๆ ที่เหมาะกับคุณ</p><div class="burn-total">🔥 วันนี้เผาผลาญ ~<b id="burnToday">0</b> kcal</div></div>
-<div class="card"><label>กิจกรรม<input id="exName" placeholder="เช่น เดิน"></label><div class="two"><label>ประเภท<select id="exType"><option>เดิน</option><option>กีฬา</option><option>ยืดเหยียด</option><option>เล่นสนุก</option><option>อื่น ๆ</option></select></label><label>เวลา (นาที)<input id="exMin" type="number" min="0"></label></div><label>น้ำหนักตัว (กก.)<input id="exWeight" type="number" min="20" max="300" step="0.1" placeholder="60"></label><div class="burn-est" id="burnEst">ใส่เวลาเพื่อประเมินแคลอรี่ที่ใช้</div><button class="primary" id="addEx">บันทึกกิจกรรม</button></div>
+<div class="card"><label>กิจกรรม<input id="exName" placeholder="เช่น วิ่งรอบสวน (ไม่ใส่ก็ได้)"></label><div class="two"><label>ประเภท<select id="exType"></select></label><label>เวลา (นาที)<input id="exMin" type="number" min="0"></label></div><label>น้ำหนักตัว (กก.)<input id="exWeight" type="number" min="20" max="300" step="0.1" placeholder="60"></label><div class="burn-est" id="burnEst">ใส่เวลาเพื่อประเมินแคลอรี่ที่ใช้</div><button class="primary" id="addEx">บันทึกกิจกรรม</button></div>
 <div id="exList" class="list"></div>
 </section>
 
@@ -661,15 +661,29 @@ $("clearWater").onclick=()=>{const mode=$("waterHistoryDay")?.value||"today";if(
 $("waterHistoryDay")?.addEventListener('change',()=>renderWaterHistoryV54());
 // Calorie burn estimate: kcal = MET × body weight (kg) × hours (Compendium of Physical Activities values).
 const MOVE_METS=[[/วิ่ง|จ็อก|run|jog/i,9.8],[/ปั่น|จักรยาน|bike|cycl/i,7.5],[/ว่าย|swim/i,7],[/กระโดดเชือก|rope/i,11],[/ฟุตบอล|ฟุตซอล|soccer|football/i,7],[/บาส|basket/i,6.5],[/แบด|badminton/i,5.5],[/เทนนิส|tennis/i,7.3],[/วอลเลย์|volley/i,4],[/ปิงปอง|table tennis/i,4],[/มวย|box|ต่อย/i,7.8],[/hiit|เวทเทรน|circuit/i,8],[/เวท|ยกน้ำหนัก|weight|gym|ฟิตเนส/i,5],[/เต้น|แอโรบิก|zumba|dance|aerobic/i,6],[/ขึ้นบันได|stair/i,8],[/ปีนเขา|เดินป่า|hik/i,6],[/เดินเร็ว|brisk/i,4.3],[/เดิน|walk/i,3.5],[/โยคะ|yoga/i,2.5],[/พิลาทิส|pilates/i,3],[/ยืด|stretch/i,2.3],[/ทำสวน|garden/i,3.8],[/ทำความสะอาด|ถูบ้าน|กวาด|clean/i,3.3]];
-const TYPE_METS={"เดิน":3.5,"กีฬา":6,"ยืดเหยียด":2.3,"เล่นสนุก":4,"อื่น ๆ":3.5};
-function moveMet(name,type){const n=String(name||"");for(const [re,m] of MOVE_METS)if(re.test(n))return m;return TYPE_METS[type]||3.5}
+// Activity types shown in the "ประเภท" picker: [name, MET, icon]. Values from the Compendium of Physical Activities.
+const EX_GROUPS=[
+ ["เดิน / วิ่ง",[["เดินช้า",2.8,"🚶"],["เดินปกติ",3.5,"🚶"],["เดินเร็ว",4.3,"🚶‍♂️"],["เดินป่า / เดินขึ้นเขา",6,"🥾"],["ขึ้นบันได",8,"🪜"],["วิ่งเหยาะ (จ็อกกิ้ง)",7,"🏃"],["วิ่ง (~8 กม./ชม.)",8.3,"🏃"],["วิ่งเร็ว (~11 กม./ชม.)",11,"🏃‍♂️"],["วิ่งบนลู่วิ่ง",9,"🏃"]]],
+ ["คาร์ดิโอ",[["ปั่นจักรยานสบาย ๆ",4,"🚲"],["ปั่นจักรยานเร็ว",8,"🚴"],["ปั่นจักรยานอยู่กับที่",6.8,"🚴"],["ว่ายน้ำสบาย ๆ",6,"🏊"],["ว่ายน้ำเร็ว",9.8,"🏊‍♂️"],["กระโดดเชือก",11,"🪢"],["เครื่องเดินวงรี (Elliptical)",5,"🏋️"],["เครื่องกรรเชียงบก (Rowing)",7,"🚣"],["แอโรบิก",7.3,"🤸"],["ซุมบ้า",6.5,"💃"],["เต้น",5,"💃"],["HIIT",8,"🔥"],["เซอร์กิตเทรนนิ่ง",8,"🔁"]]],
+ ["เวท / แรงต้าน",[["เวทเทรนนิ่ง",5,"🏋️"],["บอดี้เวท (วิดพื้น ซิทอัพ สควอท)",3.8,"💪"],["คาลิสเธนิกส์แบบหนัก",8,"🤸‍♂️"]]],
+ ["ยืดหยุ่น / ผ่อนคลาย",[["โยคะ",2.5,"🧘"],["พิลาทิส",3,"🧘‍♀️"],["ยืดเหยียด",2.3,"🙆"],["ไทชิ",3,"☯️"]]],
+ ["กีฬา",[["ฟุตบอล",7,"⚽"],["ฟุตซอล",7,"⚽"],["บาสเกตบอล",6.5,"🏀"],["วอลเลย์บอล",4,"🏐"],["แบดมินตัน",5.5,"🏸"],["เทนนิส",7.3,"🎾"],["ปิงปอง",4,"🏓"],["มวย / มวยไทย",7.8,"🥊"],["ตะกร้อ",4,"⚽"],["กอล์ฟ (เดิน)",4.8,"⛳"],["ปีนผา",8,"🧗"],["สเก็ต / โรลเลอร์",7,"🛼"]]],
+ ["ชีวิตประจำวัน",[["ทำงานบ้าน",3.3,"🧹"],["ทำสวน",3.8,"🌱"],["เล่นกับลูก / สัตว์เลี้ยง",4,"🐕"]]]
+];
+const EX_TYPES={};EX_GROUPS.forEach(([,list])=>list.forEach(([n,met,icon])=>EX_TYPES[n]={met,icon}));
+// Types saved by older versions of the app.
+Object.assign(EX_TYPES,{"เดิน":{met:3.5,icon:"🚶"},"กีฬา":{met:6,icon:"🏅"},"เล่นสนุก":{met:4,icon:"🎈"}});
+const EX_AUTO="อื่น ๆ";
+function moveMet(name,type){if(type&&type!==EX_AUTO&&EX_TYPES[type])return EX_TYPES[type].met;const n=String(name||"");for(const [re,m] of MOVE_METS)if(re.test(n))return m;return 3.5}
+function moveIcon(x){return (EX_TYPES[x.type]||{}).icon||"🏃"}
+(()=>{const sel=$("exType");if(!sel)return;sel.innerHTML=`<option value="${EX_AUTO}">🔎 อื่น ๆ (ประเมินจากชื่อ)</option>`+EX_GROUPS.map(([g,list])=>`<optgroup label="${g}">${list.map(([n,met,icon])=>`<option value="${n}">${icon} ${n}</option>`).join("")}</optgroup>`).join("")})();
 function bodyWeight(){const w=Number(s.profile&&s.profile.weight);return w>=20&&w<=300?w:60}
 function moveKcal(name,type,min){return Math.round(moveMet(name,type)*bodyWeight()*Number(min||0)/60)}
 function moveKcalOf(x){return Number.isFinite(Number(x.kcal))&&x.kcal!==null&&x.kcal!==""?Number(x.kcal):moveKcal(x.name,x.type,x.min)}
 function updateBurnEst(){const el=$("burnEst");if(!el)return;const m=Number($("exMin").value||0);if(!m){el.textContent="ใส่เวลาเพื่อประเมินแคลอรี่ที่ใช้";return}const met=moveMet($("exName").value,$("exType").value);el.innerHTML=`🔥 ประมาณ <b>${moveKcal($("exName").value,$("exType").value,m).toLocaleString()} kcal</b> <small>(MET ${met} × ${bodyWeight()} กก. × ${m} นาที)</small>`}
 ["exName","exType","exMin"].forEach(id=>{const e=$(id);if(e){e.addEventListener("input",updateBurnEst);e.addEventListener("change",updateBurnEst)}});
 (()=>{const w=$("exWeight");if(!w)return;if(s.profile&&s.profile.weight)w.value=s.profile.weight;w.addEventListener("change",()=>{const v=Number(w.value);s.profile=s.profile||{};if(v>=20&&v<=300){s.profile.weight=v;save()}else{delete s.profile.weight;w.value="";save()}updateBurnEst()})})();
-$("addEx").onclick=()=>{let n=$("exName").value.trim(),m=Number($("exMin").value||0);if(!n||!m){toast("กรอกกิจกรรมและเวลา");return}s.moves.unshift({id:Date.now(),name:n,type:$("exType").value,min:m,kcal:moveKcal(n,$("exType").value,m),met:moveMet(n,$("exType").value),time:new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});$("exName").value="";$("exMin").value="";save();updateBurnEst();toast("บันทึกแล้ว")};
+$("addEx").onclick=()=>{let t=$("exType").value,n=$("exName").value.trim()||(t!==EX_AUTO?t:""),m=Number($("exMin").value||0);if(!n||!m){toast(n?"กรอกเวลา (นาที)":"เลือกประเภทหรือพิมพ์ชื่อกิจกรรม");return}s.moves.unshift({id:Date.now(),name:n,type:$("exType").value,min:m,kcal:moveKcal(n,$("exType").value,m),met:moveMet(n,$("exType").value),time:new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});$("exName").value="";$("exMin").value="";$("exType").value=EX_AUTO;save();updateBurnEst();toast("บันทึกแล้ว")};
 $("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้งหมดในเครื่องนี้?")){s={foods:[],water:0,moves:[],waterLog:[],favorites:[],history:[],dayNote:"",profile:{name:"FoodWell",emoji:"🌿"},settings:{softTheme:false,gentleReminder:false,reminderMinutes:180}};save();toast("ล้างข้อมูลแล้ว")}};
 let meal="ทั้งหมด";
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");meal=b.dataset.meal;renderFood()});
@@ -932,7 +946,7 @@ renderTrophies();
 setTimeout(()=>{getTrophyItems().forEach((x,i)=>{if(x.v>=x.max) celebrateTrophy(i);});},120);
 $("favList").innerHTML=s.favorites.length?s.favorites.map((f,i)=>`<button class="quick-food" onclick="useFavorite(${i})"><b>↺ ${esc(f.name)}</b><small>${esc(f.meal)}${f.kcal?" · "+f.kcal+" kcal":""}</small></button>`).join(""):'<div class="history-pill">ยังไม่มีอาหารที่บันทึกบ่อย</div>';
 $("waterHistory").innerHTML=s.waterLog.length?s.waterLog.slice(0,10).map(x=>`<div class="item"><div class="thumb">💧</div><div class="meta"><b>+${x.ml} ml</b><small>${x.time}</small></div></div>`).join(""):'<div class="item"><div class="meta"><b>ยังไม่มีรายการน้ำ</b><small>กดปุ่มด้านบนเพื่อบันทึก</small></div></div>';
-$("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">🏃</div><div class="meta"><b>${esc(x.name)}</b><small>${esc(x.type||"กิจกรรม")} · ${x.min} นาที · 🔥 ~${moveKcalOf(x)} kcal · ${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';$("burnToday")&&($("burnToday").textContent=s.moves.reduce((a,x)=>a+moveKcalOf(x),0).toLocaleString());
+$("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">${moveIcon(x)}</div><div class="meta"><b>${esc(x.name)}</b><small>${x.type&&x.type!==x.name&&x.type!==EX_AUTO?esc(x.type)+" · ":""}${x.min} นาที · 🔥 ~${moveKcalOf(x)} kcal · ${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';$("burnToday")&&($("burnToday").textContent=s.moves.reduce((a,x)=>a+moveKcalOf(x),0).toLocaleString());
 renderHistory();
 renderDashboard();
 
