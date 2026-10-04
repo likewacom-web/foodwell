@@ -7,6 +7,9 @@ on:
       - 'FoodWell_v89_Android_UI_Polish/android/**'
       - '.github/workflows/android-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -45,3 +48,19 @@ jobs:
           name: FoodWell-debug-apk
           path: FoodWell_v89_Android_UI_Polish/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # A plain .apk download link (no zip, no GitHub login):
+      # https://github.com/<owner>/<repo>/releases/download/latest-debug/FoodWell.apk
+      - name: Publish APK to the 'latest-debug' release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp FoodWell_v89_Android_UI_Polish/android/app/build/outputs/apk/debug/app-debug.apk FoodWell.apk
+          if gh release view latest-debug >/dev/null 2>&1; then
+            gh release upload latest-debug FoodWell.apk --clobber
+            gh release edit latest-debug --notes "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7} · $(date -u +'%Y-%m-%d %H:%M UTC')"
+          else
+            gh release create latest-debug FoodWell.apk --prerelease --target "$GITHUB_SHA" \
+              --title "FoodWell (debug ล่าสุด)" --notes "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}"
+          fi
