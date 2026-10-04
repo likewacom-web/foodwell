@@ -268,7 +268,6 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
       <div class="core-card"><strong>🍱 อาหาร</strong><small id="coreFood">บันทึกอาหารวันนี้</small></div>
       <div class="core-card"><strong>💧 น้ำ</strong><small id="coreWater">บันทึกน้ำวันนี้</small></div>
       <div class="core-card"><strong>🏃 การเคลื่อนไหว</strong><small id="coreMove">กิจกรรมวันนี้</small></div>
-      <div class="core-card"><strong>⌚ อุปกรณ์</strong><small id="coreWatch">Health Connect</small></div>
     </div>
     <button class="primary core-primary" id="coreSync">🔄 ซิงก์ข้อมูลตอนนี้</button>
   </div>
@@ -284,8 +283,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="mini"><div class="ico">💧</div><h3>ดื่มน้ำ</h3><div class="count"><span id="waterCount">0</span> <small>ml</small></div><div class="bar blue"><i></i></div></div>
 <div class="mini"><div class="ico">🏃</div><h3>เคลื่อนไหว</h3><div class="count"><span id="moveCount">0</span> <small>นาที</small></div><div class="bar green"><i></i></div></div>
 </div>
-<div class="home-sortable" data-home-key="watch-entry" style="margin:12px 0"><button class="primary" type="button" data-go="watch" style="width:100%;margin-bottom:8px">⌚ เชื่อมต่อ Smart Watch</button>
-</div><div class="dashboard-entry home-sortable" data-home-key="dashboard-entry" style="margin:12px 0"><button class="primary" type="button" data-go="dashboard" style="width:100%">📊 ดู Dashboard ของฉัน</button></div>
+<div class="dashboard-entry home-sortable" data-home-key="dashboard-entry" style="margin:12px 0"><button class="primary" type="button" data-go="dashboard" style="width:100%">📊 ดู Dashboard ของฉัน</button></div>
 <div class="home-food-section home-sortable" data-home-key="food-section"><div class="section-head"><h2>มื้ออาหารวันนี้</h2><button data-go="food">ดูทั้งหมด</button></div><div id="foodStrip" class="food-row"></div></div>
 </section>
 
@@ -341,7 +339,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <section id="move" class="page">
 <div class="page-title"><div><p>MOVEMENT</p><h1>การเคลื่อนไหว</h1></div></div>
 <div class="card movement"><div class="move-icon">🏃‍♂️</div><h2>ขยับในแบบที่ชอบ</h2><p style="color:#92949e;font-size:12px">เดิน เล่นกีฬา ยืดเหยียด หรือกิจกรรมอื่น ๆ ที่เหมาะกับคุณ</p></div>
-<div class="card"><label>กิจกรรม<input id="exName" placeholder="เช่น เดิน"></label><div class="two"><label>แหล่งข้อมูล<select id="exSource"><option value="manual">✍️ บันทึกเอง</option><option value="watch">⌚ Smart Watch</option></select></label><label>ประเภท<select id="exType"><option>เดิน</option><option>กีฬา</option><option>ยืดเหยียด</option><option>เล่นสนุก</option><option>อื่น ๆ</option></select></label><label>เวลา (นาที)<input id="exMin" type="number" min="0"></label></div><button class="primary" id="addEx">บันทึกกิจกรรม</button></div>
+<div class="card"><label>กิจกรรม<input id="exName" placeholder="เช่น เดิน"></label><div class="two"><label>ประเภท<select id="exType"><option>เดิน</option><option>กีฬา</option><option>ยืดเหยียด</option><option>เล่นสนุก</option><option>อื่น ๆ</option></select></label><label>เวลา (นาที)<input id="exMin" type="number" min="0"></label></div><button class="primary" id="addEx">บันทึกกิจกรรม</button></div>
 <div id="exList" class="list"></div>
 </section>
 
@@ -352,39 +350,10 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="dashboard-card"><h3>🍱 อาหารที่บันทึก</h3><p>จำนวนรายการในแต่ละวัน</p><div id="dashFoodBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>💧 น้ำ</h3><p>ปริมาณที่บันทึกในแต่ละวัน</p><div id="dashWaterBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>🏃 การเคลื่อนไหว</h3><p>เวลาที่บันทึกในแต่ละวัน</p><div id="dashMoveBars" class="dash-bars"></div></div>
-<div class="dashboard-card"><h3>⌚ สุขภาพจากอุปกรณ์</h3><p>รวมข้อมูลจาก Smart Watch / Health Connect ล่าสุด</p><div class="core-dashboard-grid"><div class="core-device-card"><div class="k">🚶 STEPS</div><div class="v" id="coreDashSteps">—</div><div class="s">ก้าวล่าสุด</div></div><div class="core-device-card"><div class="k">❤️ HEART RATE</div><div class="v" id="coreDashHeart">—</div><div class="s">bpm</div></div><div class="core-device-card"><div class="k">😴 SLEEP</div><div class="v" id="coreDashSleep">—</div><div class="s">ชั่วโมง</div></div><div class="core-device-card"><div class="k">🔥 CALORIES</div><div class="v" id="coreDashKcal">—</div><div class="s">kcal จากกิจกรรม</div></div><div class="core-device-card"><div class="k">🏃 DEVICE ACTIVITY</div><div class="v" id="coreDashMove">—</div><div class="s">นาที</div></div></div><div class="core-sync-row"><span><i id="coreDashDot" class="core-sync-dot"></i><span id="coreDashStatus">ยังไม่ได้เชื่อมต่อ</span></span><button class="secondary-btn" type="button" data-go="syncCenter">เปิด Sync Center</button></div></div>
 <div class="dashboard-two"><div class="dashboard-mini"><b id="dashActiveDays">0</b><small>วันที่มีการบันทึก</small></div><div class="dashboard-mini"><b id="dashRecentFoods">0</b><small>อาหารวันนี้</small></div></div>
 <div class="dashboard-card"><h3>✨ สรุป</h3><p>ภาพรวมจากข้อมูลล่าสุด</p><div id="dashNote" class="dashboard-note">ยังไม่มีข้อมูลมากพอสำหรับสรุป</div></div>
 </section>
 
-<section id="watch" class="page">
-<div class="topbar"><button class="back" onclick="go('home')">‹</button><div><div class="eyebrow">SMART WATCH</div><h1>⌚ อุปกรณ์สุขภาพ</h1></div></div>
-<div class="watch-hero"><div style="font-size:12px;color:#aaa">การเชื่อมต่อที่แนะนำ</div><h2 style="margin:4px 0">Health Connect</h2><div class="watch-status"><span id="watchDot" class="watch-dot"></span><span id="watchStatus">ยังไม่ได้เชื่อมต่อ</span></div><div class="watch-actions"><button class="primary" id="watchConnect">⌚ เชื่อมต่อ</button><button class="secondary-btn" id="watchSync">↻ ซิงก์ข้อมูล</button><button class="secondary-btn" type="button" data-go="watchDashboard">📊 Dashboard</button><button class="secondary-btn" type="button" data-go="syncCenter">🛰️ Sync Center</button></div><div class="watch-note">FoodWell จะอ่านข้อมูลที่คุณอนุญาตเท่านั้น เช่น ก้าว ชีพจร การนอน และกิจกรรม ไม่จำเป็นต้องเปิดข้อมูลทุกประเภท</div></div>
-<div class="card"><h2>📊 ข้อมูลล่าสุด</h2><div class="watch-metrics"><div class="watch-metric"><b id="watchSteps">—</b><small>ก้าว</small></div><div class="watch-metric"><b id="watchHeart">—</b><small>ชีพจร</small></div><div class="watch-metric"><b id="watchSleep">—</b><small>การนอน</small></div><div class="watch-metric"><b id="watchMove">—</b><small>กิจกรรม</small></div><div class="watch-metric"><b id="watchActiveKcal">—</b><small>🔥 kcal จากกิจกรรม</small></div><div class="watch-metric"><b id="watchTotalKcal">—</b><small>🔥 kcal รวมทั้งวัน</small></div></div><div id="watchSourceNote" class="watch-note" style="overflow-wrap:anywhere"></div></div>
-<div class="card"><h2>🔐 สิทธิ์ข้อมูล</h2><div class="watch-perms"><div class="watch-perm"><span>🚶 ก้าว</span><input class="switch" type="checkbox" id="permSteps" checked></div><div class="watch-perm"><span>❤️ ชีพจร</span><input class="switch" type="checkbox" id="permHeart"></div><div class="watch-perm"><span>😴 การนอน</span><input class="switch" type="checkbox" id="permSleep"></div><div class="watch-perm"><span>🏃 กิจกรรม</span><input class="switch" type="checkbox" id="permMove" checked></div></div><div class="watch-note">สิทธิ์เหล่านี้เป็นการตั้งค่าภายใน FoodWell สำหรับการเชื่อมต่อจริงบน Android จะต้องอนุมัติสิทธิ์จาก Health Connect อีกครั้ง</div></div>
-<div class="card"><h2>🧪 ทดสอบการเชื่อมต่อ</h2><button class="secondary-btn" id="watchDemo" style="width:100%">ใช้ข้อมูลตัวอย่าง</button><div class="watch-note">โหมดตัวอย่างใช้สำหรับทดสอบหน้าจอเท่านั้น ไม่ใช่ข้อมูลสุขภาพจริง</div></div>
-<div class="card"><h2>🔄 ซิงก์อัตโนมัติ</h2><div class="watch-perm"><span>เปิด Auto Sync</span><input class="switch" type="checkbox" id="watchAutoSync"></div><label style="display:block;margin-top:10px">ความถี่<select id="watchSyncEvery" style="width:100%;margin-top:6px"><option value="15">ทุก 15 นาที</option><option value="30">ทุก 30 นาที</option><option value="60">ทุก 1 ชั่วโมง</option></select></label><div class="watch-note">จะซิงก์ขณะเปิดแอปอยู่เท่านั้น และจะหยุดเมื่อปิดแอป</div></div>
-
-<div class="card core-hc-card"><div class="trend-head"><h2>🩺 Health Connect Core</h2><span id="hcCoreChip" class="sync-chip">ตรวจสอบ</span></div><div class="hc-core-grid"><div><b id="hcCoreDevice">Health Connect</b><small>ตัวกลางข้อมูลสุขภาพ</small></div><div><b id="hcCoreLast">—</b><small>ซิงก์ล่าสุด</small></div><div><b id="hcCoreRecords">—</b><small>ข้อมูลที่รับล่าสุด</small></div><div><b id="hcCoreMode">เว็บ / Android</b><small>ช่องทางเชื่อมต่อ</small></div></div><div class="hc-core-actions"><button class="secondary-btn" id="hcOpenSettings">⚙️ จัดการ Health Connect</button><button class="secondary-btn" id="hcTestBridge">🧪 ทดสอบ Bridge</button></div><div id="hcCoreNote" class="watch-note">บน Android ให้เปิดสิทธิ์เฉพาะข้อมูลที่ต้องการใช้</div></div>
-<div class="card"><h2>⌚ แหล่งข้อมูล</h2><div id="watchSources"></div><button class="secondary-btn" id="watchAddSource" style="width:100%;margin-top:10px">＋ เพิ่มอุปกรณ์</button></div>
-</section>
-<section id="watchDashboard" class="page">
-<div class="topbar"><button class="back" onclick="go('watch')">‹</button><div><div class="eyebrow">HEALTH SYNC</div><h1>📊 Smart Watch Dashboard</h1></div></div>
-<div class="watch-dashboard">
-<div class="watch-dash-hero"><div class="watch-sync-line"><span>สถานะการซิงก์</span><b id="watchDashStatus">ยังไม่มีการซิงก์</b></div><h2>ภาพรวมจากอุปกรณ์</h2><p style="color:#aaa;font-size:12px;margin:0">ข้อมูลจาก Health Connect จะแยกจากข้อมูลที่คุณกรอกเอง</p><div class="watch-kpis"><div class="watch-kpi"><b id="dashWatchSteps">—</b><small>🚶 ก้าวล่าสุด</small></div><div class="watch-kpi"><b id="dashWatchHeart">—</b><small>❤️ ชีพจรล่าสุด</small></div><div class="watch-kpi"><b id="dashWatchSleep">—</b><small>😴 การนอน</small></div><div class="watch-kpi"><b id="dashWatchMove">—</b><small>🏃 กิจกรรม</small></div></div></div>
-<div class="watch-chart"><h3>แนวโน้มการซิงก์ 7 วัน</h3><p style="color:#999;font-size:11px">แสดงจำนวนก้าวจากการซิงก์ที่บันทึกไว้ในเครื่อง</p><div id="watchSevenBars" class="watch-bars"></div></div>
-<div class="card"><h3>⌚ อุปกรณ์และสิทธิ์</h3><div class="watch-device-row"><div class="watch-device-icon">⌚</div><div><b id="watchDashDevice">Health Connect</b><small>แหล่งข้อมูลกลางสำหรับอุปกรณ์ที่รองรับ</small></div></div><div class="watch-device-row"><div class="watch-device-icon">🔐</div><div><b>ข้อมูลที่อนุญาต</b><small>สิทธิ์สามารถเปลี่ยนได้จากหน้าเชื่อมต่ออุปกรณ์</small></div></div><button class="secondary-btn" type="button" data-go="watch" style="width:100%;margin-top:10px">จัดการการเชื่อมต่อ</button></div>
-<div class="watch-data-note">หมายเหตุ: ค่าใน Dashboard นี้เป็นข้อมูลที่ Health Connect ส่งให้ FoodWell และอาจเปลี่ยนแปลงตามอุปกรณ์หรือการซิงก์ของระบบ</div>
-</div></section>
-<section id="syncCenter" class="page">
-<div class="page-title"><div><p>DEVICE SYNC</p><h1>🛰️ Sync Center</h1></div><button class="secondary-btn" type="button" data-go="watch">ตั้งค่า</button></div>
-<div class="sync-center">
-<div class="sync-hero"><div class="sync-status"><span id="syncHealthDot" class="sync-dot"></span><b id="syncHealthStatus">กำลังตรวจสอบ Health Connect…</b></div><p style="color:#aaa;font-size:12px;margin:10px 0 14px">ศูนย์รวมสถานะ Smart Watch, Health Connect และการซิงก์เบื้องหลัง</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" id="syncNowBtn">↻ ซิงก์ตอนนี้</button><button class="secondary-btn" id="syncBgBtn">⚙️ Background Sync</button></div></div>
-<div class="sync-grid"><div class="sync-tile"><small>⌚ อุปกรณ์</small><b id="syncDeviceName">Health Connect</b></div><div class="sync-tile"><small>🔄 ซิงก์ล่าสุด</small><b id="syncLastTime">—</b></div><div class="sync-tile"><small>🚶 ก้าว</small><b id="syncSteps">—</b></div><div class="sync-tile"><small>❤️ ชีพจร</small><b id="syncHeart">—</b></div></div>
-<div class="card"><h3>📡 แหล่งข้อมูล</h3><div class="sync-row"><div class="sync-left"><div class="sync-icon">⌚</div><div><b>Smart Watch</b><small style="display:block;color:#888">ผ่าน Health Connect</small></div></div><span id="syncWatchChip" class="sync-chip">รอตรวจสอบ</span></div><div class="sync-row"><div class="sync-left"><div class="sync-icon">🔗</div><div><b>Health Connect</b><small style="display:block;color:#888">สิทธิ์อ่านข้อมูลสุขภาพ</small></div></div><span id="syncHealthChip" class="sync-chip">รอตรวจสอบ</span></div><div class="sync-row"><div class="sync-left"><div class="sync-icon">⚙️</div><div><b>Background Sync</b><small style="display:block;color:#888">ซิงก์อัตโนมัติบน Android</small></div></div><span id="syncBgChip" class="sync-chip">รอตรวจสอบ</span></div></div>
-<div class="card"><h3>🗂️ ประวัติการซิงก์</h3><div id="syncLog" class="sync-log"><div style="color:#888;font-size:11px">ยังไม่มีประวัติ</div></div></div>
-<div class="watch-data-note">ข้อมูลจาก Health Connect แสดงตามสิทธิ์ที่คุณอนุญาต และอาจแตกต่างกันตามอุปกรณ์หรือแอปที่ส่งข้อมูลเข้า Health Connect</div>
-</div></section>
 <section id="foodLibrary" class="page">
 <div class="page-title"><div><p>FOOD LIBRARY · v62</p><h1>🍱 คลังอาหาร</h1></div><button class="secondary-btn" type="button" onclick="go('food')">กลับ</button></div>
 <div class="card">
@@ -520,9 +489,6 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
       <button class="quick-item" data-quick-go="food"><div class="quick-icon">🍱</div><div><b>เพิ่มอาหาร</b><span>บันทึกมื้ออาหาร</span></div></button>
       <button class="quick-item" data-quick-go="water"><div class="quick-icon">💧</div><div><b>เพิ่มน้ำ</b><span>ไปหน้าบันทึกน้ำ</span></div></button>
       <button class="quick-item" data-quick-go="move"><div class="quick-icon">🏃</div><div><b>เพิ่มกิจกรรม</b><span>บันทึกการเคลื่อนไหว</span></div></button>
-      <button class="quick-item" data-quick-go="watch"><div class="quick-icon">⌚</div><div><b>Smart Watch</b><span>จัดการการเชื่อมต่อ</span></div></button>
-      <button class="quick-item" data-quick-go="watchDashboard"><div class="quick-icon">📊</div><div><b>Watch Dashboard</b><span>ดูข้อมูลจากอุปกรณ์</span></div></button>
-      <button class="quick-item" data-quick-go="syncCenter"><div class="quick-icon">🔄</div><div><b>Sync Center</b><span>ซิงก์ข้อมูลทันที</span></div></button>
     </div>
   </div>
 </div>
@@ -605,32 +571,8 @@ function snapshotDay(){
 const save=()=>{snapshotDay();localStorage.setItem(KEY,JSON.stringify(s));render()};
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function toast(t){let e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1600)}
-function renderSyncCenter(){
-  const d=window.foodwellHealthData||{};
-  const dot=$("syncHealthDot"), st=$("syncHealthStatus");
-  const connected=!!window.foodwellHealthConnected;
-  if(dot){dot.className='sync-dot '+(connected?'ok':'warn')}
-  if(st) st.textContent=connected?'Health Connect เชื่อมต่อแล้ว':'ยังไม่ได้เชื่อมต่อ Health Connect';
-  if($("syncHealthChip")) $("syncHealthChip").textContent=connected?'เชื่อมต่อแล้ว':'ยังไม่เชื่อมต่อ';
-  if($("syncWatchChip")) $("syncWatchChip").textContent=connected?'พร้อมใช้งาน':'รอการเชื่อมต่อ';
-  if($("syncBgChip")) $("syncBgChip").textContent=window.foodwellBackgroundSync?'เปิดอยู่':'ยังไม่เปิด';
-  if($("syncSteps")) $("syncSteps").textContent=d.steps!=null?Number(d.steps).toLocaleString():'—';
-  if($("syncHeart")) $("syncHeart").textContent=d.heart!=null?Math.round(d.heart)+' bpm':'—';
-  if($("syncLastTime")) $("syncLastTime").textContent=d.syncedAt?new Date(d.syncedAt).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—';
-  if($("syncDeviceName")) $("syncDeviceName").textContent=d.deviceName||'Health Connect';
-  const log=JSON.parse(localStorage.getItem('foodwell_sync_log')||'[]');
-  const box=$("syncLog"); if(box) box.innerHTML=log.length?log.slice(0,12).map(x=>`<div class="sync-log-item"><span>${x.ok?'✓':'!'} ${esc(x.label||'ซิงก์ข้อมูล')}</span><small>${new Date(x.at).toLocaleString('th-TH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</small></div>`).join(''):'<div style="color:#888;font-size:11px">ยังไม่มีประวัติ</div>';
-}
-function addSyncLog(ok,label){const a=JSON.parse(localStorage.getItem('foodwell_sync_log')||'[]');a.unshift({ok,label,at:new Date().toISOString()});localStorage.setItem('foodwell_sync_log',JSON.stringify(a.slice(0,20)));renderSyncCenter()}
-window.onHealthConnectConnected=function(ok){window.foodwellHealthConnected=!!ok; if(ok) addSyncLog(true,'เชื่อมต่อ Health Connect'); renderSyncCenter();};
-window.onHealthConnectData=function(payload){try{const d=typeof payload==='string'?JSON.parse(payload):payload;window.foodwellHealthData=d;localStorage.setItem('foodwell_health_latest',JSON.stringify(d));addSyncLog(true,'ซิงก์ Health Connect'); if(typeof renderWatchDashboard==='function') renderWatchDashboard(); renderSyncCenter();}catch(e){}};
-window.onHealthConnectError=function(msg){addSyncLog(false,msg||'ซิงก์ไม่สำเร็จ');renderSyncCenter()};
-window.foodwellHealthData=JSON.parse(localStorage.getItem('foodwell_health_latest')||'{}');
-window.foodwellBackgroundSync=localStorage.getItem('foodwell_bg_sync')==='1';
-function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===p));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===p));if(p==="syncCenter")renderSyncCenter()}
+function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===p));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===p))}
 document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
-$("syncNowBtn")?.addEventListener("click",()=>{if(window.AndroidHealthConnect?.sync){window.AndroidHealthConnect.sync();toast("กำลังซิงก์ข้อมูล…")}else{toast("โหมดเว็บ: ต้องเปิดผ่าน APK เพื่อซิงก์จริง");addSyncLog(false,'ต้องใช้ Android Bridge')}});
-$("syncBgBtn")?.addEventListener("click",()=>{if(window.AndroidHealthConnect?.enableBackgroundSync){window.AndroidHealthConnect.enableBackgroundSync();window.foodwellBackgroundSync=true;localStorage.setItem('foodwell_bg_sync','1');toast('ขอสิทธิ์ Background Sync แล้ว')}else{toast('Background Sync ใช้ได้เมื่อเปิดผ่าน APK')}});
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
 function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme").checked=!!s.settings.softTheme;$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);$("profileNameView").textContent=s.profile.name||"FoodWell";$("profileAvatar").textContent=s.profile.emoji||"🌿";if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🌿";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
@@ -921,13 +863,6 @@ $("trophySort").onchange=()=>renderTrophies();
 $("trophyDetailFav")&&($("trophyDetailFav").onclick=()=>{if(typeof window.foodwellOpenTrophyIndex==="number")toggleTrophyFavorite(window.foodwellOpenTrophyIndex)});
 
 function renderDashboard(){
- const wd=(s.settings&&s.settings.watch)||{}; const wdata=wd.data||{};
- const setCore=(id,val)=>{const e=$(id);if(e)e.textContent=val};
- setCore("coreDashSteps",wdata.steps==null?"—":Number(wdata.steps).toLocaleString());
- setCore("coreDashHeart",wdata.heart==null?"—":Number(wdata.heart));
- setCore("coreDashSleep",wdata.sleep==null||wdata.sleep==="—"?"—":String(wdata.sleep));
- setCore("coreDashMove",wdata.move==null?"—":String(wdata.move));setCore("coreDashKcal",wdata.activeKcal==null?"—":Number(wdata.activeKcal).toLocaleString());
- const dot=$("coreDashDot"),status=$("coreDashStatus"); if(dot)dot.classList.toggle("on",!!wd.connected); if(status)status.textContent=wd.connected?(wd.lastSync?"เชื่อมต่อแล้ว · ซิงก์ "+new Date(wd.lastSync).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"เชื่อมต่อแล้ว"):"ยังไม่ได้เชื่อมต่อ";
 
  const now=new Date(),days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(d.toISOString().slice(0,10));}
  const recs=days.map(dayRecord);
@@ -962,12 +897,11 @@ function renderProfileStats(){
 }
 $("editProfileHero").onclick=()=>{go("more");$("profileEditor").style.display="block";$("profileName").focus()};
 
-const HOME_DEFAULT=['welcome','summary','twocards','watch-entry','dashboard-entry','food-section'];
+const HOME_DEFAULT=['welcome','summary','twocards','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
 function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
 function setupHomeCustomizer(){applyHomePrefs();const btn=document.getElementById('customizeHome'),menu=document.getElementById('homeWidgetMenu'),home=document.getElementById('home');if(!btn||btn.dataset.ready)return;btn.dataset.ready='1';btn.onclick=()=>{home.classList.toggle('home-editing');menu.classList.toggle('open');if(home.classList.contains('home-editing')){document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=true);toast('โหมดปรับแต่ง Home เปิดแล้ว')}else{saveHomePrefs();document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=false);toast('บันทึกเลย์เอาต์แล้ว')}};document.getElementById('resetHomeLayout').onclick=()=>{localStorage.removeItem('foodwell_home_layout_v36');location.reload()};document.querySelectorAll('[data-widget-toggle]').forEach(b=>b.onclick=()=>{const n=home.querySelector(`[data-home-key="${b.dataset.widgetToggle}"]`);if(n){n.classList.toggle('home-card-hidden');saveHomePrefs();}});let drag=null;home.addEventListener('dragstart',e=>{const n=e.target.closest('[data-home-key]');if(!home.classList.contains('home-editing')||!n)return;drag=n;n.classList.add('dragging')});home.addEventListener('dragend',e=>{if(drag){drag.classList.remove('dragging');saveHomePrefs();drag=null}});home.addEventListener('dragover',e=>{if(!drag||!home.classList.contains('home-editing'))return;e.preventDefault();const target=e.target.closest('[data-home-key]');if(!target||target===drag)return;const r=target.getBoundingClientRect();const before=e.clientY<r.top+r.height/2;if(before)target.before(drag);else target.after(drag)});}
-$("watchAddSource")?.addEventListener("click",()=>{const name=prompt("ชื่ออุปกรณ์ เช่น Galaxy Watch / Xiaomi Watch");if(!name)return;const w=s.settings.watch||{};w.sources=Array.isArray(w.sources)?w.sources:[];w.sources.push({name,type:"Smart Watch",active:false});s.settings.watch=w;save();renderWatch();toast("เพิ่มอุปกรณ์แล้ว")});
 function renderWaterHistoryV54(){
  const logs=(s.waterLog||[]).slice(); const today=new Date().toISOString().slice(0,10); const mode=$("waterHistoryDay")?.value||"today";
  const shown=mode==='today'?logs.filter(x=>String(x.date||'').slice(0,10)===today):logs;
@@ -989,23 +923,6 @@ $("waterHistory").innerHTML=s.waterLog.length?s.waterLog.slice(0,10).map(x=>`<di
 $("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">🏃</div><div class="meta"><b>${esc(x.name)}</b><small>${esc(x.type||"กิจกรรม")} · ${x.min} นาที · ${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';
 renderHistory();
 renderDashboard();
-// v44 Smart Watch / Health Connect bridge
-function watchSetStatus(on,msg){const d=$("watchDot"),t=$("watchStatus");if(d)d.classList.toggle("on",!!on);if(t)t.textContent=msg|| (on?"เชื่อมต่อแล้ว":"ยังไม่ได้เชื่อมต่อ");}
-function renderWatchDashboard(){const w=s.settings.watch||{},d=w.data||{},hist=Array.isArray(w.syncHistory)?w.syncHistory:[];if($("dashWatchSteps"))$("dashWatchSteps").textContent=d.steps==null?"—":Number(d.steps).toLocaleString();if($("dashWatchHeart"))$("dashWatchHeart").textContent=d.heart==null?"—":d.heart+" bpm";if($("dashWatchSleep"))$("dashWatchSleep").textContent=d.sleep||"—";if($("dashWatchMove"))$("dashWatchMove").textContent=d.move||"—";if($("watchDashStatus"))$("watchDashStatus").textContent=w.lastSync?new Date(w.lastSync).toLocaleString("th-TH",{dateStyle:"short",timeStyle:"short"}):"ยังไม่มีการซิงก์";const el=$("watchSevenBars");if(el){const arr=[...hist].reverse();const max=Math.max(1,...arr.map(x=>Number(x.steps||0)));el.innerHTML=Array.from({length:7},(_,i)=>{const x=arr[i]||{};const h=Math.max(3,Math.round(Number(x.steps||0)/max*112));const label=x.at?new Date(x.at).toLocaleDateString("th-TH",{weekday:"short"}):"—";return `<div class="watch-bar-col"><div class="watch-bar" style="height:${h}px"></div><small>${label}</small></div>`}).join("")}}
-let watchAutoTimer=null;
-function renderWatchSources(){const w=s.settings.watch||{};const el=$("watchSources");if(!el)return;const src=Array.isArray(w.sources)&&w.sources.length?w.sources:[{name:"Health Connect",type:"ระบบกลาง",active:!!w.connected}];el.innerHTML=src.map((x,i)=>`<div class="watch-device-row"><div class="watch-device-icon">⌚</div><div style="flex:1"><b>${esc(x.name||"อุปกรณ์")}</b><small>${esc(x.type||"อุปกรณ์สุขภาพ")} · ${x.active?"พร้อมใช้งาน":"ยังไม่เชื่อมต่อ"}</small></div><span>${x.active?"🟢":"⚪"}</span></div>`).join("")}
-function setupWatchAutoSync(){const w=s.settings.watch||{};const cb=$("watchAutoSync"),sel=$("watchSyncEvery");if(cb){cb.checked=!!w.autoSync;cb.onchange=()=>{w.autoSync=cb.checked;save();startWatchAutoSync();toast(cb.checked?"เปิด Auto Sync แล้ว":"ปิด Auto Sync แล้ว")}}if(sel){sel.value=String(w.syncEvery||30);sel.onchange=()=>{w.syncEvery=Number(sel.value);save();startWatchAutoSync()}}startWatchAutoSync()}
-function startWatchAutoSync(){if(watchAutoTimer)clearInterval(watchAutoTimer);const w=s.settings.watch||{};if(!w.autoSync||!w.connected||!window.AndroidHealthConnect)return;watchAutoTimer=setInterval(()=>{try{window.AndroidHealthConnect.sync()}catch(e){}},Math.max(15,Number(w.syncEvery||30))*60000)}
-function renderWatch(){const w=s.settings.watch||{};renderWatchSources();setupWatchAutoSync();watchSetStatus(!!w.connected,w.connected?"เชื่อมต่อแล้ว · พร้อมซิงก์":"ยังไม่ได้เชื่อมต่อ");if($("watchSteps"))$("watchSteps").textContent=w.data?.steps??"—";if($("watchHeart"))$("watchHeart").textContent=w.data?.heart??"—";if($("watchSleep"))$("watchSleep").textContent=w.data?.sleep??"—";if($("watchMove"))$("watchMove").textContent=w.data?.move??"—";const kc=v=>v==null?"—":Number(v).toLocaleString();if($("watchActiveKcal"))$("watchActiveKcal").textContent=kc(w.data?.activeKcal);if($("watchTotalKcal"))$("watchTotalKcal").textContent=kc(w.data?.totalKcal);if($("watchSourceNote")){const src=w.data?.sources||{},lab={steps:"ก้าว",heart:"ชีพจร",move:"กิจกรรม",activeKcal:"kcal กิจกรรม",totalKcal:"kcal รวม"};const appName=pkg=>{const known={"com.huawei.health":"Huawei Health","com.mi.health":"Mi Fitness","com.xiaomi.wearable":"Mi Fitness","com.sec.android.app.shealth":"Samsung Health","com.google.android.apps.fitness":"Google Fit","com.fitbit.FitbitMobile":"Fitbit","com.huami.watch.hmwatchmanager":"Zepp","com.garmin.android.apps.connectmobile":"Garmin Connect","com.urbandroid.sleep":"Sleep as Android","nl.appyhapps.healthsync":"Health Sync"};if(known[pkg])return known[pkg];if(/^com\.android\.healthconnect\.phone/.test(pkg)||pkg==="android")return "ตัวนับในมือถือ";return pkg};const rows=Object.entries(src).map(([k,a])=>(lab[k]||k)+": "+[...new Set([].concat(a).map(appName))].join(", "));$("watchSourceNote").textContent=rows.length?"แหล่งข้อมูล — "+rows.join(" · "):""}["steps","heart","sleep","move"].forEach(k=>{const e=$("perm"+k.charAt(0).toUpperCase()+k.slice(1));if(e)e.checked=w[k]!==false});}
-async function connectWatch(){s.settings.watch=s.settings.watch||{};try{if(window.FoodWellHealthConnect?.connect){await window.FoodWellHealthConnect.connect();return}if(window.AndroidHealthConnect?.connect){window.AndroidHealthConnect.connect();toast("กำลังเปิดหน้าสิทธิ์ Health Connect…");return}toast("หน้านี้พร้อมแล้ว แต่การเชื่อมต่อจริงต้องใช้ Android APK");}catch(e){toast("เชื่อมต่อไม่สำเร็จ")}}
-async function syncWatch(){try{if(window.FoodWellHealthConnect?.read){const data=await window.FoodWellHealthConnect.read();if(data) applyHealthConnectData(data);return}if(window.AndroidHealthConnect?.sync){window.AndroidHealthConnect.sync();toast("กำลังซิงก์ข้อมูล…");return}toast("ยังไม่มี Android bridge · ใช้โหมดตัวอย่างได้");}catch(e){toast("ซิงก์ไม่สำเร็จ")}}
-function applyHealthConnectData(data){s.settings.watch=s.settings.watch||{};s.settings.watch.data={...s.settings.watch.data,...data};s.settings.watch.connected=true;s.settings.watch.lastSync=new Date().toISOString();s.settings.watch.syncHistory=Array.isArray(s.settings.watch.syncHistory)?s.settings.watch.syncHistory:[];s.settings.watch.syncHistory.unshift({at:s.settings.watch.lastSync,steps:Number(data.steps||0),heart:data.heart??null,move:data.move??"—",sleep:data.sleep??"—"});s.settings.watch.syncHistory=s.settings.watch.syncHistory.slice(0,7);save();renderWatch();renderWatchDashboard();toast("ซิงก์ข้อมูลแล้ว")}
-window.onHealthConnectConnected=function(ok){s.settings.watch=s.settings.watch||{};s.settings.watch.connected=!!ok;save();renderWatch();renderWatchDashboard();toast(ok?"เชื่อมต่อ Health Connect แล้ว":"ยังไม่ได้รับสิทธิ์ Health Connect")};
-window.onHealthConnectData=function(raw){try{applyHealthConnectData(JSON.parse(raw))}catch(e){toast("ข้อมูล Health Connect ไม่ถูกต้อง")}};
-window.onHealthConnectError=function(msg){toast(msg||"ซิงก์ไม่สำเร็จ")};
-$("watchConnect")?.addEventListener("click",connectWatch);$("watchSync")?.addEventListener("click",syncWatch);$("watchDemo")?.addEventListener("click",()=>{s.settings.watch={...s.settings.watch,connected:true,data:{steps:4280,heart:"—",sleep:"—",move:"24 นาที"}};save();renderWatch();toast("ใช้ข้อมูลตัวอย่างแล้ว")});
-["steps","heart","sleep","move"].forEach(k=>$("perm"+k.charAt(0).toUpperCase()+k.slice(1))?.addEventListener("change",e=>{s.settings.watch[k]=e.target.checked;save()}));
-renderWatch();renderWatchDashboard();
 
 renderProfileStats();renderAiHistory();
 applyHomePrefs();
@@ -1040,9 +957,6 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
     {id:'food',icon:'🍱',name:'เพิ่มอาหาร',desc:'บันทึกมื้ออาหาร'},
     {id:'water',icon:'💧',name:'เพิ่มน้ำ',desc:'ไปหน้าบันทึกน้ำ'},
     {id:'move',icon:'🏃',name:'เพิ่มกิจกรรม',desc:'บันทึกการเคลื่อนไหว'},
-    {id:'watch',icon:'⌚',name:'Smart Watch',desc:'จัดการการเชื่อมต่อ'},
-    {id:'watchDashboard',icon:'📊',name:'Watch Dashboard',desc:'ดูข้อมูลจากอุปกรณ์'},
-    {id:'syncCenter',icon:'🔄',name:'Sync Center',desc:'ซิงก์ข้อมูลทันที'}
   ];
   const defaults=defs.map(x=>x.id);
   function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.order))return {order:x.order.filter(id=>defs.some(d=>d.id===id)),hidden:Array.isArray(x.hidden)?x.hidden:[]}}catch(e){}return {order:defaults.slice(),hidden:[]}}
@@ -1089,24 +1003,6 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   }));
 })();
 
-// v56 Core Health Connect diagnostics
-(function(){
- const q=id=>document.getElementById(id);
- function refresh(){
-   const d=window.foodwellHealthData||JSON.parse(localStorage.getItem('foodwell_health_latest')||'null');
-   const ok=!!window.foodwellHealthConnected || !!d;
-   if(q('hcCoreChip')){q('hcCoreChip').textContent=ok?'เชื่อมต่อแล้ว':'ยังไม่เชื่อมต่อ';q('hcCoreChip').classList.toggle('ok',ok)}
-   if(q('hcCoreLast')) q('hcCoreLast').textContent=d?.syncedAt?new Date(d.syncedAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'—';
-   if(q('hcCoreRecords')) q('hcCoreRecords').textContent=d?['steps','heart','sleep','move'].filter(k=>d[k]!=null).length+' ชนิด':'—';
-   if(q('hcCoreMode')) q('hcCoreMode').textContent=window.AndroidHealthConnect?'Android Bridge':'Web';
-   if(q('hcCoreNote')) q('hcCoreNote').textContent=window.AndroidHealthConnect?'พร้อมใช้ Android Bridge · ข้อมูลจะอ่านตามสิทธิ์ที่อนุญาต':'เปิดผ่าน APK เพื่อเชื่อม Health Connect จริง';
- }
- q('hcOpenSettings')?.addEventListener('click',()=>{if(window.AndroidHealthConnect?.openSettings){window.AndroidHealthConnect.openSettings();}else toast('เปิดผ่าน APK เพื่อจัดการ Health Connect')});
- q('hcTestBridge')?.addEventListener('click',()=>{if(window.AndroidHealthConnect?.sync){window.AndroidHealthConnect.sync();toast('กำลังทดสอบการอ่านข้อมูล…')}else toast('ยังไม่มี Android Bridge')});
- const old=window.onHealthConnectData; window.onHealthConnectData=function(x){try{window.foodwellHealthData=typeof x==='string'?JSON.parse(x):x}catch(e){} if(old)old(x);refresh()};
- const oldc=window.onHealthConnectConnected; window.onHealthConnectConnected=function(ok){window.foodwellHealthConnected=!!ok;if(oldc)oldc(ok);refresh()};
- document.addEventListener('DOMContentLoaded',refresh); setTimeout(refresh,300);
-})();
 </script>
 <script>
 (function(){
@@ -1122,8 +1018,6 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  document.addEventListener('DOMContentLoaded',refreshCore);
  document.addEventListener('click',e=>{if(e.target.closest('#coreSync')){window.postMessage({type:'FOODWELL_SYNC_REQUEST'},'*'); refreshCore();}});
 })();
-
-$("syncMoveWatch")&&( $("syncMoveWatch").onclick=()=>{ try{ if(window.AndroidHealth&&AndroidHealth.syncHealthData){ AndroidHealth.syncHealthData(); toast("กำลังซิงก์ข้อมูลจาก Health Connect"); } else { toast("เปิด FoodWell ใน Android เพื่อซิงก์ Smart Watch"); } }catch(e){toast("ยังเชื่อมต่อ Smart Watch ไม่ได้")} });
 </script><script>
 // FoodWell v64 — Smart Food Suggestions
 (function(){
@@ -1605,52 +1499,6 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   render();
   if(user){C().start()}
   try{if(sessionStorage.getItem('fwsync_reloaded')){sessionStorage.removeItem('fwsync_reloaded');setTimeout(()=>say('อัปเดตข้อมูลจากอีกเครื่องแล้ว ☁️'),600)}}catch(e){}
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
-})();
-</script>
-
-<!-- v98 Huawei Health (watch) via the FoodWell Worker's Huawei Health Kit routes; native bridge: window.FoodWellHuawei -->
-<style>
-.fw98-card{background:linear-gradient(135deg,rgba(255,80,80,.12),rgba(255,160,90,.08));border:1px solid rgba(255,120,100,.25);border-radius:20px;padding:16px;margin-bottom:10px}
-.fw98-card h2{margin:0 0 4px;font-size:18px}.fw98-small{font-size:12px;color:#a9abb3;line-height:1.55;margin-top:6px}
-.fw98-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.fw98-row button{flex:1}
-.fw98-warn{margin-top:8px;padding:9px 11px;border-radius:12px;background:#3a2a20;color:#f4c79b;font-size:12px;line-height:1.5}
-</style>
-<script>
-(function(){
- const H=()=>window.FoodWellHuawei;
- const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- const say=m=>{if(typeof toast==='function')toast(m)};
- function endpoint(){try{return (JSON.parse(localStorage.getItem('foodwell_mimo_style')||'{}').settings||{}).aiEndpoint||''}catch(e){return ''}}
- let connected=false,debug=null;
- function render(){
-  const box=document.getElementById('fw98');if(!box)return;
-  let html='<h2>⌚ Huawei Health</h2>';
-  if(!H()){box.innerHTML=html+'<div class="fw98-small">ดึงข้อมูลจากนาฬิกา Huawei (ก้าว แคลอรี่ ชีพจร) ได้เมื่อเปิดผ่านแอป FoodWell บน Android</div>';return}
-  const ep=endpoint();
-  if(connected){
-   html+='<div class="fw98-small">🟢 เชื่อมต่อบัญชี Huawei แล้ว · ใช้ค่า ก้าว / kcal กิจกรรม / ชีพจร จาก Huawei แทนตัวนับในมือถือ</div>'+
-    '<div class="fw98-row"><button class="primary" id="fw98-sync">↻ ซิงก์ Huawei</button><button class="secondary-btn" id="fw98-off">ยกเลิกการเชื่อมต่อ</button></div>';
-  }else{
-   html+='<div class="fw98-small">เชื่อมบัญชี Huawei ID เพื่อดึง ก้าว แคลอรี่ และชีพจร จากนาฬิกาโดยตรง (ผ่าน Huawei Health Kit)</div>'+
-    (ep?'':'<div class="fw98-warn">ต้องตั้ง <b>AI Endpoint</b> (URL ของ FoodWell Worker) ในหน้า เพิ่มเติม ก่อน และ Worker ต้องมี HUAWEI_CLIENT_ID / HUAWEI_CLIENT_SECRET</div>')+
-    '<div class="fw98-row"><button class="primary" id="fw98-on" '+(ep?'':'disabled')+'>เชื่อมต่อ Huawei</button></div>';
-  }
-  if(debug)html+='<div class="fw98-warn">ค่าบางอย่างยังอ่านจาก Huawei ไม่ได้: '+esc(Object.keys(debug).join(', '))+' · ส่งข้อความนี้ให้ผู้พัฒนา: <span style="opacity:.8">'+esc(JSON.stringify(debug).slice(0,300))+'</span></div>';
-  box.innerHTML=html;
-  box.querySelector('#fw98-on')?.addEventListener('click',()=>{say('กำลังเปิดหน้าล็อกอิน Huawei…');H().connect(endpoint())});
-  box.querySelector('#fw98-sync')?.addEventListener('click',()=>{say('กำลังซิงก์ Huawei…');H().sync()});
-  box.querySelector('#fw98-off')?.addEventListener('click',()=>{if(confirm('ยกเลิกการเชื่อมต่อ Huawei?')){H().disconnect()}});
- }
- window.onHuaweiStatus=raw=>{const x=JSON.parse(raw);const was=connected;connected=!!x.connected;debug=x.debug||null;render();
-  if(connected&&!was)say('เชื่อมต่อ Huawei แล้ว ✓');if(!connected&&was)say('ยกเลิกการเชื่อมต่อ Huawei แล้ว')};
- function init(){
-  if(document.getElementById('fw98'))return;
-  const card=document.createElement('div');card.id='fw98';card.className='fw98-card';
-  const hero=document.querySelector('#watch .watch-hero');if(hero)hero.after(card);else (document.getElementById('watch')||document.body).appendChild(card);
-  if(H()){try{connected=!!JSON.parse(H().status()).connected}catch(e){}}
-  render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
 })();

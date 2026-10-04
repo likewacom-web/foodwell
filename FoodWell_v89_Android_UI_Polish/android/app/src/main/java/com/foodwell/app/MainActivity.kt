@@ -25,23 +25,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
 import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var web: WebView
-    private lateinit var health: HealthConnectBridge
-    private lateinit var permissionLauncher: ActivityResultLauncher<Set<String>>
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cloud: CloudSync
-    private lateinit var huawei: HuaweiHealth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,17 +44,11 @@ class MainActivity : ComponentActivity() {
         @Suppress("DEPRECATION")
         window.navigationBarColor = dark
 
-        health = HealthConnectBridge(this)
-        permissionLauncher = registerForActivityResult(
-            PermissionController.createRequestPermissionResultContract()
-        ) { granted -> onPermissionResult(granted) }
         fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
             filePathCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(r.resultCode, r.data))
             filePathCallback = null
         }
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
-        huawei = HuaweiHealth(this)
-        huawei.handleRedirect(intent?.data)
 
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -72,12 +59,7 @@ class MainActivity : ComponentActivity() {
             settings.textZoom = 100
             overScrollMode = WebView.OVER_SCROLL_NEVER
             setBackgroundColor(dark)
-            webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    syncHealth(userInitiated = false)
-                    if (huawei.connected) syncHuawei(userInitiated = false)
-                }
-            }
+            webViewClient = WebViewClient()
             // Without a WebChromeClient file chooser, <input type=file> (food photos, backup import) does nothing.
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(
@@ -94,12 +76,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            // The page calls window.AndroidHealthConnect.connect()/sync()/openSettings().
-            addJavascriptInterface(AndroidHealthConnectApi(), "AndroidHealthConnect")
-            addJavascriptInterface(NativeHealthApi(), "FoodWellHealth")
             addJavascriptInterface(FilesApi(), "FoodWellFiles")
             addJavascriptInterface(CloudApi(), "FoodWellCloud")
-            addJavascriptInterface(HuaweiApi(), "FoodWellHuawei")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -136,76 +114,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun connectHealth() {
-        when (health.status()) {
-            HealthConnectClient.SDK_AVAILABLE -> lifecycleScope.launch {
-                val granted = runCatching { health.grantedPermissions() }.getOrDefault(emptySet())
-                if (granted.containsAll(health.permissions)) {
-                    callJs("onHealthConnectConnected", "true")
-                    syncHealth(userInitiated = true)
-                } else {
-                    permissionLauncher.launch(health.permissions)
-                }
-            }
-            HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED -> {
-                callJs("onHealthConnectError", JSONObject.quote("ต้องติดตั้งหรืออัปเดต Health Connect ก่อน"))
-                openHealthConnectInStore()
-            }
-            else -> callJs("onHealthConnectError", JSONObject.quote("อุปกรณ์นี้ยังไม่รองรับ Health Connect"))
-        }
-    }
-
-    private fun onPermissionResult(granted: Set<String>) {
-        if (granted.isEmpty()) {
-            callJs("onHealthConnectConnected", "false")
-            return
-        }
-        callJs("onHealthConnectConnected", "true")
-        syncHealth(userInitiated = true)
-    }
-
-    private fun syncHealth(userInitiated: Boolean) {
-        if (!health.isAvailable()) {
-            if (userInitiated) callJs("onHealthConnectError", JSONObject.quote("Health Connect ยังไม่พร้อมใช้งาน"))
-            return
-        }
-        lifecycleScope.launch {
-            try {
-                val granted = health.grantedPermissions()
-                if (granted.isEmpty()) {
-                    if (userInitiated) callJs("onHealthConnectError", JSONObject.quote("ยังไม่ได้อนุญาตสิทธิ์ · กด ⌚ เชื่อมต่อ ก่อน"))
-                    return@launch
-                }
-                val data = health.readToday(granted)
-                if (huawei.connected) {
-                    HuaweiHealth.PROVIDED.forEach { data.remove(it); data.optJSONObject("sources")?.remove(it) }
-                }
-                Log.i(TAG, "synced $data")
-                callJs("onHealthConnectData", JSONObject.quote(data.toString()))
-            } catch (e: Exception) {
-                Log.w(TAG, "sync failed", e)
-                if (userInitiated) callJs("onHealthConnectError", JSONObject.quote("ซิงก์ไม่สำเร็จ: ${e.message}"))
-            }
-        }
-    }
-
-    private fun openHealthSettings() {
-        try {
-            startActivity(Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS))
-        } catch (e: ActivityNotFoundException) {
-            openHealthConnectInStore()
-        }
-    }
-
-    private fun openHealthConnectInStore() {
-        val uri = Uri.parse("market://details?id=${HealthConnectBridge.PROVIDER}&url=healthconnect%3A%2F%2Fonboarding")
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, uri).setPackage("com.android.vending"))
-        } catch (e: ActivityNotFoundException) {
-            toast("ไม่พบ Play Store สำหรับติดตั้ง Health Connect")
-        }
-    }
-
     /** arg must already be a JS literal (e.g. JSONObject.quote(...), "true"). */
     private fun callJs(fn: String, arg: String) = runOnUiThread {
         web.evaluateJavascript("window.$fn && window.$fn($arg)", null)
@@ -214,64 +122,6 @@ class MainActivity : ComponentActivity() {
     private fun toast(msg: String) = runOnUiThread { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() }
 
     // JavascriptInterface methods run on a background thread; hop to the UI thread for anything Android-side.
-    inner class AndroidHealthConnectApi {
-        @JavascriptInterface fun connect() = runOnUiThread { connectHealth() }
-        @JavascriptInterface fun sync() = runOnUiThread { syncHealth(userInitiated = true) }
-        @JavascriptInterface fun openSettings() = runOnUiThread { openHealthSettings() }
-        @JavascriptInterface fun isAvailable(): Boolean = health.isAvailable()
-    }
-
-    // ---- Huawei Health (watch) via the Worker's Huawei Health Kit routes ------------------------
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        if (huawei.handleRedirect(intent.data)) {
-            callJs("onHuaweiStatus", JSONObject.quote(JSONObject().put("connected", true).toString()))
-            syncHuawei(userInitiated = true)
-        }
-    }
-
-    private fun syncHuawei(userInitiated: Boolean) {
-        lifecycleScope.launch {
-            try {
-                val data = withContext(Dispatchers.IO) { huawei.fetchToday() }
-                Log.i(TAG, "huawei synced $data")
-                callJs("onHealthConnectData", JSONObject.quote(data.toString()))
-                if (data.has("debug") && userInitiated) {
-                    callJs("onHuaweiStatus", JSONObject.quote(JSONObject().put("connected", true).put("debug", data.get("debug")).toString()))
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "huawei sync failed", e)
-                if (userInitiated) callJs("onHealthConnectError", JSONObject.quote("Huawei: ${e.message}"))
-            }
-        }
-    }
-
-    inner class HuaweiApi {
-        @JavascriptInterface fun status(): String = JSONObject().put("connected", huawei.connected).toString()
-
-        /** endpoint = the page's AI Endpoint (https://<worker>.workers.dev/?k=TOKEN). */
-        @JavascriptInterface fun connect(endpoint: String) = runOnUiThread {
-            val url = huawei.loginUrl(endpoint)
-            if (url == null) {
-                callJs("onHealthConnectError", JSONObject.quote("ตั้ง AI Endpoint (URL ของ Worker) ในหน้าเพิ่มเติมก่อน"))
-                return@runOnUiThread
-            }
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            } catch (e: ActivityNotFoundException) {
-                toast("ไม่พบเบราว์เซอร์")
-            }
-        }
-
-        @JavascriptInterface fun sync() = runOnUiThread { syncHuawei(userInitiated = true) }
-
-        @JavascriptInterface fun disconnect() = runOnUiThread {
-            huawei.disconnect()
-            callJs("onHuaweiStatus", JSONObject.quote(JSONObject().put("connected", false).toString()))
-            syncHealth(userInitiated = false)
-        }
-    }
 
     // ---- Gmail sign-in + multi-device sync (Firebase) -----------------------------------------
 
@@ -344,14 +194,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Older bridge name kept for compatibility. */
-    inner class NativeHealthApi {
-        @JavascriptInterface fun availability(): String = if (health.isAvailable()) "available" else "unavailable"
-        @JavascriptInterface fun requestPermissions() = runOnUiThread { connectHealth() }
-        @JavascriptInterface fun bridgeVersion(): String = "v94"
-    }
-
     companion object {
-        private const val TAG = "FoodWellHC"
+        private const val TAG = "FoodWell"
     }
 }
