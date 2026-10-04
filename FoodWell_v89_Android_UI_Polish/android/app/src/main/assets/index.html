@@ -966,7 +966,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   function renderGrid(){
     const grid=document.querySelector('#quickOverlay .quick-grid');if(!grid)return;
     grid.innerHTML=cfg.order.filter(id=>!cfg.hidden.includes(id)).map(id=>{const d=def(id);return `<button class="quick-item" data-quick-go="${d.id}"><div class="quick-icon">${d.icon}</div><div><b>${d.name}</b><span>${d.desc}</span></div></button>`}).join('');
-    grid.querySelectorAll('[data-quick-go]').forEach(btn=>btn.addEventListener('click',()=>{const page=btn.dataset.quickGo;setOpen(false);if(typeof go==='function')go(page)}));
+    // setOpen lives in the v50 popup block, so close the sheet here directly.
+    grid.querySelectorAll('[data-quick-go]').forEach(btn=>btn.addEventListener('click',()=>{const page=btn.dataset.quickGo;const ov=document.getElementById('quickOverlay');ov?.classList.remove('show');ov?.setAttribute('aria-hidden','true');document.getElementById('quickFab')?.classList.remove('open');if(typeof go==='function')go(page);window.scrollTo({top:0})}));
   }
   function renderManager(){
     const box=document.getElementById('quickManageList');if(!box)return;
@@ -1340,6 +1341,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .fw92-fab{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:5900;width:60px;height:60px;border:0;border-radius:50%;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#24141b;font-size:28px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
 .fw92-fab:active{transform:scale(.92)}
 .fw92-fab.open{transform:rotate(45deg)}
+body:has(.quick-overlay.show) .fw92-fab,body:has(.quick-custom-modal.show) .fw92-fab{display:none}
 .fw92-backdrop{position:fixed;inset:0;z-index:5898;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .fw92-backdrop.show{opacity:1;pointer-events:auto}
 .fw92-menu{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(156px + env(safe-area-inset-bottom));z-index:5899;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
