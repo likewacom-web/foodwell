@@ -16,7 +16,9 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.view.View
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
@@ -35,6 +37,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cloud: CloudSync
+    private lateinit var pro: Monetization
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +81,7 @@ class MainActivity : ComponentActivity() {
             }
             addJavascriptInterface(FilesApi(), "FoodWellFiles")
             addJavascriptInterface(CloudApi(), "FoodWellCloud")
+            addJavascriptInterface(ProApi(), "FoodWellPro")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -85,9 +89,13 @@ class MainActivity : ComponentActivity() {
         // status bar and navigation bar. Opt in on every version and pad the WebView by the
         // system bar / cutout / keyboard insets instead.
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val root = FrameLayout(this).apply {
+        // Banner ad slot under the page; stays GONE unless ads are enabled and not removed.
+        val adSlot = FrameLayout(this).apply { visibility = View.GONE; setBackgroundColor(dark) }
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
             setBackgroundColor(dark)
-            addView(web, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
+            addView(web, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+            addView(adSlot, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         }
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
@@ -104,6 +112,9 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        pro = Monetization(this, adSlot) { fn, arg -> callJs(fn, arg) }
+        pro.start()
+
         onBackPressedDispatcher.addCallback(this) {
             if (web.canGoBack()) {
                 web.goBack()
@@ -112,6 +123,21 @@ class MainActivity : ComponentActivity() {
                 onBackPressedDispatcher.onBackPressed()
             }
         }
+    }
+
+    override fun onPause() {
+        pro.onPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        pro.onResume()
+    }
+
+    override fun onDestroy() {
+        pro.onDestroy()
+        super.onDestroy()
     }
 
     /** arg must already be a JS literal (e.g. JSONObject.quote(...), "true"). */
@@ -167,6 +193,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // ---- One-time purchase that removes ads (Google Play Billing) ------------------------------
+
+    inner class ProApi {
+        /** {adsEnabled, adFree, billingReady, price, pending, message} */
+        @JavascriptInterface fun status(): String = pro.statusJson().toString()
+        @JavascriptInterface fun buy() = pro.buy()
+        @JavascriptInterface fun restore() = pro.restore()
     }
 
     /** WebView can't download blob: links, so backups are written to Downloads through this bridge. */

@@ -7,7 +7,16 @@ if (file('google-services.json').exists()) {
 }
 
 android { namespace 'com.foodwell.app'; compileSdk 35
-    defaultConfig { applicationId 'com.foodwell.app'; minSdk 26; targetSdk 35; versionCode 89; versionName '89.0' }
+    defaultConfig {
+        applicationId 'com.foodwell.app'; minSdk 26; targetSdk 35; versionCode 89; versionName '89.0'
+        // Ads are off unless built with -Pads=true. The IDs default to Google's test IDs;
+        // pass -PadmobAppId=... -PadmobBannerId=... for the real ones (see MONETIZATION.md).
+        def ads = (project.findProperty('ads') ?: 'false').toString().toBoolean()
+        manifestPlaceholders = [admobAppId: project.findProperty('admobAppId') ?: 'ca-app-pub-3940256099942544~3347511713']
+        buildConfigField 'boolean', 'ADS_ENABLED', ads.toString()
+        buildConfigField 'String', 'ADMOB_BANNER_ID', "\"${project.findProperty('admobBannerId') ?: 'ca-app-pub-3940256099942544/9214589741'}\""
+    }
+    buildFeatures { buildConfig true }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = '17' }
     // A fixed debug key checked into the repo: every CI build gets the same signature, so a new
@@ -30,4 +39,7 @@ dependencies {
     implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'
     implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0'
+    implementation 'com.android.billingclient:billing-ktx:7.1.1'
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation 'com.google.android.ump:user-messaging-platform:3.1.0'
 }

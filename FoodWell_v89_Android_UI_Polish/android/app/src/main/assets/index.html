@@ -1531,3 +1531,47 @@ body:has(.quick-overlay.show) .fw92-fab,body:has(.quick-custom-modal.show) .fw92
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
 })();
 </script>
+
+<!-- v98 One-time purchase that removes ads (Android app only; native bridge: window.FoodWellPro) -->
+<style>
+.fw98-card{margin:12px 0;padding:16px;border-radius:20px;background:linear-gradient(135deg,#2b2230,#1d1b22);border:1px solid #4a3442}
+.fw98-card.done{background:linear-gradient(135deg,#1f2b25,#1a1d1f);border-color:#2f4a3c}
+.fw98-buy{width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px;font:800 15px inherit;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#2b1820}
+.fw98-buy:disabled{opacity:.45}
+.fw98-link{border:0;background:none;color:#e9a3bb;font:700 13px inherit;padding:10px 0 0;text-decoration:underline}
+.fw98-msg{margin-top:8px;font-size:12px;color:#f4c76b}
+.fw98-list{margin:8px 0 0;padding-left:18px;font-size:13px;color:#cfd2da;line-height:1.7}
+</style>
+<script>
+(function(){
+ const P=()=>window.FoodWellPro;
+ let st={};
+ const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function render(){
+  const box=document.getElementById('fw98');if(!box)return;
+  box.className='fw98-card'+(st.adFree?' done':'');
+  if(st.adFree){
+   box.innerHTML='<div class="fw96-head"><span style="font-size:24px">⭐</span><h3>FoodWell ไม่มีโฆษณา</h3></div><div class="fw96-small">ขอบคุณที่สนับสนุนครับ 💖 สิทธิ์นี้ผูกกับบัญชี Google Play ของคุณ ลงแอปใหม่หรือเปลี่ยนเครื่องก็ยังไม่มีโฆษณา</div>';
+   return;
+  }
+  const price=st.price?' '+esc(st.price):'';
+  box.innerHTML='<div class="fw96-head"><span style="font-size:24px">🚫</span><h3>ปิดโฆษณาถาวร</h3></div>'
+   +'<ul class="fw98-list"><li>ซื้อครั้งเดียว ใช้ได้ตลอด ไม่ใช่รายเดือน</li><li>ใช้ได้ทุกเครื่องที่ใช้บัญชี Google Play เดียวกัน</li><li>ช่วยสนับสนุนการพัฒนา FoodWell</li></ul>'
+   +(st.adsEnabled?'':'<div class="fw96-small">เวอร์ชันนี้ยังไม่แสดงโฆษณา</div>')
+   +'<button class="fw98-buy" id="fw98Buy"'+(st.billingReady?'':' disabled')+'>'+(st.pending?'⏳ รอการชำระเงิน':'ซื้อเพื่อปิดโฆษณา'+price)+'</button>'
+   +(st.message?'<div class="fw98-msg">'+esc(st.message)+'</div>':'')
+   +'<button class="fw98-link" id="fw98Restore">กู้คืนการซื้อ</button>';
+  box.querySelector('#fw98Buy').onclick=()=>P()&&P().buy();
+  box.querySelector('#fw98Restore').onclick=()=>{if(!P())return;st.message='กำลังตรวจสอบกับ Google Play…';render();P().restore()};
+ }
+ window.onProStatus=json=>{try{st=JSON.parse(json)}catch(e){}render()};
+ function init(){
+  if(!P()||document.getElementById('fw98'))return;
+  const card=document.createElement('section');card.id='fw98';
+  const after=document.getElementById('fw96');if(after)after.after(card);else (document.getElementById('more')||document.body).appendChild(card);
+  try{st=JSON.parse(P().status())}catch(e){}
+  render();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,10));else setTimeout(init,10);
+})();
+</script>
