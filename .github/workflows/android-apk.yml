@@ -64,3 +64,18 @@ jobs:
             gh release create latest-debug FoodWell.apk --prerelease --target "$GITHUB_SHA" \
               --title "FoodWell (debug ล่าสุด)" --notes "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}"
           fi
+
+      # Same APK at a URL with no expiring redirect (phone download managers often fail on the
+      # signed release-asset link): https://raw.githubusercontent.com/<owner>/<repo>/apk/FoodWell.apk
+      # The 'apk' branch is a single orphan commit, force-pushed each build, so history stays small.
+      - name: Publish APK to the 'apk' branch
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir apk-branch && cp FoodWell.apk apk-branch/ && cd apk-branch
+          git init -q -b apk
+          git add FoodWell.apk
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -qm "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" apk
