@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 20 1200 470" width="1200" height="470">
+  <!-- FoodWell fitness character: turnaround reference (front, side, three-quarter). Chroma-green background for keying. -->
+  <defs>
+    <style>
+      .o{stroke:#2A2230;stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+      .skin{fill:#F2C29B}.skinS{fill:#D9A47E}
+      .hair{fill:#2B2B3A}
+      .shirt{fill:#E887AA}.shirtS{fill:#C96A8E}
+      .shorts{fill:#2C3A6B}.shortsS{fill:#1F2A50}
+      .shoe{fill:#FFFFFF}.sole{fill:#DADDE6}
+      .eye{fill:#2A2230}
+    </style>
+  </defs>
+  <rect y="0" width="1200" height="600" fill="#00FF00"/>
+
+  <!-- ============ FRONT ============ -->
+  <g id="front" transform="translate(200 0)">
+    <!-- legs -->
+    <rect class="skin o" x="-30" y="330" width="26" height="110" rx="12"/>
+    <rect class="skin o" x="4" y="330" width="26" height="110" rx="12"/>
+    <!-- shoes -->
+    <path class="shoe o" d="M-36 438 h34 a6 6 0 0 1 6 6 v8 h-46 v-6 a8 8 0 0 1 6 -8z"/>
+    <path class="shoe o" d="M2 438 h34 a8 8 0 0 1 6 8 v6 h-46 v-8 a6 6 0 0 1 6 -6z"/>
+    <rect class="sole" x="-38" y="448" width="40" height="4"/><rect class="sole" x="-2" y="448" width="40" height="4"/>
+    <!-- shorts -->
+    <path class="shorts o" d="M-42 262 h84 l6 78 h-40 l-8 -40 l-8 40 h-40z"/>
+    <path class="shortsS" d="M20 300 l8 40 h14 l-4 -60z" opacity=".55"/>
+    <!-- arms (behind sleeves) -->
+    <rect class="skin o" x="-66" y="182" width="22" height="118" rx="11"/>
+    <rect class="skin o" x="44" y="182" width="22" height="118" rx="11"/>
+    <circle class="skin o" cx="-55" cy="304" r="12"/><circle class="skin o" cx="55" cy="304" r="12"/>
+    <!-- shirt -->
+    <path class="shirt o" d="M-46 150 q46 -14 92 0 l24 22 l-6 40 l-20 -6 l2 62 h-92 l2 -62 l-20 6 l-6 -40z"/>
+    <path class="shirtS" d="M22 160 l22 2 l20 12 l-5 34 l-17 -6 l2 66 h-26z" opacity=".5"/>
+    <!-- neck + head -->
+    <rect class="skin o" x="-10" y="132" width="20" height="22" rx="6"/>
+    <circle class="skin o" cx="0" cy="98" r="40"/>
+    <path class="skinS" d="M18 66 a40 40 0 0 1 0 64 a46 46 0 0 0 0 -64z" opacity=".5"/>
+    <path class="hair o" d="M-41 94 q-2 -48 40 -50 q44 0 42 50 q-8 -22 -26 -26 q-20 10 -46 6 q-8 8 -10 20z"/>
+    <circle class="skin o" cx="-40" cy="102" r="7"/><circle class="skin o" cx="40" cy="102" r="7"/>
+    <circle class="eye" cx="-14" cy="100" r="4"/><circle class="eye" cx="14" cy="100" r="4"/>
+    <path d="M-10 116 q10 9 20 0" fill="none" class="o" stroke-width="3"/>
+    <circle cx="-24" cy="112" r="5" fill="#F4A3B8" opacity=".7"/><circle cx="24" cy="112" r="5" fill="#F4A3B8" opacity=".7"/>
+  </g>
+
+  <!-- ============ SIDE (facing right) ============ -->
+  <g id="side" transform="translate(600 0)">
+    <!-- back leg -->
+    <rect class="skinS o" x="-8" y="330" width="24" height="110" rx="12"/>
+    <!-- front leg -->
+    <rect class="skin o" x="-14" y="330" width="26" height="110" rx="12"/>
+    <!-- shoe -->
+    <path class="shoe o" d="M-20 436 h30 q22 2 26 12 v4 h-56z"/>
+    <rect class="sole" x="-20" y="448" width="56" height="4"/>
+    <!-- shorts -->
+    <path class="shorts o" d="M-30 262 h56 l6 78 h-60z"/>
+    <path class="shortsS" d="M-30 262 h14 l-2 78 h-12z" opacity=".55"/>
+    <!-- torso -->
+    <path class="shirt o" d="M-30 152 q30 -10 56 2 q6 50 0 112 h-56 q-6 -60 0 -114z"/>
+    <path class="shirtS" d="M-30 152 q-6 60 0 114 h12 q-4 -56 2 -116z" opacity=".5"/>
+    <!-- arm (near side) -->
+    <path class="shirt o" d="M-14 158 q22 -4 26 14 l-2 34 h-26z"/>
+    <rect class="skin o" x="-12" y="196" width="22" height="104" rx="11"/>
+    <circle class="skin o" cx="-1" cy="304" r="12"/>
+    <!-- neck + head -->
+    <rect class="skin o" x="-8" y="132" width="20" height="24" rx="6"/>
+    <circle class="skin o" cx="2" cy="98" r="39"/><path class="skin o" d="M38 92 q10 6 4 14 q-2 2 -6 2"/>
+    <path class="hair o" d="M-38 96 q-2 -50 42 -52 q34 0 38 30 q-18 -10 -36 -6 q-6 14 -20 18 q-10 2 -24 10z"/>
+    <circle class="skin o" cx="-8" cy="102" r="8"/>
+    <circle class="eye" cx="24" cy="96" r="4"/>
+    <path d="M24 120 q7 4 12 -1" fill="none" class="o" stroke-width="3"/>
+    <circle cx="18" cy="112" r="5" fill="#F4A3B8" opacity=".7"/>
+  </g>
+
+  <!-- ============ THREE-QUARTER (turned right) ============ -->
+  <g id="three-quarter" transform="translate(1000 0)">
+    <!-- legs -->
+    <rect class="skinS o" x="2" y="330" width="24" height="110" rx="12"/>
+    <rect class="skin o" x="-26" y="330" width="26" height="110" rx="12"/>
+    <path class="shoe o" d="M-2 438 h30 q12 2 14 10 v4 h-44z"/>
+    <path class="shoe o" d="M-32 438 h32 q12 2 14 10 v4 h-46z"/>
+    <rect class="sole" x="-32" y="448" width="46" height="4"/><rect class="sole" x="-2" y="448" width="44" height="4"/>
+    <!-- shorts -->
+    <path class="shorts o" d="M-36 262 h70 l6 78 h-34 l-6 -38 l-8 38 h-34z"/>
+    <path class="shortsS" d="M-36 262 h12 l-6 78 h-12z" opacity=".55"/>
+    <!-- far arm -->
+    <rect class="skinS o" x="34" y="186" width="20" height="112" rx="10"/>
+    <circle class="skinS o" cx="44" cy="300" r="11"/>
+    <!-- shirt -->
+    <path class="shirt o" d="M-40 152 q40 -12 76 0 l16 22 l-4 36 l-14 -6 l0 62 h-78 l2 -62 l-20 6 l-6 -38z"/>
+    <path class="shirtS" d="M-40 152 l-24 22 l6 38 l20 -6 l-2 62 h14 l-2 -66z" opacity=".5"/>
+    <!-- near arm -->
+    <rect class="skin o" x="-62" y="184" width="22" height="116" rx="11"/>
+    <circle class="skin o" cx="-51" cy="304" r="12"/>
+    <!-- neck + head -->
+    <rect class="skin o" x="-6" y="132" width="20" height="22" rx="6"/>
+    <path class="skin o" d="M-36 98 a40 40 0 0 1 78 -6 q2 6 2 10 q0 36 -40 38 q-40 -2 -40 -42z"/>
+    <path class="skinS" d="M-36 98 q0 34 30 40 q-22 -14 -22 -42z" opacity=".5"/>
+    <path class="hair o" d="M-40 96 q-2 -50 42 -52 q40 0 42 44 q-12 -20 -32 -22 q-18 12 -40 10 q-6 10 -12 20z"/>
+    <circle class="skin o" cx="-34" cy="104" r="7"/>
+    <circle class="eye" cx="4" cy="100" r="4"/><circle class="eye" cx="28" cy="100" r="3.5"/>
+    <path d="M6 117 q9 8 18 0" fill="none" class="o" stroke-width="3"/>
+    <circle cx="-6" cy="112" r="5" fill="#F4A3B8" opacity=".7"/><circle cx="34" cy="112" r="4" fill="#F4A3B8" opacity=".7"/>
+  </g>
+</svg>
