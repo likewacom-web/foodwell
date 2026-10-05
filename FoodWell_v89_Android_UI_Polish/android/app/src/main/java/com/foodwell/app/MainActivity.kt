@@ -133,17 +133,20 @@ class MainActivity : ComponentActivity() {
         pro = Monetization(this, adSlot) { fn, arg -> callJs(fn, arg) }
         pro.start()
 
+        // Back: the page closes an open popup or returns to the home page first; on the home page
+        // a second press within 2 seconds leaves the app.
         onBackPressedDispatcher.addCallback(this) {
-            if (web.canGoBack()) {
-                web.goBack()
-            } else {
-                isEnabled = false
-                onBackPressedDispatcher.onBackPressed()
+            web.evaluateJavascript("(window.fwBack && window.fwBack()) || 'exit'") { r ->
+                if (r?.contains("handled") == true) return@evaluateJavascript
+                val now = System.currentTimeMillis()
+                if (now - lastBack < 2000) finish()
+                else { lastBack = now; toast("กดย้อนกลับอีกครั้งเพื่อออกจากแอป") }
             }
         }
     }
 
     private var rootLayout: LinearLayout? = null
+    private var lastBack = 0L
 
     /** Status/navigation bar colour and icon contrast to match the page theme. */
     private fun applyBars(color: Int, light: Boolean) {

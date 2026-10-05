@@ -2165,6 +2165,54 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  card();
 })();
 </script>
+<!-- v113 Android back button + "refresh" on the add-food form -->
+<style>
+.ff-head{display:flex;align-items:center;gap:8px}.ff-head h2{flex:1;margin:0}
+.ff-reset{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:7px 11px;font-weight:700;font-size:13px;font-family:inherit}
+.ff-reset:active{transform:rotate(-20deg)}
+</style>
+<script>
+(function(){
+ const vis=el=>{if(!el)return false;const cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden'&&el.getClientRects().length>0};
+ // Overlays the back button should close first (most specific first, then any visible dialog)
+ const OVERLAYS=[
+  ['#fwOnb.show',()=>{const b=document.getElementById('onbBack');if(b&&!b.hidden)b.click()}], // first-run setup: step back, never skip it by accident
+  ['#rwSheet.show',el=>el.classList.remove('show')],
+  ['#trophyCelebrate.open',el=>el.classList.remove('open')],
+  ['#foodModal.open',()=>window.closeFoodModal&&closeFoodModal()],
+  ['.fw92-fab.open',el=>el.click()],
+  ['.fw-sugg.show,.rc-drop.show',el=>el.classList.remove('show')]];
+ function closeOverlay(){
+  for(const [sel,fn] of OVERLAYS){const el=document.querySelector(sel);if(el&&vis(el)){fn(el);return true}}
+  // any other open dialog/modal: press its own close button
+  const cands=[...document.querySelectorAll('[role="dialog"],.modal,[id$="-modal"],[class*="modal"],[class*="sheet"],[class*="overlay"]')].filter(el=>{if(!vis(el))return false;const cs=getComputedStyle(el);return cs.position==='fixed'&&el.offsetWidth>200});
+  for(const el of cands){const btn=[...el.querySelectorAll('button')].find(b=>/^(×|✕|x|ปิด|close)$/i.test(b.textContent.trim())||/close|-x\b/i.test(b.id+' '+b.className));if(btn){btn.click();return true}}
+  return false}
+ // sub-pages go back to where they were opened from; everything else goes home
+ const PARENT={recipes:'food',foodLibrary:'food'};
+ window.fwBack=function(){
+  try{
+   if(closeOverlay())return 'handled';
+   const page=document.querySelector('.page.active')?.id||'home';
+   if(page!=='home'){go(PARENT[page]||'home');window.scrollTo({top:0});return 'handled'}
+   if(window.scrollY>200){window.scrollTo({top:0,behavior:'smooth'});return 'handled'}
+  }catch(e){console.error(e)}
+  return 'exit';
+ };
+ // ↻ on the add-food form: clear every field, the photo, the barcode result and the portion bar
+ const title=document.getElementById('foodFormTitle');
+ if(title&&!document.getElementById('ffReset')){const head=document.createElement('div');head.className='ff-head';title.before(head);head.appendChild(title);
+  const b=document.createElement('button');b.type='button';b.id='ffReset';b.className='ff-reset';b.textContent='↻ ล้างฟอร์ม';head.appendChild(b);
+  b.onclick=()=>{if(typeof resetFoodForm==='function')resetFoodForm();window.fwPendingPhoto=null;
+   const pv=document.getElementById('photoPreview');if(pv)pv.style.display='none';
+   const info=document.querySelector('.bc-info');if(info){info.innerHTML='';info.hidden=true}
+   document.querySelector('.fw-portion')?.classList.remove('show');document.querySelector('.fw-sugg')?.classList.remove('show');
+   const v40=document.getElementById('v40AiStatus')||document.querySelector('.v40-ai-status');if(v40)v40.textContent='';
+   if(typeof window.render==='function')window.render();
+   document.getElementById('foodName')?.dispatchEvent(new Event('input'));
+   title.scrollIntoView({behavior:'smooth',block:'start'});toast('ล้างฟอร์มแล้ว ✨')}}
+})();
+</script>
 </body>
 </html>
 
