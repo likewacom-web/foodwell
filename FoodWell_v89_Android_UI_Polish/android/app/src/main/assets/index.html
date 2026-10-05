@@ -3043,6 +3043,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  if(onb&&!document.getElementById('onbLang')){const b=document.createElement('button');b.type='button';b.id='onbLang';b.className='onb-lang';b.setAttribute('translate','no');b.textContent=lang==='en'?'🌐 ไทย':'🌐 English';b.onclick=()=>fwSetLang(lang==='en'?'th':'en');onb.appendChild(b)}
 })();
 </script>
+<script src="workout_rig.js"></script>
 <!-- v117 Workout plan: weekly plan from goal/level/days/time/place, guided timer player, auto-log to movement, reminders -->
 <style>
 .wo-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
@@ -3084,7 +3085,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .wo-pbar{height:6px;border-radius:9px;background:#ffffff26;margin:10px 0 0;overflow:hidden}.wo-pbar i{display:block;height:100%;background:#7dd3a8}
 .wo-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
 .wo-main .ph{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:800}
-.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain}.wo-main h2{margin:0;font-size:26px}
+.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto}svg.wo-anim{height:min(64vw,280px)}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain;display:block}
+.wo-frames{position:relative;display:block}.wo-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .25s}.wo-frames img.on{opacity:1}.wo-frames.wo-anim{aspect-ratio:1}.wo-main h2{margin:0;font-size:26px}
 .wo-main .amt{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
 .wo-main .cue{font-size:14px;opacity:.85;max-width:420px;line-height:1.6}.wo-main .nx{font-size:13px;opacity:.7;margin-top:8px}
 .wo-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px}
@@ -3148,9 +3150,17 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   rest:['พัก','Rest','😮‍💨','s',30,'หายใจลึก ๆ จิบน้ำได้','Breathe deeply, sip some water'],
  };
  const nm=id=>L(X[id][0],X[id][1]),cue=id=>L(X[id][5],X[id][6]);
- // looping animations in assets/anim/<id>.webp (see EXERCISES.md); moves without one show their emoji
- const ANIM=new Set(['march']);
- const art=(id,cls)=>ANIM.has(id)?`<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`:X[id][2];
+ // Pictures for each move, best first: a looping clip (anim/<id>.webp), drawn key frames (anim/<id>_1.webp …
+ // shown in turn), or the built-in vector figure (workout_rig.js). See EXERCISES.md.
+ const ANIM={march:'v'};
+ const art=(id,cls)=>{const a=ANIM[id];
+  if(a==='v')return `<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`;
+  if(a>1)return `<span class="wo-frames ${cls}" data-fr="${id}" data-n="${a}">${[...Array(a)].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i?'':'on'}">`).join('')}</span>`;
+  return window.FWRig&&FWRig.has(id)?FWRig.svg(id,cls):X[id][2]};
+ // key-frame pictures: show frame n of each move in step with the move's tempo
+ setInterval(()=>{const now=Date.now();document.querySelectorAll('.wo-frames[data-fr]').forEach(el=>{const n=+el.dataset.n,cyc=(window.FWRig&&FWRig.has(el.dataset.fr)?FWRig.cycle(el.dataset.fr):1600),i=Math.floor((now%cyc)/cyc*n);
+  el.querySelectorAll('img').forEach((im,j)=>im.classList.toggle('on',j===i))})},120);
+ const anims=root=>{try{window.FWRig&&FWRig.scan(root)}catch(e){console.error(e)}};
  // ---- session types ----
  const TYPES={
   full:{e:'🏋️',th:'เวทเต็มตัว',en:'Full-body strength',met:5},
@@ -3279,7 +3289,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    html+=`<div class="wo-step"><span class="e">${art(st.id,'wo-thumb')}</span><div><b>${esc(nm(st.id))} · ${amtText(st)}</b><small>${esc(cue(st.id))}</small></div></div>`});
   b.innerHTML=`<div class="hd"><span style="font-size:36px">${S.e}</span><div style="flex:1"><h2>${esc(S.title)}</h2><div class="wo-sub">~${S.min} ${L('นาที','min')} · ~${kcalFor(S.met,S.min)} kcal</div></div><button type="button" class="wo-x" id="woSheetX" aria-label="${L('ปิด','Close')}">✕</button></div>${html}
    <button type="button" class="wo-btn" id="woGo" style="margin-top:14px">▶️ ${L('เริ่มเลย','Start now')}</button>`;
-  b.querySelector('#woSheetX').onclick=()=>sheet.classList.remove('show');b.querySelector('#woGo').onclick=()=>{sheet.classList.remove('show');play(S)};
+  anims(b);b.querySelector('#woSheetX').onclick=()=>sheet.classList.remove('show');b.querySelector('#woGo').onclick=()=>{sheet.classList.remove('show');play(S)};
   sheet.classList.add('show');b.scrollTop=0}
  // ---- guided player ----
  const pl=document.createElement('div');pl.className='wo-player';pl.id='woPlayer';pl.setAttribute('role','dialog');document.body.appendChild(pl);
@@ -3304,7 +3314,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    <div class="wo-ctl"><button type="button" id="woPrev">⏮</button>
     ${st.u==='r'?`<button type="button" class="main" id="woNext">✓ ${L('เสร็จ','Done')}</button>`:isRest?`<button type="button" class="main" id="woNext">⏭ ${L('ข้ามพัก','Skip rest')}</button>`:`<button type="button" class="main" id="woPause">${paused?'▶️ '+L('ต่อ','Resume'):'⏸ '+L('หยุด','Pause')}</button>`}
     <button type="button" id="woSkip" aria-label="${isRest?L('พักเพิ่ม 10 วินาที','10 more seconds'):L('ข้าม','Skip')}">${isRest?'+10s':'⏭'}</button></div>`;
-  pl.querySelector('#woClose').onclick=quit;pl.querySelector('#woPrev').onclick=prevStep;
+  anims(pl);pl.querySelector('#woClose').onclick=quit;pl.querySelector('#woPrev').onclick=prevStep;
   const n=pl.querySelector('#woNext');if(n)n.onclick=next;
   const p=pl.querySelector('#woPause');if(p)p.onclick=()=>{if(paused){endAt=Date.now()+paused;paused=0}else{paused=Math.max(0,endAt-Date.now())}render()};
   pl.querySelector('#woSkip').onclick=()=>{if(isRest){if(paused)paused+=10000;else endAt+=10000;render()}else next()}}
