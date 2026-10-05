@@ -1650,6 +1650,59 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  apply();
 })();
 </script>
+<!-- v105 AI photo analysis quota: 3 free a day, watch a rewarded ad for more (only when ads are on) -->
+<style>
+.rw-back{position:fixed;inset:0;z-index:6500;background:rgba(5,6,10,.6);display:none;align-items:flex-end;justify-content:center;padding:0 14px calc(18px + env(safe-area-inset-bottom))}
+.rw-back.show{display:flex}
+.rw-sheet{width:min(430px,100%);background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 22px 60px rgba(0,0,0,.4);animation:quickUp .2s ease}
+.rw-sheet h3{margin:6px 0 4px;font-size:20px}.rw-sheet p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.6}
+.rw-ic{font-size:40px}
+.rw-btn{width:100%;border:0;border-radius:16px;padding:14px;font-weight:800;font-size:15px;font-family:inherit;margin-top:8px}
+.rw-btn.main{background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.rw-btn.alt{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.rw-btn.ghost{background:none;color:var(--muted)}
+.rw-left{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;background:#f0a9c033;color:#d4568a;vertical-align:2px}
+@keyframes quickUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+</style>
+<div class="rw-back" id="rwSheet" role="dialog" aria-modal="true"><div class="rw-sheet">
+ <div class="rw-ic">✨</div><h3>ใช้สิทธิ์ฟรีวันนี้ครบแล้ว</h3>
+ <p id="rwText">วิเคราะห์รูปด้วย AI ได้ฟรีวันละ 3 ครั้ง · ดูโฆษณาสั้น ๆ เพื่อวิเคราะห์เพิ่มอีก 1 ครั้ง</p>
+ <button type="button" class="rw-btn main" id="rwWatch">▶️ ดูโฆษณาเพื่อวิเคราะห์ต่อ</button>
+ <button type="button" class="rw-btn alt" id="rwBuy">⭐ ปิดโฆษณาถาวร + วิเคราะห์ไม่จำกัด</button>
+ <button type="button" class="rw-btn ghost" id="rwCancel">ไว้ทีหลัง</button>
+</div></div>
+<script>
+(function(){
+ const FREE=3,KEY='fw_ai_quota'; // per device, not synced
+ const P=()=>window.FoodWellPro;
+ const btn=document.getElementById('v40AnalyzeBtn');if(!btn||typeof analyzeFoodWithAI!=='function')return;
+ const run=analyzeFoodWithAI,sheet=document.getElementById('rwSheet');
+ function pro(){try{return P()?JSON.parse(P().status()):null}catch(e){return null}}
+ // Limits apply only when this build shows ads and the user hasn't bought "remove ads".
+ function limited(){const st=pro();return !!(st&&st.adsEnabled&&!st.adFree)}
+ function q(){let x;try{x=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){x={}}if(x.day!==localDay())x={day:localDay(),used:0,bonus:0};return x}
+ const saveQ=x=>{try{localStorage.setItem(KEY,JSON.stringify(x))}catch(e){}};
+ const left=()=>{const x=q();return Math.max(0,FREE+x.bonus-x.used)};
+ function badge(){let b=document.getElementById('rwLeft');if(!limited()){b&&b.remove();return}
+  if(!b){b=document.createElement('span');b.id='rwLeft';b.className='rw-left';btn.appendChild(b)}const n=left();b.textContent=n?`ฟรีอีก ${n}`:'▶️ ดูโฆษณา'}
+ // same checks the analyser makes first, so a missing photo/endpoint doesn't use up a free try
+ const ready=()=>!!document.getElementById('photo')?.files?.[0]&&!!String(s.settings.aiEndpoint||document.getElementById('aiEndpoint')?.value||'').trim();
+ function go_(){const x=q();x.used++;saveQ(x);badge();return run()}
+ btn.onclick=()=>{if(!limited()||!ready())return run();if(left()>0)return go_();sheet.classList.add('show')};
+ const close=()=>sheet.classList.remove('show');
+ document.getElementById('rwCancel').onclick=close;sheet.addEventListener('click',e=>{if(e.target===sheet)close()});
+ document.getElementById('rwBuy').onclick=()=>{close();go('more');setTimeout(()=>document.getElementById('fw98')?.scrollIntoView({behavior:'smooth',block:'center'}),80)};
+ document.getElementById('rwWatch').onclick=()=>{const w=document.getElementById('rwWatch');w.disabled=true;w.textContent='กำลังเปิดโฆษณา…';P().showRewarded()};
+ const reset=()=>{const w=document.getElementById('rwWatch');w.disabled=false;w.textContent='▶️ ดูโฆษณาเพื่อวิเคราะห์ต่อ'};
+ const grant=()=>{const x=q();x.bonus++;saveQ(x);close();reset();go_()};
+ window.onRewardEarned=()=>{grant()};
+ window.onRewardClosed=()=>{reset();toast('ต้องดูโฆษณาจนจบเพื่อรับสิทธิ์')};
+ // no ad to show (no fill / offline): don't block the user
+ window.onRewardUnavailable=()=>{toast('ตอนนี้ไม่มีโฆษณา · วิเคราะห์ให้ฟรีครั้งนี้');grant()};
+ const prevPro=window.onProStatus;window.onProStatus=j=>{if(prevPro)prevPro(j);badge()};
+ badge();
+})();
+</script>
 </body>
 </html>
 
@@ -1971,7 +2024,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   }
   const price=st.price?' '+esc(st.price):'';
   box.innerHTML='<div class="fw96-head"><span style="font-size:24px">🚫</span><h3>ปิดโฆษณาถาวร</h3></div>'
-   +'<ul class="fw98-list"><li>ซื้อครั้งเดียว ใช้ได้ตลอด ไม่ใช่รายเดือน</li><li>ใช้ได้ทุกเครื่องที่ใช้บัญชี Google Play เดียวกัน</li><li>ช่วยสนับสนุนการพัฒนา FoodWell</li></ul>'
+   +'<ul class="fw98-list"><li>ซื้อครั้งเดียว ใช้ได้ตลอด ไม่ใช่รายเดือน</li><li>วิเคราะห์รูปอาหารด้วย AI ได้ไม่จำกัด</li><li>ใช้ได้ทุกเครื่องที่ใช้บัญชี Google Play เดียวกัน</li><li>ช่วยสนับสนุนการพัฒนา FoodWell</li></ul>'
    +(st.adsEnabled?'':'<div class="fw96-small">เวอร์ชันนี้ยังไม่แสดงโฆษณา</div>')
    +'<button class="fw98-buy" id="fw98Buy"'+(st.billingReady?'':' disabled')+'>'+(st.pending?'⏳ รอการชำระเงิน':'ซื้อเพื่อปิดโฆษณา'+price)+'</button>'
    +(st.message?'<div class="fw98-msg">'+esc(st.message)+'</div>':'')

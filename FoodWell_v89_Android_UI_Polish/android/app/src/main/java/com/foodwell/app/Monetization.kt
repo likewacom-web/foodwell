@@ -20,7 +20,12 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
@@ -51,6 +56,8 @@ class Monetization(
     private var pending = false
     private var message = ""
     private var adView: AdView? = null
+    private var rewarded: RewardedAd? = null
+    private var rewardedLoading = false
 
     var adFree: Boolean
         get() = prefs.getBoolean("adFree", false)
@@ -87,6 +94,7 @@ class Monetization(
         .put("price", product?.oneTimePurchaseOfferDetails?.formattedPrice ?: "")
         .put("pending", pending)
         .put("message", message)
+        .put("rewardedReady", rewarded != null)
 
     private fun emitStatus() = emit("onProStatus", JSONObject.quote(statusJson().toString()))
 
@@ -204,6 +212,38 @@ class Monetization(
         }
         adContainer.addView(adView)
         adContainer.visibility = View.VISIBLE
+        loadRewarded()
+    }
+
+    // ---- Rewarded ads: watch a short ad for one more AI photo analysis --------------------------
+
+    private fun loadRewarded() {
+        if (!BuildConfig.ADS_ENABLED || adFree || rewarded != null || rewardedLoading) return
+        rewardedLoading = true
+        RewardedAd.load(activity, BuildConfig.ADMOB_REWARDED_ID, AdRequest.Builder().build(), object : RewardedAdLoadCallback() {
+            override fun onAdLoaded(ad: RewardedAd) { rewarded = ad; rewardedLoading = false }
+            override fun onAdFailedToLoad(e: LoadAdError) { rewarded = null; rewardedLoading = false; Log.w(TAG, "rewarded load: ${e.message}") }
+        })
+    }
+
+    /** Answers onRewardEarned() after the ad closes with the reward, onRewardClosed() if skipped,
+     *  or onRewardUnavailable(reason) when there is no ad to show (the page then lets the user through). */
+    fun showRewarded() = activity.runOnUiThread {
+        val ad = rewarded
+        if (!BuildConfig.ADS_ENABLED || adFree) { emit("onRewardEarned", ""); return@runOnUiThread }
+        if (ad == null) { emit("onRewardUnavailable", JSONObject.quote("no_ad")); loadRewarded(); return@runOnUiThread }
+        var earned = false
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                rewarded = null; loadRewarded()
+                emit(if (earned) "onRewardEarned" else "onRewardClosed", "")
+            }
+            override fun onAdFailedToShowFullScreenContent(e: AdError) {
+                rewarded = null; loadRewarded()
+                emit("onRewardUnavailable", JSONObject.quote(e.message ?: "show_failed"))
+            }
+        }
+        ad.show(activity) { earned = true }
     }
 
     private fun removeAds() {

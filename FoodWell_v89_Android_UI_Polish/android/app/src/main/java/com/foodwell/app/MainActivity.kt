@@ -300,6 +300,7 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface fun status(): String = pro.statusJson().toString()
         @JavascriptInterface fun buy() = pro.buy()
         @JavascriptInterface fun restore() = pro.restore()
+        @JavascriptInterface fun showRewarded() = pro.showRewarded()
     }
 
     /** WebView can't download blob: links, so backups are written to Downloads through this bridge. */

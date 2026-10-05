@@ -4,9 +4,10 @@
 
 | ส่วน | ไฟล์ |
 |---|---|
-| แบนเนอร์ AdMob + หน้าขอความยินยอม (UMP) + Google Play Billing | `android/app/src/main/java/com/foodwell/app/Monetization.kt` |
+| แบนเนอร์ + Rewarded ads (AdMob) + หน้าขอความยินยอม (UMP) + Google Play Billing | `android/app/src/main/java/com/foodwell/app/Monetization.kt` |
 | การ์ด "🚫 ปิดโฆษณาถาวร" ในหน้า **เพิ่มเติม** | `assets/index.html` (บล็อก v98, `window.FoodWellPro`) |
-| เปิด/ปิดโฆษณา และ ID | `android/app/build.gradle` (`-Pads`, `-PadmobAppId`, `-PadmobBannerId`) |
+| โควตา AI วิเคราะห์รูป ฟรีวันละ 3 ครั้ง + ดูโฆษณาเพื่อรับเพิ่ม | `assets/index.html` (บล็อก v105) |
+| เปิด/ปิดโฆษณา และ ID | `android/app/build.gradle` (`-Pads`, `-PadmobAppId`, `-PadmobBannerId`, `-PadmobRewardedId`) |
 
 ## สิ่งที่ต้องทำตอนจะลง Google Play
 
@@ -16,10 +17,11 @@
    *(ต้องอัปโหลดแอปที่มี Billing อย่างน้อย 1 ครั้งก่อน ถึงจะสร้างสินค้าได้)*
 2. **AdMob** → Apps → Add app → เลือกแอปจาก Play → ได้ **App ID** (`ca-app-pub-xxx~yyy`)
    → Ad units → **Banner** → ได้ **Ad unit ID** (`ca-app-pub-xxx/zzz`)
+   → Ad units → **Rewarded** → ได้ Ad unit ID อีกตัว (ใช้กับปุ่ม ✨ วิเคราะห์รูป)
    → Privacy & messaging → สร้างข้อความ **GDPR** (หน้ายินยอมสำหรับผู้ใช้ยุโรป)
 3. Build แบบเปิดโฆษณา:
    ```
-   gradle assembleRelease -Pads=true -PadmobAppId=ca-app-pub-xxx~yyy -PadmobBannerId=ca-app-pub-xxx/zzz
+   gradle assembleRelease -Pads=true -PadmobAppId=ca-app-pub-xxx~yyy -PadmobBannerId=ca-app-pub-xxx/zzz -PadmobRewardedId=ca-app-pub-xxx/rrr
    ```
 4. ใส่ไฟล์ `app-ads.txt` ที่เว็บไซต์ผู้พัฒนาที่กรอกใน Play Console (AdMob ให้เนื้อหาไฟล์มา)
 5. Play Console → **Data safety**: แจ้งว่ามีโฆษณา (Advertising ID) และการซื้อในแอป
@@ -34,3 +36,8 @@
 - การซื้อถูก acknowledge ทันทีในแอป (ถ้าไม่ทำ Google จะคืนเงินอัตโนมัติใน 3 วัน)
 - ยังไม่มีเซิร์ฟเวอร์ตรวจสอบใบเสร็จ ถ้าต้องการกันการโกงจริงจังให้เพิ่มการตรวจผ่าน Google Play Developer API ภายหลัง
 - Build บน GitHub ยังเป็น debug APK ที่ปิดโฆษณา — การลง Play ต้องใช้ release (.aab) ที่เซ็นด้วยกุญแจจริง
+
+## Rewarded ads (AI วิเคราะห์รูป)
+- เมื่อเปิดโฆษณา: วิเคราะห์ฟรีวันละ 3 ครั้งต่อเครื่อง ครั้งต่อไปดูโฆษณา 1 ครั้ง = วิเคราะห์ 1 ครั้ง
+- ปุ่มแสดง "ฟรีอีก N" ให้เห็นก่อนกด · ถ้าไม่มีโฆษณาให้ดู (no fill/ออฟไลน์) จะให้ใช้ฟรีครั้งนั้น ไม่ปิดกั้นผู้ใช้
+- ซื้อ "ปิดโฆษณาถาวร" แล้ว = วิเคราะห์ไม่จำกัด · build ที่ปิดโฆษณา (ปัจจุบัน) = ไม่จำกัด
