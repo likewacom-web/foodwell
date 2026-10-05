@@ -77,22 +77,23 @@ class TodayWidget : AppWidgetProvider() {
 
             val v = RemoteViews(c.packageName, R.layout.widget_today)
             v.setTextViewText(R.id.w_kcal, fmt(kcal))
-            v.setTextViewText(R.id.w_streak, if (streak > 0) "🔥 $streak วัน" else "🔥 เริ่มวันนี้")
+            v.setTextViewText(R.id.w_streak, if (streak > 0) Lang.t(c, "🔥 $streak วัน", "🔥 $streak days") else Lang.t(c, "🔥 เริ่มวันนี้", "🔥 Start today"))
             if (target > 0) {
                 val left = target - kcal
                 v.setProgressBar(R.id.w_ring, target, kcal.coerceAtMost(target), false)
-                v.setTextViewText(R.id.w_pct, "${(kcal * 100 / target)}% ของเป้า")
-                v.setTextViewText(R.id.w_left, if (left >= 0) "เหลืออีก ${fmt(left)}" else "เกินมา ${fmt(-left)}")
+                v.setTextViewText(R.id.w_pct, "${(kcal * 100 / target)}%" + Lang.t(c, " ของเป้า", " of goal"))
+                v.setTextViewText(R.id.w_left, if (left >= 0) Lang.t(c, "เหลืออีก", "Left") + " ${fmt(left)}" else Lang.t(c, "เกินมา", "Over") + " ${fmt(-left)}")
                 v.setTextColor(R.id.w_left, if (left >= 0) 0xFF2B1820.toInt() else 0xFFD9480F.toInt())
-                v.setTextViewText(R.id.w_kcal_sub, "kcal · เป้า ${fmt(target)}" + if (meals > 0) " · $meals มื้อ" else "")
+                v.setTextViewText(R.id.w_kcal_sub, Lang.t(c, "kcal · เป้า", "kcal · goal") + " ${fmt(target)}" + if (meals > 0) Lang.t(c, " · $meals มื้อ", " · $meals meals") else "")
             } else {
                 v.setProgressBar(R.id.w_ring, 100, if (kcal > 0) 100 else 0, false)
                 v.setTextViewText(R.id.w_pct, "kcal")
                 v.setTextViewText(R.id.w_left, "${fmt(kcal)} kcal")
                 v.setTextColor(R.id.w_left, 0xFF2B1820.toInt())
-                v.setTextViewText(R.id.w_kcal_sub, "ตั้งเป้าหมายในแอปเพื่อดูที่เหลือ")
+                v.setTextViewText(R.id.w_kcal_sub, Lang.t(c, "ตั้งเป้าหมายในแอปเพื่อดูที่เหลือ", "Set a goal in the app to see what's left"))
             }
             v.setTextViewText(R.id.w_water, "💧 ${fmt(water)} / ${fmt(waterGoal)} ml" + if (water >= waterGoal) "  ✓" else "")
+            v.setTextViewText(R.id.w_add_food, Lang.t(c, "🍽️ บันทึกอาหาร", "🍽️ Log food"))
             v.setProgressBar(R.id.w_water_bar, waterGoal, water.coerceAtMost(waterGoal), false)
 
             fun open(page: String, code: Int) = PendingIntent.getActivity(

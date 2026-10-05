@@ -113,18 +113,18 @@ object Reminders {
         val meals = st.optJSONArray("meals")?.let { a -> (0 until a.length()).map { a.getString(it) } } ?: emptyList()
         fun logged(meal: String) = isToday && meal in meals
         return when (kind) {
-            "breakfast" -> if (logged("เช้า")) null else Triple("🌅 ได้เวลาอาหารเช้า", "กินอะไรไปบ้าง? แตะเพื่อบันทึกมื้อเช้า", "food")
-            "lunch" -> if (logged("กลางวัน")) null else Triple("☀️ มื้อกลางวันแล้ว", "อย่าลืมบันทึกมื้อกลางวันใน FoodWell นะ", "food")
-            "dinner" -> if (logged("เย็น")) null else Triple("🌙 บันทึกมื้อเย็น", "บันทึกมื้อเย็น แล้วดูสรุปพลังงานของวันนี้", "food")
+            "breakfast" -> if (logged("เช้า")) null else Triple(Lang.t(c, "🌅 ได้เวลาอาหารเช้า", "🌅 Breakfast time"), Lang.t(c, "กินอะไรไปบ้าง? แตะเพื่อบันทึกมื้อเช้า", "What did you eat? Tap to log breakfast"), "food")
+            "lunch" -> if (logged("กลางวัน")) null else Triple(Lang.t(c, "☀️ มื้อกลางวันแล้ว", "☀️ Lunch time"), Lang.t(c, "อย่าลืมบันทึกมื้อกลางวันใน FoodWell นะ", "Don't forget to log lunch in FoodWell"), "food")
+            "dinner" -> if (logged("เย็น")) null else Triple(Lang.t(c, "🌙 บันทึกมื้อเย็น", "🌙 Log dinner"), Lang.t(c, "บันทึกมื้อเย็น แล้วดูสรุปพลังงานของวันนี้", "Log dinner and see today's energy summary"), "food")
             "water" -> {
                 val ml = if (isToday) st.optInt("water") else 0
                 val goal = st.optInt("waterGoal", 2000)
-                if (ml >= goal) null else Triple("💧 ดื่มน้ำสักแก้ว", "วันนี้ดื่มไป ${"%,d".format(ml)} / ${"%,d".format(goal)} ml", "water")
+                if (ml >= goal) null else Triple(Lang.t(c, "💧 ดื่มน้ำสักแก้ว", "💧 Have a glass of water"), Lang.t(c, "วันนี้ดื่มไป", "Today so far") + " ${"%,d".format(ml)} / ${"%,d".format(goal)} ml", "water")
             }
             "weigh" -> {
                 val last = st.optString("lastWeigh")
                 val recent = runCatching { !LocalDate.parse(last).isBefore(LocalDate.now().minusDays(5)) }.getOrDefault(false)
-                if (recent) null else Triple("⚖️ ชั่งน้ำหนักประจำสัปดาห์", "บันทึกน้ำหนักเพื่อดูความคืบหน้าของแผน", "weightPlan")
+                if (recent) null else Triple(Lang.t(c, "⚖️ ชั่งน้ำหนักประจำสัปดาห์", "⚖️ Weekly weigh-in"), Lang.t(c, "บันทึกน้ำหนักเพื่อดูความคืบหน้าของแผน", "Log your weight to see your plan's progress"), "weightPlan")
             }
             "if_open", "if_close" -> {
                 val cfg = runCatching { JSONObject(prefs(c).getString("config", "{}")!!) }.getOrElse { JSONObject() }
@@ -132,8 +132,8 @@ object Reminders {
                 val eat = cfg.optInt("ifEat", 8).coerceIn(1, 23)
                 val end = (h * 60 + m + eat * 60) % 1440
                 val endText = "%02d:%02d".format(end / 60, end % 60)
-                if (kind == "if_open") Triple("🍽️ ถึงช่วงกินแล้ว", "เริ่มกินได้ถึง $endText · มื้อแรกเน้นโปรตีนและผักนะ", "food")
-                else Triple("⏱️ อีก 30 นาทีหมดช่วงกิน", "หลัง $endText เริ่มอด ${24 - eat} ชั่วโมง · น้ำเปล่า ชา กาแฟดำ ดื่มได้", "home")
+                if (kind == "if_open") Triple(Lang.t(c, "🍽️ ถึงช่วงกินแล้ว", "🍽️ Eating window open"), Lang.t(c, "เริ่มกินได้ถึง $endText · มื้อแรกเน้นโปรตีนและผักนะ", "Eat until $endText · make your first meal protein and vegetables"), "food")
+                else Triple(Lang.t(c, "⏱️ อีก 30 นาทีหมดช่วงกิน", "⏱️ Eating window closes in 30 min"), Lang.t(c, "หลัง $endText เริ่มอด ${24 - eat} ชั่วโมง · น้ำเปล่า ชา กาแฟดำ ดื่มได้", "After $endText you fast ${24 - eat} hours · water, tea and black coffee are fine"), "home")
             }
             else -> null
         }
@@ -142,8 +142,8 @@ object Reminders {
     fun ensureChannel(c: Context) {
         if (Build.VERSION.SDK_INT >= 26) {
             c.getSystemService(NotificationManager::class.java).createNotificationChannel(
-                NotificationChannel(CHANNEL, "การแจ้งเตือน FoodWell", NotificationManager.IMPORTANCE_DEFAULT)
-                    .apply { description = "เตือนบันทึกอาหาร ดื่มน้ำ และชั่งน้ำหนัก" }
+                NotificationChannel(CHANNEL, Lang.t(c, "การแจ้งเตือน FoodWell", "FoodWell reminders"), NotificationManager.IMPORTANCE_DEFAULT)
+                    .apply { description = Lang.t(c, "เตือนบันทึกอาหาร ดื่มน้ำ และชั่งน้ำหนัก", "Reminders to log food, drink water and weigh in") }
             )
         }
     }

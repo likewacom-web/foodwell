@@ -2,6 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
+<script>
+// v116: English dates from the first render (the rest of the language switch is at the end of the page)
+(function(){try{if(localStorage.getItem('fw_lang')!=='en')return}catch(e){return}
+ const loc=l=>(l==null||/^th\b/i.test(String(l)))?'en-GB':l;
+ ['toLocaleDateString','toLocaleTimeString','toLocaleString'].forEach(f=>{const o=Date.prototype[f];Date.prototype[f]=function(l,opt){return o.call(this,loc(l),opt)}});
+ window.fwDatesEn=true})();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101116">
 <title>FoodWell</title>
@@ -353,7 +360,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="card trophy-card">
   <div class="trend-head"><h2>🏆 ถ้วยรางวัล</h2><span id="trophyCount" class="trophy-count">0/6</span></div>
   <p style="color:#92949e;font-size:10px;margin:0">ปลดล็อกจากสิ่งที่คุณบันทึกไว้ ไม่ใช่การแข่งขันหรือเป้าหมาย</p>
-  <div class="trophy-summary"><div><b id="trophySummaryText">กำลังสะสม 0 จาก 6 ถ้วย</b><small>ความคืบหน้ารวมของถ้วยรางวัล</small><div class="trophy-summary-bar"><i id="trophySummaryBar" style="width:0%"></i></div></div><div id="trophySummaryPct" class="trophy-summary-pct">0%</div></div>
+  <div class="trophy-summary"><div><b id="trophySummaryText">กำลังสะสม 0 จาก 6 ถ้วยรางวัล</b><small>ความคืบหน้ารวมของถ้วยรางวัล</small><div class="trophy-summary-bar"><i id="trophySummaryBar" style="width:0%"></i></div></div><div id="trophySummaryPct" class="trophy-summary-pct">0%</div></div>
   <div class="trophy-filter" role="tablist" aria-label="กรองถ้วยรางวัล">
     <button class="active" data-filter="all" type="button">ทั้งหมด</button>
     <button data-filter="unlocked" type="button">ปลดล็อกแล้ว</button>
@@ -438,6 +445,11 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <section id="healthy" class="page">
 <div class="page-title"><div><p>HEALTHY RECIPES</p><h1>🥗 เมนูสุขภาพ</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
 <div id="hlBody"></div>
+</section>
+<section id="settings" class="page">
+<div class="page-title"><div><p>SETTINGS</p><h1>⚙️ ตั้งค่า</h1></div><button class="secondary-btn" type="button" id="setBack">กลับ</button></div>
+<div class="set-nav" id="setNav"></div>
+<div id="setBody"></div>
 </section>
 </main>
 
@@ -727,7 +739,7 @@ function renderTrophies(){
  const unlocked=items.filter(x=>x.v>=x.max).length;
  $("trophyCount").textContent=`${unlocked}/${items.length}`;
  const pct=Math.round(items.reduce((sum,x)=>sum+Math.min(x.v/x.max,1),0)/items.length*100);
- $("trophySummaryText").textContent=`กำลังสะสม ${unlocked} จาก ${items.length} ถ้วย`;
+ $("trophySummaryText").textContent=`กำลังสะสม ${unlocked} จาก ${items.length} ถ้วยรางวัล`;
  $("trophySummaryBar").style.width=pct+"%";
  $("trophySummaryPct").textContent=pct+"%";
  renderTrophyShowcase(items);
@@ -1765,7 +1777,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function card(){
   const ws=weekStart(today()),cur=tab==='this'?ws:addD(ws,-7),S=stats(cur),P=stats(addD(cur,-7)),t=S.t;
   return `<div class="wk-head"><h3>📅 สรุปรายสัปดาห์</h3><div class="wk-tabs"><button type="button" data-wk="this" class="${tab==='this'?'on':''}">สัปดาห์นี้</button><button type="button" data-wk="last" class="${tab==='last'?'on':''}">ที่แล้ว</button></div></div>
-   <div class="wk-range">${fmt(S.days[0])} – ${fmt(S.days[6])} · บันทึก ${S.logDays}/7 วัน</div>
+   <div class="wk-range">${fmt(S.days[0])} – ${fmt(S.days[6])} · วันที่บันทึก ${S.logDays}/7</div>
    <div class="wk-grid"><div class="wk-tile"><small>กินเฉลี่ย/วัน</small><b>${S.avg?S.avg.toLocaleString():'–'}</b>${S.avg&&P.avg?arrow(S.avg,P.avg,true):'<em class="wk-flat">kcal</em>'}</div>
     <div class="wk-tile"><small>${t?'วันที่ใกล้เป้า ±10%':'วันที่บันทึกอาหาร'}</small><b>${t?S.inTarget:S.foodDays} <span style="font-size:14px;color:var(--muted)">/ 7</span></b>${t?`<em class="wk-flat">เป้า ${t.toLocaleString()} kcal</em>`:''}</div>
     <div class="wk-tile"><small>ดื่มน้ำครบเป้า</small><b>${S.waterDays} <span style="font-size:14px;color:var(--muted)">วัน</span></b>${arrow(S.waterDays,P.waterDays,false)}</div>
@@ -1780,7 +1792,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   // home: last week's summary once at the start of a new week
   const hc=document.getElementById('weekHome');if(!hc)return;const ws=weekStart(today()),last=addD(ws,-7),L=stats(last);
   if(L.logDays<2||(s.settings&&s.settings.weekCardSeen)===ws){hc.innerHTML='';hc.style.display='none';return}
-  hc.style.display='';hc.innerHTML=`<button class="x" type="button" aria-label="ปิด">×</button><div class="wk-head"><h3>🗓️ สรุปสัปดาห์ที่แล้ว</h3></div><div class="wk-range">${fmt(L.days[0])} – ${fmt(L.days[6])} · บันทึก ${L.logDays}/7 วัน</div><div class="wk-note">${note(L)}</div><button class="go" type="button">ดูสรุปทั้งหมด</button>`;
+  hc.style.display='';hc.innerHTML=`<button class="x" type="button" aria-label="ปิด">×</button><div class="wk-head"><h3>🗓️ สรุปสัปดาห์ที่แล้ว</h3></div><div class="wk-range">${fmt(L.days[0])} – ${fmt(L.days[6])} · วันที่บันทึก ${L.logDays}/7</div><div class="wk-note">${note(L)}</div><button class="go" type="button">ดูสรุปทั้งหมด</button>`;
   const seen=()=>{s.settings=s.settings||{};s.settings.weekCardSeen=ws;save()};
   hc.querySelector('.x').onclick=seen;hc.querySelector('.go').onclick=()=>{tab='last';seen();go('dashboard');window.scrollTo({top:0})};
  }
@@ -2118,7 +2130,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const fmtD=(d,o)=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',o||{day:'numeric',month:'short',year:'2-digit'});
  const n0=v=>Math.round(v).toLocaleString(),n1=v=>(Math.round(v*10)/10).toLocaleString();
- function build(days){
+ function build(days){const h=build0(days);return window.fwT?fwT(h):h}
+ function build0(days){
   const list=[...Array(days)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1)+i);return localDay(d)});
   const rows=list.map(d=>({d,kcal:kcalOn(d),n:nutrientsOn(d),water:waterOn(d),move:moveMinOn(d),foods:s.foods.filter(f=>foodDay(f)===d).length}));
   const logged=rows.filter(r=>r.foods>0),avg=k=>logged.length?logged.reduce((a,r)=>a+(k==='kcal'?r.kcal:r.n[k]),0)/logged.length:0;
@@ -2194,7 +2207,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   for(const el of cands){const btn=[...el.querySelectorAll('button')].find(b=>/^(×|✕|x|ปิด|close)$/i.test(b.textContent.trim())||/close|-x\b/i.test(b.id+' '+b.className));if(btn){btn.click();return true}}
   return false}
  // sub-pages go back to where they were opened from; everything else goes home
- const PARENT={recipes:'food',foodLibrary:'food'};
+ const PARENT=window.fwParent=Object.assign({recipes:'food',foodLibrary:'food'},window.fwParent||{});
  window.fwBack=function(){
   try{
    if(closeOverlay())return 'handled';
@@ -2918,5 +2931,115 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,10));else setTimeout(init,10);
+})();
+</script>
+<!-- v116 Language (ไทย / English) + Settings page.
+ English works by translating the Thai text the app renders: every run of Thai text (Thai letters and the spaces
+ between them) is looked up in FW_I18N_EN (i18n_en.js); a run that isn't there is split into known pieces, or left
+ as is. Stored data stays Thai (meal names, food names), only what's shown changes. New Thai UI text needs an entry
+ in i18n_en.js. Dates use en-GB instead of th-TH. The language is per device (localStorage "fw_lang"). -->
+<script src="i18n_en.js"></script>
+<style>
+.set-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none;position:sticky;top:0;z-index:5;background:var(--bg,transparent)}
+.set-nav button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:7px 12px;font-size:13px;font-family:inherit}
+.set-group{margin:0 0 6px}.set-group>h3{margin:14px 4px 8px;font-size:13px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.set-lang .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.set-lang .btns button{border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:14px 10px;font-size:16px;font-weight:800;font-family:inherit}
+.set-lang .btns button.on{border-color:#2f9e6e;background:#2f9e6e1a;box-shadow:0 0 0 1px #2f9e6e inset}
+.set-lang small{display:block;margin-top:8px;color:var(--muted);font-size:12px;line-height:1.5}
+.set-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:16px;padding:13px 14px;margin:0 0 10px;font-family:inherit;font-size:15px}
+.set-row .ic{font-size:22px}.set-row .tx{flex:1;min-width:0}.set-row b{display:block}.set-row small{display:block;color:var(--muted);font-size:12px}.set-row .go{color:var(--muted);font-size:18px}
+.set-entry{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:0;border-radius:18px;padding:14px 16px;font-family:inherit;text-align:left;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.set-entry .ic{font-size:24px}.set-entry b{display:block;font-size:16px}.set-entry small{display:block;font-size:12px;opacity:.8}
+.set-ver{text-align:center;color:var(--muted);font-size:12px;margin:14px 0 24px}
+.onb-lang{position:absolute;top:calc(18px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:3;border:1px solid #0002;background:#fff9;color:#2b1820;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;font-family:inherit}
+.gear{cursor:pointer}
+</style>
+<script>
+(function(){
+ // ---- language ----
+ const KEY='fw_lang';
+ const lang=(()=>{try{return localStorage.getItem(KEY)==='en'?'en':'th'}catch(e){return 'th'}})();
+ try{window.FoodWellLang&&FoodWellLang.set(lang)}catch(e){}
+ window.fwLang=()=>lang;
+ window.fwSetLang=l=>{if(l===lang)return;try{localStorage.setItem(KEY,l)}catch(e){}try{window.FoodWellLang&&FoodWellLang.set(l)}catch(e){}location.reload()};
+ window.fwT=x=>x;
+ if(lang==='en'&&window.FW_I18N_EN){
+  document.documentElement.lang='en';
+  const D=FW_I18N_EN,RUN=/[฀-๿]+(?:[  ]+[฀-๿]+)*/g,cache=new Map();
+  let maxLen=0;for(const k in D)if(k.length>maxLen)maxLen=k.length;
+  // split a run with no spaces into known pieces (fewest pieces wins); null if any part is unknown
+  function pieces(w){const n=w.length,best=new Array(n+1).fill(null);best[0]=[];
+   for(let i=0;i<n;i++){if(!best[i])continue;for(let j=Math.min(n,i+maxLen);j>i+1;j--){const p=w.slice(i,j);if(D[p]!=null&&(!best[j]||best[j].length>best[i].length+1))best[j]=[...best[i],D[p]]}}
+   return best[n]?best[n].join(' '):null}
+  function tr(run){if(cache.has(run))return cache.get(run);let out=D[run];
+   if(out==null){const parts=run.split(/[  ]+/);out=parts.map(p=>D[p]!=null?D[p]:(pieces(p)||p)).join(' ')}
+   if(cache.size>5000)cache.clear();cache.set(run,out);return out}
+  const T=s=>{if(!s||!/[฀-๿]/.test(s))return s;
+   return s.replace(RUN,(m,off,all)=>{let o=tr(m);if(o===m)return m;const b=all[off-1],a=all[off+m.length];
+    if(b&&/[A-Za-z0-9%)\]]/.test(b))o=' '+o;if(a&&/[A-Za-z0-9(\[]/.test(a))o+=' ';return o})};
+  window.fwT=T;
+  const SKIP=new Set(['SCRIPT','STYLE','TEXTAREA','NOSCRIPT']),ATTR=['placeholder','title','aria-label','alt'];
+  const skipEl=el=>SKIP.has(el.tagName)||(el.closest&&el.closest('[translate="no"]'));
+  function attrs(el){ATTR.forEach(a=>{const v=el.getAttribute&&el.getAttribute(a);if(v&&/[฀-๿]/.test(v)){const t=T(v);if(t!==v)el.setAttribute(a,t)}})}
+  function text(n){const v=n.nodeValue;if(v&&/[฀-๿]/.test(v)){const p=n.parentNode;if(p&&p.nodeType===1&&skipEl(p))return;const t=T(v);if(t!==v)n.nodeValue=t}}
+  function walk(root){if(root.nodeType===3)return text(root);if(root.nodeType!==1)return;if(root.tagName==='TEXTAREA')return attrs(root);if(skipEl(root))return;attrs(root);
+   const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,{acceptNode:n=>n.nodeType===1&&skipEl(n)?(n.tagName==='TEXTAREA'&&attrs(n),NodeFilter.FILTER_REJECT):NodeFilter.FILTER_ACCEPT});
+   let n;while((n=w.nextNode()))n.nodeType===3?text(n):attrs(n)}
+  walk(document.documentElement);document.title=T(document.title);
+  new MutationObserver(ms=>{for(const m of ms){
+   if(m.type==='childList')m.addedNodes.forEach(walk);else if(m.type==='characterData')text(m.target);else if(m.type==='attributes'&&(m.target.tagName==='TEXTAREA'||!skipEl(m.target)))attrs(m.target)}})
+   .observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTR});
+  // native dialogs and dates
+  const oa=window.alert.bind(window),oc=window.confirm.bind(window),op=window.prompt.bind(window);
+  window.alert=m=>oa(T(String(m)));window.confirm=m=>oc(T(String(m)));window.prompt=(m,d)=>op(T(String(m)),d);
+
+ }
+ const L=(th,en)=>lang==='en'?en:th;
+ // ---- settings page ----
+ const page=document.getElementById('settings');if(!page)return;
+ const GROUPS=[
+  ['lang','🌐',L('ภาษา','Language')],
+  ['look','🎨',L('หน้าตาแอป','Appearance')],
+  ['remind','🔔',L('การแจ้งเตือนและ IF','Reminders & IF')],
+  ['data','☁️',L('ข้อมูลและซิงก์','Data & sync')],
+  ['ai','🤖','AI'],
+  ['about','🌱',L('เกี่ยวกับ','About')]];
+ const body=page.querySelector('#setBody');
+ body.innerHTML=GROUPS.map(([id,ic,t])=>`<div class="set-group" id="setg-${id}"><h3>${ic} ${t}</h3></div>`).join('')+`<div class="set-ver">FoodWell · ${L('ภาษา','Language')}: ${lang==='en'?'English':'ไทย'}</div>`;
+ page.querySelector('#setNav').innerHTML=GROUPS.map(([id,ic,t])=>`<button type="button" data-sg="${id}">${ic} ${t}</button>`).join('');
+ page.querySelectorAll('[data-sg]').forEach(b=>b.onclick=()=>document.getElementById('setg-'+b.dataset.sg)?.scrollIntoView({behavior:'smooth',block:'start'}));
+ const g=id=>document.getElementById('setg-'+id);
+ // language card (button labels stay in their own language)
+ const lc=document.createElement('div');lc.className='card set-lang';lc.id='setLang';lc.setAttribute('translate','no');
+ lc.innerHTML=`<h2>🌐 ภาษา / Language</h2><div class="btns" translate="no"><button type="button" data-l="th" class="${lang==='th'?'on':''}">🇹🇭 ไทย</button><button type="button" data-l="en" class="${lang==='en'?'on':''}">🇬🇧 English</button></div><small>${L('เปลี่ยนภาษาของเมนู ปุ่ม และการแจ้งเตือน · ข้อมูลที่บันทึกไว้ไม่เปลี่ยน','Changes the language of menus, buttons and notifications · your saved data stays the same')}</small>`;
+ lc.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>fwSetLang(b.dataset.l));
+ g('lang').appendChild(lc);
+ // shortcut rows to things that live on other pages
+ const row=(ic,t,sub,fn)=>{const b=document.createElement('button');b.type='button';b.className='set-row';b.innerHTML=`<span class="ic">${ic}</span><span class="tx"><b>${t}</b><small>${sub}</small></span><span class="go">›</span>`;b.onclick=fn;return b};
+ g('look').after(row('🎯',L('ร่างกายและเป้าหมาย','Body & goals'),L('เพศ อายุ ส่วนสูง น้ำหนัก และเป้าหมายต่อวัน','Sex, age, height, weight and daily targets'),()=>{go('more');setTimeout(()=>document.getElementById('bodyCard')?.scrollIntoView({block:'start'}),60)}));
+ // existing setting cards move here from the More page (some are created later, so this runs again)
+ const find=sel=>typeof sel==='function'?sel():document.querySelector(sel);
+ const MOVE=[
+  ['look','#fwThemeCard'],['look',()=>document.getElementById('softTheme')?.closest('.card')],
+  ['remind','#fwNotify'],['remind','#ifSet'],
+  ['data','#fw96'],['data','#fw70Backup'],['data','#fw98'],
+  ['ai','.v40-ai-settings'],
+  ['about',()=>document.getElementById('reset')?.closest('.card')]];
+ function collect(){MOVE.forEach(([id,sel])=>{const el=find(sel);if(el&&!g(id).contains(el))g(id).appendChild(el)})}
+ collect();[300,1500,4000].forEach(t=>setTimeout(collect,t));
+ // entry points: gear on Home, a button at the top of More
+ const gear=document.querySelector('#home .gear');if(gear){gear.setAttribute('role','button');gear.setAttribute('aria-label',L('ตั้งค่า','Settings'));gear.onclick=()=>go('settings')}
+ const moreTitle=document.querySelector('#more .page-title');
+ if(moreTitle&&!document.getElementById('setEntry')){const b=document.createElement('button');b.type='button';b.id='setEntry';b.className='set-entry';
+  b.innerHTML=`<span class="ic">⚙️</span><span style="flex:1"><b>${L('ตั้งค่า','Settings')}</b><small>${L('ภาษา ธีม การแจ้งเตือน ซิงก์ และสำรองข้อมูล','Language, theme, notifications, sync and backup')}</small></span><span>›</span>`;moreTitle.after(b);b.onclick=()=>go('settings')}
+ // back goes to the page Settings was opened from
+ let prev='home';
+ const og=window.go;if(og)window.go=function(p){const cur=document.querySelector('.page.active')?.id;if(p==='settings'&&cur&&cur!=='settings')prev=cur;og(p);
+  if(p==='settings'){collect();window.fwParent&&(fwParent.settings=prev);window.scrollTo({top:0})}};
+ page.querySelector('#setBack').onclick=()=>go(prev);
+ // first-run setup: language switch in the corner
+ const onb=document.getElementById('fwOnb');
+ if(onb&&!document.getElementById('onbLang')){const b=document.createElement('button');b.type='button';b.id='onbLang';b.className='onb-lang';b.setAttribute('translate','no');b.textContent=lang==='en'?'🌐 ไทย':'🌐 English';b.onclick=()=>fwSetLang(lang==='en'?'th':'en');onb.appendChild(b)}
 })();
 </script>

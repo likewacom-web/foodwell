@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(ScanApi(), "FoodWellScan")
             addJavascriptInterface(WidgetApi(), "FoodWellWidget")
             addJavascriptInterface(PrintApi(), "FoodWellPrint")
+            addJavascriptInterface(LangApi(), "FoodWellLang")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -140,7 +141,7 @@ class MainActivity : ComponentActivity() {
                 if (r?.contains("handled") == true) return@evaluateJavascript
                 val now = System.currentTimeMillis()
                 if (now - lastBack < 2000) finish()
-                else { lastBack = now; toast("กดย้อนกลับอีกครั้งเพื่อออกจากแอป") }
+                else { lastBack = now; toast(Lang.t(this@MainActivity, "กดย้อนกลับอีกครั้งเพื่อออกจากแอป", "Press back again to exit")) }
             }
         }
     }
@@ -207,6 +208,16 @@ class MainActivity : ComponentActivity() {
                 .addOnSuccessListener { b -> callJs("onBarcode", JSONObject.quote(b.rawValue ?: "")) }
                 .addOnCanceledListener { callJs("onBarcodeCancel", "") }
                 .addOnFailureListener { e -> Log.w(TAG, "scan failed", e); callJs("onBarcodeError", JSONObject.quote(e.message ?: "")) }
+        }
+    }
+
+    inner class LangApi {
+        /** The page tells us its language so notifications and the widget match it. */
+        @JavascriptInterface fun set(lang: String) {
+            if (Lang.isEn(this@MainActivity) == (lang == "en")) return
+            Lang.set(this@MainActivity, lang)
+            Reminders.ensureChannel(this@MainActivity)
+            TodayWidget.refresh(this@MainActivity)
         }
     }
 
@@ -342,7 +353,7 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface fun configure(json: String) = Reminders.configure(this@MainActivity, json)
         @JavascriptInterface fun report(json: String) = Reminders.report(this@MainActivity, json)
-        @JavascriptInterface fun test() = Reminders.post(this@MainActivity, 999, "🔔 ทดสอบการแจ้งเตือน", "FoodWell จะเตือนแบบนี้ตามเวลาที่ตั้งไว้", "more")
+        @JavascriptInterface fun test() = Reminders.post(this@MainActivity, 999, Lang.t(this@MainActivity, "🔔 ทดสอบการแจ้งเตือน", "🔔 Test notification"), Lang.t(this@MainActivity, "FoodWell จะเตือนแบบนี้ตามเวลาที่ตั้งไว้", "FoodWell will remind you like this at the times you set"), "more")
     }
 
     // ---- One-time purchase that removes ads (Google Play Billing) ------------------------------
