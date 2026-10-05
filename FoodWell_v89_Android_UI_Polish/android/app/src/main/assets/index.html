@@ -255,7 +255,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <main>
 <section id="home" class="page active">
 <div class="home-date"><div class="moon">🌙</div><h1>วันนี้</h1><p id="date"></p><div class="gear">⚙</div></div>
-<div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
+<div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🥗 วันนี้กินอะไรดี?</span><button data-widget-toggle="healthy">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
 <div class="welcome home-sortable" data-home-key="welcome"><div class="bubble">ดูแลตัวเองทีละวัน<br>เก่งมากแล้วนะ ♡</div><div class="cat">🐈</div></div>
 <div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่ได้รับวันนี้</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p id="kcalSub">ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span id="kcalRing">วันนี้<br>♡</span></div><div class="nutri-grid" id="nutriToday"></div></div>
 <div class="twocards home-sortable" data-home-key="twocards">
@@ -434,6 +434,10 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <section id="recipes" class="page">
 <div class="page-title"><div><p>MY RECIPES</p><h1>🍳 เมนูทำเอง</h1></div><button class="secondary-btn" type="button" data-go="food">กลับ</button></div>
 <div id="rcBody"></div>
+</section>
+<section id="healthy" class="page">
+<div class="page-title"><div><p>HEALTHY RECIPES</p><h1>🥗 เมนูสุขภาพ</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
+<div id="hlBody"></div>
 </section>
 </main>
 
@@ -855,7 +859,7 @@ function renderProfileStats(){
 }
 
 
-const HOME_DEFAULT=['welcome','summary','twocards','dashboard-entry','food-section'];
+const HOME_DEFAULT=['welcome','summary','twocards','healthy','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
 function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
@@ -2211,6 +2215,172 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    if(typeof window.render==='function')window.render();
    document.getElementById('foodName')?.dispatchEvent(new Event('input'));
    title.scrollIntoView({behavior:'smooth',block:'start'});toast('ล้างฟอร์มแล้ว ✨')}}
+})();
+</script>
+<!-- v114 Healthy Thai recipes: suggestions from what's left today, eat / cook / shopping list in one tap -->
+<script src="healthy_th.js"></script>
+<style>
+.hl-home{margin:0 0 12px;padding:16px;border-radius:22px;background:linear-gradient(135deg,#e9f9ef,#f3fbe8);border:1px solid #cfe9d6;color:#1d3a27}
+.hl-home h3{margin:0 0 2px;font-size:17px}.hl-home .sub{font-size:12px;color:#4f6f5a;margin-bottom:10px}
+.hl-home .pick{display:flex;align-items:center;gap:12px;background:#ffffffb3;border-radius:16px;padding:10px 12px;border:0;width:100%;text-align:left;font-family:inherit;color:inherit}
+.hl-home .pick .em{font-size:30px}.hl-home .pick b{display:block;font-size:15px}.hl-home .pick small{display:block;font-size:12px;color:#4f6f5a}
+.hl-home .more{margin-top:10px;width:100%;border:0;border-radius:12px;padding:10px;font-weight:800;font-family:inherit;background:#2f9e6e;color:#fff}
+.hl-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.hl-card h3{margin:0 0 4px;font-size:17px}.hl-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.hl-top{display:grid;gap:8px;margin-top:10px}
+.hl-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:16px;padding:10px 12px;font-family:inherit}
+.hl-item .em{font-size:28px;flex:none;width:36px;text-align:center}.hl-item .tx{flex:1;min-width:0}
+.hl-item b{display:block;font-size:15px}.hl-item small{display:block;font-size:12px;color:var(--muted)}
+.hl-item .kc{font-weight:800;font-size:14px;white-space:nowrap}.hl-item .why{color:#2f9e6e;font-weight:700}
+.hl-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px;padding:4px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.hl-tabs button{border:0;border-radius:11px;padding:9px;font-weight:800;font-family:inherit;background:none;color:var(--muted)}
+.hl-tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 2px 8px #0002}
+.hl-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.hl-chips button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:7px 12px;font-size:13px;font-family:inherit}
+.hl-chips button.on{background:#2f9e6e;border-color:#2f9e6e;color:#fff;font-weight:800}
+.hl-find{width:100%;margin:2px 0 10px}
+.hl-list{display:grid;gap:8px}
+.hl-tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:999px;background:#2f9e6e1f;color:#2f9e6e;margin:4px 4px 0 0;font-weight:700}
+.hl-empty{color:var(--muted);font-size:13px;padding:10px 0;text-align:center}
+.hl-sheet{position:fixed;inset:0;z-index:6000;background:#0007;display:none;align-items:flex-end;justify-content:center}
+.hl-sheet.show{display:flex}
+.hl-sheet .box{width:100%;max-width:560px;max-height:88vh;overflow-y:auto;background:var(--panel);color:var(--text);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+.hl-head{display:flex;align-items:flex-start;gap:10px}.hl-head .em{font-size:40px}.hl-head h2{margin:0;font-size:20px;flex:1}
+.hl-x{border:0;background:var(--panel2);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:16px;flex:none}
+.hl-nut{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+.hl-nut div{background:var(--panel2);border-radius:12px;padding:8px 4px;text-align:center}.hl-nut b{display:block;font-size:16px}.hl-nut small{font-size:11px;color:var(--muted)}
+.hl-sec{margin:14px 0 6px;font-weight:800;font-size:15px}
+.hl-ing{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}.hl-ing span:last-child{color:var(--muted);text-align:right}
+.hl-steps{margin:0;padding-left:20px;font-size:14px;line-height:1.6}.hl-steps li{margin-bottom:6px}
+.hl-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.hl-acts button,.hl-btn{border:0;border-radius:14px;padding:12px;font-weight:800;font-size:14px;font-family:inherit;background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.hl-acts .go{grid-column:1/-1;background:#2f9e6e;color:#fff;border-color:#2f9e6e}
+.hl-sv{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.hl-sv button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:16px}
+.hl-sv b{color:var(--text);font-size:15px;min-width:18px;text-align:center}
+.hl-shop{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.hl-shop:first-child{border-top:0}.hl-shop input{width:22px;height:22px;flex:none;accent-color:#2f9e6e}
+.hl-shop .tx{flex:1;min-width:0}.hl-shop b{display:block;font-size:15px}.hl-shop small{display:block;font-size:11px;color:var(--muted)}
+.hl-shop.done b{text-decoration:line-through;color:var(--muted)}
+.hl-shop .q{font-size:13px;color:var(--muted);white-space:nowrap}
+.hl-entry{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:-4px 0 12px;border:1.5px dashed #8fd3ad;background:#2f9e6e14;color:var(--text);border-radius:14px;padding:11px;font-weight:800;font-size:14px;font-family:inherit}
+</style>
+<script>
+(function(){
+ if(!window.FW_HEALTHY||!window.FW_INGREDIENTS)return;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const norm=t=>String(t||'').toLowerCase().replace(/[\s\-()·.,/]/g,'');
+ const K=['kcal','protein','carbs','fat','sugar','fiber','sodium'];
+ const ING=new Map(FW_INGREDIENTS.map(r=>[r[0]+'|'+r[1],{kcal:r[2],protein:r[3],carbs:r[4],fat:r[5],sugar:r[6],fiber:r[7],sodium:r[8]}]));
+ const factor=(unit,qty)=>unit==='g'?qty/100:qty;
+ const r1=x=>Math.round(x*10)/10;
+ function nutrition(r){const t={};K.forEach(k=>t[k]=0);
+  r.i.forEach(([n,u,q])=>{const v=ING.get(n+'|'+u);if(v)K.forEach(k=>t[k]+=Number(v[k]||0)*factor(u,q))});
+  const o={};K.forEach(k=>o[k]=k==='kcal'||k==='sodium'?Math.round(t[k]/r.sv):r1(t[k]/r.sv));return o}
+ const R=FW_HEALTHY.map((r,id)=>({...r,id,p:nutrition(r),key:norm(r.n+r.i.map(x=>x[0]).join(''))}));
+ const TAGS={protein:'💪 โปรตีนสูง',lowsugar:'🍬 น้ำตาลต่ำ',lowsodium:'🧂 โซเดียมต่ำ',quick:'⏱️ ≤15 นาที',veg:'🥗 มังสวิรัติ'};
+ const MEAL_ICON={'เช้า':'🌅','กลางวัน':'☀️','เย็น':'🌙','ของว่าง':'🍓'};
+ const unitText=(u,q)=>u==='g'?`${r1(q)} กรัม`:`${r1(q)} ${u}`;
+ function mealAt(d){const h=d.getHours()+d.getMinutes()/60;return h<10.5?'เช้า':h<15?'กลางวัน':h<21?'เย็น':'ของว่าง'}
+ const mealsLeftAt=m=>({'เช้า':3,'กลางวัน':2,'เย็น':1,'ของว่าง':1})[m];
+ // ---- what to eat now: fit the calories left today, fill protein, go easy on salt and sugar ----
+ function suggest(now=new Date()){
+  const T=(typeof bodyTargets==='function'&&bodyTargets())||{},today=localDay(now);
+  const goal=(window.fwWeightPlanKcal&&fwWeightPlanKcal())||T.kcal||2000,proteinGoal=T.protein||50;
+  const eaten=kcalOn(today),n=nutrientsOn(today),left=Math.round(goal-eaten);
+  let when=now,fasting=null;
+  if(window.FWFast&&FWFast.conf().on){const st=FWFast.state(now);if(!st.eating){fasting=st;when=st.until}}
+  const meal=mealAt(when),late=meal==='ของว่าง';
+  let budget=late?250:left/mealsLeftAt(meal);budget=Math.round(Math.max(200,Math.min(600,budget)));
+  const light=left<350;if(light)budget=Math.max(150,Math.min(300,left>0?left:200));
+  const pGap=proteinGoal-n.protein,saltHigh=n.sodium>1500,sugarHigh=n.sugar>18;
+  const todayNames=new Set(s.foods.filter(f=>foodDay(f)===today).map(f=>f.name));
+  const scored=R.map(r=>{const p=r.p,why=[];let sc=-Math.abs(p.kcal-budget)/budget*10;
+   if(r.m.includes(meal))sc+=3;else if(!(late||light))sc-=4;
+   if(light)why.push(`เมนูเบา ${p.kcal} kcal`);else if(Math.abs(p.kcal-budget)<=budget*.2)why.push(`พอดีกับ ~${budget} kcal ที่เหลือมื้อนี้`);
+   if(pGap>15&&p.protein>=20){sc+=Math.min(4,p.protein/8);why.push(`โปรตีน ${Math.round(p.protein)} g ช่วยเติมที่ยังขาด ${Math.round(pGap)} g`)}
+   if(saltHigh){sc-=p.sodium/250;if(p.sodium<450)why.unshift(`โซเดียมแค่ ${p.sodium} mg · วันนี้เค็มมาเยอะแล้ว`)}
+   if(sugarHigh){sc-=p.sugar/3;if(p.sugar<5)why.push(`น้ำตาลแค่ ${p.sugar} g`)}
+   if(left>0&&p.kcal>left*1.15&&!light)sc-=6;
+   if(todayNames.has(r.n))sc-=6;
+   return {r,sc,why:why.length?why:[r.t.includes('quick')?`ทำง่าย ${r.min} นาที`:'เมนูสมดุล ผักเยอะ']}}).sort((a,b)=>b.sc-a.sc);
+  let head=fasting?`⏱️ ตอนนี้อยู่ในช่วงอด · แนะนำสำหรับมื้อแรกตอน ${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}`
+   :light?(left>0?`เหลืออีก ${left.toLocaleString()} kcal วันนี้ · เลือกเมนูเบา ๆ`:`วันนี้ครบ ${goal.toLocaleString()} kcal แล้ว · ถ้าหิว เลือกเมนูเบา ๆ`)
+   :`เหลืออีก ${left.toLocaleString()} kcal วันนี้ · มื้อ${meal}ควรประมาณ ${budget.toLocaleString()} kcal`;
+  return {meal,budget,left,goal,head,top:scored.slice(0,3)}}
+ // ---- actions ----
+ function eat(r){const now=new Date(),id=Date.now(),p=r.p;
+  s.foods.unshift({id,createdAt:id,name:r.n,meal:mealAt(now),...p,note:'เมนูสุขภาพ · 1 ที่',date:localDay(now),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),favorite:false});
+  save();toast(`บันทึก ${r.n} · ${p.kcal} kcal ✅`)}
+ function cook(r){
+  s.recipes=s.recipes||[];let rc=s.recipes.find(x=>x.name===r.n);
+  if(!rc){rc={id:Date.now(),name:r.n,servings:r.sv,lines:r.i.map(([n,u,q])=>({name:n,unit:u,qty:q,v:ING.get(n+'|'+u)||{}}))};s.recipes.unshift(rc);save();toast('เพิ่มใน “เมนูทำเอง” แล้ว · ปรับวัตถุดิบได้ 🍳')}
+  else toast('มีเมนูนี้ใน “เมนูทำเอง” แล้ว');
+  close();go('recipes')}
+ function addShopping(r,servings){const k=servings/r.sv;s.shopping=s.shopping||[];
+  r.i.forEach(([n,u,q])=>{let it=s.shopping.find(x=>x.name===n&&x.unit===u&&!x.done);
+   if(!it){it={id:Date.now()+Math.random(),name:n,unit:u,qty:0,from:[],done:false};s.shopping.push(it)}
+   it.qty=r1(it.qty+q*k);if(!it.from.includes(r.n))it.from.push(r.n)});
+  save();toast(`เพิ่ม ${r.i.length} วัตถุดิบในรายการซื้อของ 🛒`)}
+ // ---- page ----
+ const page=document.getElementById('healthy');if(!page)return;
+ let tab='menu',filter='all',query='',open=null,servings=1;
+ const itemHtml=(r,why)=>`<button type="button" class="hl-item" data-r="${r.id}"><span class="em">${r.e}</span><span class="tx"><b>${esc(r.n)}</b><small>${why?`<span class="why">${esc(why)}</span>`:`⏱️ ${r.min} นาที · โปรตีน ${r.p.protein} g · โซเดียม ${r.p.sodium} mg`}</small></span><span class="kc">${r.p.kcal}<small>kcal</small></span></button>`;
+ function draw(){
+  const sg=suggest(),shop=s.shopping||[],left=shop.filter(x=>!x.done).length;
+  let html=`<div class="hl-card"><h3>✨ แนะนำสำหรับคุณตอนนี้</h3><div class="hl-sub">${esc(sg.head)}</div><div class="hl-top">${sg.top.map(x=>itemHtml(x.r,x.why[0])).join('')}</div></div>
+   <div class="hl-tabs"><button type="button" data-tab="menu" class="${tab==='menu'?'on':''}">📖 เมนูทั้งหมด (${R.length})</button><button type="button" data-tab="shop" class="${tab==='shop'?'on':''}">🛒 ซื้อของ${left?` (${left})`:''}</button></div>`;
+  if(tab==='menu'){
+   const qn=norm(query),list=R.filter(r=>(filter==='all'||r.t.includes(filter))&&(!qn||r.key.includes(qn)));
+   html+=`<div class="hl-card"><input class="hl-find" id="hlFind" placeholder="🔎 ค้นหาเมนูหรือวัตถุดิบ เช่น อกไก่ เต้าหู้" value="${esc(query)}" autocomplete="off">
+    <div class="hl-chips">${[['all','ทั้งหมด'],...Object.entries(TAGS)].map(([k,l])=>`<button type="button" data-f="${k}" class="${filter===k?'on':''}">${l}</button>`).join('')}</div>
+    <div class="hl-list">${list.map(r=>itemHtml(r)).join('')||'<div class="hl-empty">ไม่พบเมนู</div>'}</div>
+    <div class="hl-sub" style="margin-top:10px">ค่าโภชนาการคำนวณจากวัตถุดิบ เป็นค่าประมาณต่อ 1 ที่</div></div>`}
+  else{
+   html+=`<div class="hl-card"><h3>🛒 รายการซื้อของ</h3>${shop.length?shop.map(x=>`<label class="hl-shop${x.done?' done':''}"><input type="checkbox" data-s="${x.id}" ${x.done?'checked':''}><span class="tx"><b>${esc(x.name)}</b><small>${esc((x.from||[]).join(' · '))}</small></span><span class="q">${esc(unitText(x.unit,x.qty))}</span></label>`).join('')
+    :'<div class="hl-empty">ยังว่างอยู่ · เปิดเมนูแล้วกด “🛒 เพิ่มในรายการซื้อของ”</div>'}
+    ${shop.length?`<div class="hl-acts"><button type="button" id="hlClearDone">ลบที่ซื้อแล้ว</button><button type="button" id="hlClearAll">ล้างทั้งหมด</button></div>`:''}</div>`}
+  page.querySelector('#hlBody').innerHTML=html;
+  page.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>show(R[Number(b.dataset.r)]));
+  page.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;draw()});
+  page.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;draw()});
+  const f=page.querySelector('#hlFind');if(f)f.oninput=()=>{query=f.value;const pos=f.selectionStart;draw();const g=page.querySelector('#hlFind');g.focus();g.setSelectionRange(pos,pos)};
+  page.querySelectorAll('[data-s]').forEach(c=>c.onchange=()=>{const it=(s.shopping||[]).find(x=>String(x.id)===c.dataset.s);if(it){it.done=c.checked;save();draw()}});
+  const cd=page.querySelector('#hlClearDone');if(cd)cd.onclick=()=>{s.shopping=shop.filter(x=>!x.done);save();draw()};
+  const ca=page.querySelector('#hlClearAll');if(ca)ca.onclick=()=>{if(confirm('ล้างรายการซื้อของทั้งหมด?')){s.shopping=[];save();draw()}};
+ }
+ // ---- detail sheet ----
+ const sheet=document.createElement('div');sheet.className='hl-sheet';sheet.id='hlSheet';sheet.innerHTML='<div class="box"></div>';document.body.appendChild(sheet);
+ sheet.onclick=e=>{if(e.target===sheet)close()};
+ function close(){sheet.classList.remove('show');open=null}
+ function show(r){open=r;servings=r.sv;sheetDraw();sheet.classList.add('show');sheet.querySelector('.box').scrollTop=0}
+ function sheetDraw(){const r=open;if(!r)return;const p=r.p,k=servings/r.sv;
+  sheet.querySelector('.box').innerHTML=`<div class="hl-head"><span class="em">${r.e}</span><div style="flex:1"><h2>${esc(r.n)}</h2><div class="hl-sub">⏱️ ${r.min} นาที · ${r.m.map(m=>MEAL_ICON[m]+' '+m).join(' ')}</div><div>${r.t.map(t=>`<span class="hl-tag">${TAGS[t]}</span>`).join('')}</div></div><button type="button" class="hl-x" id="hlClose" aria-label="ปิด">✕</button></div>
+   <div class="hl-nut"><div><b>${p.kcal}</b><small>kcal/ที่</small></div><div><b>${p.protein}</b><small>โปรตีน g</small></div><div><b>${p.carbs}</b><small>คาร์บ g</small></div><div><b>${p.fat}</b><small>ไขมัน g</small></div><div><b>${p.sugar}</b><small>น้ำตาล g</small></div><div><b>${p.fiber}</b><small>ใยอาหาร g</small></div><div style="grid-column:span 2"><b>${p.sodium}</b><small>โซเดียม mg</small></div></div>
+   <div style="display:flex;align-items:center;justify-content:space-between"><div class="hl-sec">🧺 วัตถุดิบ</div><div class="hl-sv">ทำ<button type="button" data-sv="-1">−</button><b>${servings}</b><button type="button" data-sv="1">+</button>ที่</div></div>
+   ${r.i.map(([n,u,q])=>`<div class="hl-ing"><span>${esc(n)}</span><span>${esc(unitText(u,q*k))}</span></div>`).join('')}
+   <div class="hl-sec">👩‍🍳 วิธีทำ</div><ol class="hl-steps">${r.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+   <div class="hl-acts"><button type="button" class="go" id="hlEat">✅ กินแล้ว · บันทึก 1 ที่ (${p.kcal} kcal)</button><button type="button" id="hlCook">🍳 ทำเมนูนี้</button><button type="button" id="hlShop">🛒 เพิ่มในรายการซื้อของ</button></div>`;
+  const b=sheet.querySelector('.box');
+  b.querySelector('#hlClose').onclick=close;
+  b.querySelectorAll('[data-sv]').forEach(x=>x.onclick=()=>{servings=Math.max(1,Math.min(20,servings+Number(x.dataset.sv)));sheetDraw()});
+  b.querySelector('#hlEat').onclick=()=>{eat(r);close()};
+  b.querySelector('#hlCook').onclick=()=>cook(r);
+  b.querySelector('#hlShop').onclick=()=>{addShopping(r,servings);close()};
+ }
+ // ---- home card + food page entry ----
+ function homeCard(){const box=document.getElementById('hlHome');if(!box)return;const sg=suggest(),x=sg.top[0];if(!x){box.style.display='none';return}box.style.display='';
+  box.innerHTML=`<h3>🥗 วันนี้กินอะไรดี?</h3><div class="sub">${esc(sg.head)}</div><button type="button" class="pick" data-r="${x.r.id}"><span class="em">${x.r.e}</span><span style="flex:1;min-width:0"><b>${esc(x.r.n)}</b><small>${x.r.p.kcal} kcal · ${esc(x.why[0])}</small></span><span>›</span></button><button type="button" class="more" id="hlMore">ดูเมนูสุขภาพทั้งหมด</button>`;
+  box.querySelector('[data-r]').onclick=()=>show(x.r);box.querySelector('#hlMore').onclick=()=>go('healthy')}
+ // home: under the calories / water / movement cards
+ const after=document.querySelector('#home .twocards')||document.querySelector('#home [data-home-key="summary"]');
+ if(after&&!document.getElementById('hlHome')){const c=document.createElement('div');c.className='hl-home home-sortable';c.id='hlHome';c.dataset.homeKey='healthy';after.after(c);if(typeof applyHomePrefs==='function')applyHomePrefs()}
+ const rc=document.getElementById('rcEntry');
+ if(rc&&!document.getElementById('hlEntry')){const b=document.createElement('button');b.type='button';b.id='hlEntry';b.className='hl-entry';b.textContent='🥗 เมนูสุขภาพแนะนำ (สูตร + ซื้อของ)';rc.after(b);b.onclick=()=>go('healthy')}
+ const og=window.go;if(og)window.go=function(p){og(p);if(p==='healthy'){draw();window.scrollTo({top:0})}};
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{homeCard();if(page.classList.contains('active')&&document.activeElement?.id!=='hlFind')draw()}catch(e){console.error(e)}return o};
+ window.FWHealthy={recipes:R,suggest,eat,cook,addShopping,show};
+ homeCard();
 })();
 </script>
 </body>
