@@ -1889,6 +1889,58 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  drain();push();
 })();
 </script>
+<!-- v109 Eat the same again: copy yesterday's meals, saved meal sets -->
+<style>
+.rp-card{margin:12px 0;padding:14px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+.rp-card h3{margin:0 0 2px;font-size:16px}.rp-sub{color:var(--muted);font-size:12px;margin-bottom:8px}
+.rp-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.rp-row:first-of-type{border-top:0}
+.rp-row .ic{font-size:22px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--panel2);flex:none}
+.rp-row .tx{flex:1;min-width:0}.rp-row b{display:block;font-size:14px}.rp-row small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-add{border:0;border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820;flex:none}
+.rp-mini{border:0;background:none;color:var(--muted);font-size:16px;padding:4px 6px;flex:none}
+.rp-save{width:100%;margin-top:8px;border:1.5px dashed var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px;font-weight:700;font-size:13px;font-family:inherit}
+.rp-empty{color:var(--muted);font-size:13px;padding:6px 0}
+</style>
+<script>
+(function(){
+ const MEALS=[['เช้า','🌅'],['กลางวัน','☀️'],['เย็น','🌙'],['ของว่าง','🍓']];
+ const icon=m=>(MEALS.find(x=>x[0]===m)||[0,'🍽️'])[1];
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const KEEP=['name','meal','kcal','protein','carbs','fat','fiber','sodium','sugar','note','photo'];
+ const pick=f=>{const o={};KEEP.forEach(k=>{if(f[k]!=null&&f[k]!=='')o[k]=f[k]});return o};
+ const sum=a=>a.reduce((t,f)=>t+Number(f.kcal||0),0);
+ function yday(){const d=new Date();d.setDate(d.getDate()-1);return localDay(d)}
+ function addItems(items,meal){let t=Date.now();const now=new Date();
+  items.forEach((it,i)=>{const id=t+i;s.foods.unshift({...pick(it),meal:meal||it.meal,id,createdAt:id,date:localDay(now),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),favorite:false})});
+  save();toast(`เพิ่ม ${items.length} รายการ · ${sum(items).toLocaleString()} kcal ✨`)}
+ function draw(){
+  const box=document.getElementById('rpCard');if(!box)return;
+  const y=yday(),today=localDay(),yFoods=s.foods.filter(f=>foodDay(f)===y),tFoods=s.foods.filter(f=>foodDay(f)===today);
+  const ymeals=MEALS.map(([m])=>[m,yFoods.filter(f=>f.meal===m)]).filter(x=>x[1].length);
+  const sets=s.mealSets||[];
+  let html='<h3>🔁 กินเหมือนเดิม</h3><div class="rp-sub">แตะครั้งเดียว เพิ่มทั้งมื้อเข้าวันนี้</div>';
+  html+=ymeals.map(([m,a])=>`<div class="rp-row"><span class="ic">${icon(m)}</span><div class="tx"><b>มื้อ${m}เมื่อวาน</b><small>${a.map(f=>esc(f.name)).join(' · ')} · ${sum(a).toLocaleString()} kcal</small></div><button type="button" class="rp-add" data-y="${m}">+ เพิ่ม</button></div>`).join('');
+  html+=sets.map(st=>`<div class="rp-row"><span class="ic">⭐</span><div class="tx"><b>${esc(st.name)}</b><small>${st.items.map(f=>esc(f.name)).join(' · ')} · ${sum(st.items).toLocaleString()} kcal</small></div><button type="button" class="rp-mini" data-del="${st.id}" aria-label="ลบชุด">🗑️</button><button type="button" class="rp-add" data-set="${st.id}">+ เพิ่ม</button></div>`).join('');
+  if(!ymeals.length&&!sets.length)html+='<div class="rp-empty">เมื่อบันทึกอาหารแล้ว มื้อของเมื่อวานจะมาแสดงตรงนี้ หรือบันทึกมื้อที่กินประจำเป็น “ชุด” ไว้ใช้ซ้ำได้</div>';
+  const tmeals=MEALS.map(([m])=>[m,tFoods.filter(f=>f.meal===m)]).filter(x=>x[1].length>0);
+  if(tmeals.length)html+=`<button type="button" class="rp-save" id="rpSave">💾 บันทึกมื้อวันนี้เป็นชุดประจำ</button>`;
+  box.innerHTML=html;
+  box.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>addItems(yFoods.filter(f=>f.meal===b.dataset.y)));
+  box.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{const st=sets.find(x=>String(x.id)===b.dataset.set);if(st)addItems(st.items,st.meal)});
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const st=sets.find(x=>String(x.id)===b.dataset.del);if(st&&confirm(`ลบชุด "${st.name}"?`)){s.mealSets=sets.filter(x=>x!==st);save()}});
+  const sv=document.getElementById('rpSave');if(sv)sv.onclick=()=>{
+   const m=tmeals.length===1?tmeals[0][0]:prompt('บันทึกมื้อไหนเป็นชุด? ('+tmeals.map(x=>x[0]).join(' / ')+')',tmeals[tmeals.length-1][0]);if(!m)return;
+   const a=(tmeals.find(x=>x[0]===m.trim())||[])[1];if(!a){toast('ไม่พบมื้อนั้นวันนี้');return}
+   const name=prompt('ตั้งชื่อชุด',a.map(f=>f.name).slice(0,2).join(' + '));if(!name)return;
+   s.mealSets=[{id:Date.now(),name:name.trim(),meal:m.trim(),items:a.map(f=>{const o=pick(f);delete o.photo;return o})},...(s.mealSets||[])].slice(0,30);save();toast('บันทึกชุดแล้ว ⭐')};
+ }
+ const anchor=document.querySelector('#food .food-repeat-card');
+ if(anchor&&!document.getElementById('rpCard')){const c=document.createElement('div');c.className='rp-card';c.id='rpCard';anchor.after(c)}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){console.error(e)}return o};
+ draw();
+})();
+</script>
 </body>
 </html>
 
