@@ -11,7 +11,11 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowInsetsController
+import android.app.AlertDialog
+import android.webkit.JsPromptResult
+import android.webkit.JsResult
 import android.webkit.JavascriptInterface
+import android.widget.EditText
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -94,6 +98,37 @@ class MainActivity : ComponentActivity() {
                         filePathCallback = null
                         false
                     }
+                }
+
+                // The page's alert/confirm/prompt in the app's own dialog, without WebView's
+                // "The page at file:// says:" title.
+                private fun dialog() = AlertDialog.Builder(this@MainActivity)
+                private fun ok() = Lang.t(this@MainActivity, "ตกลง", "OK")
+                private fun cancel() = Lang.t(this@MainActivity, "ยกเลิก", "Cancel")
+
+                override fun onJsAlert(view: WebView, url: String?, message: String?, result: JsResult): Boolean {
+                    dialog().setMessage(message).setPositiveButton(ok()) { _, _ -> result.confirm() }
+                        .setOnCancelListener { result.confirm() }.show()
+                    return true
+                }
+
+                override fun onJsConfirm(view: WebView, url: String?, message: String?, result: JsResult): Boolean {
+                    dialog().setMessage(message)
+                        .setPositiveButton(ok()) { _, _ -> result.confirm() }
+                        .setNegativeButton(cancel()) { _, _ -> result.cancel() }
+                        .setOnCancelListener { result.cancel() }.show()
+                    return true
+                }
+
+                override fun onJsPrompt(view: WebView, url: String?, message: String?, defaultValue: String?, result: JsPromptResult): Boolean {
+                    val input = EditText(this@MainActivity).apply { setText(defaultValue ?: ""); setSingleLine(); selectAll() }
+                    val pad = (20 * resources.displayMetrics.density).toInt()
+                    val box = FrameLayout(this@MainActivity).apply { setPadding(pad, pad / 2, pad, 0); addView(input) }
+                    dialog().setMessage(message).setView(box)
+                        .setPositiveButton(ok()) { _, _ -> result.confirm(input.text.toString()) }
+                        .setNegativeButton(cancel()) { _, _ -> result.cancel() }
+                        .setOnCancelListener { result.cancel() }.show()
+                    return true
                 }
             }
             addJavascriptInterface(FilesApi(), "FoodWellFiles")
