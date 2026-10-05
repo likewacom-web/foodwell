@@ -193,6 +193,15 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 .nutri-table-wrap{overflow-x:auto}.nutri-table{width:100%;border-collapse:collapse;font-size:12px;text-align:right}
 .nutri-table th{color:#9ea0aa;font-weight:700;padding:6px 4px;border-bottom:1px solid #30333b}.nutri-table td{padding:7px 4px;border-bottom:1px solid #24262d}
 .nutri-table th:first-child,.nutri-table td:first-child{text-align:left}.nutri-table tr.today td{color:#f3a0bb;font-weight:800}.nutri-table tr.avg td{color:#9ea0aa;border-bottom:0}
+.body-form{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-top:10px}.body-form label{margin:0}.body-form .wide{grid-column:1/-1}
+.body-result{margin-top:12px}.bmi-box{display:flex;align-items:center;gap:14px;padding:12px;border-radius:16px;background:#24262d}
+.bmi-num{font-size:34px;font-weight:900;line-height:1}.bmi-num small{display:block;font-size:11px;color:#9ea0aa;font-weight:700;margin-top:4px}
+.bmi-tag{display:inline-block;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;margin-bottom:4px}
+.bmi-scale{position:relative;height:8px;border-radius:9px;margin:12px 2px 4px;background:linear-gradient(90deg,#7cc4f5 0 17.5%,#6ee7a8 17.5% 40%,#f4c76b 40% 50%,#f59f6b 50% 75%,#ef718d 75%)}
+.bmi-scale i{position:absolute;top:-4px;width:4px;height:16px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px #0006}
+.bmi-legend{position:relative;height:14px;font-size:10px;color:#8f929b}.bmi-legend span{position:absolute;transform:translateX(-50%)}.bmi-legend span:first-child{transform:none}.bmi-legend span:last-child{transform:translateX(-100%)}
+.target-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.target-grid div{background:#24262d;border-radius:14px;padding:9px}
+.target-grid b{display:block;font-size:16px}.target-grid small{color:#9ea0aa;font-size:11px}.body-note{font-size:11px;color:#8f929b;line-height:1.6;margin-top:10px}
 .dash-insights{width:100%;margin:4px 0 12px;padding:14px}
 .burn-total{margin-top:10px;display:inline-block;background:#2a2026;color:#f3a0bb;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700}.burn-total b{font-size:16px}
 .burn-est{margin:10px 0 2px;padding:10px 12px;border-radius:13px;background:#24262d;color:#f3c7d6;font-size:14px}.burn-est small{display:block;color:#8f929b;font-size:11px;margin-top:2px}
@@ -375,6 +384,18 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
     <div class="profile-stat"><b id="profileStatDays">0</b><small>วันที่บันทึก</small></div>
   </div>
   <div class="profile-insight" id="profileInsight">เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨</div>
+</div>
+<div class="card body-card" id="bodyCard">
+  <div class="trend-head"><h2>🎯 ร่างกายและเป้าหมาย</h2><small>ใช้คำนวณ BMI และเป้าหมายต่อวัน</small></div>
+  <div class="body-form">
+    <label>เพศ<select id="bodySex"><option value="">เลือก</option><option value="f">หญิง</option><option value="m">ชาย</option></select></label>
+    <label>อายุ (ปี)<input id="bodyAge" type="number" min="10" max="100" inputmode="numeric"></label>
+    <label>ส่วนสูง (ซม.)<input id="bodyHeight" type="number" min="100" max="230" step="0.1" inputmode="decimal"></label>
+    <label>น้ำหนัก (กก.)<input id="bodyWeight" type="number" min="20" max="300" step="0.1" inputmode="decimal"></label>
+    <label class="wide">ระดับกิจกรรม<select id="bodyActivity"><option value="1.2">นั่งทำงานเป็นส่วนใหญ่ แทบไม่ออกกำลังกาย</option><option value="1.375">ออกกำลังกายเบา ๆ 1–3 วัน/สัปดาห์</option><option value="1.55">ออกกำลังกายปานกลาง 3–5 วัน/สัปดาห์</option><option value="1.725">ออกกำลังกายหนัก 6–7 วัน/สัปดาห์</option></select></label>
+    <label class="wide">เป้าหมาย<select id="bodyGoal"><option value="lose">ลดน้ำหนัก (~0.5 กก./สัปดาห์)</option><option value="maintain">คงน้ำหนัก</option><option value="gain">เพิ่มน้ำหนัก / สร้างกล้ามเนื้อ</option></select></label>
+  </div>
+  <div id="bodyResult" class="body-result"></div>
 </div>
 <div class="card" id="profileEditor" style="display:none">
   <h2>👤 โปรไฟล์</h2>
@@ -587,7 +608,7 @@ function moveKcal(name,type,min){return Math.round(moveMet(name,type)*bodyWeight
 function moveKcalOf(x){return Number.isFinite(Number(x.kcal))&&x.kcal!==null&&x.kcal!==""?Number(x.kcal):moveKcal(x.name,x.type,x.min)}
 function updateBurnEst(){const el=$("burnEst");if(!el)return;const m=Number($("exMin").value||0);if(!m){el.textContent="ใส่เวลาเพื่อประเมินแคลอรี่ที่ใช้";return}const met=moveMet($("exName").value,$("exType").value);el.innerHTML=`🔥 ประมาณ <b>${moveKcal($("exName").value,$("exType").value,m).toLocaleString()} kcal</b> <small>(MET ${met} × ${bodyWeight()} กก. × ${m} นาที)</small>`}
 ["exName","exType","exMin"].forEach(id=>{const e=$(id);if(e){e.addEventListener("input",updateBurnEst);e.addEventListener("change",updateBurnEst)}});
-(()=>{const w=$("exWeight");if(!w)return;if(s.profile&&s.profile.weight)w.value=s.profile.weight;w.addEventListener("change",()=>{const v=Number(w.value);s.profile=s.profile||{};if(v>=20&&v<=300){s.profile.weight=v;save()}else{delete s.profile.weight;w.value="";save()}updateBurnEst()})})();
+(()=>{const w=$("exWeight");if(!w)return;if(s.profile&&s.profile.weight)w.value=s.profile.weight;w.addEventListener("change",()=>{const v=Number(w.value);s.profile=s.profile||{};if(v>=20&&v<=300){s.profile.weight=v;save()}else{delete s.profile.weight;w.value="";save()}if($("bodyWeight"))$("bodyWeight").value=s.profile.weight||"";updateBurnEst()})})();
 $("addEx").onclick=()=>{let t=$("exType").value,n=$("exName").value.trim()||(t!==EX_AUTO?t:""),m=Number($("exMin").value||0);if(!n||!m){toast(n?"กรอกเวลา (นาที)":"เลือกประเภทหรือพิมพ์ชื่อกิจกรรม");return}s.moves.unshift({id:Date.now(),name:n,type:$("exType").value,min:m,kcal:moveKcal(n,$("exType").value,m),met:moveMet(n,$("exType").value),time:new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});$("exName").value="";$("exMin").value="";$("exType").value=EX_AUTO;save();updateBurnEst();toast("บันทึกแล้ว")};
 $("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้งหมดในเครื่องนี้?")){s={foods:[],water:0,moves:[],waterLog:[],favorites:[],history:[],dayNote:"",profile:{name:"FoodWell",emoji:"🌿"},settings:{softTheme:false,gentleReminder:false,reminderMinutes:180}};save();toast("ล้างข้อมูลแล้ว")}};
 let meal="ทั้งหมด";
@@ -846,6 +867,40 @@ function localDay(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMont
 function foodDay(f){return f.createdAt?localDay(new Date(f.createdAt)):String(f.date||"").slice(0,10)}
 function kcalOn(day){return s.foods.filter(f=>foodDay(f)===day).reduce((a,f)=>a+Number(f.kcal||0),0)}
 function lastDays(n){const out=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(localDay(d))}return out}
+// Personal targets from sex, age, height, weight, activity and goal.
+// BMI uses the Asian cut-offs used in Thailand; energy = Mifflin-St Jeor BMR × activity, ± goal.
+const BMI_LEVELS=[[18.5,"น้ำหนักน้อย / ผอม","#7cc4f5"],[23,"ปกติ (สุขภาพดี)","#6ee7a8"],[25,"น้ำหนักเกิน / ท้วม","#f4c76b"],[30,"อ้วนระดับ 1","#f59f6b"],[Infinity,"อ้วนระดับ 2","#ef718d"]];
+function bodyTargets(){
+ const p=s.profile||{},w=Number(p.weight),h=Number(p.height),a=Number(p.age);
+ if(!(w>=20&&h>=100&&a>=10))return null;
+ const bmi=w/((h/100)**2),lvl=BMI_LEVELS.find(x=>bmi<x[0]);
+ const out={bmi:Math.round(bmi*10)/10,bmiLabel:lvl[1],bmiColor:lvl[2],healthy:[18.5,22.9].map(b=>Math.round(b*(h/100)**2*10)/10)};
+ if(p.sex!=="m"&&p.sex!=="f")return out;
+ const bmr=10*w+6.25*h-5*a+(p.sex==="m"?5:-161),tdee=bmr*Number(p.activity||1.2),goal=p.goal||"maintain";
+ const floor=p.sex==="m"?1500:1200;
+ let kcal=goal==="lose"?Math.max(floor,tdee-500):goal==="gain"?tdee+300:tdee;kcal=Math.round(kcal/10)*10;
+ const protein=Math.round(w*(goal==="lose"?1.2:goal==="gain"?1.6:1.0)),fat=Math.round(kcal*0.3/9);
+ return Object.assign(out,{bmr:Math.round(bmr),tdee:Math.round(tdee),kcal,protein,fat,carbs:Math.max(0,Math.round((kcal-protein*4-fat*9)/4)),fiber:Math.round(kcal/1000*14),sugar:24,sodium:2000});
+}
+function renderBody(){
+ const p=s.profile||{},set=(id,v)=>{const e=$(id);if(e&&document.activeElement!==e)e.value=v==null?"":v};
+ set("bodySex",p.sex||"");set("bodyAge",p.age||"");set("bodyHeight",p.height||"");set("bodyWeight",p.weight||"");set("bodyActivity",p.activity||"1.2");set("bodyGoal",p.goal||"maintain");
+ const box=$("bodyResult");if(!box)return;const T=bodyTargets();
+ if(!T){box.innerHTML='<div class="body-note">กรอกอายุ ส่วนสูง และน้ำหนัก เพื่อดู BMI · เลือกเพศด้วยเพื่อคำนวณแคลอรี่และสารอาหารที่ควรได้ต่อวัน</div>';return}
+ const pos=Math.max(0,Math.min(100,(T.bmi-15)/(35-15)*100));
+ let html=`<div class="bmi-box"><div class="bmi-num">${T.bmi}<small>BMI</small></div><div><span class="bmi-tag" style="background:${T.bmiColor};color:#1b1d22">${T.bmiLabel}</span><div style="font-size:12px;color:#c9ccd4">น้ำหนักที่เหมาะกับส่วนสูงนี้ ${T.healthy[0]}–${T.healthy[1]} กก.</div></div></div>
+  <div class="bmi-scale"><i style="left:calc(${pos}% - 2px)"></i></div><div class="bmi-legend"><span style="left:0">15</span><span style="left:17.5%">18.5</span><span style="left:40%">23</span><span style="left:50%">25</span><span style="left:75%">30</span><span style="left:100%">35</span></div>`;
+ if(T.kcal)html+=`<div class="target-grid"><div><small>ควรได้ต่อวัน</small><b>${T.kcal.toLocaleString()}</b><small>kcal</small></div><div><small>BMR</small><b>${T.bmr.toLocaleString()}</b><small>kcal (พักผ่อน)</small></div><div><small>TDEE</small><b>${T.tdee.toLocaleString()}</b><small>kcal (รวมกิจกรรม)</small></div>
+  <div><small>โปรตีน</small><b>${T.protein} g</b></div><div><small>คาร์บ</small><b>${T.carbs} g</b></div><div><small>ไขมัน</small><b>≤ ${T.fat} g</b></div></div>`;
+ else html+='<div class="body-note">เลือกเพศเพื่อคำนวณแคลอรี่และสารอาหารที่ควรได้ต่อวัน</div>';
+ html+=`<div class="body-note">ค่าประมาณสำหรับผู้ใหญ่ทั่วไป${Number(p.age)<18?' · <b>อายุต่ำกว่า 18 ปี เกณฑ์ BMI และสูตรนี้อาจไม่เหมาะ</b>':''} · ไม่ใช่คำแนะนำทางการแพทย์ หากมีโรคประจำตัว ตั้งครรภ์ หรือให้นมบุตร ควรปรึกษาแพทย์/นักกำหนดอาหาร</div>`;
+ box.innerHTML=html;
+}
+(()=>{
+ const num=(id,min,max,k)=>{const e=$(id);if(!e)return;e.addEventListener("change",()=>{const v=Number(e.value);s.profile=s.profile||{};if(v>=min&&v<=max)s.profile[k]=v;else{delete s.profile[k];e.value=""}if(k==="weight"&&$("exWeight"))$("exWeight").value=s.profile.weight||"";save()})};
+ num("bodyAge",10,100,"age");num("bodyHeight",100,230,"height");num("bodyWeight",20,300,"weight");
+ [["bodySex","sex"],["bodyActivity","activity"],["bodyGoal","goal"]].forEach(([id,k])=>{const e=$(id);if(e)e.addEventListener("change",()=>{s.profile=s.profile||{};s.profile[k]=e.value;save()})});
+})();
 // Daily reference values: Thai RDI (protein, carbs, fat, fiber, sodium) and the Department of
 // Health limit of 6 teaspoons (24 g) of sugar. "limit" ones turn orange when exceeded.
 const NUTRIENTS=[
@@ -858,7 +913,8 @@ const NUTRIENTS=[
 function nutrientsOn(day){const t={};NUTRIENTS.forEach(n=>t[n.k]=0);s.foods.filter(f=>foodDay(f)===day).forEach(f=>NUTRIENTS.forEach(n=>t[n.k]+=Number(f[n.k]||0)));NUTRIENTS.forEach(n=>t[n.k]=Math.round(t[n.k]*10)/10);return t}
 function renderNutrients(days){
  const box=$("nutriToday");
- if(box){const t=nutrientsOn(days[6]);box.innerHTML=NUTRIENTS.map(n=>{const v=t[n.k],pct=Math.min(100,v/n.ref*100),over=n.limit&&v>n.ref;return `<div class="nutri${over?" over":""}"><span>${n.label}</span><b>${v.toLocaleString()}<small> ${n.unit}</small></b><i><em style="width:${pct}%"></em></i><span>${n.limit?"ไม่เกิน":"แนะนำ"} ${n.ref.toLocaleString()}</span></div>`}).join("")}
+ const T=bodyTargets(),ref=n=>(T&&T[n.k])||n.ref;
+ if(box){const t=nutrientsOn(days[6]);box.innerHTML=NUTRIENTS.map(n=>{const v=t[n.k],r=ref(n),pct=Math.min(100,v/r*100),over=n.limit&&v>r;return `<div class="nutri${over?" over":""}"><span>${n.label}</span><b>${v.toLocaleString()}<small> ${n.unit}</small></b><i><em style="width:${pct}%"></em></i><span>${n.limit?"ไม่เกิน":T&&T.kcal?"เป้า":"แนะนำ"} ${r.toLocaleString()}</span></div>`}).join("")}
  const tb=$("dashNutri");if(!tb)return;
  const rows=days.map(d=>({d,t:nutrientsOn(d)})).reverse(),cols=NUTRIENTS.filter(n=>n.k!=="fiber");
  const logged=rows.filter(r=>kcalOn(r.d)>0||cols.some(n=>r.t[n.k]>0));
@@ -869,12 +925,21 @@ function renderNutrients(days){
 }
 function renderKcal(){
  const days=lastDays(7),vals=days.map(kcalOn),today=vals[6],yest=vals[5];
- renderNutrients(days);
+ renderNutrients(days);renderBody();
  const logged=vals.filter(v=>v>0),avg=logged.length?Math.round(logged.reduce((a,v)=>a+v,0)/logged.length):0;
  $("totalKcal").textContent=today.toLocaleString();
  const meals=new Set(s.foods.filter(f=>foodDay(f)===days[6]).map(f=>f.meal)).size;
- if($("kcalRing"))$("kcalRing").innerHTML=meals?`${meals}<br><small style="font-size:11px">มื้อ</small>`:"วันนี้<br>♡";
- if($("kcalSub"))$("kcalSub").textContent=`เมื่อวาน ${yest.toLocaleString()} kcal`+(avg?` · เฉลี่ย 7 วัน ${avg.toLocaleString()} kcal`:"");
+ const T=bodyTargets(),ringEl=$("kcalRing")?.parentElement;
+ if(T&&T.kcal){
+  const pct=Math.round(today/T.kcal*100),left=T.kcal-today;
+  if($("kcalRing"))$("kcalRing").innerHTML=`${pct}%<br><small style="font-size:11px">ของเป้า</small>`;
+  if(ringEl)ringEl.style.background=`conic-gradient(${pct>100?"#d9480f":"#17191f"} 0 ${Math.min(100,pct)*3.6}deg,#e58ea9 ${Math.min(100,pct)*3.6}deg 360deg)`;
+  if($("kcalSub"))$("kcalSub").textContent=`เป้าหมาย ${T.kcal.toLocaleString()} kcal · `+(left>=0?`เหลืออีก ${left.toLocaleString()}`:`เกินมา ${(-left).toLocaleString()}`)+` · เมื่อวาน ${yest.toLocaleString()}`;
+ }else{
+  if($("kcalRing"))$("kcalRing").innerHTML=meals?`${meals}<br><small style="font-size:11px">มื้อ</small>`:"วันนี้<br>♡";
+  if(ringEl)ringEl.style.background="";
+  if($("kcalSub"))$("kcalSub").textContent=`เมื่อวาน ${yest.toLocaleString()} kcal`+(avg?` · เฉลี่ย 7 วัน ${avg.toLocaleString()} kcal`:"");
+ }
  const box=$("dashKcalBars");if(!box)return;const max=Math.max(...vals,1);
  box.innerHTML=vals.map((v,i)=>`<div class="dash-col"><span class="dash-value">${v.toLocaleString()}</span><div class="dash-bar" style="height:${Math.max(5,(v/max)*108)}px"></div><small>${new Date(days[i]+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short"})}</small></div>`).join("");
  if($("dashKcalNote"))$("dashKcalNote").textContent=avg?`เฉลี่ย ${avg.toLocaleString()} kcal ต่อวัน (เฉพาะวันที่มีบันทึก)`:"kcal จากอาหารที่บันทึกในแต่ละวัน";
