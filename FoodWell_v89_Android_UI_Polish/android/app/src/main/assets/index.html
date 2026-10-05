@@ -66,7 +66,7 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 
 .insight-card{background:linear-gradient(145deg,#211b24,#191a20);border:1px solid rgba(240,169,192,.16)}
 .insight-list{display:grid;gap:8px;margin-top:12px}.insight-item{display:flex;gap:10px;align-items:center;padding:11px 12px;border-radius:16px;background:#24242b}.insight-icon{font-size:21px}.insight-item b{font-size:12px}.insight-item small{display:block;color:#a9a5ad;font-size:10px;margin-top:2px}
-.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.quick-action{border:0;border-radius:18px;padding:12px 7px;background:#24242b;color:#fff;font:700 11px inherit;cursor:pointer;transition:transform .16s,background .16s}.quick-action:active{transform:scale(.95);background:#302b32}.quick-action span{display:block;font-size:20px;margin-bottom:4px}
+.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.quick-action{border:0;border-radius:18px;padding:12px 7px;background:#24242b;color:#fff;font-weight:700;font-size:11px;font-family:inherit;cursor:pointer;transition:transform .16s,background .16s}.quick-action:active{transform:scale(.95);background:#302b32}.quick-action span{display:block;font-size:20px;margin-bottom:4px}
 @media(prefers-reduced-motion:no-preference){.insight-item{animation:rise .35s both}.insight-item:nth-child(2){animation-delay:.05s}.insight-item:nth-child(3){animation-delay:.1s}}
 
 .trophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.trophy{background:#1f2127;border:1px solid #2d3038;border-radius:20px;padding:10px;display:grid;grid-template-columns:78px minmax(0,1fr);gap:9px;align-items:center;min-height:138px;transition:.18s;overflow:hidden}.trophy.locked{opacity:.5;filter:saturate(.45)}.trophy.unlocked{border-color:#e98eae;box-shadow:0 8px 24px rgba(233,142,174,.12),inset 0 0 24px rgba(233,142,174,.035)}.trophy-art{width:78px;height:104px;border-radius:16px;overflow:hidden;background:#17181d;border:1px solid #343640;display:grid;place-items:center}.trophy-art img{width:100%;height:100%;object-fit:contain;display:block}.trophy.locked .trophy-art{filter:grayscale(1) brightness(.55)}.trophy-body{min-width:0}.trophy-icon{width:42px;height:42px;border-radius:14px;background:#292b33;display:grid;place-items:center;font-size:22px;flex:none;margin-bottom:7px}.trophy b{display:block;font-size:12px;line-height:1.25}.trophy small{display:block;color:#92949e;font-size:9px;margin-top:4px;line-height:1.35}.trophy-progress{height:5px;background:#30333b;border-radius:99px;overflow:hidden;margin-top:7px}.trophy-progress i{display:block;height:100%;background:#e98eae;border-radius:99px}.trophy-count{font-size:11px;color:#e997ae;font-weight:800}.trophy-filter{display:flex;gap:7px;margin:12px 0 4px;overflow:auto;padding-bottom:2px}.trophy-filter button{flex:0 0 auto;border:1px solid #343640;background:#24262d;color:#aaaeba;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:800;cursor:pointer}.trophy-filter button.active{background:#efa0bc;color:#35252c;border-color:#efa0bc;box-shadow:0 5px 14px rgba(239,160,188,.14)} .trophy-tools{display:flex;gap:7px;align-items:center;margin:10px 0 2px}.trophy-tools select{margin:0;flex:1;padding:8px 10px;font-size:10px}.trophy-fav{position:absolute;top:7px;right:7px;width:30px;height:30px;border:1px solid #3a333b;border-radius:10px;background:#202127;color:#8e9098;display:grid;place-items:center;font-size:15px;cursor:pointer;z-index:2}.trophy-fav.active{color:#ffd36b;border-color:#6b5260;background:#30262c}.trophy{position:relative}.trophy-star-note{font-size:9px;color:#9b9da5;margin-top:3px}.trophy-detail-fav{position:absolute;z-index:4;right:62px;top:14px;width:40px;height:40px;border:1px solid #3b343d;border-radius:13px;background:#25232a;color:#8e9098;font-size:19px;cursor:pointer}.trophy-detail-fav.active{color:#ffd36b;border-color:#6b5260}..trophy-summary{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:10px;padding:10px 12px;border:1px solid #34353d;border-radius:15px;background:#202127}.trophy-summary small{display:block;color:#90939d;font-size:9px}.trophy-summary b{display:block;color:#f2a0bb;font-size:12px;margin-bottom:5px}.trophy-summary-bar{height:6px;background:#30323a;border-radius:99px;overflow:hidden}.trophy-summary-bar i{display:block;height:100%;background:linear-gradient(90deg,#e98eae,#f7bfd0);border-radius:99px}.trophy-summary-pct{color:#f3a0bb;font-weight:900;font-size:13px}.trophy-share{border:1px solid #4a303b;background:#2a2026;color:#f2a1bd;border-radius:10px;padding:6px 8px;font-size:10px;font-weight:800;cursor:pointer;margin-top:7px}.trophy-share:active{transform:scale(.95)}.trophy-fallback{display:grid;place-items:center;min-height:180px;background:#24272e;border-radius:20px;color:#f39abc;font-size:42px}.trophy-fallback:after{content:"🏆"}@media(max-width:360px){.trophy{grid-template-columns:68px minmax(0,1fr);padding:8px;gap:7px}.trophy-art{width:68px;height:96px}.trophy b{font-size:11px}.trophy small{font-size:8px}}
@@ -1173,6 +1173,123 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   window.addEventListener('offline',()=>{const d=load();d.network='offline';save(d);});
 })();
 </script>
+<!-- v99 First-run setup: body + goal, step by step -->
+<style>
+#fwOnb{position:fixed;inset:0;z-index:7000;display:none;background:radial-gradient(120% 70% at 50% -10%,#3a2231 0%,#14151b 55%,#0f1015 100%);color:#f5f3f5;font-family:"Noto Sans Thai",system-ui,sans-serif;overflow:hidden}
+#fwOnb.show{display:flex;flex-direction:column}
+.onb-top{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 20px 6px;max-width:480px;width:100%;margin:0 auto;box-sizing:border-box}
+.onb-back{width:40px;height:40px;border-radius:14px;border:1px solid #ffffff1a;background:#ffffff0d;color:#f5f3f5;font-size:20px;flex:none}
+.onb-back[hidden]{visibility:hidden;display:block}
+.onb-progress{flex:1;height:6px;border-radius:9px;background:#ffffff14;overflow:hidden}.onb-progress i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#f7bfd0,#e887aa);transition:width .35s ease}
+.onb-skip{border:0;background:none;color:#9ea0aa;font-weight:600;font-size:14px;font-family:inherit;padding:8px 2px}
+.onb-body{flex:1;overflow-y:auto;padding:18px 20px 12px;max-width:480px;width:100%;margin:0 auto;box-sizing:border-box}
+.onb-step{animation:onbIn .35s ease both}@keyframes onbIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.onb-step.back{animation-name:onbBack}@keyframes onbBack{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.onb-kicker{font-size:12px;letter-spacing:.14em;color:#f3a0bb;font-weight:800}
+.onb-h{font-size:28px;line-height:1.25;font-weight:800;margin:6px 0 6px}.onb-p{color:#a9abb5;font-size:15px;line-height:1.6;margin:0 0 22px}
+.onb-hero{display:grid;place-items:center;margin:26px 0 22px}.onb-logo{width:116px;height:116px;border-radius:36px;display:grid;place-items:center;font-size:58px;background:linear-gradient(145deg,#f7bfd0,#e887aa);box-shadow:0 20px 50px #e887aa40,inset 0 2px 0 #ffffff60}
+.onb-feats{display:grid;gap:10px;margin-top:8px}.onb-feat{display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:18px;background:#ffffff0a;border:1px solid #ffffff10}.onb-feat span{font-size:24px}.onb-feat b{display:block;font-size:15px}.onb-feat small{color:#9ea0aa;font-size:13px}
+.onb-choices{display:grid;gap:10px}.onb-choices.two{grid-template-columns:1fr 1fr}
+.onb-choice{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:16px;border-radius:20px;border:1.5px solid #ffffff14;background:#ffffff0a;color:#f5f3f5;font:inherit;transition:border-color .2s,background .2s,transform .12s}
+.onb-choice:active{transform:scale(.98)}.onb-choice .ic{font-size:30px;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#ffffff0f;flex:none}
+.onb-choice b{display:block;font-size:16px}.onb-choice small{display:block;color:#9ea0aa;font-size:13px;margin-top:2px;line-height:1.45}
+.onb-choices.two .onb-choice{flex-direction:column;justify-content:center;text-align:center;padding:22px 10px}.onb-choices.two .onb-choice .ic{width:64px;height:64px;font-size:38px;border-radius:20px}
+.onb-choice.sel{border-color:#f0a9c0;background:linear-gradient(145deg,#f0a9c024,#e887aa12)}.onb-choice.sel .ic{background:#f0a9c033}
+.onb-field{margin:18px 0 6px;padding:16px 16px 12px;border-radius:22px;background:#ffffff0a;border:1px solid #ffffff10}
+.onb-field-head{display:flex;justify-content:space-between;align-items:baseline}.onb-field-head span{color:#a9abb5;font-size:14px;font-weight:600}
+.onb-val{display:flex;align-items:center;gap:10px}.onb-val input{width:110px;text-align:right;background:none;border:0;color:#fff;font-weight:800;font-size:34px;font-family:inherit;padding:0;outline:none;-moz-appearance:textfield}
+.onb-val input::-webkit-inner-spin-button{-webkit-appearance:none}.onb-val em{font-style:normal;color:#9ea0aa;font-size:15px;font-weight:700}
+.onb-step-btn{width:38px;height:38px;border-radius:12px;border:1px solid #ffffff1a;background:#ffffff0d;color:#fff;font-size:20px;flex:none}
+.onb-range{width:100%;margin:12px 0 2px;accent-color:#e887aa;height:28px}
+.onb-bmi{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 16px;border-radius:20px;background:#ffffff0a;border:1px solid #ffffff10}
+.onb-bmi .num{font-size:30px;font-weight:900;line-height:1}.onb-bmi .num small{display:block;font-size:11px;color:#9ea0aa;margin-top:3px}
+.onb-pill{display:inline-block;border-radius:999px;padding:4px 11px;font-size:13px;font-weight:800;color:#1b1d22}
+.onb-sum{display:grid;place-items:center;text-align:center;margin:8px 0 18px}
+.onb-ring{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#f7bfd0,#e887aa,#f7bfd0);padding:10px;box-shadow:0 18px 50px #e887aa33}
+.onb-ring>div{width:100%;height:100%;border-radius:50%;background:#16171d;display:grid;place-content:center}.onb-ring b{font-size:44px;font-weight:900;line-height:1}.onb-ring small{color:#9ea0aa;font-size:13px;margin-top:4px}
+.onb-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}.onb-macro{padding:14px 10px;border-radius:18px;background:#ffffff0a;border:1px solid #ffffff10;text-align:center}
+.onb-macro b{display:block;font-size:20px}.onb-macro small{color:#9ea0aa;font-size:12px}.onb-macro i{display:block;width:26px;height:4px;border-radius:4px;margin:0 auto 8px}
+.onb-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.onb-stats div{padding:12px 14px;border-radius:18px;background:#ffffff0a;border:1px solid #ffffff10}.onb-stats b{display:block;font-size:18px}.onb-stats small{color:#9ea0aa;font-size:12px}
+.onb-note{font-size:12px;color:#7f828c;line-height:1.6;margin-top:14px}
+.onb-foot{padding:10px 20px calc(16px + env(safe-area-inset-bottom));max-width:480px;width:100%;margin:0 auto;box-sizing:border-box}
+.onb-next{width:100%;height:56px;border:0;border-radius:18px;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820;font-weight:800;font-size:17px;font-family:inherit;box-shadow:0 12px 30px #e887aa40;transition:opacity .2s,transform .12s}
+.onb-next:active{transform:scale(.98)}.onb-next:disabled{opacity:.35;box-shadow:none}
+@media (prefers-reduced-motion:reduce){.onb-step,.onb-progress i{animation:none;transition:none}}
+.body-reopen{margin-top:10px;width:100%;border:1px dashed #f0a9c066;background:#f0a9c00d;color:#f3a0bb;border-radius:14px;padding:11px;font-weight:700;font-size:14px;font-family:inherit}
+</style>
+<div id="fwOnb" role="dialog" aria-modal="true" aria-label="ตั้งค่าร่างกายและเป้าหมาย">
+ <div class="onb-top"><button class="onb-back" id="onbBack" type="button" aria-label="ย้อนกลับ">‹</button><div class="onb-progress"><i id="onbBar"></i></div><button class="onb-skip" id="onbSkip" type="button">ข้าม</button></div>
+ <div class="onb-body" id="onbBody"></div>
+ <div class="onb-foot"><button class="onb-next" id="onbNext" type="button">เริ่มต้น</button></div>
+</div>
+<script>
+(function(){
+ const FLAG='onboarded';
+ const root=document.getElementById('fwOnb'),body=document.getElementById('onbBody'),next=document.getElementById('onbNext'),back=document.getElementById('onbBack'),bar=document.getElementById('onbBar');
+ if(!root||typeof s==='undefined')return;
+ let step=0,dir=1,d={};
+ const SEX=[['f','👩','หญิง'],['m','👨','ชาย']];
+ const ACT=[['1.2','🪑','นั่งทำงานเป็นส่วนใหญ่','แทบไม่ได้ออกกำลังกาย'],['1.375','🚶','ขยับเบา ๆ','ออกกำลังกาย 1–3 วัน/สัปดาห์'],['1.55','🏃','ปานกลาง','ออกกำลังกาย 3–5 วัน/สัปดาห์'],['1.725','🔥','หนัก','ออกกำลังกาย 6–7 วัน/สัปดาห์']];
+ const GOAL=[['lose','📉','ลดน้ำหนัก','ประมาณ 0.5 กก. ต่อสัปดาห์'],['maintain','⚖️','คงน้ำหนัก','รักษาสมดุลให้สุขภาพดี'],['gain','💪','เพิ่มน้ำหนัก / กล้ามเนื้อ','เพิ่มพลังงานและโปรตีน']];
+ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const choice=(list,key,two)=>`<div class="onb-choices${two?' two':''}">${list.map(([v,ic,t,sub])=>`<button type="button" class="onb-choice${String(d[key])===v?' sel':''}" data-k="${key}" data-v="${v}"><span class="ic">${ic}</span><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></button>`).join('')}</div>`;
+ const field=(key,label,unit,min,max,stepv)=>`<div class="onb-field"><div class="onb-field-head"><span>${label}</span><div class="onb-val"><button type="button" class="onb-step-btn" data-inc="${key}" data-by="${-stepv}">−</button><input id="onb_${key}" type="number" inputmode="decimal" min="${min}" max="${max}" step="${stepv}" value="${d[key]??''}"><em>${unit}</em><button type="button" class="onb-step-btn" data-inc="${key}" data-by="${stepv}">+</button></div></div><input class="onb-range" type="range" data-range="${key}" min="${min}" max="${max}" step="${stepv}" value="${d[key]??Math.round((min+max)/2)}"></div>`;
+ const LIM={age:[12,90,1],height:[120,220,0.5],weight:[30,200,0.5]};
+ function previewTargets(){const keep=s.profile;s.profile={...keep,...d};try{return bodyTargets()}finally{s.profile=keep}}
+ function bmiHtml(){const T=previewTargets();if(!T)return '<div class="onb-bmi"><div style="color:#9ea0aa;font-size:14px">ใส่ส่วนสูงและน้ำหนักเพื่อดู BMI</div></div>';
+  return `<div class="onb-bmi"><div class="num">${T.bmi}<small>BMI</small></div><div><span class="onb-pill" style="background:${T.bmiColor}">${T.bmiLabel}</span><div style="font-size:13px;color:#a9abb5;margin-top:5px">น้ำหนักที่เหมาะสม ${T.healthy[0]}–${T.healthy[1]} กก.</div></div></div>`}
+ const STEPS=[
+  {btn:'เริ่มต้น',ok:()=>true,html:()=>`<div class="onb-hero"><div class="onb-logo">🌿</div></div><div class="onb-kicker">WELCOME TO FOODWELL</div><div class="onb-h">ยินดีต้อนรับ 👋</div><p class="onb-p">ตอบคำถามสั้น ๆ 4 ข้อ แล้ว FoodWell จะคำนวณพลังงานและสารอาหารที่เหมาะกับคุณในแต่ละวัน</p>
+   <div class="onb-feats"><div class="onb-feat"><span>🎯</span><div><b>เป้าหมายเฉพาะตัว</b><small>แคลอรี่ โปรตีน คาร์บ ไขมัน ต่อวัน</small></div></div><div class="onb-feat"><span>⚖️</span><div><b>BMI และน้ำหนักที่เหมาะสม</b><small>ประเมินตามเกณฑ์คนเอเชีย</small></div></div><div class="onb-feat"><span>🔒</span><div><b>ข้อมูลอยู่ในเครื่องคุณ</b><small>แก้ไขได้ทุกเมื่อในหน้า “เพิ่มเติม”</small></div></div></div>`},
+  {btn:'ถัดไป',ok:()=>d.sex&&d.age>=12,html:()=>`<div class="onb-kicker">ขั้นที่ 1 จาก 4</div><div class="onb-h">เกี่ยวกับคุณ</div><p class="onb-p">ใช้คำนวณอัตราการเผาผลาญพื้นฐาน (BMR)</p>${choice(SEX,'sex',true)}${field('age','อายุ','ปี',...LIM.age)}`},
+  {btn:'ถัดไป',ok:()=>d.height>=120&&d.weight>=30,html:()=>`<div class="onb-kicker">ขั้นที่ 2 จาก 4</div><div class="onb-h">ส่วนสูงและน้ำหนัก</div><p class="onb-p">ลากแถบหรือแตะตัวเลขเพื่อพิมพ์</p>${field('height','ส่วนสูง','ซม.',...LIM.height)}${field('weight','น้ำหนัก','กก.',...LIM.weight)}<div id="onbBmi">${bmiHtml()}</div>`},
+  {btn:'ถัดไป',ok:()=>!!d.activity,html:()=>`<div class="onb-kicker">ขั้นที่ 3 จาก 4</div><div class="onb-h">ปกติคุณขยับตัวแค่ไหน?</div><p class="onb-p">เลือกที่ใกล้เคียงชีวิตประจำวันที่สุด</p>${choice(ACT,'activity')}`},
+  {btn:'ดูแผนของฉัน ✨',ok:()=>!!d.goal,html:()=>`<div class="onb-kicker">ขั้นที่ 4 จาก 4</div><div class="onb-h">เป้าหมายของคุณ</div><p class="onb-p">เปลี่ยนได้ภายหลังเสมอ</p>${choice(GOAL,'goal')}`},
+  {btn:'เริ่มใช้ FoodWell',ok:()=>true,html:()=>{const T=previewTargets()||{};return `<div class="onb-kicker" style="text-align:center">แผนของคุณพร้อมแล้ว</div><div class="onb-h" style="text-align:center">พลังงานที่ควรได้ต่อวัน</div>
+   <div class="onb-sum"><div class="onb-ring"><div><b>${(T.kcal||0).toLocaleString()}</b><small>kcal / วัน</small></div></div></div>
+   <div class="onb-macros"><div class="onb-macro"><i style="background:#f3a0bb"></i><b>${T.protein||0} g</b><small>โปรตีน</small></div><div class="onb-macro"><i style="background:#f4c76b"></i><b>${T.carbs||0} g</b><small>คาร์บ</small></div><div class="onb-macro"><i style="background:#7cc4f5"></i><b>≤ ${T.fat||0} g</b><small>ไขมัน</small></div></div>
+   <div class="onb-stats"><div><small>BMI</small><b>${T.bmi??'–'}</b><span class="onb-pill" style="background:${T.bmiColor||'#ccc'};margin-top:6px">${esc(T.bmiLabel||'')}</span></div><div><small>น้ำหนักที่เหมาะสม</small><b>${T.healthy?T.healthy[0]+'–'+T.healthy[1]:'–'}</b><small>กิโลกรัม</small></div></div>
+   <div class="onb-note">BMR ${(T.bmr||0).toLocaleString()} kcal · TDEE ${(T.tdee||0).toLocaleString()} kcal · ค่าประมาณสำหรับผู้ใหญ่ทั่วไป${d.age<18?' (อายุต่ำกว่า 18 ปี เกณฑ์นี้อาจไม่เหมาะ)':''} ไม่ใช่คำแนะนำทางการแพทย์</div>`}}
+ ];
+ function render(){
+  const st=STEPS[step];
+  body.innerHTML=`<div class="onb-step${dir<0?' back':''}">${st.html()}</div>`;body.scrollTop=0;
+  bar.style.width=(step/(STEPS.length-1)*100)+'%';
+  back.hidden=step===0;next.textContent=st.btn;sync();
+  document.getElementById('onbSkip').style.visibility=step===STEPS.length-1?'hidden':'visible';
+ }
+ function sync(){next.disabled=!STEPS[step].ok()}
+ function setNum(k,v,from){const [min,max,stp]=LIM[k];v=Number(v);if(!isFinite(v))return;v=Math.min(max,Math.max(min,Math.round(v/stp)*stp));d[k]=v;
+  const i=document.getElementById('onb_'+k),r=body.querySelector(`[data-range="${k}"]`);if(i&&from!=='input')i.value=v;if(r&&from!=='range')r.value=v;
+  const b=document.getElementById('onbBmi');if(b)b.innerHTML=bmiHtml();sync()}
+ body.addEventListener('click',e=>{
+  const c=e.target.closest('.onb-choice');if(c){d[c.dataset.k]=c.dataset.k==='activity'?c.dataset.v:c.dataset.v;body.querySelectorAll(`.onb-choice[data-k="${c.dataset.k}"]`).forEach(x=>x.classList.toggle('sel',x===c));sync();return}
+  const inc=e.target.closest('[data-inc]');if(inc){const k=inc.dataset.inc;setNum(k,(d[k]??(LIM[k][0]+LIM[k][1])/2)+Number(inc.dataset.by))}
+ });
+ body.addEventListener('input',e=>{const r=e.target.closest('[data-range]');if(r){setNum(r.dataset.range,r.value,'range');return}
+  const i=e.target.closest('input[id^="onb_"]');if(i){const k=i.id.slice(4);const v=Number(i.value);if(i.value===''){delete d[k];sync();return}if(v>=LIM[k][0]&&v<=LIM[k][1]){d[k]=v;const r2=body.querySelector(`[data-range="${k}"]`);if(r2)r2.value=v;const b=document.getElementById('onbBmi');if(b)b.innerHTML=bmiHtml();}sync()}});
+ body.addEventListener('change',e=>{const i=e.target.closest('input[id^="onb_"]');if(i&&i.value!=='')setNum(i.id.slice(4),i.value)});
+ function finish(save_){
+  s.profile=s.profile||{};
+  if(save_){['sex','age','height','weight','activity','goal'].forEach(k=>{if(d[k]!=null&&d[k]!=='')s.profile[k]=d[k]})}
+  s.profile[FLAG]=true;save();
+  root.classList.remove('show');document.body.style.overflow='';
+  if(save_&&typeof toast==='function')toast('ตั้งค่าเป้าหมายเรียบร้อย 🎯');
+  if(typeof go==='function')go('home');
+ }
+ next.onclick=()=>{if(!STEPS[step].ok())return;if(step===STEPS.length-1){finish(true);return}dir=1;step++;render()};
+ back.onclick=()=>{if(step>0){dir=-1;step--;render()}};
+ document.getElementById('onbSkip').onclick=()=>finish(step>0);
+ window.fwOpenOnboarding=function(){const p=s.profile||{};d={sex:p.sex,age:p.age,height:p.height,weight:p.weight,activity:p.activity||'1.2',goal:p.goal||'maintain'};
+  Object.keys(d).forEach(k=>d[k]==null&&delete d[k]);step=0;dir=1;root.classList.add('show');document.body.style.overflow='hidden';render()};
+ // First launch: profile has never been set up (and no body data was entered some other way).
+ const p=s.profile||{};
+ if(!p[FLAG]&&!(p.height&&p.age&&p.sex))setTimeout(window.fwOpenOnboarding,300);
+ // "set up again" button on the More page card
+ const card=document.getElementById('bodyCard');
+ if(card&&!document.getElementById('bodyReopen')){const b=document.createElement('button');b.type='button';b.id='bodyReopen';b.className='body-reopen';b.textContent='✨ ตั้งค่าใหม่แบบทีละขั้น';b.onclick=window.fwOpenOnboarding;card.appendChild(b)}
+})();
+</script>
 </body>
 </html>
 
@@ -1392,9 +1509,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 <style>
 .fw98-card{margin:12px 0;padding:16px;border-radius:20px;background:linear-gradient(135deg,#2b2230,#1d1b22);border:1px solid #4a3442}
 .fw98-card.done{background:linear-gradient(135deg,#1f2b25,#1a1d1f);border-color:#2f4a3c}
-.fw98-buy{width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px;font:800 15px inherit;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#2b1820}
+.fw98-buy{width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px;font-weight:800;font-size:15px;font-family:inherit;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#2b1820}
 .fw98-buy:disabled{opacity:.45}
-.fw98-link{border:0;background:none;color:#e9a3bb;font:700 13px inherit;padding:10px 0 0;text-decoration:underline}
+.fw98-link{border:0;background:none;color:#e9a3bb;font-weight:700;font-size:13px;font-family:inherit;padding:10px 0 0;text-decoration:underline}
 .fw98-msg{margin-top:8px;font-size:12px;color:#f4c76b}
 .fw98-list{margin:8px 0 0;padding-left:18px;font-size:13px;color:#cfd2da;line-height:1.7}
 </style>
