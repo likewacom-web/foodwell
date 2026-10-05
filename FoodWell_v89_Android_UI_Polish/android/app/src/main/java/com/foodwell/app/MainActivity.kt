@@ -102,6 +102,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(NotifyApi(), "FoodWellNotify")
             addJavascriptInterface(ThemeApi(), "FoodWellTheme")
             addJavascriptInterface(ScanApi(), "FoodWellScan")
+            addJavascriptInterface(WidgetApi(), "FoodWellWidget")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -160,6 +161,12 @@ class MainActivity : ComponentActivity() {
                 isAppearanceLightNavigationBars = light
             }
         }
+    }
+
+    /** Home-screen widget: the page sends today's numbers and collects water added from the widget. */
+    inner class WidgetApi {
+        @JavascriptInterface fun update(json: String) = TodayWidget.saveSnapshot(this@MainActivity, json)
+        @JavascriptInterface fun drain(): String = TodayWidget.drain(this@MainActivity)
     }
 
     /** Barcode scanning through Google Play services' scanner UI (no camera permission needed). */
