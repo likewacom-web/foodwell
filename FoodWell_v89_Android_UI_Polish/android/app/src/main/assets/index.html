@@ -1703,6 +1703,85 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  badge();
 })();
 </script>
+<!-- v106 Streak + weekly summary -->
+<style>
+.streak-row{display:flex;justify-content:center;gap:8px;margin:-4px 0 12px;flex-wrap:wrap}
+.streak-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;background:#f4c76b26;color:#b7791f;border:1px solid #f4c76b55}
+.streak-chip.zero{background:var(--panel2);color:var(--muted);border-color:var(--line)}
+.streak-chip small{font-weight:600;opacity:.8}
+.wk-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.wk-head{display:flex;align-items:center;gap:8px}.wk-head h3{margin:0;font-size:17px;flex:1}
+.wk-tabs{display:flex;background:var(--panel2);border-radius:12px;padding:3px}.wk-tabs button{border:0;background:none;color:var(--muted);font-family:inherit;font-weight:700;font-size:12px;padding:6px 10px;border-radius:9px}.wk-tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 4px #0002}
+.wk-range{color:var(--muted);font-size:12px;margin:4px 0 12px}
+.wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wk-tile{background:var(--panel2);border-radius:16px;padding:12px}.wk-tile small{display:block;color:var(--muted);font-size:12px}.wk-tile b{display:block;font-size:21px;margin-top:2px}.wk-tile em{font-style:normal;font-size:12px;font-weight:700}
+.wk-up{color:#d9480f}.wk-down{color:#2f9e6e}.wk-flat{color:var(--muted)}
+.wk-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+.wk-day{text-align:center;font-size:11px;color:var(--muted)}.wk-day i{display:block;height:34px;border-radius:9px;margin-bottom:4px;background:var(--panel2);position:relative;overflow:hidden}
+.wk-day i em{position:absolute;left:0;right:0;bottom:0;background:#f0a9c0;border-radius:9px}.wk-day.over i em{background:#f59f6b}.wk-day.today{color:var(--text);font-weight:800}
+.wk-note{margin-top:12px;padding:10px 12px;border-radius:14px;background:var(--panel2);font-size:13px;line-height:1.6}
+.wk-home{position:relative}.wk-home .x{position:absolute;right:10px;top:10px;border:0;background:none;color:var(--muted);font-size:18px}
+.wk-home .go{width:100%;margin-top:10px;border:0;border-radius:14px;padding:11px;font-weight:800;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+</style>
+<script>
+(function(){
+ const addD=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ const today=()=>localDay();
+ const logged=d=>s.foods.some(f=>foodDay(f)===d)||waterOn(d)>0||moveMinOn(d)>0;
+ function streak(){let d=today();if(!logged(d))d=addD(d,-1);let n=0;while(logged(d)&&n<3660){n++;d=addD(d,-1)}return n}
+ function best(){const days=new Set();s.foods.forEach(f=>days.add(foodDay(f)));(s.waterLog||[]).forEach(x=>days.add(entryDay(x)));(s.moves||[]).forEach(x=>days.add(entryDay(x)));
+  let b=0;[...days].filter(Boolean).forEach(d=>{if(days.has(addD(d,-1)))return;let n=0,x=d;while(days.has(x)){n++;x=addD(x,1)}b=Math.max(b,n)});return b}
+ function weekStart(d){const x=new Date(d+'T12:00:00');const dow=(x.getDay()+6)%7;x.setDate(x.getDate()-dow);return localDay(x)}
+ function target(){const T=bodyTargets&&bodyTargets();return (window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||null}
+ function stats(ws){
+  const days=[...Array(7)].map((_,i)=>addD(ws,i)),t=target(),wg=waterGoal();
+  const kc=days.map(kcalOn),food=days.filter((d,i)=>kc[i]>0),avg=food.length?Math.round(food.reduce((a,d)=>a+kcalOn(d),0)/food.length):0;
+  const inTarget=t?days.filter((d,i)=>kc[i]>0&&Math.abs(kc[i]-t)<=t*.1).length:0;
+  const water=days.map(waterOn),waterDays=water.filter(w=>w>=wg).length,move=days.reduce((a,d)=>a+moveMinOn(d),0);
+  const wl=(s.weightLog||[]).filter(x=>x.date>=days[0]&&x.date<=days[6]).sort((a,b)=>a.date.localeCompare(b.date));
+  const prevW=(s.weightLog||[]).filter(x=>x.date<days[0]).sort((a,b)=>a.date.localeCompare(b.date)).pop();
+  const wFrom=prevW||wl[0],wTo=wl[wl.length-1],wChange=wFrom&&wTo&&wFrom!==wTo?Math.round((wTo.kg-wFrom.kg)*10)/10:null;
+  return {days,kc,t,avg,foodDays:food.length,inTarget,waterDays,move,wChange,logDays:days.filter(logged).length};
+ }
+ const arrow=(a,b,lowerIsGood)=>{if(b==null||!isFinite(b)||a===b)return '<em class="wk-flat">เท่าเดิม</em>';const up=a>b,good=lowerIsGood?!up:up;return `<em class="${good?'wk-down':'wk-up'}">${up?'▲':'▼'} ${Math.abs(Math.round(a-b)).toLocaleString()}</em>`};
+ const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+ function note(S){const tips=[];
+  if(S.t&&S.avg){const diff=S.avg-S.t;tips.push(Math.abs(diff)<=S.t*.1?`กินเฉลี่ยใกล้เป้ามาก (${S.t.toLocaleString()} kcal) เยี่ยมเลย 👏`:diff>0?`เฉลี่ยเกินเป้าวันละ ~${diff.toLocaleString()} kcal ลองลดของหวาน/เครื่องดื่มหวานดู`:`เฉลี่ยต่ำกว่าเป้าวันละ ~${(-diff).toLocaleString()} kcal อย่าลืมกินให้พอนะ`)}
+  if(S.waterDays<4)tips.push(`ดื่มน้ำครบเป้าแค่ ${S.waterDays} วัน ลองเปิดการแจ้งเตือนดื่มน้ำ 💧`);else tips.push(`ดื่มน้ำครบเป้า ${S.waterDays} วัน 💧`);
+  if(S.move<150)tips.push(`ขยับรวม ${S.move} นาที · แนะนำอย่างน้อย 150 นาที/สัปดาห์`);else tips.push(`ขยับรวม ${S.move} นาที ถึงคำแนะนำ 150 นาทีแล้ว 🏃`);
+  if(S.wChange!=null)tips.push(`น้ำหนัก ${S.wChange>0?'+':''}${S.wChange} กก.`);
+  return tips.join('<br>')}
+ let tab='this';
+ function card(){
+  const ws=weekStart(today()),cur=tab==='this'?ws:addD(ws,-7),S=stats(cur),P=stats(addD(cur,-7)),t=S.t;
+  return `<div class="wk-head"><h3>📅 สรุปรายสัปดาห์</h3><div class="wk-tabs"><button type="button" data-wk="this" class="${tab==='this'?'on':''}">สัปดาห์นี้</button><button type="button" data-wk="last" class="${tab==='last'?'on':''}">ที่แล้ว</button></div></div>
+   <div class="wk-range">${fmt(S.days[0])} – ${fmt(S.days[6])} · บันทึก ${S.logDays}/7 วัน</div>
+   <div class="wk-grid"><div class="wk-tile"><small>กินเฉลี่ย/วัน</small><b>${S.avg?S.avg.toLocaleString():'–'}</b>${S.avg&&P.avg?arrow(S.avg,P.avg,true):'<em class="wk-flat">kcal</em>'}</div>
+    <div class="wk-tile"><small>${t?'วันที่ใกล้เป้า ±10%':'วันที่บันทึกอาหาร'}</small><b>${t?S.inTarget:S.foodDays} <span style="font-size:14px;color:var(--muted)">/ 7</span></b>${t?`<em class="wk-flat">เป้า ${t.toLocaleString()} kcal</em>`:''}</div>
+    <div class="wk-tile"><small>ดื่มน้ำครบเป้า</small><b>${S.waterDays} <span style="font-size:14px;color:var(--muted)">วัน</span></b>${arrow(S.waterDays,P.waterDays,false)}</div>
+    <div class="wk-tile"><small>${S.wChange!=null?'น้ำหนักเปลี่ยน':'ขยับรวม'}</small><b>${S.wChange!=null?(S.wChange>0?'+':'')+S.wChange+' กก.':S.move+' นาที'}</b>${S.wChange!=null?`<em class="wk-flat">ขยับรวม ${S.move} นาที</em>`:arrow(S.move,P.move,false)}</div></div>
+   <div class="wk-days">${S.days.map((d,i)=>{const k=S.kc[i],max=Math.max(t||0,...S.kc,1),h=Math.min(100,k/max*100);return `<div class="wk-day${d===today()?' today':''}${t&&k>t*1.1?' over':''}"><i><em style="height:${h}%"></em></i>${new Date(d+'T12:00:00').toLocaleDateString('th-TH',{weekday:'narrow'})}</div>`}).join('')}</div>
+   <div class="wk-note">${note(S)}</div>`;
+ }
+ function render(){
+  const n=streak(),b=Math.max(best(),n),row=document.getElementById('streakRow');
+  if(row)row.innerHTML=n?`<span class="streak-chip">🔥 บันทึกต่อเนื่อง ${n} วัน${b>n?` <small>· สูงสุด ${b}</small>`:''}</span>`:`<span class="streak-chip zero">🔥 เริ่มบันทึกวันนี้เพื่อสร้างสถิติต่อเนื่อง</span>`;
+  const dc=document.getElementById('weekDash');if(dc){dc.innerHTML=card();dc.querySelectorAll('[data-wk]').forEach(x=>x.onclick=()=>{tab=x.dataset.wk;render()})}
+  // home: last week's summary once at the start of a new week
+  const hc=document.getElementById('weekHome');if(!hc)return;const ws=weekStart(today()),last=addD(ws,-7),L=stats(last);
+  if(L.logDays<2||(s.settings&&s.settings.weekCardSeen)===ws){hc.innerHTML='';hc.style.display='none';return}
+  hc.style.display='';hc.innerHTML=`<button class="x" type="button" aria-label="ปิด">×</button><div class="wk-head"><h3>🗓️ สรุปสัปดาห์ที่แล้ว</h3></div><div class="wk-range">${fmt(L.days[0])} – ${fmt(L.days[6])} · บันทึก ${L.logDays}/7 วัน</div><div class="wk-note">${note(L)}</div><button class="go" type="button">ดูสรุปทั้งหมด</button>`;
+  const seen=()=>{s.settings=s.settings||{};s.settings.weekCardSeen=ws;save()};
+  hc.querySelector('.x').onclick=seen;hc.querySelector('.go').onclick=()=>{tab='last';seen();go('dashboard');window.scrollTo({top:0})};
+ }
+ // placeholders
+ const hd=document.querySelector('#home .home-date');if(hd&&!document.getElementById('streakRow')){const r=document.createElement('div');r.className='streak-row';r.id='streakRow';hd.after(r);const h=document.createElement('div');h.className='wk-card wk-home';h.id='weekHome';r.after(h)}
+ const dh=document.querySelector('#dashboard .dashboard-hero');if(dh&&!document.getElementById('weekDash')){const c=document.createElement('div');c.className='wk-card';c.id='weekDash';dh.after(c)}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{render()}catch(e){console.error(e)}return o};
+ window.FWWeek={streak,best,stats,weekStart};
+ render();
+})();
+</script>
 </body>
 </html>
 
