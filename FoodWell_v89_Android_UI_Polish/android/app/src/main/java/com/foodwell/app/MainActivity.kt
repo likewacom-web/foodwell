@@ -38,6 +38,8 @@ class MainActivity : ComponentActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cloud: CloudSync
     private lateinit var pro: Monetization
+    private lateinit var notifyPermission: ActivityResultLauncher<String>
+    private var pendingPage: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +54,10 @@ class MainActivity : ComponentActivity() {
             filePathCallback = null
         }
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
+        notifyPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+            callJs("onNotifyPermission", JSONObject.quote(if (ok) "granted" else "denied"))
+        }
+        pendingPage = intent?.getStringExtra("page")
 
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -62,7 +68,12 @@ class MainActivity : ComponentActivity() {
             settings.textZoom = 100
             overScrollMode = WebView.OVER_SCROLL_NEVER
             setBackgroundColor(dark)
-            webViewClient = WebViewClient()
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView, url: String?) {
+                    // Opened from a reminder: jump to its page once the app has loaded.
+                    pendingPage?.let { p -> pendingPage = null; view.postDelayed({ callJs("go", JSONObject.quote(p)) }, 400) }
+                }
+            }
             // Without a WebChromeClient file chooser, <input type=file> (food photos, backup import) does nothing.
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(
@@ -82,6 +93,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(FilesApi(), "FoodWellFiles")
             addJavascriptInterface(CloudApi(), "FoodWellCloud")
             addJavascriptInterface(ProApi(), "FoodWellPro")
+            addJavascriptInterface(NotifyApi(), "FoodWellNotify")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -123,6 +135,11 @@ class MainActivity : ComponentActivity() {
                 onBackPressedDispatcher.onBackPressed()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.getStringExtra("page")?.let { callJs("go", JSONObject.quote(it)) }
     }
 
     override fun onPause() {
@@ -212,6 +229,39 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // ---- Reminders (real Android notifications) -------------------------------------------------
+
+    inner class NotifyApi {
+        /** "granted" | "denied" | "prompt" */
+        @JavascriptInterface fun permission(): String = when {
+            Reminders.canNotify(this@MainActivity) -> "granted"
+            Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS) -> "prompt"
+            Build.VERSION.SDK_INT >= 33 && getSharedPreferences("foodwell_reminders", MODE_PRIVATE).getBoolean("asked", false) -> "denied"
+            else -> "prompt"
+        }
+
+        /** Answers with onNotifyPermission("granted"|"denied"). */
+        @JavascriptInterface fun request() = runOnUiThread {
+            if (Reminders.canNotify(this@MainActivity) || Build.VERSION.SDK_INT < 33) {
+                callJs("onNotifyPermission", JSONObject.quote("granted"))
+            } else {
+                getSharedPreferences("foodwell_reminders", MODE_PRIVATE).edit().putBoolean("asked", true).apply()
+                notifyPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        /** Opens the system notification settings for this app (after the user said "don't ask again"). */
+        @JavascriptInterface fun openSettings() = runOnUiThread {
+            val i = if (Build.VERSION.SDK_INT >= 26) Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+            else Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+            runCatching { startActivity(i) }
+        }
+
+        @JavascriptInterface fun configure(json: String) = Reminders.configure(this@MainActivity, json)
+        @JavascriptInterface fun report(json: String) = Reminders.report(this@MainActivity, json)
+        @JavascriptInterface fun test() = Reminders.post(this@MainActivity, 999, "🔔 ทดสอบการแจ้งเตือน", "FoodWell จะเตือนแบบนี้ตามเวลาที่ตั้งไว้", "more")
     }
 
     // ---- One-time purchase that removes ads (Google Play Billing) ------------------------------

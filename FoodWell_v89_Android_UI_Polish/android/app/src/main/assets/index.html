@@ -1503,6 +1503,70 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  window.FWFoodDB={search,count:DB.length};
 })();
 </script>
+<!-- v103 Reminders: real Android notifications (native bridge: window.FoodWellNotify) -->
+<style>
+.nt-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #24262d}.nt-row:last-of-type{border-bottom:0}
+.nt-row .ic{font-size:22px;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#ffffff0d;flex:none}
+.nt-row .tx{flex:1;min-width:0}.nt-row b{display:block;font-size:15px}.nt-row small{display:block;color:#8f929b;font-size:12px;margin-top:1px}
+.nt-sub{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 10px 52px}.nt-sub label{display:flex;flex-direction:column;gap:4px;margin:0;font-size:11px;color:#9ea0aa}
+.nt-sub input,.nt-sub select{background:#24262d;color:#f5f3f5;border:1px solid #34363f;border-radius:10px;padding:7px 8px;font-size:14px;font-family:inherit;min-width:0}
+.nt-sub[hidden]{display:none}
+.nt-perm{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:#f4c76b14;color:#f4c76b;font-size:13px;margin:8px 0 4px}
+.nt-perm button{margin-left:auto;border:0;border-radius:10px;background:#f4c76b;color:#2a2010;font-weight:800;font-size:13px;font-family:inherit;padding:8px 10px;flex:none}
+.nt-perm.ok{background:#6ee7a814;color:#6ee7a8}
+.nt-test{width:100%;margin-top:10px;border:1px solid #ffffff1a;background:#ffffff0a;color:#f5f3f5;border-radius:14px;padding:11px;font-size:14px;font-weight:700;font-family:inherit}
+</style>
+<script>
+(function(){
+ const N=()=>window.FoodWellNotify;
+ const DEF={meals:false,breakfast:'08:00',lunch:'12:00',dinner:'18:30',water:false,waterEvery:2,waterFrom:9,waterTo:21,weigh:false,weighDay:1,weighTime:'07:30'};
+ const cfg=()=>Object.assign({},DEF,(s.settings&&s.settings.reminders)||{});
+ const DAYS=['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+ let perm=N()?N().permission():'none';
+ function push(){if(N())try{N().configure(JSON.stringify(cfg()))}catch(e){}}
+ function set(patch){s.settings=s.settings||{};s.settings.reminders=Object.assign(cfg(),patch);save();push();draw()}
+ const anyOn=c=>c.meals||c.water||c.weigh;
+ function draw(){
+  const box=document.getElementById('fwNotify');if(!box)return;const c=cfg();
+  const head='<h2>🔔 การแจ้งเตือน</h2>';
+  if(!N()){box.innerHTML=head+'<p class="body-note" style="font-size:12px;color:#8f929b">ใช้ได้ในแอป FoodWell บน Android · เตือนได้แม้ปิดแอปอยู่</p>';return}
+  const permHtml=perm==='granted'?(anyOn(c)?'<div class="nt-perm ok">✅ เปิดการแจ้งเตือนแล้ว · บันทึกแล้วจะไม่เตือนซ้ำ</div>':'')
+   :`<div class="nt-perm">⚠️ ${perm==='denied'?'การแจ้งเตือนถูกปิดในเครื่อง':'ยังไม่ได้อนุญาตการแจ้งเตือน'}<button type="button" id="ntAllow">${perm==='denied'?'เปิดการตั้งค่า':'อนุญาต'}</button></div>`;
+  const sw=(k,on)=>`<input class="switch" type="checkbox" data-k="${k}" ${on?'checked':''}>`;
+  const time=(k)=>`<input type="time" data-t="${k}" value="${c[k]}">`;
+  box.innerHTML=head+permHtml+`
+   <div class="nt-row"><span class="ic">🍽️</span><div class="tx"><b>บันทึกมื้ออาหาร</b><small>ข้ามมื้อที่บันทึกไปแล้ว</small></div>${sw('meals',c.meals)}</div>
+   <div class="nt-sub" ${c.meals?'':'hidden'}><label>เช้า${time('breakfast')}</label><label>กลางวัน${time('lunch')}</label><label>เย็น${time('dinner')}</label></div>
+   <div class="nt-row"><span class="ic">💧</span><div class="tx"><b>ดื่มน้ำ</b><small>หยุดเตือนเมื่อดื่มครบเป้าของวัน</small></div>${sw('water',c.water)}</div>
+   <div class="nt-sub" ${c.water?'':'hidden'}><label>ทุก<select data-n="waterEvery">${[1,2,3].map(h=>`<option value="${h}" ${c.waterEvery==h?'selected':''}>${h} ชม.</option>`).join('')}</select></label>
+    <label>ตั้งแต่<select data-n="waterFrom">${[6,7,8,9,10].map(h=>`<option value="${h}" ${c.waterFrom==h?'selected':''}>${String(h).padStart(2,'0')}:00</option>`).join('')}</select></label>
+    <label>ถึง<select data-n="waterTo">${[18,19,20,21,22].map(h=>`<option value="${h}" ${c.waterTo==h?'selected':''}>${h}:00</option>`).join('')}</select></label></div>
+   <div class="nt-row"><span class="ic">⚖️</span><div class="tx"><b>ชั่งน้ำหนักทุกสัปดาห์</b><small>ข้ามถ้าชั่งไปแล้วในสัปดาห์นี้</small></div>${sw('weigh',c.weigh)}</div>
+   <div class="nt-sub" ${c.weigh?'':'hidden'}><label>วัน<select data-n="weighDay">${DAYS.map((d,i)=>`<option value="${i+1}" ${c.weighDay==i+1?'selected':''}>${d}</option>`).join('')}</select></label><label>เวลา${time('weighTime')}</label></div>
+   ${anyOn(c)&&perm==='granted'?'<button type="button" class="nt-test" id="ntTest">ทดสอบการแจ้งเตือน</button>':''}`;
+  box.querySelectorAll('[data-k]').forEach(el=>el.onchange=()=>{const on=el.checked;set({[el.dataset.k]:on});if(on&&perm!=='granted')N().request()});
+  box.querySelectorAll('[data-t]').forEach(el=>el.onchange=()=>{if(el.value)set({[el.dataset.t]:el.value})});
+  box.querySelectorAll('[data-n]').forEach(el=>el.onchange=()=>set({[el.dataset.n]:Number(el.value)}));
+  const al=document.getElementById('ntAllow');if(al)al.onclick=()=>perm==='denied'?N().openSettings():N().request();
+  const te=document.getElementById('ntTest');if(te)te.onclick=()=>{N().test();toast('ส่งการแจ้งเตือนทดสอบแล้ว')};
+ }
+ window.onNotifyPermission=st=>{perm=st;if(st!=='granted')toast('ยังไม่ได้อนุญาต · การเตือนจะไม่แสดง');draw()};
+ // tell Android what's done today, so reminders for finished jobs are skipped
+ let last='';
+ function report(){if(!N())return;try{const today=localDay();
+  const meals=[...new Set(s.foods.filter(f=>foodDay(f)===today).map(f=>f.meal))];
+  const wl=(s.weightLog||[]).map(x=>x.date).sort();
+  const st=JSON.stringify({date:today,meals,water:waterOn(today),waterGoal:waterGoal(),lastWeigh:wl[wl.length-1]||''});
+  if(st!==last){last=st;N().report(st)}}catch(e){}}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const out=r0.apply(this,arguments);report();return out};
+ // card on the More page, under the settings card
+ const settings=[...document.querySelectorAll('#more .card h2')].find(h=>h.textContent.includes('ตั้งค่า'))?.closest('.card');
+ const card=document.createElement('div');card.className='card';card.id='fwNotify';
+ if(settings)settings.after(card);else document.getElementById('more')?.appendChild(card);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&N()){const p=N().permission();if(p!==perm){perm=p;draw()}}});
+ push();report();draw();
+})();
+</script>
 </body>
 </html>
 
