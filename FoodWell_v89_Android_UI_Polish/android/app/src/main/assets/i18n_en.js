@@ -1674,4 +1674,5 @@ window.FW_I18N_EN={"วันนี้":"Today",
 "อังกฤษ":"English",
 "ภาษาไทย":"Thai",
 "ภาษาอังกฤษ":"English",
-"บันทึก 1 ที่":"Log 1 serving"};
+"บันทึก 1 ที่":"Log 1 serving",
+"แผนออกกำลังกาย":"Workout plan"};

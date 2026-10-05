@@ -72,6 +72,14 @@ object Reminders {
             val close = ((h * 60 + m + eat * 60 - 30) % 1440 + 1440) % 1440
             out += Slot(61, "if_close", close / 60, close % 60)
         }
+        if (cfg.optBoolean("woOn")) {
+            val (h, m) = hm(cfg.optString("woTime", "18:00"), "18:00")
+            val days = cfg.optJSONArray("woDays")
+            if (days != null) for (k in 0 until days.length()) {
+                val wd = days.optInt(k).coerceIn(1, 7)
+                out += Slot(70 + wd, "workout", h, m, wd)
+            }
+        }
         return out
     }
 
@@ -134,6 +142,17 @@ object Reminders {
                 val endText = "%02d:%02d".format(end / 60, end % 60)
                 if (kind == "if_open") Triple(Lang.t(c, "🍽️ ถึงช่วงกินแล้ว", "🍽️ Eating window open"), Lang.t(c, "เริ่มกินได้ถึง $endText · มื้อแรกเน้นโปรตีนและผักนะ", "Eat until $endText · make your first meal protein and vegetables"), "food")
                 else Triple(Lang.t(c, "⏱️ อีก 30 นาทีหมดช่วงกิน", "⏱️ Eating window closes in 30 min"), Lang.t(c, "หลัง $endText เริ่มอด ${24 - eat} ชั่วโมง · น้ำเปล่า ชา กาแฟดำ ดื่มได้", "After $endText you fast ${24 - eat} hours · water, tea and black coffee are fine"), "home")
+            }
+            "workout" -> {
+                if (isToday && st.optBoolean("workoutDone")) return null
+                val cfg = runCatching { JSONObject(prefs(c).getString("config", "{}")!!) }.getOrElse { JSONObject() }
+                val wd = LocalDate.now().dayOfWeek.value
+                val name = cfg.optJSONObject("woNames")?.optString(wd.toString()).orEmpty()
+                Triple(
+                    Lang.t(c, "🏋️ ถึงเวลาออกกำลังกาย", "🏋️ Workout time"),
+                    (if (name.isNotEmpty()) "$name · " else "") + Lang.t(c, "แตะเพื่อเริ่มตามแผนของวันนี้", "Tap to start today's session"),
+                    "move"
+                )
             }
             else -> null
         }

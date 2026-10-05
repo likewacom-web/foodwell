@@ -262,7 +262,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <main>
 <section id="home" class="page active">
 <div class="home-date"><div class="moon">🌙</div><h1>วันนี้</h1><p id="date"></p><div class="gear">⚙</div></div>
-<div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🥗 วันนี้กินอะไรดี?</span><button data-widget-toggle="healthy">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
+<div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🏋️ แผนออกกำลังกาย</span><button data-widget-toggle="workout">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🥗 วันนี้กินอะไรดี?</span><button data-widget-toggle="healthy">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
 <div class="welcome home-sortable" data-home-key="welcome"><div class="bubble">ดูแลตัวเองทีละวัน<br>เก่งมากแล้วนะ ♡</div><div class="cat">🐈</div></div>
 <div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่ได้รับวันนี้</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p id="kcalSub">ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span id="kcalRing">วันนี้<br>♡</span></div><div class="nutri-grid" id="nutriToday"></div></div>
 <div class="twocards home-sortable" data-home-key="twocards">
@@ -871,7 +871,7 @@ function renderProfileStats(){
 }
 
 
-const HOME_DEFAULT=['welcome','summary','twocards','healthy','dashboard-entry','food-section'];
+const HOME_DEFAULT=['welcome','summary','twocards','workout','healthy','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
 function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
@@ -1544,7 +1544,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const cfg=()=>Object.assign({},DEF,(s.settings&&s.settings.reminders)||{});
  const DAYS=['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
  let perm=N()?N().permission():'none';
- function push(){if(N())try{const f=(s.settings&&s.settings.fasting)||{};N().configure(JSON.stringify(Object.assign({},cfg(),{ifOn:!!(f.on&&f.notify!==false),ifStart:f.start||'12:00',ifEat:24-(Number(f.fast)||16)})))}catch(e){}}
+ function push(){if(N())try{const f=(s.settings&&s.settings.fasting)||{};N().configure(JSON.stringify(Object.assign({},cfg(),{ifOn:!!(f.on&&f.notify!==false),ifStart:f.start||'12:00',ifEat:24-(Number(f.fast)||16)},window.fwWorkoutNotify?fwWorkoutNotify():{})))}catch(e){}}
  window.fwNotifyPush=()=>push();
  function set(patch){s.settings=s.settings||{};s.settings.reminders=Object.assign(cfg(),patch);save();push();draw()}
  const anyOn=c=>c.meals||c.water||c.weigh;
@@ -1578,7 +1578,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function report(){if(!N())return;try{const today=localDay();
   const meals=[...new Set(s.foods.filter(f=>foodDay(f)===today).map(f=>f.meal))];
   const wl=(s.weightLog||[]).map(x=>x.date).sort();
-  const st=JSON.stringify({date:today,meals,water:waterOn(today),waterGoal:waterGoal(),lastWeigh:wl[wl.length-1]||''});
+  const st=JSON.stringify({date:today,meals,water:waterOn(today),waterGoal:waterGoal(),lastWeigh:wl[wl.length-1]||'',workoutDone:!!(window.fwWorkoutDone&&fwWorkoutDone(today))});
   if(st!==last){last=st;N().report(st)}}catch(e){}}
  const r0=window.render;if(typeof r0==='function')window.render=function(){const out=r0.apply(this,arguments);report();return out};
  // card on the More page, under the settings card
@@ -3041,5 +3041,297 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // first-run setup: language switch in the corner
  const onb=document.getElementById('fwOnb');
  if(onb&&!document.getElementById('onbLang')){const b=document.createElement('button');b.type='button';b.id='onbLang';b.className='onb-lang';b.setAttribute('translate','no');b.textContent=lang==='en'?'🌐 ไทย':'🌐 English';b.onclick=()=>fwSetLang(lang==='en'?'th':'en');onb.appendChild(b)}
+})();
+</script>
+<!-- v117 Workout plan: weekly plan from goal/level/days/time/place, guided timer player, auto-log to movement, reminders -->
+<style>
+.wo-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.wo-card h3{margin:0;font-size:17px}.wo-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.wo-hero{text-align:center;padding:6px 0}.wo-hero .big{font-size:44px}.wo-hero p{margin:6px 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.wo-btn{width:100%;border:0;border-radius:14px;padding:13px;font-weight:800;font-size:15px;font-family:inherit;background:linear-gradient(135deg,#7dd3a8,#2f9e6e);color:#fff}
+.wo-btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.wo-two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.wo-q{margin:14px 0 6px;font-weight:800;font-size:14px}
+.wo-chips{display:flex;flex-wrap:wrap;gap:6px}
+.wo-chips button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 11px;font-size:13px;font-family:inherit;text-align:left}
+.wo-chips button small{display:block;font-size:11px;color:var(--muted)}
+.wo-chips button.on{border-color:#2f9e6e;background:#2f9e6e1f;box-shadow:0 0 0 1px #2f9e6e inset;font-weight:800}
+.wo-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wo-days button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:9px 0;font-family:inherit;font-weight:800}
+.wo-days button.on{background:#2f9e6e;border-color:#2f9e6e;color:#fff}
+.wo-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0}
+.wo-week button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:6px 0;font-family:inherit;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.wo-week button i{font-style:normal;font-size:18px}.wo-week button.rest{opacity:.55}
+.wo-week button.today{border-color:#2f9e6e;box-shadow:0 0 0 1px #2f9e6e inset}.wo-week button.done{background:#2f9e6e1f}
+.wo-week button.done i::after{content:'✓';font-size:11px;color:#2f9e6e;margin-left:1px}
+.wo-today{border-radius:18px;padding:14px;background:linear-gradient(135deg,#e9f9ef,#f3fbe8);color:#1d3a27;border:1px solid #cfe9d6}
+.wo-today b{font-size:17px}.wo-today .meta{font-size:12px;color:#4f6f5a;margin:2px 0 8px}
+.wo-today .list{font-size:13px;line-height:1.6;color:#2d4a37;margin-bottom:10px}
+.wo-today.ok{background:linear-gradient(135deg,#eef7ff,#eaf3ff);border-color:#cfe0f3;color:#1d3149}
+.wo-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;color:var(--text);padding:10px 2px;font-family:inherit}
+.wo-row .ic{font-size:22px;width:30px;text-align:center}.wo-row .tx{flex:1}.wo-row b{display:block;font-size:14px}.wo-row small{color:var(--muted);font-size:12px}
+.wo-links{display:flex;gap:8px;margin-top:10px}.wo-links button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px;font-size:13px;font-weight:700;font-family:inherit}
+.wo-sheet{position:fixed;inset:0;z-index:6500;background:#0007;display:none;align-items:flex-end;justify-content:center}.wo-sheet.show{display:flex}
+.wo-sheet .box{width:100%;max-width:560px;max-height:86vh;overflow-y:auto;background:var(--panel);color:var(--text);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+.wo-sheet .hd{display:flex;align-items:flex-start;gap:10px}.wo-sheet h2{margin:0;font-size:20px;flex:1}
+.wo-x{border:0;background:var(--panel2);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:16px;flex:none}
+.wo-step{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.wo-step .e{font-size:22px;width:30px;text-align:center}.wo-step b{display:block;font-size:14px}.wo-step small{color:var(--muted);font-size:12px;line-height:1.5}
+.wo-sec{margin:14px 0 4px;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.wo-player{position:fixed;inset:0;z-index:7000;display:none;flex-direction:column;background:linear-gradient(180deg,#123527,#0d2219);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
+.wo-player.show{display:flex}.wo-player.rest{background:linear-gradient(180deg,#1b2a44,#121c2e)}
+.wo-ptop{display:flex;align-items:center;gap:10px}.wo-ptop .t{flex:1;font-size:13px;opacity:.8}
+.wo-ptop button{border:0;background:#ffffff1f;color:#fff;border-radius:50%;width:38px;height:38px;font-size:16px}
+.wo-pbar{height:6px;border-radius:9px;background:#ffffff26;margin:10px 0 0;overflow:hidden}.wo-pbar i{display:block;height:100%;background:#7dd3a8}
+.wo-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+.wo-main .ph{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:800}
+.wo-main .em{font-size:72px;line-height:1.1}.wo-main h2{margin:0;font-size:26px}
+.wo-main .amt{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
+.wo-main .cue{font-size:14px;opacity:.85;max-width:420px;line-height:1.6}.wo-main .nx{font-size:13px;opacity:.7;margin-top:8px}
+.wo-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px}
+.wo-ctl button{border:0;border-radius:16px;padding:16px 8px;font-size:16px;font-weight:800;font-family:inherit;background:#ffffff1f;color:#fff}
+.wo-ctl button.main{background:#7dd3a8;color:#0d2219;font-size:18px}
+.wo-done{text-align:center}.wo-done .em{font-size:64px}.wo-done .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.wo-done .stats div{background:#ffffff1a;border-radius:14px;padding:10px}.wo-done .stats b{display:block;font-size:22px}
+.wo-home{margin:0 0 12px;padding:14px 16px;border-radius:22px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.wo-home .em{font-size:30px}.wo-home .tx{flex:1;min-width:0}.wo-home b{display:block;font-size:15px}.wo-home small{display:block;color:var(--muted);font-size:12px}
+.wo-home button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-family:inherit;background:#2f9e6e;color:#fff;white-space:nowrap}
+.wo-home button.ok{background:var(--panel2);color:var(--muted)}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ // ---- exercise library: [th, en, emoji, unit (r = reps, s = seconds, m = minutes), base amount, cue th, cue en] ----
+ const X={
+  march:['ย่ำเท้าอยู่กับที่','March in place','🚶','s',60,'ยกเข่าสลับ แกว่งแขนเบา ๆ หายใจสม่ำเสมอ','Lift knees in turn, swing arms gently, breathe steadily'],
+  armc:['หมุนแขน','Arm circles','🙆','s',30,'กางแขน หมุนวงเล็กไปวงใหญ่ แล้วหมุนกลับ','Arms out, small to big circles, then reverse'],
+  legsw:['เหวี่ยงขา','Leg swings','🦵','s',30,'จับผนัง เหวี่ยงขาหน้า-หลังเบา ๆ สลับข้าง','Hold a wall, swing each leg forward and back'],
+  squat:['สควอท','Squats','🦵','r',12,'ยืนกว้างเท่าไหล่ ย่อสะโพกไปด้านหลังเหมือนนั่งเก้าอี้ หลังตรง','Feet shoulder-width, sit hips back like onto a chair, back straight'],
+  kpush:['วิดพื้นแบบคุกเข่า','Knee push-ups','💪','r',8,'คุกเข่า มือกว้างกว่าไหล่ ลำตัวตรง ลดอกลงแล้วดันขึ้น','On knees, hands wider than shoulders, body straight, lower and press up'],
+  push:['วิดพื้น','Push-ups','💪','r',10,'ลำตัวตรงจากหัวถึงส้นเท้า ลดอกใกล้พื้นแล้วดันขึ้น','Straight line head to heels, chest near the floor, press up'],
+  bridge:['ยกสะโพก','Glute bridges','🍑','r',15,'นอนหงาย ชันเข่า ยกสะโพกขึ้น บีบก้นค้าง 1 วินาที','Lie on your back, knees bent, lift hips and squeeze for a second'],
+  lunge:['ลันจ์ถอยหลัง','Reverse lunges','🚶','r',10,'ก้าวถอยหลัง ย่อเข่าหลังลงใกล้พื้น สลับข้าง (นับรวมสองข้าง)','Step back, lower the back knee toward the floor, alternate (both sides count)'],
+  plank:['แพลงก์','Plank','🧱','s',30,'วางศอกใต้ไหล่ ลำตัวตรง เกร็งท้อง อย่าให้สะโพกตก','Elbows under shoulders, body straight, brace your core, hips level'],
+  superman:['ซูเปอร์แมน','Superman','🦸','r',12,'นอนคว่ำ ยกแขนและขาขึ้นพร้อมกัน ค้างสั้น ๆ แล้ววางลง','Lie face down, lift arms and legs together, hold briefly, lower'],
+  deadbug:['เดดบัก','Dead bug','🐞','r',10,'นอนหงาย ยืดแขนขาฝั่งตรงข้ามออกช้า ๆ หลังแนบพื้น','On your back, slowly extend opposite arm and leg, low back on the floor'],
+  dips:['ดิปกับเก้าอี้','Chair dips','🪑','r',10,'มือจับขอบเก้าอี้ด้านหลัง งอศอกลดตัวลงแล้วดันขึ้น','Hands on a chair behind you, bend elbows to lower, press up'],
+  wallsit:['นั่งพิงกำแพง','Wall sit','🧱','s',30,'หลังพิงผนัง ย่อจนต้นขาขนานพื้น ค้างไว้','Back on the wall, thighs parallel to the floor, hold'],
+  calf:['เขย่งปลายเท้า','Calf raises','🦶','r',15,'ยืนตรง เขย่งขึ้นช้า ๆ แล้วลดลง','Stand tall, rise onto your toes slowly, lower'],
+  splank:['แพลงก์ด้านข้าง','Side plank','🧱','s',20,'ตะแคง ยันศอก ยกสะโพกให้ลำตัวตรง (แบ่งสองข้าง)','On your side on one elbow, lift hips into a line (split both sides)'],
+  stepup:['ก้าวขึ้นบันได','Step-ups','🪜','r',12,'ก้าวขึ้นขั้นบันไดหรือกล่องมั่นคง สลับขา','Step up onto a stair or sturdy box, alternate legs'],
+  jacks:['กระโดดตบ','Jumping jacks','⭐','s',40,'กระโดดกางขา ยกแขนเหนือหัว แล้วหุบ (ไม่กระโดด: ก้าวออกข้าง)','Jump feet out, arms overhead, back in (low impact: step out)'],
+  knees:['วิ่งยกเข่าสูง','High knees','🏃','s',30,'วิ่งอยู่กับที่ ยกเข่าสูงระดับสะโพก','Run in place, knees to hip height'],
+  climb:['เมาท์เทนไคลม์เบอร์','Mountain climbers','⛰️','s',30,'ท่าวิดพื้น ดึงเข่าเข้าหาอกสลับเร็ว ๆ','Push-up position, drive knees to chest in turn'],
+  skater:['สเก็ตเตอร์','Skaters','⛸️','s',30,'กระโดดข้างซ้าย-ขวา แตะเท้าหลังเบา ๆ','Leap side to side, light back-foot touch'],
+  burpee:['เบอร์พี','Burpees','🔥','r',8,'ย่อ วางมือ ถีบขาหลัง ดึงกลับ แล้วกระโดดขึ้น','Squat, hands down, kick back, return, jump up'],
+  box:['ชกลม','Shadow boxing','🥊','s',45,'ยืนย่อเข่าเล็กน้อย ชกหมัดตรงสลับ เคลื่อนเท้าเบา ๆ','Soft knees, alternate straight punches, light footwork'],
+  gsquat:['สควอทดัมเบล','Goblet squats','🏋️','r',10,'ถือดัมเบลชิดอก ย่อสะโพกลง หลังตรง','Hold a dumbbell at your chest, squat down, back straight'],
+  bench:['ดันอก (เบนช์เพรส)','Bench press','🏋️','r',10,'นอนบนม้านั่ง ลดบาร์/ดัมเบลถึงอกแล้วดันขึ้น','Lie on the bench, lower to your chest, press up'],
+  row:['ซีทเต็ดโรว์','Seated row','🚣','r',12,'นั่งหลังตรง ดึงด้ามจับเข้าหาท้อง บีบสะบัก','Sit tall, pull the handle to your belly, squeeze shoulder blades'],
+  latpd:['แลตพูลดาวน์','Lat pulldown','⬇️','r',12,'ดึงบาร์ลงถึงอกบน ศอกชี้ลงพื้น','Pull the bar to your upper chest, elbows down'],
+  ohp:['ดันไหล่ดัมเบล','Shoulder press','🏋️','r',10,'นั่งหรือยืน ดันดัมเบลจากระดับไหล่ขึ้นเหนือหัว','Press dumbbells from shoulders to overhead'],
+  rdl:['โรมาเนียนเดดลิฟต์','Romanian deadlift','🏋️','r',10,'ถือดัมเบล พับสะโพกไปด้านหลัง หลังตรง แล้วยืดขึ้น','Hold dumbbells, hinge hips back with a flat back, stand up'],
+  lpress:['เลกเพรส','Leg press','🦵','r',12,'วางเท้ากว้างเท่าไหล่ ดันจนเกือบสุด ไม่ล็อกเข่า','Feet shoulder-width, press out without locking knees'],
+  curl:['ดัมเบลเคิร์ล','Biceps curls','💪','r',12,'ศอกชิดลำตัว ยกดัมเบลขึ้นช้า ๆ','Elbows by your sides, curl the dumbbells up slowly'],
+  triext:['ไทรเซปส์เอ็กซ์เทนชัน','Triceps extension','💪','r',12,'ยกดัมเบลเหนือหัว งอศอกลดไปด้านหลังแล้วเหยียด','Dumbbell overhead, bend elbows behind, extend'],
+  walk:['เดินเร็ว','Brisk walk','🚶','m',20,'เดินเร็วจนพูดได้แต่ร้องเพลงไม่ได้','Walk fast enough that you can talk but not sing'],
+  jog:['วิ่งเหยาะ','Easy jog','🏃','m',15,'วิ่งช้า ๆ หายใจสะดวก','Run slowly with easy breathing'],
+  bike:['ปั่นจักรยาน','Cycling','🚴','m',20,'ปั่นต่อเนื่องระดับเหนื่อยปานกลาง','Pedal steadily at moderate effort'],
+  ellip:['เครื่องเดินวงรี','Elliptical','🏃','m',20,'ระดับเหนื่อยปานกลาง หลังตรง','Moderate effort, stand tall'],
+  catcow:['แมว-วัว','Cat-cow','🐈','s',40,'คลาน แอ่นหลังและโก่งหลังสลับช้า ๆ ตามลมหายใจ','On all fours, arch and round your back slowly with your breath'],
+  child:['ท่าเด็ก','Child\'s pose','🧘','s',40,'นั่งบนส้นเท้า ก้มตัวไปข้างหน้า ยืดแขน ผ่อนคลาย','Sit back on your heels, fold forward, arms long, relax'],
+  ham:['ยืดต้นขาหลัง','Hamstring stretch','🦵','s',30,'นั่งเหยียดขา โน้มตัวไปหาปลายเท้าเบา ๆ (แบ่งสองข้าง)','Sit with legs long, lean toward your toes gently (split both sides)'],
+  hip:['ยืดสะโพกด้านหน้า','Hip flexor stretch','🧎','s',30,'คุกเข่าข้างเดียว ดันสะโพกไปข้างหน้า (แบ่งสองข้าง)','Half kneel, push hips forward (split both sides)'],
+  chest:['ยืดอกและไหล่','Chest & shoulder stretch','🙆','s',30,'ประสานมือด้านหลัง ยืดอก ดึงไหล่ลง','Clasp hands behind you, open the chest, shoulders down'],
+  twist:['บิดลำตัวนอน','Lying twist','🌀','s',30,'นอนหงาย พับเข่าไปด้านข้าง หันหน้าไปอีกฝั่ง (แบ่งสองข้าง)','On your back, drop knees to one side, look the other way (split both sides)'],
+  cobra:['ท่างู','Cobra','🐍','s',30,'นอนคว่ำ ดันอกขึ้นเบา ๆ สะโพกแนบพื้น','Face down, gently press your chest up, hips on the floor'],
+  rest:['พัก','Rest','😮‍💨','s',30,'หายใจลึก ๆ จิบน้ำได้','Breathe deeply, sip some water'],
+ };
+ const nm=id=>L(X[id][0],X[id][1]),cue=id=>L(X[id][5],X[id][6]);
+ // ---- session types ----
+ const TYPES={
+  full:{e:'🏋️',th:'เวทเต็มตัว',en:'Full-body strength',met:5},
+  upper:{e:'💪',th:'เวทช่วงบน',en:'Upper-body strength',met:5},
+  lower:{e:'🦵',th:'เวทช่วงล่าง',en:'Lower-body strength',met:5},
+  cardio:{e:'🏃',th:'คาร์ดิโอ',en:'Cardio',met:6},
+  hiit:{e:'🔥',th:'HIIT',en:'HIIT',met:8},
+  mobility:{e:'🧘',th:'ยืดเหยียด / โยคะ',en:'Mobility / yoga',met:2.5},
+  walk:{e:'🚶',th:'เดินเร็ว',en:'Brisk walk',met:4.3}};
+ const tName=t=>L(TYPES[t].th,TYPES[t].en);
+ const GOALS=[['lose','🔥',L('ลดไขมัน','Lose fat'),L('คาร์ดิโอ + เวท','Cardio + strength')],['fit','❤️',L('ฟิต หัวใจแข็งแรง','Get fitter'),L('เน้นคาร์ดิโอ','Mostly cardio')],['muscle','💪',L('สร้างกล้ามเนื้อ','Build muscle'),L('เน้นเวท','Mostly strength')],['health','🧘',L('สุขภาพทั่วไป','General health'),L('เดิน ยืดเหยียด เวทเบา','Walking, mobility, light strength')]];
+ const LEVELS=[['1',L('เริ่มต้น','Beginner'),L('ไม่ค่อยได้ออก','Rarely exercise')],['2',L('ปานกลาง','Intermediate'),L('ออกบ้าง 1–2 ครั้ง/สัปดาห์','1–2 times a week')],['3',L('ขั้นสูง','Advanced'),L('ออกประจำ','Regularly')]];
+ const PLACES=[['home','🏠',L('บ้าน','Home')],['gym','🏢',L('ยิม','Gym')],['out','🌳',L('กลางแจ้ง','Outdoors')]];
+ const MINS=[15,20,30,45,60];
+ const WD=EN?['M','T','W','T','F','S','S']:['จ','อ','พ','พฤ','ศ','ส','อา'];
+ const WDL=EN?['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']:['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+ const SPLIT={lose:['full','cardio','full','hiit','cardio','full','walk'],fit:['cardio','full','hiit','cardio','full','cardio','walk'],
+  muscle4:['upper','lower','upper','lower','cardio','walk','mobility'],muscle:['full','full','full','walk','full','mobility','walk'],health:['walk','mobility','full','walk','mobility','full','walk']};
+ const iso=d=>{const x=new Date(d+'T12:00:00').getDay();return x===0?7:x};
+ const addDay=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ const plan=()=>s.workoutPlan||null;
+ function typeOf(P,wd){const i=(P.days||[]).slice().sort((a,b)=>a-b).indexOf(wd);if(i<0)return null;
+  const key=P.goal==='muscle'?(P.days.length>=4?'muscle4':'muscle'):P.goal;let t=SPLIT[key][i%7];
+  if(t==='hiit'&&P.level==='1')t='cardio';return t}
+ function weekNo(P,day=localDay()){const a=new Date(P.start+'T12:00:00'),b=new Date(day+'T12:00:00');return Math.max(0,Math.floor((b-a)/864e5/7))}
+ // volume: level x gentle weekly progression (max +48%), every 4th week is lighter
+ function factor(P,day){const w=weekNo(P,day);let f=({1:.7,2:1,3:1.3})[P.level]*(1+.08*Math.min(w,6));if(w%4===3)f*=.85;return f}
+ function amt(id,f){const [, , , u,b]=X[id];if(u==='r')return Math.max(4,Math.round(b*f));if(u==='s')return Math.max(15,Math.round(b*f/5)*5);return b}
+ function strengthList(t,P){const g=P.place==='gym',beg=P.level==='1';
+  if(t==='upper')return g?['bench','row','ohp','latpd','curl','triext']:[beg?'kpush':'push','dips','superman','plank','splank'];
+  if(t==='lower')return g?['gsquat','rdl','lpress','lunge','calf','plank']:['squat','lunge','bridge','wallsit','calf','stepup'];
+  return g?['gsquat','bench','row','rdl','ohp','plank']:['squat',beg?'kpush':'push','bridge','lunge','superman','plank',P.level==='3'?'burpee':'deadbug']}
+ // build a session that fills the chosen minutes: warm-up, main block, cool-down
+ function session(t,P,day){const f=factor(P,day),steps=[],rest=({1:30,2:20,3:15})[P.level];
+  const add=(id,ph,a)=>steps.push({id,ph,u:X[id][3],a:a!=null?a:amt(id,f)});
+  const R=sec=>steps.push({id:'rest',ph:'rest',u:'s',a:sec});
+  const secOf=st=>st.u==='r'?st.a*3:st.u==='m'?st.a*60:st.a;
+  ['march','armc','legsw'].forEach(id=>add(id,'warm',X[id][4]));if(t==='cardio'||t==='hiit')add('jacks','warm',30);
+  const warm=steps.reduce((a,x)=>a+secOf(x),0),cool=150,main=Math.max(300,P.min*60-warm-cool);
+  if(t==='full'||t==='upper'||t==='lower'){const list=strengthList(t,P),round=list.reduce((a,id)=>a+(X[id][3]==='r'?amt(id,f)*3:amt(id,f))+rest,0)+60;
+   const rounds=Math.max(1,Math.min(5,Math.floor(main/round)));
+   for(let r=0;r<rounds;r++){list.forEach((id,i)=>{add(id,'main');if(i<list.length-1)R(rest)});if(r<rounds-1)R(60)}
+   // time left over: a short cardio finisher
+   let left=main-rounds*round;const fin=P.level==='1'?['march','jacks','box']:['jacks','knees','climb','skater'];
+   if(left>=120){R(60);left-=60;let i=0;while(left>=60){add(fin[i%fin.length],'main',40);R(20);left-=60;i++}}}
+  else if(t==='cardio'){if(P.place==='home'){const list=['jacks','knees','box','skater','climb','march'],on=({1:30,2:40,3:45})[P.level],off=({1:30,2:20,3:15})[P.level];
+    let used=0,i=0;while(used+on+off<=main){add(list[i%list.length],'main',on);R(off);used+=on+off;i++}}
+   else{const m=Math.round(main/60);if(P.place==='gym')add(P.level==='1'?'walk':'ellip','main',m);
+    else if(P.level==='1')add('walk','main',m);
+    else if(P.level==='2'){let left=m;while(left>=5){add('jog','main',3);add('walk','main',2);left-=5}if(left>0)add('walk','main',left)}
+    else add('jog','main',m)}}
+  else if(t==='hiit'){const list=P.level==='3'?['burpee','climb','skater','knees']:['jacks','climb','skater','knees'],on=P.level==='3'?40:30,off=P.level==='3'?20:30;
+   let used=0,i=0;while(used+on+off<=main){const id=list[i%list.length];add(id,'main',X[id][3]==='r'?Math.round(on/4):on);R(off);used+=on+off;i++;if(i%list.length===0&&used+60<=main){R(60);used+=60}}}
+  else if(t==='mobility'){const list=['catcow','child','cobra','ham','hip','twist','chest'];let used=0,i=0;while(used<main){const id=list[i%list.length],a=amt(id,1)+15;add(id,'main',a);used+=a;i++}}
+  else if(t==='walk')add('walk','main',Math.round(main/60));
+  ['ham','hip','chest','child'].forEach(id=>add(id,'cool',X[id][4]));
+  const sec=steps.reduce((a,x)=>a+secOf(x),0);
+  return {t,title:tName(t),e:TYPES[t].e,steps,min:Math.round(sec/60),met:TYPES[t].met}}
+ const kcalFor=(met,min)=>Math.round(met*(typeof bodyWeight==='function'?bodyWeight():60)*min/60);
+ const doneOn=d=>(s.moves||[]).some(m=>m.wo&&entryDay(m)===d);
+ const amtText=st=>st.u==='r'?`${st.a} ${L('ครั้ง','reps')}`:st.u==='m'?`${st.a} ${L('นาที','min')}`:`${st.a} ${L('วินาที','sec')}`;
+ const uniqMain=S=>[...new Set(S.steps.filter(x=>x.ph==='main'&&x.id!=='rest').map(x=>x.id))];
+ // ---- card on the Move page ----
+ const movePage=document.getElementById('move');if(!movePage)return;
+ const card=document.createElement('div');card.className='wo-card';card.id='woCard';
+ movePage.querySelector('.page-title')?.after(card);
+ let editing=false,draft=null,showWeek=false;
+ function setupView(){const P=draft;
+  const chips=(key,arr,fmt)=>`<div class="wo-chips">${arr.map(a=>`<button type="button" data-k="${key}" data-v="${a[0]}" class="${String(P[key])===String(a[0])?'on':''}">${fmt(a)}</button>`).join('')}</div>`;
+  card.innerHTML=`<h3>🏋️ ${plan()?L('ปรับแผนออกกำลังกาย','Edit workout plan'):L('สร้างแผนออกกำลังกาย','Create a workout plan')}</h3>
+   <div class="wo-q">${L('เป้าหมาย','Goal')}</div>${chips('goal',GOALS,a=>`${a[1]} ${a[2]}<small>${a[3]}</small>`)}
+   <div class="wo-q">${L('ระดับ','Level')}</div>${chips('level',LEVELS,a=>`${a[1]}<small>${a[2]}</small>`)}
+   <div class="wo-q">${L('วันที่ออกกำลังกาย','Workout days')} <span class="wo-sub">(${P.days.length} ${L('วัน/สัปดาห์','days/week')})</span></div>
+   <div class="wo-days">${WD.map((d,i)=>`<button type="button" data-d="${i+1}" class="${P.days.includes(i+1)?'on':''}">${d}</button>`).join('')}</div>
+   <div class="wo-q">${L('ครั้งละ','Per session')}</div>${chips('min',MINS.map(m=>[m]),a=>`${a[0]} ${L('นาที','min')}`)}
+   <div class="wo-q">${L('สถานที่','Where')}</div>${chips('place',PLACES,a=>`${a[1]} ${a[2]}`)}
+   <div class="wo-q" style="display:flex;align-items:center;gap:8px"><span style="flex:1">🔔 ${L('เตือนวันออกกำลังกาย','Remind me on workout days')}</span><input type="time" id="woTime" value="${P.time}" style="width:auto"><input class="switch" type="checkbox" id="woRemind" ${P.remind?'checked':''}></div>
+   <div class="wo-sub" style="margin:12px 0">${L('ถ้ามีโรคหัวใจ ความดันสูง ปวดข้อ ตั้งครรภ์ หรือไม่ได้ออกกำลังกายนาน ควรปรึกษาแพทย์ก่อน · เจ็บหรือเวียนหัวให้หยุดทันที','If you have heart disease, high blood pressure, joint pain, are pregnant or haven\'t exercised in a long time, check with a doctor first · stop right away if you feel pain or dizziness')}</div>
+   <div class="wo-two">${plan()?`<button type="button" class="wo-btn ghost" id="woCancel">${L('ยกเลิก','Cancel')}</button>`:''}<button type="button" class="wo-btn" id="woSave" style="${plan()?'':'grid-column:1/-1'}">${plan()?L('บันทึกแผน','Save plan'):L('สร้างแผน','Create plan')}</button></div>`;
+  card.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;P[k]=k==='min'?Number(b.dataset.v):b.dataset.v;setupView()});
+  card.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const d=Number(b.dataset.d);P.days=P.days.includes(d)?P.days.filter(x=>x!==d):[...P.days,d].sort((a,b)=>a-b);setupView()});
+  card.querySelector('#woTime').onchange=e=>P.time=e.target.value||'18:00';
+  card.querySelector('#woRemind').onchange=e=>{P.remind=e.target.checked;if(P.remind&&window.FoodWellNotify&&FoodWellNotify.permission()!=='granted')FoodWellNotify.request()};
+  const c=card.querySelector('#woCancel');if(c)c.onclick=()=>{editing=false;draw()};
+  card.querySelector('#woSave').onclick=()=>{if(P.days.length<1){toast(L('เลือกอย่างน้อย 1 วัน','Pick at least one day'));return}
+   const old=plan();s.workoutPlan=Object.assign({},P,{start:old&&old.start||localDay()});save();editing=false;window.fwNotifyPush&&fwNotifyPush();draw();toast(old?L('บันทึกแผนแล้ว','Plan saved'):L('สร้างแผนแล้ว เริ่มกันเลย 💪','Plan created — let\'s go 💪'))}}
+ function planView(){const P=plan(),today=localDay(),wdT=iso(today),mon=addDay(today,1-wdT);
+  const days=[...Array(7)].map((_,i)=>{const d=addDay(mon,i),t=typeOf(P,i+1);return {d,t,done:doneOn(d)}});
+  const planned=days.filter(x=>x.t).length,done=days.filter(x=>x.t&&x.done).length,tT=typeOf(P,wdT);
+  let todayHtml;
+  if(tT){const S=session(tT,P,today),dn=doneOn(today);
+   todayHtml=`<div class="wo-today${dn?' ok':''}"><b>${dn?'✅ ':''}${S.e} ${L('วันนี้','Today')}: ${esc(S.title)}</b><div class="meta">~${S.min} ${L('นาที','min')} · ~${kcalFor(S.met,S.min)} kcal · ${uniqMain(S).length} ${L('ท่า','moves')}</div>
+    <div class="list">${uniqMain(S).slice(0,5).map(nm).join(' · ')}${uniqMain(S).length>5?' …':''}</div>
+    ${dn?`<div class="meta">${L('ทำแล้ววันนี้ เก่งมาก! ทำซ้ำได้ถ้าต้องการ','Done today — great job! You can do it again if you like')}</div>`:''}
+    <button type="button" class="wo-btn" id="woStart">▶️ ${dn?L('ทำอีกครั้ง','Do it again'):L('เริ่มออกกำลังกาย','Start workout')}</button>
+    <div class="wo-two"><button type="button" class="wo-btn ghost" id="woPreview">📋 ${L('ดูท่าทั้งหมด','See all moves')}</button><button type="button" class="wo-btn ghost" id="woMark">✅ ${L('ทำแล้ว (บันทึกเอง)','Done (log it)')}</button></div></div>`}
+  else{const next=days.concat(days.map(x=>({...x,d:addDay(x.d,7)}))).find(x=>x.t&&x.d>today);
+   todayHtml=`<div class="wo-today ok"><b>😌 ${L('วันนี้วันพัก','Rest day today')}</b><div class="meta">${next?`${L('ครั้งถัดไป','Next')}: ${WDL[iso(next.d)-1]} · ${TYPES[next.t].e} ${tName(next.t)}`:''}</div>
+    <div class="list">${L('ร่างกายสร้างกล้ามเนื้อตอนพัก · เดินเบา ๆ หรือยืดเหยียดได้','Your body rebuilds while resting · a light walk or stretch is fine')}</div>
+    <button type="button" class="wo-btn ghost" id="woLight">🧘 ${L('ยืดเหยียดเบา ๆ 10 นาที','Light stretching, 10 min')}</button></div>`}
+  card.innerHTML=`<div style="display:flex;align-items:baseline;gap:8px"><h3 style="flex:1">🏋️ ${L('แผนออกกำลังกาย','Workout plan')}</h3><span class="wo-sub">${L('สัปดาห์ที่','Week')} ${weekNo(P)+1}${weekNo(P)%4===3?' · '+L('สัปดาห์เบา','light week'):''}</span></div>
+   <div class="wo-sub">${GOALS.find(g=>g[0]===P.goal)[2]} · ${LEVELS.find(l=>l[0]===P.level)[1]} · ${P.min} ${L('นาที','min')} · ${PLACES.find(p=>p[0]===P.place)[2]} · ${L('สัปดาห์นี้','this week')} ${done}/${planned}</div>
+   <div class="wo-week">${days.map((x,i)=>`<button type="button" data-wd="${i+1}" class="${x.t?'':'rest'}${x.d===today?' today':''}${x.t&&x.done?' done':''}"><span>${WD[i]}</span><i>${x.t?TYPES[x.t].e:'·'}</i></button>`).join('')}</div>
+   ${todayHtml}
+   ${showWeek?`<div style="margin-top:10px">${days.filter(x=>x.t).map(x=>{const S=session(x.t,P,x.d);return `<button type="button" class="wo-row" data-wd="${iso(x.d)}"><span class="ic">${S.e}</span><span class="tx"><b>${WDL[iso(x.d)-1]} · ${esc(S.title)}${x.done?' ✅':''}</b><small>~${S.min} ${L('นาที','min')} · ${uniqMain(S).slice(0,4).map(nm).join(', ')}</small></span><span>›</span></button>`}).join('')}</div>`:''}
+   <div class="wo-links"><button type="button" id="woWeek">${showWeek?L('ซ่อนทั้งสัปดาห์','Hide week'):L('📅 ดูทั้งสัปดาห์','📅 See the week')}</button><button type="button" id="woEdit">⚙️ ${L('ปรับแผน','Edit plan')}</button><button type="button" id="woEnd">${L('จบแผน','End plan')}</button></div>`;
+  const q=id=>card.querySelector(id);
+  q('#woStart')&&(q('#woStart').onclick=()=>play(session(tT,P,today)));
+  q('#woPreview')&&(q('#woPreview').onclick=()=>preview(session(tT,P,today)));
+  q('#woMark')&&(q('#woMark').onclick=()=>{const S=session(tT,P,today);logDone(S,S.min);toast(L('บันทึกแล้ว 💪','Logged 💪'))});
+  q('#woLight')&&(q('#woLight').onclick=()=>play(session('mobility',Object.assign({},P,{min:10}),today)));
+  card.querySelectorAll('[data-wd]').forEach(b=>b.onclick=()=>{const wd=Number(b.dataset.wd),t=typeOf(P,wd);if(t)preview(session(t,P,addDay(mon,wd-1)))});
+  q('#woWeek').onclick=()=>{showWeek=!showWeek;draw()};
+  q('#woEdit').onclick=()=>{editing=true;draft=JSON.parse(JSON.stringify(P));draw()};
+  q('#woEnd').onclick=()=>{if(!confirm(L('จบแผนออกกำลังกายนี้? (ประวัติการเคลื่อนไหวยังอยู่)','End this workout plan? (your movement history stays)')))return;delete s.workoutPlan;save();window.fwNotifyPush&&fwNotifyPush();draw()}}
+ function introView(){card.innerHTML=`<div class="wo-hero"><div class="big">🏋️</div><h3>${L('แผนออกกำลังกาย','Workout plan')}</h3>
+  <p>${L('บอกเป้าหมาย ระดับ วัน และเวลาที่มี แอปจะจัดตารางรายสัปดาห์ พร้อมท่าและตัวจับเวลานำเล่น · ค่อย ๆ เพิ่มความหนักทุกสัปดาห์','Tell us your goal, level, days and time — the app builds a weekly schedule with moves and a guided timer, getting a little harder each week')}</p>
+  <button type="button" class="wo-btn" id="woNew">✨ ${L('สร้างแผนของฉัน','Create my plan')}</button></div>`;
+  card.querySelector('#woNew').onclick=()=>{editing=true;draft={goal:(s.profile&&s.profile.goal==='gain')?'muscle':(s.profile&&s.profile.goal==='lose')?'lose':'health',level:'1',days:[1,3,5],min:30,place:'home',remind:false,time:'18:00'};draw()}}
+ function draw(){if(editing)setupView();else if(plan())planView();else introView();homeCard()}
+ // ---- preview sheet ----
+ const sheet=document.createElement('div');sheet.className='wo-sheet';sheet.id='woSheet';sheet.innerHTML='<div class="box"></div>';document.body.appendChild(sheet);
+ sheet.onclick=e=>{if(e.target===sheet)sheet.classList.remove('show')};
+ function preview(S){const b=sheet.querySelector('.box'),ph={warm:L('วอร์มอัพ','Warm-up'),main:L('ออกกำลังกาย','Workout'),cool:L('คูลดาวน์','Cool-down')};
+  let last='',html='';S.steps.forEach(st=>{if(st.id==='rest')return;if(st.ph!==last){html+=`<div class="wo-sec">${ph[st.ph]}</div>`;last=st.ph}
+   html+=`<div class="wo-step"><span class="e">${X[st.id][2]}</span><div><b>${esc(nm(st.id))} · ${amtText(st)}</b><small>${esc(cue(st.id))}</small></div></div>`});
+  b.innerHTML=`<div class="hd"><span style="font-size:36px">${S.e}</span><div style="flex:1"><h2>${esc(S.title)}</h2><div class="wo-sub">~${S.min} ${L('นาที','min')} · ~${kcalFor(S.met,S.min)} kcal</div></div><button type="button" class="wo-x" id="woSheetX" aria-label="${L('ปิด','Close')}">✕</button></div>${html}
+   <button type="button" class="wo-btn" id="woGo" style="margin-top:14px">▶️ ${L('เริ่มเลย','Start now')}</button>`;
+  b.querySelector('#woSheetX').onclick=()=>sheet.classList.remove('show');b.querySelector('#woGo').onclick=()=>{sheet.classList.remove('show');play(S)};
+  sheet.classList.add('show');b.scrollTop=0}
+ // ---- guided player ----
+ const pl=document.createElement('div');pl.className='wo-player';pl.id='woPlayer';pl.setAttribute('role','dialog');document.body.appendChild(pl);
+ let cur=null,idx=0,endAt=0,paused=0,timer=0,started=0;
+ const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(180)}catch(e){}};
+ const fmt=sec=>`${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
+ function play(S){cur=S;idx=0;started=Date.now();pl.classList.add('show');enter()}
+ function enter(){const st=cur.steps[idx];paused=0;endAt=st.u==='r'?0:Date.now()+(st.u==='m'?st.a*60:st.a)*1000;buzz();render();clearInterval(timer);timer=setInterval(tick,250)}
+ function tick(){const st=cur&&cur.steps[idx];if(!st||paused||!endAt)return;const left=Math.ceil((endAt-Date.now())/1000);
+  const a=pl.querySelector('.amt');if(a)a.textContent=fmt(Math.max(0,left));if(left<=0)next()}
+ function next(){if(!cur)return;if(idx<cur.steps.length-1){idx++;enter()}else finish()}
+ function prevStep(){if(idx>0){idx--;enter()}}
+ function render(){const st=cur.steps[idx],isRest=st.id==='rest',nx=cur.steps.slice(idx+1).find(x=>x.id!=='rest');
+  const ph={warm:L('วอร์มอัพ','Warm-up'),main:L('ออกกำลังกาย','Workout'),cool:L('คูลดาวน์','Cool-down'),rest:L('พัก','Rest')}[st.ph];
+  const left=endAt?Math.ceil((endAt-Date.now())/1000):0;
+  pl.classList.toggle('rest',isRest);
+  pl.innerHTML=`<div class="wo-ptop"><button type="button" id="woClose" aria-label="${L('ปิด','Close')}">✕</button><div class="t">${esc(cur.title)} · ${idx+1}/${cur.steps.length}</div></div>
+   <div class="wo-pbar"><i style="width:${(idx/cur.steps.length*100).toFixed(1)}%"></i></div>
+   <div class="wo-main"><div class="ph">${ph}</div><div class="em">${X[st.id][2]}</div><h2>${esc(nm(st.id))}</h2>
+    <div class="amt">${st.u==='r'?`${st.a}<span style="font-size:22px"> ${L('ครั้ง','reps')}</span>`:fmt(Math.max(0,left))}</div>
+    <div class="cue">${esc(cue(st.id))}</div>${nx?`<div class="nx">${L('ถัดไป','Next')}: ${X[nx.id][2]} ${esc(nm(nx.id))} · ${amtText(nx)}</div>`:''}</div>
+   <div class="wo-ctl"><button type="button" id="woPrev">⏮</button>
+    ${st.u==='r'?`<button type="button" class="main" id="woNext">✓ ${L('เสร็จ','Done')}</button>`:isRest?`<button type="button" class="main" id="woNext">⏭ ${L('ข้ามพัก','Skip rest')}</button>`:`<button type="button" class="main" id="woPause">${paused?'▶️ '+L('ต่อ','Resume'):'⏸ '+L('หยุด','Pause')}</button>`}
+    <button type="button" id="woSkip" aria-label="${isRest?L('พักเพิ่ม 10 วินาที','10 more seconds'):L('ข้าม','Skip')}">${isRest?'+10s':'⏭'}</button></div>`;
+  pl.querySelector('#woClose').onclick=quit;pl.querySelector('#woPrev').onclick=prevStep;
+  const n=pl.querySelector('#woNext');if(n)n.onclick=next;
+  const p=pl.querySelector('#woPause');if(p)p.onclick=()=>{if(paused){endAt=Date.now()+paused;paused=0}else{paused=Math.max(0,endAt-Date.now())}render()};
+  pl.querySelector('#woSkip').onclick=()=>{if(isRest){if(paused)paused+=10000;else endAt+=10000;render()}else next()}}
+ const elapsedMin=()=>Math.max(1,Math.round((Date.now()-started)/60000));
+ function stop(){clearInterval(timer);timer=0;pl.classList.remove('show','rest');cur=null}
+ function quit(){if(!cur)return;const m=elapsedMin(),S=cur;
+  if(m>=3&&confirm(L(`ออกจากการออกกำลังกาย? บันทึกเวลาที่ทำไปแล้ว ${m} นาที`,`Leave the workout? ${m} min done will be logged`))){logDone(S,m);stop();return}
+  if(m<3&&confirm(L('ออกจากการออกกำลังกาย?','Leave the workout?')))stop()}
+ function finish(){clearInterval(timer);const S=cur,m=Math.max(elapsedMin(),Math.round(S.min*.6)),k=kcalFor(S.met,m);logDone(S,m);
+  pl.classList.remove('rest');pl.innerHTML=`<div class="wo-ptop"><button type="button" id="woClose" aria-label="${L('ปิด','Close')}">✕</button><div class="t">${esc(S.title)}</div></div>
+   <div class="wo-main wo-done"><div class="em">🎉</div><h2>${L('เยี่ยมมาก!','Great job!')}</h2><div class="cue">${L('บันทึกลงการเคลื่อนไหววันนี้แล้ว','Logged to today\'s movement')}</div>
+    <div class="stats"><div><b>${m}</b>${L('นาที','min')}</div><div><b>${k}</b>kcal</div><div><b>${uniqMain(S).length}</b>${L('ท่า','moves')}</div></div>
+    <button type="button" class="wo-btn" id="woFin">${L('เสร็จสิ้น','Finish')}</button></div>`;
+  const close=()=>{stop();window.scrollTo({top:0})};pl.querySelector('#woClose').onclick=close;pl.querySelector('#woFin').onclick=close;cur=S}
+ function logDone(S,min){const now=new Date();s.moves=s.moves||[];
+  s.moves.unshift({id:Date.now(),name:`${S.e} ${S.title}`,type:'',min,kcal:kcalFor(S.met,min),met:S.met,wo:S.t,time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})});save()}
+ // ---- home card (customisable home) ----
+ function homeCard(){let box=document.getElementById('woHome');const P=plan();
+  if(!box){const after=document.querySelector('#home .twocards');if(!after)return;box=document.createElement('div');box.className='wo-home home-sortable';box.id='woHome';box.dataset.homeKey='workout';after.after(box);if(typeof applyHomePrefs==='function')applyHomePrefs()}
+  if(!P){box.style.display='none';return}box.style.display='';
+  const today=localDay(),t=typeOf(P,iso(today)),dn=doneOn(today);
+  if(!t){box.innerHTML=`<span class="em">😌</span><span class="tx"><b>${L('วันนี้วันพัก','Rest day today')}</b><small>${L('แผนออกกำลังกาย','Workout plan')} · ${L('ยืดเหยียดเบา ๆ ได้','a light stretch is fine')}</small></span><button type="button" class="ok">${L('ดูแผน','Plan')}</button>`;box.querySelector('button').onclick=()=>go('move');return}
+  const S=session(t,P,today);
+  box.innerHTML=`<span class="em">${S.e}</span><span class="tx"><b>${dn?'✅ ':''}${esc(S.title)}</b><small>~${S.min} ${L('นาที','min')} · ~${kcalFor(S.met,S.min)} kcal${dn?' · '+L('ทำแล้ว','done'):''}</small></span><button type="button" class="${dn?'ok':''}">${dn?L('ดูแผน','Plan'):'▶️ '+L('เริ่ม','Start')}</button>`;
+  box.querySelector('button').onclick=()=>dn?go('move'):play(S)}
+ // reminders (native): workout days at the chosen time, skipped once today's workout is logged
+ window.fwWorkoutNotify=()=>{const P=plan();if(!P||!P.remind)return {woOn:false};const names={};(P.days||[]).forEach(d=>names[d]=tName(typeOf(P,d)));return {woOn:true,woTime:P.time||'18:00',woDays:P.days,woNames:names}};
+ window.fwWorkoutDone=d=>doneOn(d);
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{if(!editing)draw();else homeCard()}catch(e){console.error(e)}return o};
+ window.FWWorkout={session,typeOf,play,preview,weekNo};
+ draw();
 })();
 </script>
