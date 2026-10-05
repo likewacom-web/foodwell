@@ -182,31 +182,14 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 /* v40 AI food recognition connector */
 .v40-ai-card{margin-top:10px;padding:12px;border-radius:18px;background:linear-gradient(135deg,rgba(239,160,188,.10),rgba(142,112,255,.08));border:1px solid rgba(239,160,188,.20)}.v40-ai-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.v40-ai-head b{font-size:13px}.v40-ai-head span{font-size:10px;color:#aaa}.v40-ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.v40-ai-btn{border:1px solid #454751;background:#252831;color:#fff;border-radius:13px;padding:10px;font-weight:800;cursor:pointer}.v40-ai-btn.primary-ai{background:linear-gradient(135deg,#f2b1c7,#b889e8);color:#2d2430;border:0}.v40-ai-status{font-size:10px;color:#aaa;line-height:1.55;margin-top:8px}.v40-ai-result{margin-top:9px;display:none}.v40-ai-result.show{display:block}.v40-ai-result .ai-result-box{background:#20232a;border:1px solid #393c46;border-radius:15px;padding:11px}.v40-ai-candidates{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.v40-ai-candidates button{border:1px solid #464954;background:#292c34;color:#eee;border-radius:12px;padding:7px 9px;font-size:10px}.v40-ai-settings small{display:block;color:#999;font-size:10px;line-height:1.5;margin-top:5px}.v40-ai-settings input{width:100%;margin-top:8px}
 
-/* v43 AI analysis history */
-.v43-ai-history{display:grid;gap:9px;margin-top:10px}.v43-ai-item{display:flex;gap:10px;align-items:center;padding:9px;border:1px solid #343741;background:#1b1e25;border-radius:16px}.v43-ai-thumb{width:54px;height:54px;border-radius:13px;object-fit:cover;background:#111}.v43-ai-info{min-width:0;flex:1}.v43-ai-info b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v43-ai-info small{display:block;color:#92949e;font-size:9px;margin-top:3px}.v43-ai-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.v43-ai-tag{font-size:9px;padding:4px 7px;border-radius:9px;background:#292c34;color:#ddd}.v43-ai-empty{padding:14px;text-align:center;color:#92949e;font-size:10px;border:1px dashed #3a3d46;border-radius:15px}.v43-ai-history-head{display:flex;justify-content:space-between;align-items:center}.v43-ai-history-head button{border:0;background:none;color:#ee8eb0;font-weight:800;font-size:10px;cursor:pointer}.v43-ai-history-meta{font-size:9px;color:#777;margin-top:3px}.v43-ai-reuse{border:1px solid #464954;background:#252831;color:#fff;border-radius:10px;padding:6px 8px;font-size:9px;cursor:pointer}
 
 <style>
 
 
-/* v50 Quick Shortcut Popup */
-.quick-fab{position:fixed;right:max(18px,calc((100vw - 430px)/2 + 18px));bottom:84px;width:58px;height:58px;border:0;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#24141b;font-size:30px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.35);z-index:80;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
-.quick-fab:active{transform:scale(.94)}
+.dash-insights{width:100%;margin:4px 0 12px;padding:14px}
 .burn-total{margin-top:10px;display:inline-block;background:#2a2026;color:#f3a0bb;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700}.burn-total b{font-size:16px}
 .burn-est{margin:10px 0 2px;padding:10px 12px;border-radius:13px;background:#24262d;color:#f3c7d6;font-size:14px}.burn-est small{display:block;color:#8f929b;font-size:11px;margin-top:2px}
-.quick-fab.open{transform:rotate(45deg)}
-.quick-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);z-index:90;display:none;align-items:flex-end;justify-content:center;padding:0 14px 78px}
-.quick-overlay.show{display:flex}
-.quick-sheet{width:min(430px,100%);background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 22px 60px rgba(0,0,0,.5);animation:quickUp .2s ease}
-.quick-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.quick-head h3{margin:0;font-size:20px}.quick-close{border:0;background:var(--panel2);color:var(--text);width:36px;height:36px;border-radius:50%;font-size:20px}
-.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-item{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:18px;padding:14px;text-align:left;display:flex;gap:11px;align-items:center;cursor:pointer}.quick-item:active{transform:scale(.98)}.quick-icon{font-size:25px}.quick-item b{display:block;font-size:15px}.quick-item span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-@keyframes quickUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@media(min-width:431px){.quick-fab{right:calc((100vw - 430px)/2 + 18px)}}
 
-/* v51 Quick Shortcut Customizer */
-.quick-manage{border:0;background:var(--panel2);color:var(--text);width:36px;height:36px;border-radius:50%;font-size:18px;margin-left:auto;margin-right:6px}
-.quick-manage-row{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}
-.quick-manage-row:last-child{border-bottom:0}.quick-manage-row input{accent-color:var(--pink);width:18px;height:18px}.quick-manage-row .qm-icon{font-size:22px;width:28px}.quick-manage-row .qm-name{flex:1}.quick-manage-row .qm-name b{display:block;font-size:13px}.quick-manage-row .qm-name small{color:var(--muted);font-size:10px}.qm-move{border:0;background:var(--panel2);color:var(--text);border-radius:9px;width:30px;height:30px}.qm-move:disabled{opacity:.3}.quick-settings-actions{display:flex;gap:8px;margin-top:12px}.quick-settings-actions button{flex:1}
-.quick-custom-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);z-index:110;display:none;align-items:flex-end;justify-content:center;padding:0 14px 78px}.quick-custom-modal.show{display:flex}.quick-custom-sheet{width:min(430px,100%);max-height:78vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 22px 60px rgba(0,0,0,.5)}
 
 .food-core-summary{margin:12px 0;padding:16px;border-radius:22px;background:linear-gradient(135deg,#2a2630,#19181d);border:1px solid rgba(255,255,255,.07);box-shadow:0 10px 30px rgba(0,0,0,.12)}
 .food-core-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.food-core-kicker{font-size:10px;letter-spacing:1.4px;color:#ee8eb0;font-weight:900}.food-core-head h2{margin:4px 0 0;font-size:20px}.food-core-badge{font-size:11px;font-weight:800;padding:8px 10px;border-radius:999px;background:rgba(238,142,176,.13);color:#f3aac3}
@@ -219,7 +202,6 @@ body.soft .food-core-summary{background:#fff;color:#25242a;border-color:#eee}.bo
 
 .core-hc-card{border:1px solid rgba(240,169,192,.16);background:linear-gradient(145deg,#211d24,#191a20)}.hc-core-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.hc-core-grid>div{background:#23252c;border-radius:14px;padding:10px}.hc-core-grid b{display:block;font-size:12px}.hc-core-grid small{display:block;color:#92949e;font-size:9px;margin-top:3px}.hc-core-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:360px){.hc-core-actions{grid-template-columns:1fr}}
 
-.v63-panel{margin-top:12px;background:#191b21;border:1px solid #30333b;border-radius:18px;padding:12px}.v63-head{display:flex;justify-content:space-between;align-items:center}.v63-head h3{margin:0;font-size:14px}.v63-head span{background:#2a2c34;color:#efa0bc;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800}.v63-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:9px}.v63-tools select{background:#24262d;color:#eee;border:1px solid #353841;border-radius:11px;padding:9px;font-size:10px}.v63-frequent{display:grid;gap:7px;margin-top:10px}.v63-freq{display:flex;align-items:center;gap:8px;background:#24262d;border-radius:13px;padding:8px}.v63-freq .pic{width:36px;height:36px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:#30333b}.v63-freq img{width:100%;height:100%;object-fit:cover}.v63-freq main{min-width:0;flex:1}.v63-freq b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v63-freq small{color:#8e919b;font-size:8px}.v63-freq button{border:0;border-radius:9px;background:#efa0bc;color:#35252c;padding:7px 9px;font-size:9px;font-weight:800}.v63-manager{margin-top:9px;display:grid;gap:7px}.v63-item{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;background:#22242b;border-radius:12px;padding:9px}.v63-item b{font-size:10px}.v63-item small{display:block;color:#8f929b;font-size:8px;margin-top:2px}.v63-actions{display:flex;gap:5px}.v63-actions button{border:0;border-radius:8px;padding:6px 7px;font-size:8px;background:#30333b;color:#eee}.v63-actions .danger{background:#4a2c35;color:#ffc2d1}
 </style>
 <style id="fw65-planner-style">
 .fw65-plan{display:grid;gap:10px;margin-top:12px}.fw65-day{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px}.fw65-day h4{margin:0 0 8px}.fw65-meal{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}.fw65-meal:first-of-type{border-top:0}.fw65-meal .name{flex:1}.fw65-actions{display:flex;gap:8px;flex-wrap:wrap}.fw65-chip{padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:inherit}.fw65-empty{opacity:.65;text-align:center;padding:14px}.fw65-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center;z-index:9999}.fw65-sheet{width:min(430px,100%);max-height:85vh;overflow:auto;background:#17131b;border-radius:24px 24px 0 0;padding:18px}.fw65-sheet h3{margin-top:0}.fw65-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0}.fw65-select{width:100%;padding:10px;border-radius:12px}
@@ -236,11 +218,9 @@ body.soft .food-core-summary{background:#fff;color:#25242a;border-color:#eee}.bo
 @media(max-width:390px){.core-dashboard-grid{grid-template-columns:1fr}}
 </style>
 
-<style id="v64-smart-suggestions-css">
-.v64-card{margin:12px 0;background:linear-gradient(135deg,#2a2028,#201d24);border:1px solid #3a2d35;border-radius:20px;padding:14px}.v64-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.v64-head h3{margin:0;font-size:14px}.v64-head small{color:#92949e;font-size:9px}.v64-list{display:grid;gap:8px;margin-top:10px}.v64-item{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:9px;background:#1f2127;border:1px solid #2c2f37;border-radius:15px;padding:8px}.v64-pic{width:42px;height:42px;border-radius:12px;background:#2a2c34;display:grid;place-items:center;overflow:hidden;font-size:20px}.v64-pic img{width:100%;height:100%;object-fit:cover}.v64-item b{font-size:12px;display:block}.v64-item small{display:block;color:#92949e;font-size:9px;margin-top:3px}.v64-use{border:0;border-radius:10px;background:#efa0bc;color:#35252c;padding:8px 9px;font-size:9px;font-weight:900}.v64-empty{font-size:10px;color:#92949e;padding:8px 0}.v64-reason{color:#b6a2aa!important}
-</style>
 <style id="v62-food-library-css">
-.v62-library-launch{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,#2a2028,#201d24);border:1px solid #3a2d35;border-radius:20px;padding:14px;margin:12px 0}.v62-library-launch b{font-size:14px}.v62-library-launch small{display:block;color:#999ba4;font-size:10px;margin-top:3px}.v62-library-launch button{border:0;border-radius:12px;background:#efa0bc;color:#35252c;padding:10px 12px;font-weight:800}.v62-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin:10px 0}.v62-cat-row{display:flex;gap:7px;overflow:auto;padding:2px 0 8px}.v62-cat{flex:0 0 auto;border:1px solid #343640;background:#24262d;color:#b9bbc3;border-radius:999px;padding:8px 11px;font-size:10px;font-weight:800}.v62-cat.active{background:#efa0bc;color:#35252c;border-color:#efa0bc}.v62-library-grid{display:grid;gap:9px}.v62-food{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;background:#1f2127;border:1px solid #2c2f37;border-radius:18px;padding:10px}.v62-thumb{width:54px;height:54px;border-radius:15px;background:#2a2c34;overflow:hidden;display:grid;place-items:center;font-size:25px}.v62-thumb img{width:100%;height:100%;object-fit:cover}.v62-food b{display:block;font-size:13px}.v62-food small{display:block;color:#92949e;font-size:9px;margin-top:3px}.v62-use{border:0;border-radius:11px;background:#2d3038;color:#eee;padding:9px 10px;font-size:10px;font-weight:800}.v62-use.primary-v62{background:#efa0bc;color:#35252c}.v62-empty{background:#1f2127;border:1px dashed #3a3d46;border-radius:18px;padding:22px;text-align:center;color:#92949e;font-size:11px}.v62-add-card{margin-top:10px;background:#191b21;border:1px dashed #3b3e47;border-radius:18px;padding:14px}.v62-add-card h3{margin:0 0 6px;font-size:14px}.v62-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.v62-stat{background:#24272e;border-radius:14px;padding:10px}.v62-stat b{display:block;font-size:17px}.v62-stat small{font-size:9px;color:#92949e}.v62-section-title{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px}.v62-section-title h3{margin:0;font-size:14px}.v62-section-title small{color:#888b94;font-size:9px}
+.v62-library-launch{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(135deg,#2a2028,#201d24);border:1px solid #3a2d35;border-radius:20px;padding:14px;margin:12px 0}.v62-library-launch b{font-size:14px}.v62-library-launch small{display:block;color:#999ba4;font-size:10px;margin-top:3px}.v62-library-launch button{border:0;border-radius:12px;background:#efa0bc;color:#35252c;padding:10px 12px;font-weight:800}.v62-tools{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin:10px 0}.v62-tools select{background:#2a2d35;color:#eee;border:1px solid #3a3d45;border-radius:12px;padding:0 8px}
+.fw-lib-acts{display:flex;gap:6px;margin-top:6px}.fw-lib-acts button{border:0;background:#2a2d35;color:#c9ccd4;border-radius:9px;padding:5px 8px;font-size:11px}.fw-lib-new{width:100%;margin:12px 0}.v62-cat-row{display:flex;gap:7px;overflow:auto;padding:2px 0 8px}.v62-cat{flex:0 0 auto;border:1px solid #343640;background:#24262d;color:#b9bbc3;border-radius:999px;padding:8px 11px;font-size:10px;font-weight:800}.v62-cat.active{background:#efa0bc;color:#35252c;border-color:#efa0bc}.v62-library-grid{display:grid;gap:9px}.v62-food{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;background:#1f2127;border:1px solid #2c2f37;border-radius:18px;padding:10px}.v62-thumb{width:54px;height:54px;border-radius:15px;background:#2a2c34;overflow:hidden;display:grid;place-items:center;font-size:25px}.v62-thumb img{width:100%;height:100%;object-fit:cover}.v62-food b{display:block;font-size:13px}.v62-food small{display:block;color:#92949e;font-size:9px;margin-top:3px}.v62-use{border:0;border-radius:11px;background:#2d3038;color:#eee;padding:9px 10px;font-size:10px;font-weight:800}.v62-use.primary-v62{background:#efa0bc;color:#35252c}.v62-empty{background:#1f2127;border:1px dashed #3a3d46;border-radius:18px;padding:22px;text-align:center;color:#92949e;font-size:11px}.v62-add-card{margin-top:10px;background:#191b21;border:1px dashed #3b3e47;border-radius:18px;padding:14px}.v62-add-card h3{margin:0 0 6px;font-size:14px}.v62-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.v62-stat{background:#24272e;border-radius:14px;padding:10px}.v62-stat b{display:block;font-size:17px}.v62-stat small{font-size:9px;color:#92949e}.v62-section-title{display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px}.v62-section-title h3{margin:0;font-size:14px}.v62-section-title small{color:#888b94;font-size:9px}
 </style>
 
 
@@ -256,21 +236,6 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <style>
 .core-home{display:grid;gap:12px;margin:12px 0}.core-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.core-card{padding:14px;border-radius:18px;background:var(--card,#17171d);border:1px solid rgba(255,255,255,.08)}.core-card strong{display:block;margin-bottom:5px}.core-card small{opacity:.72}.core-pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:rgba(255,105,160,.14);font-size:12px}.core-sync{display:flex;justify-content:space-between;align-items:center;gap:10px}.core-primary{width:100%;margin-top:10px}</style>
 <main>
-<section id="overview" class="page">
-<div class="page-title"><div><p>OVERVIEW</p><h1>ภาพรวม</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
-<div class="core-home">
-  <div class="card">
-    <div class="core-sync"><div><h2 style="margin:0 0 4px">ภาพรวมวันนี้</h2><small>ศูนย์กลางของ FoodWell</small></div><span style="font-size:30px">🌿</span></div>
-    <div class="core-grid" style="margin-top:12px">
-      <div class="core-card"><strong>🍱 อาหาร</strong><small id="coreFood">บันทึกอาหารวันนี้</small></div>
-      <div class="core-card"><strong>💧 น้ำ</strong><small id="coreWater">บันทึกน้ำวันนี้</small></div>
-      <div class="core-card"><strong>🏃 การเคลื่อนไหว</strong><small id="coreMove">กิจกรรมวันนี้</small></div>
-    </div>
-    <button class="primary core-primary" id="coreSync">🔄 ซิงก์ข้อมูลตอนนี้</button>
-  </div>
-</div>
-</section>
-
 <section id="home" class="page active">
 <div class="home-date"><div class="moon">🌙</div><h1>วันนี้</h1><p id="date"></p><div class="gear">⚙</div></div>
 <div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
@@ -287,7 +252,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <section id="food" class="page">
 <div class="page-title"><div><p>FOOD JOURNAL</p><h1>อาหาร</h1></div><button class="add" id="foodFocus">+</button></div>
 <div class="v62-library-launch"><div><b>🍱 คลังอาหารของฉัน</b><small>รายการโปรด · รายการล่าสุด · ใช้ซ้ำได้ในแตะเดียว</small></div><button type="button" onclick="go('foodLibrary')">เปิดคลัง</button></div>
-<div class="food-core-summary"><div class="food-core-head"><div><span class="food-core-kicker">TODAY · FOOD LOG</span><h2>บันทึกวันนี้</h2></div><span id="foodTodayCount" class="food-core-badge">0 รายการ</span></div><div class="food-core-meals"><button data-core-meal="เช้า">🌅 <b id="coreBreakfast">0</b><small>เช้า</small></button><button data-core-meal="กลางวัน">☀️ <b id="coreLunch">0</b><small>กลางวัน</small></button><button data-core-meal="เย็น">🌙 <b id="coreDinner">0</b><small>เย็น</small></button><button data-core-meal="ของว่าง">🍓 <b id="coreSnack">0</b><small>ว่าง</small></button></div></div><div class="v64-card" id="v64SmartSuggestions"><div class="v64-head"><h3>✨ แนะนำจากคลังของคุณ</h3><small>อ้างอิงจากรายการที่ใช้บ่อยและมื้อที่เลือก</small></div><div id="v64SuggestionList" class="v64-list"></div></div><div class="food-repeat-card"><div class="section-head"><h2>⚡ เพิ่มจากรายการล่าสุด</h2><span>แตะเพื่อเติมฟอร์ม</span></div><div id="foodRepeatList" class="food-repeat-list"></div></div><div class="meal-shortcuts" aria-label="เลือกมื้ออาหาร"><button class="meal-shortcut active" data-meal-quick="เช้า"><span>🌅</span>เช้า</button><button class="meal-shortcut" data-meal-quick="กลางวัน"><span>☀️</span>กลางวัน</button><button class="meal-shortcut" data-meal-quick="เย็น"><span>🌙</span>เย็น</button><button class="meal-shortcut" data-meal-quick="ของว่าง"><span>🍓</span>ของว่าง</button></div>
+<div class="food-core-summary"><div class="food-core-head"><div><span class="food-core-kicker">TODAY · FOOD LOG</span><h2>บันทึกวันนี้</h2></div><span id="foodTodayCount" class="food-core-badge">0 รายการ</span></div><div class="food-core-meals"><button data-core-meal="เช้า">🌅 <b id="coreBreakfast">0</b><small>เช้า</small></button><button data-core-meal="กลางวัน">☀️ <b id="coreLunch">0</b><small>กลางวัน</small></button><button data-core-meal="เย็น">🌙 <b id="coreDinner">0</b><small>เย็น</small></button><button data-core-meal="ของว่าง">🍓 <b id="coreSnack">0</b><small>ว่าง</small></button></div></div><div class="food-repeat-card"><div class="section-head"><h2>⚡ เพิ่มด่วน</h2><span>แตะเพื่อเติมฟอร์ม</span></div><div id="foodRepeatList" class="food-repeat-list"></div></div><div class="meal-shortcuts" aria-label="เลือกมื้ออาหาร"><button class="meal-shortcut active" data-meal-quick="เช้า"><span>🌅</span>เช้า</button><button class="meal-shortcut" data-meal-quick="กลางวัน"><span>☀️</span>กลางวัน</button><button class="meal-shortcut" data-meal-quick="เย็น"><span>🌙</span>เย็น</button><button class="meal-shortcut" data-meal-quick="ของว่าง"><span>🍓</span>ของว่าง</button></div>
 <div class="card food-editor">
 <h2 id="foodFormTitle">เพิ่มอาหาร</h2>
 <label>ชื่ออาหาร<input id="foodName" placeholder="เช่น ข้าวกะเพราไก่"></label>
@@ -308,18 +273,9 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <label>หมายเหตุ<textarea id="note" placeholder="ถ้ามีรายละเอียดเพิ่มเติม"></textarea></label>
 <div class="form-actions"><button class="secondary-btn" id="cancelEdit" style="display:none">ยกเลิก</button><button class="primary" id="addFood">บันทึกอาหาร</button></div>
 </div>
-<div class="section-head"><h2>📸 รูปอาหารล่าสุด</h2><span style="color:#92949e;font-size:11px">แตะเพื่อดู</span></div><div id="foodPhotoGrid" class="food-photo-grid"></div><div class="section-head"><h2>อาหารที่บันทึกบ่อย</h2><button id="clearFav" style="border:0;background:none;color:#ee8eb0;font-weight:800">ล้าง</button></div>
-<div id="favList" class="quick-foods"></div>
 <div class="filter-row"><button class="filter active" data-meal="ทั้งหมด">ทั้งหมด</button><button class="filter" data-meal="เช้า">เช้า</button><button class="filter" data-meal="กลางวัน">กลางวัน</button><button class="filter" data-meal="เย็น">เย็น</button><button class="filter" data-meal="ของว่าง">ของว่าง</button></div>
 <input class="search" id="search" placeholder="ค้นหาอาหาร...">
-<div class="section-head"><h2>รายการอาหาร</h2><span style="color:#92949e;font-size:11px">แตะรายการเพื่อดูรายละเอียด</span></div><div class="food-filter-panel">
-  <div class="food-search-row"><input id="foodSearchV37" class="input" placeholder="🔎 ค้นหาอาหาร..." autocomplete="off"><button class="btn" id="clearFoodSearchV37">ล้าง</button></div>
-  <div class="food-filter-chips" id="foodMealChipsV37">
-    <button class="food-filter-chip active" data-meal="all">ทั้งหมด</button><button class="food-filter-chip" data-meal="favorite">⭐ โปรด</button><button class="food-filter-chip" data-meal="เช้า">เช้า</button><button class="food-filter-chip" data-meal="กลางวัน">กลางวัน</button><button class="food-filter-chip" data-meal="เย็น">เย็น</button><button class="food-filter-chip" data-meal="ของว่าง">ของว่าง</button>
-  </div>
-  <div class="food-filter-grid"><select id="foodSortV37"><option value="new">ใหม่ล่าสุด</option><option value="old">เก่าสุด</option><option value="name">ชื่ออาหาร A–Z</option><option value="kcal">พลังงานน้อย→มาก</option><option value="protein">โปรตีนมาก→น้อย</option></select><select id="foodDayV37"><option value="today">วันนี้</option><option value="all">ทุกวันที่มีข้อมูล</option></select></div>
-</div>
-<div id="foodResultsMetaV37" class="food-results-meta"></div>
+<div class="section-head"><h2>รายการอาหาร</h2><span style="color:#92949e;font-size:11px">แตะรายการเพื่อดูรายละเอียด</span></div>
 <div id="foodList" class="list"></div>
 </section>
 
@@ -344,32 +300,34 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <section id="dashboard" class="page">
 <div class="page-title"><div><p>MY DASHBOARD</p><h1>ภาพรวม</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
 <div class="dashboard-hero"><div class="dashboard-kicker">FOODWELL · 7 DAYS</div><h2>ภาพรวมการบันทึกของคุณ</h2><p>ดูแนวโน้มจากสิ่งที่บันทึกไว้ โดยไม่ต้องเปรียบเทียบกับเป้าหมาย</p><div class="dashboard-stats"><div class="dashboard-stat"><b id="dashFoods">0</b><small>รายการอาหาร</small></div><div class="dashboard-stat"><b id="dashWater">0</b><small>ml น้ำ</small></div><div class="dashboard-stat"><b id="dashMove">0</b><small>นาทีเคลื่อนไหว</small></div></div></div>
+<div class="card insight-card">
+  <div class="trend-head"><h2>✨ วันนี้</h2><small>สรุปจากสิ่งที่บันทึกไว้</small></div>
+  <div id="smartInsights" class="insight-list"></div>
+</div>
 <div class="dashboard-card"><h3>🍱 อาหารที่บันทึก</h3><p>จำนวนรายการในแต่ละวัน</p><div id="dashFoodBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>💧 น้ำ</h3><p>ปริมาณที่บันทึกในแต่ละวัน</p><div id="dashWaterBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>🏃 การเคลื่อนไหว</h3><p>เวลาที่บันทึกในแต่ละวัน</p><div id="dashMoveBars" class="dash-bars"></div></div>
 <div class="dashboard-two"><div class="dashboard-mini"><b id="dashActiveDays">0</b><small>วันที่มีการบันทึก</small></div><div class="dashboard-mini"><b id="dashRecentFoods">0</b><small>อาหารวันนี้</small></div></div>
-<div class="dashboard-card"><h3>✨ สรุป</h3><p>ภาพรวมจากข้อมูลล่าสุด</p><div id="dashNote" class="dashboard-note">ยังไม่มีข้อมูลมากพอสำหรับสรุป</div></div>
+<div class="card">
+  <h2>📅 ประวัติการบันทึก</h2>
+  <div class="history-stats"><div><b id="historyFood">0</b><small>รายการอาหาร</small></div><div><b id="historyWater">0</b><small>ml น้ำ</small></div><div><b id="historyMove">0</b><small>นาที</small></div></div>
+  <div class="date-picker"><input id="historyDate" type="date"><button class="secondary-btn" id="todayHistory">วันนี้</button></div>
+  <div id="selectedHistory" class="selected-day"><b>เลือกวันที่เพื่อดูสรุป</b><p>จะแสดงจำนวนอาหาร น้ำ และเวลาการเคลื่อนไหวที่บันทึกไว้ในวันนั้น</p></div>
+  <div id="historyDays" class="history-days" style="margin-top:10px"></div>
+</div>
+<button class="secondary-btn dash-insights" type="button" id="dashInsights">📊 Meal Insights · วิเคราะห์มื้ออาหาร</button>
 </section>
 
 <section id="foodLibrary" class="page">
-<div class="page-title"><div><p>FOOD LIBRARY · v62</p><h1>🍱 คลังอาหาร</h1></div><button class="secondary-btn" type="button" onclick="go('food')">กลับ</button></div>
+<div class="page-title"><div><p>FOOD LIBRARY</p><h1>🍱 คลังอาหาร</h1></div><button class="secondary-btn" type="button" onclick="go('food')">กลับ</button></div>
 <div class="card">
-  <div class="v62-stat-row"><div class="v62-stat"><b id="v62Total">0</b><small>รายการในคลัง</small></div><div class="v62-stat"><b id="v62Fav">0</b><small>รายการโปรด</small></div><div class="v62-stat"><b id="v62Recent">0</b><small>รายการล่าสุด</small></div></div>
-  <div class="v62-tools"><input id="v62Search" placeholder="🔎 ค้นหาอาหารในคลัง..." autocomplete="off"><button class="secondary-btn" id="v62Clear" type="button">ล้าง</button></div>
+  <div class="v62-stat-row"><div class="v62-stat"><b id="v62Total">0</b><small>รายการในคลัง</small></div><div class="v62-stat"><b id="v62Fav">0</b><small>รายการโปรด</small></div><div class="v62-stat"><b id="v62Recent">0</b><small>ครั้งที่ใช้ซ้ำ</small></div></div>
+  <div class="v62-tools"><input id="v62Search" placeholder="🔎 ค้นหาอาหารในคลัง..." autocomplete="off"><select id="fwLibSort" aria-label="เรียงลำดับ"><option value="recent">ล่าสุด</option><option value="frequent">ใช้บ่อย</option><option value="name">ชื่อ ก–ฮ</option></select><button class="secondary-btn" id="v62Clear" type="button">ล้าง</button></div>
   <div class="v62-cat-row" id="v62Cats"><button class="v62-cat active" data-v62-cat="ทั้งหมด">ทั้งหมด</button><button class="v62-cat" data-v62-cat="โปรด">⭐ โปรด</button><button class="v62-cat" data-v62-cat="เช้า">🌅 เช้า</button><button class="v62-cat" data-v62-cat="กลางวัน">☀️ กลางวัน</button><button class="v62-cat" data-v62-cat="เย็น">🌙 เย็น</button><button class="v62-cat" data-v62-cat="ของว่าง">🍓 ของว่าง</button></div>
 </div>
-<div class="v62-section-title"><h3>⭐ รายการที่เก็บไว้</h3><small>แตะ “ใช้รายการนี้” เพื่อเติมฟอร์ม</small></div>
+<div class="v62-section-title"><h3>📚 รายการในคลัง</h3><small>แตะ “ใช้รายการนี้” เพื่อเติมฟอร์ม</small></div>
 <div id="v62LibraryGrid" class="v62-library-grid"></div>
-<div class="v62-add-card"><h3>➕ เพิ่มรายการเข้าคลัง</h3><p style="margin:4px 0 10px;color:#92949e;font-size:10px;line-height:1.5">บันทึกอาหารจากหน้า “อาหาร” แล้ว FoodWell จะเพิ่มรายการนั้นเข้าคลังให้อัตโนมัติ คุณยังแก้ไขหรือลบรายการได้ภายหลัง</p><button class="primary" type="button" onclick="go('food');document.getElementById('foodName').focus()">เพิ่มอาหารใหม่</button></div>
-<div class="v63-panel">
-  <div class="v63-head"><h3>🗂️ จัดการคลังอาหาร 2.0</h3><span id="v63Count">0</span></div>
-  <div class="v63-tools">
-    <select id="v63Sort"><option value="recent">ล่าสุด</option><option value="frequent">ใช้บ่อย</option><option value="name">ชื่อ A–Z</option></select>
-    <button class="secondary-btn" id="v63ManageBtn" type="button">⚙️ จัดการ</button>
-  </div>
-  <div class="v63-frequent" id="v63Frequent"></div>
-  <div id="v63Manager" class="v63-manager" hidden></div>
-</div>
+<button class="primary fw-lib-new" type="button" onclick="go('food');document.getElementById('foodName').focus()">➕ เพิ่มอาหารใหม่ (เข้าคลังอัตโนมัติ)</button>
 </section>
 <section id="more" class="page">
 <div class="page-title"><div><p>MORE</p><h1>เพิ่มเติม</h1></div></div>
@@ -409,42 +367,11 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
   </div>
   <div class="profile-insight" id="profileInsight">เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨</div>
 </div>
-<div class="card">
-  <div class="profile-section-title"><h3>🍴 อาหารที่บันทึกบ่อย</h3><small>จากรายการที่คุณบันทึกไว้</small></div>
-  <div id="profileFavorites" class="profile-chip-row"></div>
-</div>
-<div class="card">
-  <div class="profile-section-title"><h3>🕘 กิจกรรมล่าสุด</h3><small>รายการที่บันทึกในวันนี้</small></div>
-  <div id="profileRecent" class="profile-recent"></div>
-</div>
-<div class="card profile-card">
-  <div class="avatar" id="profileAvatar">🌿</div>
-  <div style="flex:1"><div class="profile-name" id="profileNameView">FoodWell</div><p class="profile-sub">พื้นที่เล็ก ๆ สำหรับบันทึกสิ่งที่ทำในแต่ละวัน</p></div>
-  <button class="secondary-btn" id="editProfile">แก้ไข</button>
-</div>
 <div class="card" id="profileEditor" style="display:none">
   <h2>👤 โปรไฟล์</h2>
   <label>ชื่อที่อยากให้แสดง<input id="profileName" placeholder="เช่น เพื่อนของ FoodWell"></label>
   <label>อีโมจิประจำตัว<input id="profileEmoji" maxlength="2" placeholder="🌿"></label>
   <button class="primary" id="saveProfile">บันทึกโปรไฟล์</button>
-</div>
-<div class="card">
-  <h2>📅 ประวัติการบันทึก</h2>
-  <div class="history-stats"><div><b id="historyFood">0</b><small>รายการอาหาร</small></div><div><b id="historyWater">0</b><small>ml น้ำ</small></div><div><b id="historyMove">0</b><small>นาที</small></div></div>
-  <div class="date-picker"><input id="historyDate" type="date"><button class="secondary-btn" id="todayHistory">วันนี้</button></div>
-  <div id="selectedHistory" class="selected-day"><b>เลือกวันที่เพื่อดูสรุป</b><p>จะแสดงจำนวนอาหาร น้ำ และเวลาการเคลื่อนไหวที่บันทึกไว้ในวันนั้น</p></div>
-  <div id="historyDays" class="history-days" style="margin-top:10px"></div>
-</div>
-<div class="trend-card">
-  <div class="trend-head"><h2>📈 ภาพรวม 7 วัน</h2><small>ดูแนวโน้มการบันทึก ไม่ใช่เป้าหมาย</small></div>
-  <div class="trend-row"><div class="trend-label">อาหาร</div><div id="foodTrend" class="trend-bars"></div><div id="foodTrendMax" class="trend-value"></div></div>
-  <div class="trend-row"><div class="trend-label">น้ำ</div><div id="waterTrend" class="trend-bars"></div><div id="waterTrendMax" class="trend-value"></div></div>
-  <div class="trend-row"><div class="trend-label">เคลื่อนไหว</div><div id="moveTrend" class="trend-bars"></div><div id="moveTrendMax" class="trend-value"></div></div>
-</div>
-
-<div class="card insight-card">
-  <div class="trend-head"><h2>✨ สรุปจากบันทึก</h2><small>ช่วยมองภาพรวมของสิ่งที่คุณบันทึกไว้</small></div>
-  <div id="smartInsights" class="insight-list"></div>
 </div>
 <div class="card">
   <h2>📝 โน้ตประจำวัน</h2>
@@ -456,20 +383,12 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
   <h2>⚙️ ตั้งค่า</h2>
   <div class="settings-grid">
     <div class="setting-row"><div><b>โหมดสีอ่อนนุ่ม</b><small>เปลี่ยนบรรยากาศของแอป โดยไม่เปลี่ยนข้อมูล</small></div><input class="switch" type="checkbox" id="softTheme"></div>
-    <div class="setting-row"><div><b>เตือนให้พักและดูแลตัวเอง</b><small>แจ้งเตือนเบา ๆ ระหว่างเปิดแอปเท่านั้น</small></div><input class="switch" type="checkbox" id="gentleReminder"></div>
+    <div class="setting-row"><div><b>เตือนให้พักและดูแลตัวเอง</b><small>ข้อความเตือนเบา ๆ ขณะเปิดแอปอยู่</small></div><input class="switch" type="checkbox" id="gentleReminder"></div>
+    <div class="setting-row"><div><b>ความถี่การเตือน</b><small>เมื่อเปิดการเตือนด้านบน</small></div><select id="reminderMinutes" style="background:#2a2d35;color:#fff;border:1px solid #3a3d45;border-radius:10px;padding:8px"><option value="30">30 นาที</option><option value="60">1 ชั่วโมง</option><option value="120">2 ชั่วโมง</option><option value="180">3 ชั่วโมง</option><option value="240">4 ชั่วโมง</option></select></div>
   </div>
-</div>
-<div class="card">
-  <h2>🔔 การแจ้งเตือน</h2>
-  <p id="notifyStatus" style="color:#999;font-size:11px;line-height:1.6">เปิดการแจ้งเตือนเพื่อรับข้อความเตือนแบบเป็นมิตร เมื่อเปิด FoodWell ค้างไว้</p>
-  <div class="settings-grid" style="margin-top:8px">
-    <div class="setting-row"><div><b>ความถี่การเตือน</b><small>ทำงานขณะเปิด FoodWell อยู่</small></div><select id="reminderMinutes" style="background:#2a2d35;color:#fff;border:1px solid #3a3d45;border-radius:10px;padding:8px"><option value="30">30 นาที</option><option value="60">1 ชั่วโมง</option><option value="120">2 ชั่วโมง</option><option value="180">3 ชั่วโมง</option><option value="240">4 ชั่วโมง</option></select></div>
-  </div>
-  <div class="two" style="margin-top:8px"><button class="secondary-btn" id="enableNotify">เปิดการแจ้งเตือน</button><button class="secondary-btn" id="testNotify">ทดสอบ 🔔</button></div>
 </div>
 <div class="card v40-ai-settings"><h2>🤖 AI Food Recognition</h2><p style="color:#999;font-size:11px;line-height:1.6">ใส่ URL ของ FoodWell AI proxy (Cloudflare Worker + Gemini ฟรี) เพื่อเปิดการวิเคราะห์รูปอาหาร · วิธีตั้งค่าอยู่ในไฟล์ ai-proxy/README.md ของโปรเจกต์ · อย่าใส่ API key ลงในแอปโดยตรง</p><label>AI Endpoint<input id="aiEndpoint" placeholder="https://foodwell-ai.xxxx.workers.dev/?k=รหัสของคุณ" autocomplete="off"></label><small>Endpoint รับ POST JSON: { "image": "data:image/..." } และตอบกลับอย่างน้อย { "name": "ชื่ออาหาร" }</small><div class="two" style="margin-top:9px"><button class="secondary-btn" id="saveAiEndpoint">บันทึก Endpoint</button><button class="secondary-btn" id="testAiEndpoint">ทดสอบการเชื่อมต่อ</button></div></div>
 
-<div class="card"><div class="v43-ai-history-head"><h2>🗂️ ประวัติการวิเคราะห์ AI</h2><button id="clearAiHistory">ล้างประวัติ</button></div><p style="color:#999;font-size:11px;line-height:1.5">เก็บผลการวิเคราะห์ล่าสุดไว้ในเครื่อง เพื่อกลับมาใช้ชื่ออาหารเดิมได้ง่ายขึ้น</p><div id="aiHistoryList" class="v43-ai-history"></div></div>
 <div class="card">
   <h2>🌱 เกี่ยวกับ FoodWell</h2>
   <p style="color:#999;font-size:12px;line-height:1.6">ใช้บันทึกและสังเกตพฤติกรรมของตัวเองอย่างสบายใจ ค่าทางโภชนาการเป็นค่าประมาณ ไม่ใช่เป้าหมายจำกัดการกิน</p>
@@ -477,18 +396,6 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 </div>
 </section>
 
-<!-- v50 Quick Shortcuts -->
-<button class="quick-fab" id="quickFab" aria-label="เปิดทางลัด" title="ทางลัด">＋</button>
-<div class="quick-overlay" id="quickOverlay" aria-hidden="true">
-  <div class="quick-sheet" role="dialog" aria-modal="true" aria-labelledby="quickTitle">
-    <div class="quick-head"><h3 id="quickTitle">⚡ ทางลัด</h3><div style="display:flex;align-items:center"><button class="quick-manage" id="quickManage" aria-label="จัดการทางลัด" title="จัดการทางลัด">⚙️</button><button class="quick-close" id="quickClose" aria-label="ปิด">×</button></div></div>
-    <div class="quick-grid">
-      <button class="quick-item" data-quick-go="food"><div class="quick-icon">🍱</div><div><b>เพิ่มอาหาร</b><span>บันทึกมื้ออาหาร</span></div></button>
-      <button class="quick-item" data-quick-go="water"><div class="quick-icon">💧</div><div><b>เพิ่มน้ำ</b><span>ไปหน้าบันทึกน้ำ</span></div></button>
-      <button class="quick-item" data-quick-go="move"><div class="quick-icon">🏃</div><div><b>เพิ่มกิจกรรม</b><span>บันทึกการเคลื่อนไหว</span></div></button>
-    </div>
-  </div>
-</div>
 </main>
 
 <div id="foodModal" class="modal">
@@ -556,7 +463,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 const $=id=>document.getElementById(id), KEY="foodwell_mimo_style";
 let s=JSON.parse(localStorage.getItem(KEY)||'{"foods":[],"water":0,"waterLog":[],"moves":[],"favorites":[],"foodLibrary":[],"dayNote":"","history":[]}');
 s.foodLibrary=Array.isArray(s.foodLibrary)?s.foodLibrary:[];
-s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=s.aiHistory||[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🌿"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
+s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🌿"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
 s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);
 s.foods=s.foods.map(f=>({...f,favorite:!!f.favorite}));
 function snapshotDay(){
@@ -572,19 +479,15 @@ function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle(
 document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
-function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme").checked=!!s.settings.softTheme;$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);$("profileNameView").textContent=s.profile.name||"FoodWell";$("profileAvatar").textContent=s.profile.emoji||"🌿";if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🌿";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
-$("editProfile").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🌿"};
+function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme").checked=!!s.settings.softTheme;$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🌿";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
+$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🌿"};
 $("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"FoodWell";s.profile.emoji=$("profileEmoji").value.trim()||"🌿";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
 $("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()};
 let reminderTimer=null;
 function reminderMessage(){const msgs=["พักสายตาสักครู่ และดูแลตัวเองตามที่รู้สึกเหมาะสมนะ ♡","ถึงเวลาเช็กอินกับตัวเองสักนิดนะ 🌿","ถ้ารู้สึกกระหาย ลองจิบน้ำสักหน่อยก็ได้ 💧","พักจากหน้าจอสักครู่เมื่อสะดวกนะ ✨"];return msgs[Math.floor(Math.random()*msgs.length)]}
-function startReminder(){clearInterval(reminderTimer);if(!s.settings.gentleReminder)return;const ms=Math.max(30,Number(s.settings.reminderMinutes||180))*60*1000;reminderTimer=setInterval(()=>{if(document.visibilityState!=="visible")return;const body=reminderMessage();toast(body);if("Notification" in window && Notification.permission==="granted")new Notification("FoodWell",{body});},ms)}
-function updateNotifyStatus(){if(!("Notification" in window)){$("notifyStatus").textContent="เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน";return}const p=Notification.permission;$("notifyStatus").textContent=p==="granted"?"เปิดแล้ว — ระบบจะเตือนตามความถี่ที่เลือกเมื่อเปิด FoodWell อยู่":p==="denied"?"ถูกปิดไว้จากการตั้งค่าเบราว์เซอร์ — สามารถเปิดสิทธิ์ใหม่ได้จากการตั้งค่า":"ยังไม่ได้อนุญาตการแจ้งเตือน"}
-$("enableNotify").onclick=async()=>{if(!("Notification" in window)){toast("เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน");return}let p=await Notification.requestPermission();updateNotifyStatus();toast(p==="granted"?"เปิดการแจ้งเตือนแล้ว":"ยังไม่ได้อนุญาต")};
-$("testNotify").onclick=()=>{const body=reminderMessage();toast(body);if("Notification" in window&&Notification.permission==="granted")new Notification("FoodWell",{body});else if("Notification" in window&&Notification.permission==="default")toast("กด 'เปิดการแจ้งเตือน' ก่อนนะ");};
+function startReminder(){clearInterval(reminderTimer);if(!s.settings.gentleReminder)return;const ms=Math.max(30,Number(s.settings.reminderMinutes||180))*60*1000;reminderTimer=setInterval(()=>{if(document.visibilityState!=="visible")return;const body=reminderMessage();toast(body);},ms)}
 $("gentleReminder").onchange=e=>{s.settings.gentleReminder=e.target.checked;save();toast(e.target.checked?"เปิดเตือนแบบนุ่มนวลแล้ว":"ปิดการเตือนแล้ว")};
 $("reminderMinutes").onchange=e=>{s.settings.reminderMinutes=Number(e.target.value)||180;save();toast("บันทึกความถี่แล้ว")};
-updateNotifyStatus();
 
 // v31 food shortcuts + photo preview
 document.querySelectorAll("[data-meal-quick]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-meal-quick]").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("meal").value=b.dataset.mealQuick;meal=b.dataset.mealQuick;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x.dataset.meal===meal));renderFood();});
@@ -612,15 +515,13 @@ function showAiCard(show){if($("v40AiCard"))$("v40AiCard").style.display=show?"b
 function normalizeAiResult(data){const name=String(data?.name||data?.foodName||data?.label||"").trim();let candidates=Array.isArray(data?.candidates)?data.candidates.filter(Boolean).map(String).slice(0,6):[];if(name&&!candidates.includes(name))candidates.unshift(name);const confidence=Number(data?.confidence);const nutrition={};['kcal','protein','carbs','fat','fiber','sugar','sodium'].forEach(k=>{const v=Number(data?.[k]);if(data?.[k]!=null&&Number.isFinite(v)&&v>=0)nutrition[k]=Math.round(v)});return {name,candidates,confidence:Number.isFinite(confidence)?Math.max(0,Math.min(1,confidence)):null,nutrition}}
 // Shrink photos before upload/storage: faster, uses less AI quota, and keeps localStorage small.
 function shrinkImage(src,max,quality){return new Promise(res=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',quality))};img.onerror=()=>res(src);img.src=src})}
-function saveAiAnalysis(x){s.aiHistory=[{id:Date.now(),name:x.name,candidates:x.candidates||[],confidence:x.confidence,image:x.image,at:new Date().toISOString()},...s.aiHistory].slice(0,20);localStorage.setItem(KEY,JSON.stringify(s));renderAiHistory()}
-function renderAiHistory(){const el=$("aiHistoryList");if(!el)return;if(!s.aiHistory.length){el.innerHTML='<div class="v43-ai-empty">ยังไม่มีประวัติ · เมื่อวิเคราะห์รูปแล้ว ผลจะมาแสดงที่นี่ 📸</div>';return}el.innerHTML=s.aiHistory.map(x=>{const d=new Date(x.at);const conf=x.confidence==null?'':` · ${Math.round(x.confidence*100)}%`;return `<div class="v43-ai-item"><img class="v43-ai-thumb" src="${x.image||''}" alt=""><div class="v43-ai-info"><b>${esc(x.name)}</b><small>${d.toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}${conf}</small><div class="v43-ai-tags">${(x.candidates||[]).slice(0,3).map(c=>`<span class="v43-ai-tag">${esc(c)}</span>`).join('')}</div></div><button class="v43-ai-reuse" type="button" data-ai-reuse="${x.id}">ใช้ชื่อ</button></div>`}).join('');el.querySelectorAll('[data-ai-reuse]').forEach(b=>b.onclick=()=>{const x=s.aiHistory.find(a=>String(a.id)===b.dataset.aiReuse);if(!x)return;go('food');$("foodName").value=x.name;toast('นำชื่อจากประวัติกลับมาแล้ว ✨')})}
+function saveAiAnalysis(x){}
 async function analyzeFoodWithAI(){const file=$("photo")?.files?.[0];const endpoint=String(s.settings.aiEndpoint||$("aiEndpoint")?.value||"").trim();if(!file){toast("เลือกรูปอาหารก่อน");return}if(!endpoint){toast("ตั้งค่า AI Endpoint ในหน้า More ก่อน");go("more");return}setAiStatus("กำลังส่งรูปไปวิเคราะห์…");$("v40AnalyzeBtn").disabled=true;try{const original=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const image=await shrinkImage(original,1024,.82);const resp=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image})});if(!resp.ok){let msg="HTTP "+resp.status;try{const j=await resp.json();if(j&&j.error)msg=j.error}catch(_){}throw new Error(msg)}const data=await resp.json();const out=normalizeAiResult(data);if(!out.name)throw new Error("ไม่พบชื่ออาหารในผลลัพธ์");$("foodName").value=out.name;const filled=[];Object.entries(out.nutrition||{}).forEach(([k,v])=>{const el=$(k);if(el&&!el.value){el.value=v;filled.push(k)}});const box=$("v40AiResult");const conf=out.confidence==null?"":" · ความมั่นใจ "+Math.round(out.confidence*100)+"%";box.innerHTML=`<div class="ai-result-box"><b>✨ ${esc(out.name)}</b><div style="font-size:10px;color:#999;margin-top:4px">AI แนะนำชื่อจากรูป${filled.length?" และค่าโภชนาการโดยประมาณ":""} — ตรวจสอบก่อนบันทึก${conf}</div><div class="v40-ai-candidates">${out.candidates.map(x=>`<button type="button" data-ai-name="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;box.classList.add("show");box.querySelectorAll("[data-ai-name]").forEach(b=>b.onclick=()=>{$("foodName").value=b.dataset.aiName;toast("เลือกชื่อแล้ว ✨")});saveAiAnalysis({name:out.name,candidates:out.candidates,confidence:out.confidence,image:await shrinkImage(image,160,.7)});setAiStatus("วิเคราะห์เสร็จแล้ว — กรุณาตรวจสอบชื่อก่อนบันทึก");toast("วิเคราะห์รูปเสร็จแล้ว ✨")}catch(e){setAiStatus("เชื่อมต่อ AI ไม่สำเร็จ: "+e.message+" · ใช้ผู้ช่วยแบบเลือกประเภทอาหารได้");toast("วิเคราะห์รูปไม่สำเร็จ")}finally{$("v40AnalyzeBtn").disabled=false}}
 $("v40AnalyzeBtn").onclick=analyzeFoodWithAI;$("v40UseManualBtn").onclick=()=>{$("foodName").focus();toast("กรอกข้อมูลเองได้เลย")};
 $("saveAiEndpoint").onclick=()=>{s.settings.aiEndpoint=$("aiEndpoint").value.trim();save();toast(s.settings.aiEndpoint?"บันทึก AI Endpoint แล้ว":"ล้าง AI Endpoint แล้ว")};
 $("testAiEndpoint").onclick=async()=>{const endpoint=String($("aiEndpoint").value.trim()||s.settings.aiEndpoint||"");if(!endpoint){toast("ใส่ AI Endpoint ก่อน");return}try{const r=await fetch(endpoint,{method:"OPTIONS"});toast(r.ok?"เชื่อมต่อ endpoint ได้":"endpoint ตอบกลับแล้ว แต่ต้องตรวจสอบรูปแบบ API")}catch(e){toast("ยังเชื่อมต่อ endpoint ไม่ได้")}};
 if($("aiEndpoint"))$("aiEndpoint").value=s.settings.aiEndpoint||"";
-$("clearAiHistory")?.addEventListener("click",()=>{if(!s.aiHistory.length){toast("ยังไม่มีประวัติ");return}if(confirm("ล้างประวัติการวิเคราะห์ AI ทั้งหมด?")){s.aiHistory=[];localStorage.setItem(KEY,JSON.stringify(s));renderAiHistory();toast("ล้างประวัติแล้ว")}});
-renderAiHistory();
+
 const v40OldPreview=previewPhotoFile;previewPhotoFile=function(file){v40OldPreview(file);showAiCard(!!file)};
 
 let editingId=null, modalId=null;
@@ -683,7 +584,6 @@ $("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้ง�
 let meal="ทั้งหมด";
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");meal=b.dataset.meal;renderFood()});
 $("search").oninput=renderFood;
-$("clearFav").onclick=()=>{s.favorites=[];save();toast("ล้างอาหารที่บันทึกบ่อยแล้ว")};
 window.delFood=id=>{s.foods=s.foods.filter(x=>x.id!==id);save()};
 window.delMove=id=>{s.moves=s.moves.filter(x=>x.id!==id);save()};
 function foodCard(f){return `<div class="item clickable" onclick="openFoodModal(${f.id})"><div class="thumb">${f.photo?`<img src="${f.photo}" alt="">`:"🍱"}</div><div class="meta"><b>${esc(f.name)}</b><small>${esc(f.meal)}${f.kcal?' · '+f.kcal+' kcal':''}</small>${f.note?`<small>${esc(f.note)}</small>`:''}</div><div class="food-card-actions"><button class="food-star ${f.favorite?'active':''}" onclick="event.stopPropagation();toggleFoodFavorite(${f.id})">${f.favorite?'★':'☆'}</button><button class="delete" onclick="event.stopPropagation();delFood(${f.id})">ลบ</button></div></div>`}
@@ -708,7 +608,7 @@ function dayRecord(date){
  return s.history.find(x=>x.date===date)||{date,foods:0,water:0,moves:0};
 }
 function fmtDay(date){return new Date(date+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}
-function renderTrends(){
+function renderTrends(){if(!$("foodTrend"))return;
  const days=[];const now=new Date();
  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(d.toISOString().slice(0,10));}
  const recs=days.map(dayRecord);
@@ -892,7 +792,7 @@ function renderDashboard(){
  $("dashActiveDays").textContent=recs.filter(x=>Number(x.foods||0)+Number(x.water||0)+Number(x.moves||0)>0).length;$("dashRecentFoods").textContent=s.foods.length;
  const make=(id,key,fmt)=>{const vals=recs.map(x=>Number(x[key]||0)),max=Math.max(...vals,1);$(id).innerHTML=vals.map((v,i)=>`<div class="dash-col"><span class="dash-value">${fmt(v)}</span><div class="dash-bar" style="height:${Math.max(5,(v/max)*108)}px"></div><small>${new Date(days[i]+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short"}).replace(".","")}</small></div>`).join("")};
  make("dashFoodBars","foods",v=>v);make("dashWaterBars","water",v=>v.toLocaleString());make("dashMoveBars","moves",v=>v);
- const latest=recs[6];$("dashNote").textContent=latest.foods||latest.water||latest.moves?`วันนี้มีการบันทึกอาหาร ${latest.foods||0} รายการ · น้ำ ${(latest.water||0).toLocaleString()} ml · การเคลื่อนไหว ${latest.moves||0} นาที`:`ยังไม่มีข้อมูลของวันนี้ ลองบันทึกสิ่งที่ทำตามปกติได้เลย`;
+ 
 }
 
 function renderProfileStats(){
@@ -911,12 +811,8 @@ function renderProfileStats(){
  $("profileAvatarLarge").textContent=s.profile.emoji||"🌿";
  const total=(allFoodCount+todayFoods)+(allWater+Number(s.water||0))+(allMove+s.moves.length);
  $("profileInsight").textContent=total?`บันทึกของคุณกำลังค่อย ๆ สร้างภาพรวมของวันต่าง ๆ — วันนี้มีอาหาร ${todayFoods} รายการ น้ำ ${(s.water||0).toLocaleString()} ml และการเคลื่อนไหว ${s.moves.reduce((a,x)=>a+Number(x.min||0),0)} นาที`:`เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨`;
- $("profileFavorites").innerHTML=s.favorites.length?s.favorites.slice(0,8).map(f=>`<span class="profile-chip">${esc(f.name)}</span>`).join(""):'<span class="profile-chip">ยังไม่มีรายการที่บันทึกบ่อย</span>';
- const recent=[]; s.foods.slice(0,4).forEach(f=>recent.push({icon:'🍴',name:f.name,sub:`${f.meal||'อาหาร'} · ${f.time||''}`})); s.moves.slice(0,3).forEach(m=>recent.push({icon:'🏃',name:m.name,sub:`${m.min||0} นาที · ${m.type||'กิจกรรม'}`}));
- if(s.waterLog.length) s.waterLog.slice(0,3).forEach(w=>recent.push({icon:'💧',name:`+${w.ml} ml`,sub:w.time||'บันทึกน้ำ'}));
- $("profileRecent").innerHTML=recent.slice(0,6).map(x=>`<div class="profile-recent-item"><div class="profile-recent-icon">${x.icon}</div><div><b>${esc(x.name)}</b><small>${esc(x.sub)}</small></div></div>`).join('')||'<div class="profile-recent-item"><div class="profile-recent-icon">✨</div><div><b>ยังไม่มีรายการล่าสุด</b><small>สิ่งที่คุณบันทึกจะปรากฏที่นี่</small></div></div>';
 }
-$("editProfileHero").onclick=()=>{go("more");$("profileEditor").style.display="block";$("profileName").focus()};
+
 
 const HOME_DEFAULT=['welcome','summary','twocards','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
@@ -939,13 +835,13 @@ renderFood();
 renderInsights();
 renderTrophies();
 setTimeout(()=>{getTrophyItems().forEach((x,i)=>{if(x.v>=x.max) celebrateTrophy(i);});},120);
-$("favList").innerHTML=s.favorites.length?s.favorites.map((f,i)=>`<button class="quick-food" onclick="useFavorite(${i})"><b>↺ ${esc(f.name)}</b><small>${esc(f.meal)}${f.kcal?" · "+f.kcal+" kcal":""}</small></button>`).join(""):'<div class="history-pill">ยังไม่มีอาหารที่บันทึกบ่อย</div>';
+$("favList")&&($("favList").innerHTML=s.favorites.length?s.favorites.map((f,i)=>`<button class="quick-food" onclick="useFavorite(${i})"><b>↺ ${esc(f.name)}</b><small>${esc(f.meal)}${f.kcal?" · "+f.kcal+" kcal":""}</small></button>`).join(""):'<div class="history-pill">ยังไม่มีอาหารที่บันทึกบ่อย</div>');
 $("waterHistory").innerHTML=s.waterLog.length?s.waterLog.slice(0,10).map(x=>`<div class="item"><div class="thumb">💧</div><div class="meta"><b>+${x.ml} ml</b><small>${x.time}</small></div></div>`).join(""):'<div class="item"><div class="meta"><b>ยังไม่มีรายการน้ำ</b><small>กดปุ่มด้านบนเพื่อบันทึก</small></div></div>';
 $("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">${moveIcon(x)}</div><div class="meta"><b>${esc(x.name)}</b><small>${x.type&&x.type!==x.name&&x.type!==EX_AUTO?esc(x.type)+" · ":""}${x.min} นาที · 🔥 ~${moveKcalOf(x)} kcal · ${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';$("burnToday")&&($("burnToday").textContent=s.moves.reduce((a,x)=>a+moveKcalOf(x),0).toLocaleString());
 renderHistory();
 renderDashboard();
 
-renderProfileStats();renderAiHistory();
+renderProfileStats();
 applyHomePrefs();
 }
 
@@ -954,7 +850,7 @@ $("exportData")&&($("exportData").onclick=exportData);
 $("importData")&&($("importData").onchange=e=>{
  const file=e.target.files[0]; if(!file)return;
  const r=new FileReader();
- r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.foods))throw 0;s=d;s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=s.aiHistory||[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🌿"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.foods))throw 0;s=d;s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🌿"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
 s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);save();toast("นำเข้าข้อมูลแล้ว")}catch(_){toast("ไฟล์ข้อมูลไม่ถูกต้อง")}};
  r.readAsText(file)
 });
@@ -970,99 +866,9 @@ document.addEventListener('click',addRipple,{passive:true});
 // Replay the home entrance when returning to the dashboard.
 const originalGo=go;
 go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .welcome,#home .twocards .mini,#home .food-strip,#home .card').forEach((el,i)=>{el.style.animation='none';void el.offsetWidth;el.style.animation='cardIn .42s '+Math.min(i*.035,.25)+'s ease both';});}};
-// v37 advanced food search/filter layer\n(function(){\n  const $=id=>document.getElementById(id);\n  let meal='all', search='', sort='new', day='today';\n  function foods(){ return Array.isArray(window.s?.foods)?window.s.foods:[]; }\n  function valFood(f,k){ return f?.[k] ?? ''; }\n  function dateKey(x){ return String(x||'').slice(0,10); }\n  function apply(){\n    const list=foods().slice();\n    let out=list.filter(f=>{\n      const hay=String(valFood(f,'name')+' '+valFood(f,'note')+' '+valFood(f,'meal')).toLowerCase();\n      const okSearch=!search || hay.includes(search.toLowerCase());\n      const okMeal=meal==='all'||(meal==='favorite'?!!f.favorite:valFood(f,'meal')===meal);\n      const okDay=day==='all'||dateKey(f.date||f.createdAt||'')===dateKey(new Date().toISOString());\n      return okSearch&&okMeal&&okDay;\n    });\n    out.sort((a,b)=>{\n      if(sort==='name') return String(valFood(a,'name')).localeCompare(String(valFood(b,'name')),'th');\n      if(sort==='kcal') return Number(a.kcal||0)-Number(b.kcal||0);\n      if(sort==='protein') return Number(b.protein||0)-Number(a.protein||0);\n      const ad=String(a.date||a.createdAt||''),bd=String(b.date||b.createdAt||'');\n      return sort==='old'?ad.localeCompare(bd):bd.localeCompare(ad);\n    });\n    const meta=$('foodResultsMetaV37'); if(meta) meta.textContent=`พบ ${out.length} รายการ${day==='today'?' · วันนี้':''}`;\n    // Let the existing renderer own the actual card markup; temporarily filter source for render.\n    const old=s.foods; s.foods=out; try{ if(typeof renderFood==='function') renderFood(); else if(typeof render==='function') render(); } finally { s.foods=old; }\n  }\n  function bind(){\n    const inp=$('foodSearchV37'); if(inp){inp.oninput=()=>{search=inp.value.trim();apply()};}\n    const clr=$('clearFoodSearchV37'); if(clr) clr.onclick=()=>{if(inp)inp.value='';search='';apply()};\n    document.querySelectorAll('#foodMealChipsV37 .food-filter-chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('#foodMealChipsV37 .food-filter-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');meal=b.dataset.meal;apply()});\n    const so=$('foodSortV37'); if(so) so.onchange=()=>{sort=so.value;apply()};\n    const dy=$('foodDayV37'); if(dy) dy.onchange=()=>{day=dy.value;apply()};\n  }\n  document.addEventListener('DOMContentLoaded',()=>{bind();setTimeout(apply,250)});\n  window.foodWellV37Apply=apply;\n})();\n
-// v51 Quick Shortcut Customizer
-(function(){
-  const KEY='foodwell_quick_shortcuts_v51';
-  const defs=[
-    {id:'food',icon:'🍱',name:'เพิ่มอาหาร',desc:'บันทึกมื้ออาหาร'},
-    {id:'water',icon:'💧',name:'เพิ่มน้ำ',desc:'ไปหน้าบันทึกน้ำ'},
-    {id:'move',icon:'🏃',name:'เพิ่มกิจกรรม',desc:'บันทึกการเคลื่อนไหว'},
-  ];
-  const defaults=defs.map(x=>x.id);
-  function read(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.order))return {order:x.order.filter(id=>defs.some(d=>d.id===id)),hidden:Array.isArray(x.hidden)?x.hidden:[]}}catch(e){}return {order:defaults.slice(),hidden:[]}}
-  let cfg=read();
-  cfg.order=[...cfg.order,...defaults.filter(id=>!cfg.order.includes(id))];
-  const def=id=>defs.find(x=>x.id===id);
-  function renderGrid(){
-    const grid=document.querySelector('#quickOverlay .quick-grid');if(!grid)return;
-    grid.innerHTML=cfg.order.filter(id=>!cfg.hidden.includes(id)).map(id=>{const d=def(id);return `<button class="quick-item" data-quick-go="${d.id}"><div class="quick-icon">${d.icon}</div><div><b>${d.name}</b><span>${d.desc}</span></div></button>`}).join('');
-    // setOpen lives in the v50 popup block, so close the sheet here directly.
-    grid.querySelectorAll('[data-quick-go]').forEach(btn=>btn.addEventListener('click',()=>{const page=btn.dataset.quickGo;const ov=document.getElementById('quickOverlay');ov?.classList.remove('show');ov?.setAttribute('aria-hidden','true');document.getElementById('quickFab')?.classList.remove('open');if(typeof go==='function')go(page);window.scrollTo({top:0})}));
-  }
-  function renderManager(){
-    const box=document.getElementById('quickManageList');if(!box)return;
-    box.innerHTML=cfg.order.map((id,i)=>{const d=def(id);const on=!cfg.hidden.includes(id);return `<div class="quick-manage-row"><input type="checkbox" data-qm-check="${id}" ${on?'checked':''}><div class="qm-icon">${d.icon}</div><div class="qm-name"><b>${d.name}</b><small>${d.desc}</small></div><button class="qm-move" data-qm-up="${id}" ${i===0?'disabled':''}>↑</button><button class="qm-move" data-qm-down="${id}" ${i===cfg.order.length-1?'disabled':''}>↓</button></div>`}).join('');
-    box.querySelectorAll('[data-qm-check]').forEach(x=>x.onchange=()=>{if(x.checked)cfg.hidden=cfg.hidden.filter(id=>id!==x.dataset.qmCheck);else if(!cfg.hidden.includes(x.dataset.qmCheck))cfg.hidden.push(x.dataset.qmCheck)});
-    box.querySelectorAll('[data-qm-up]').forEach(b=>b.onclick=()=>move(b.dataset.qmUp,-1));
-    box.querySelectorAll('[data-qm-down]').forEach(b=>b.onclick=()=>move(b.dataset.qmDown,1));
-  }
-  function move(id,dir){const i=cfg.order.indexOf(id),j=i+dir;if(i<0||j<0||j>=cfg.order.length)return;[cfg.order[i],cfg.order[j]]=[cfg.order[j],cfg.order[i]];renderManager()}
-  function persist(){localStorage.setItem(KEY,JSON.stringify(cfg));renderGrid();toast('บันทึกทางลัดแล้ว ✨')}
-  const modal=document.getElementById('quickCustomModal');
-  const openManager=()=>{cfg=read();cfg.order=[...cfg.order,...defaults.filter(id=>!cfg.order.includes(id))];renderManager();modal?.classList.add('show');modal?.setAttribute('aria-hidden','false')};
-  const closeManager=()=>{modal?.classList.remove('show');modal?.setAttribute('aria-hidden','true')};
-  document.getElementById('quickManage')?.addEventListener('click',openManager);
-  document.getElementById('quickCustomClose')?.addEventListener('click',closeManager);
-  modal?.addEventListener('click',e=>{if(e.target===modal)closeManager()});
-  document.getElementById('quickSaveSettings')?.addEventListener('click',()=>{persist();closeManager()});
-  document.getElementById('quickResetSettings')?.addEventListener('click',()=>{cfg={order:defaults.slice(),hidden:[]};renderManager();persist();});
-  window.foodWellQuickV51={open:openManager,renderGrid};
-  setTimeout(renderGrid,0);
-})();
-
-// v50 Quick Shortcut Popup
-(function(){
-  const fab=document.getElementById('quickFab'), overlay=document.getElementById('quickOverlay'), close=document.getElementById('quickClose');
-  if(!fab||!overlay)return;
-  const setOpen=(open)=>{overlay.classList.toggle('show',open);fab.classList.toggle('open',open);overlay.setAttribute('aria-hidden',String(!open));};
-  fab.addEventListener('click',()=>setOpen(!overlay.classList.contains('show')));
-  close&&close.addEventListener('click',()=>setOpen(false));
-  overlay.addEventListener('click',e=>{if(e.target===overlay)setOpen(false);});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false);});
-  overlay.querySelectorAll('[data-quick-go]').forEach(btn=>btn.addEventListener('click',()=>{
-    const page=btn.dataset.quickGo; setOpen(false); if(typeof go==='function')go(page);
-  }));
-})();
 
 </script>
 <script>
-(function(){
- const q=id=>document.getElementById(id);
- function refreshCore(){
-  try{const raw=localStorage.getItem('foodwell_mimo_style')||localStorage.getItem('foodwell'); const s=raw?JSON.parse(raw):{};
-   const foods=Array.isArray(s.foods)?s.foods:[]; const water=Number(s.waterTotal||s.water||0); const moves=Array.isArray(s.exercises)?s.exercises:[];
-   if(q('coreFood')) q('coreFood').textContent=foods.length?foods.length+' รายการที่บันทึก':'ยังไม่มีรายการ';
-   if(q('coreWater')) q('coreWater').textContent=water?water+' ml':'ยังไม่มีการบันทึก';
-   if(q('coreMove')) q('coreMove').textContent=moves.length?moves.length+' กิจกรรม':'ยังไม่มีการบันทึก';
-  }catch(e){}
- }
- document.addEventListener('DOMContentLoaded',refreshCore);
- document.addEventListener('click',e=>{if(e.target.closest('#coreSync')){window.postMessage({type:'FOODWELL_SYNC_REQUEST'},'*'); refreshCore();}});
-})();
-</script><script>
-// FoodWell v64 — Smart Food Suggestions
-(function(){
- const META='foodwell_library_meta_v63';
- function all(){return Array.isArray(s.foodLibrary)?s.foodLibrary:[]}
- function meta(){try{return JSON.parse(localStorage.getItem(META)||'{}')}catch(e){return {}}}
- function uses(f,m){return Number(m[String(f.name||'').trim().toLowerCase()]?.uses||0)}
- function currentMeal(){const el=document.getElementById('meal');return el?.value||'เช้า'}
- function hour(){return new Date().getHours()}
- function mealByTime(h){if(h<11)return 'เช้า';if(h<16)return 'กลางวัน';if(h<21)return 'เย็น';return 'ของว่าง'}
- function render(){
-   const box=document.getElementById('v64SuggestionList');if(!box)return;
-   const arr=all(); if(!arr.length){box.innerHTML='<div class="v64-empty">เพิ่มอาหารลงในคลังสักรายการ แล้วคำแนะนำจะปรากฏที่นี่ 🌿</div>';return}
-   const m=meta(), chosen=currentMeal(), timeMeal=mealByTime(hour());
-   let list=arr.map(f=>{const u=uses(f,m);const meal=String(f.meal||m[String(f.name||'').trim().toLowerCase()]?.category||'');let score=u*4+(meal===chosen?7:0)+(meal===timeMeal?3:0)+(f.favorite?2:0)+(Number(f.createdAt||0)/1e13);let reason=meal===chosen?'เหมาะกับมื้อที่เลือก':meal===timeMeal?'เข้ากับช่วงเวลานี้':u>0?'จากรายการที่ใช้บ่อย':'จากคลังอาหารของคุณ';return {...f,_score:score,_uses:u,_reason:reason}}).sort((a,b)=>b._score-a._score).slice(0,4);
-   box.innerHTML=list.map(f=>`<div class="v64-item"><div class="v64-pic">${f.photo?`<img src="${f.photo}" alt="">`:'🍱'}</div><div><b>${esc(f.name)}</b><small class="v64-reason">${esc(f._reason)} · ใช้ ${f._uses} ครั้ง</small></div><button class="v64-use" type="button" onclick="v64Use(${Number(f.id)})">ใช้</button></div>`).join('');
- }
- window.v64Use=function(id){if(typeof window.v62UseFoodById==='function'){window.v62UseFoodById(id);toast('เติมรายการอาหารให้แล้ว ✨')}else{go('food')}};
- document.getElementById('meal')?.addEventListener('change',()=>setTimeout(render,20));
- const oldGo=window.go;if(oldGo)window.go=function(p){oldGo(p);if(p==='food'||p==='foodLibrary')setTimeout(render,60)};
- const oldSave=window.save;if(oldSave)window.save=function(){const r=oldSave();setTimeout(render,60);return r};
- setTimeout(render,250);
-})();
 </script>
 
 
@@ -1143,119 +949,75 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 </body>
 </html>
 <script>
-// FoodWell v62 — Personal Food Library
+// FoodWell Food Library — one list built from what you log: search, meal filter, sort, use count, rename, remove.
+// (Merges the old v62 library and the v63 "คลังอาหาร 2.0" panel; keeps their storage keys.)
 (function(){
-  const KEYLIB='foodwell_library_v62';
-  let cat='ทั้งหมด', q='';
+  const KEYLIB='foodwell_library_v62', META='foodwell_library_meta_v63';
+  let cat='ทั้งหมด', q='', sort='recent';
+  let meta={};try{meta=JSON.parse(localStorage.getItem(META)||'{}')||{}}catch(e){meta={}}
+  const saveMeta=()=>{try{localStorage.setItem(META,JSON.stringify(meta))}catch(e){}};
+  const key=f=>String(f.name||'').trim().toLowerCase();
+  const m=f=>meta[key(f)]||(meta[key(f)]={});
+  // A removed name stays out of the library until that food is logged again after removal.
+  const removed=f=>{const x=meta[key(f)];return !!(x&&x.removedAt&&(f.createdAt||0)<=x.removedAt)};
   function syncLibrary(){
     if(!Array.isArray(s.foodLibrary))s.foodLibrary=[];
-    // Keep a compact personal library built from saved foods. Favorites are always retained.
     const byName=new Map();
     [...s.foods].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(f=>{
-      const name=String(f.name||'').trim(); if(!name)return;
-      if(!byName.has(name)) byName.set(name,{...f,libraryUpdatedAt:f.createdAt||Date.now()});
+      const name=String(f.name||'').trim();if(!name||byName.has(name)||removed(f))return;
+      byName.set(name,{...f});
     });
-    s.foodLibrary.forEach(f=>{const name=String(f.name||'').trim();if(name&&!byName.has(name))byName.set(name,f)});
+    s.foodLibrary.forEach(f=>{const name=String(f.name||'').trim();if(name&&!byName.has(name)&&!removed(f))byName.set(name,f)});
     s.foodLibrary=[...byName.values()].slice(0,100);
   }
   function use(f){
+    const x=m(f);x.uses=(x.uses||0)+1;delete x.removedAt;saveMeta();
     go('food');
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v==null?'':v};
     set('foodName',f.name);set('meal',f.meal||'เช้า');set('kcal',f.kcal||'');set('protein',f.protein||'');set('carbs',f.carbs||'');set('fat',f.fat||'');set('fiber',f.fiber||'');set('sodium',f.sodium||'');set('sugar',f.sugar||'');set('note',f.note||'');
     toast('เติมข้อมูลจากคลังแล้ว · ตรวจสอบก่อนบันทึก ✨');
     setTimeout(()=>document.getElementById('foodName')?.focus(),80);
   }
-  window.v62UseFood=use; window.v62UseFoodById=function(id){const f=(s.foodLibrary||[]).find(x=>String(x.id)===String(id)) || s.foods.find(x=>String(x.id)===String(id)); if(f)use(f)};
+  const byId=id=>(s.foodLibrary||[]).find(x=>String(x.id)===String(id));
+  window.v62UseFood=use;
+  window.v62UseFoodById=id=>{const f=byId(id)||s.foods.find(x=>String(x.id)===String(id));if(f)use(f)};
+  window.fwLibRename=id=>{
+    const f=byId(id);if(!f)return;
+    const name=prompt('ชื่ออาหารในคลัง',f.name||'');if(name===null||!name.trim()||name.trim()===f.name)return;
+    const old=m(f);old.removedAt=Date.now();const uses=old.uses||0;
+    f.name=name.trim();f.createdAt=Date.now();const x=m(f);x.uses=(x.uses||0)+uses;delete x.removedAt;
+    saveMeta();render();toast('เปลี่ยนชื่อแล้ว');
+  };
+  window.fwLibRemove=id=>{
+    const f=byId(id);if(!f||!confirm('ลบ "'+f.name+'" ออกจากคลังอาหาร?\n(รายการที่บันทึกไว้ในแต่ละวันยังอยู่)'))return;
+    m(f).removedAt=Date.now();saveMeta();render();toast('ลบออกจากคลังแล้ว');
+  };
   function render(){
     syncLibrary();
-    const grid=document.getElementById('v62LibraryGrid'); if(!grid)return;
-    const all=s.foodLibrary||[];
-    const search=q.toLowerCase();
-    let list=all.filter(f=>{
-      const text=String(f.name||'')+' '+String(f.note||'')+' '+String(f.meal||'');
-      const okQ=!search||text.toLowerCase().includes(search);
-      const okCat=cat==='ทั้งหมด'||(cat==='โปรด'?!!f.favorite:f.meal===cat);
-      return okQ&&okCat;
+    try{localStorage.setItem(KEYLIB,JSON.stringify(s.foodLibrary))}catch(e){}
+    const grid=document.getElementById('v62LibraryGrid');if(!grid)return;
+    const all=s.foodLibrary, search=q.toLowerCase();
+    const list=all.filter(f=>{
+      const text=(String(f.name||'')+' '+String(f.note||'')+' '+String(f.meal||'')).toLowerCase();
+      return (!search||text.includes(search))&&(cat==='ทั้งหมด'||(cat==='โปรด'?!!f.favorite:f.meal===cat));
     });
-    list.sort((a,b)=>{if(!!b.favorite!==!!a.favorite)return b.favorite?1:-1;return (b.createdAt||0)-(a.createdAt||0)});
-    document.getElementById('v62Total').textContent=all.length;
-    document.getElementById('v62Fav').textContent=all.filter(f=>f.favorite).length;
-    document.getElementById('v62Recent').textContent=Math.min(6,all.length);
-    grid.innerHTML=list.length?list.map(f=>`<div class="v62-food"><div class="v62-thumb">${f.photo?`<img src="${f.photo}" alt="">`:'🍱'}</div><div><b>${esc(f.name)}</b><small>${f.favorite?'⭐ โปรด · ':''}${esc(f.meal||'อาหาร')}${f.kcal?' · ข้อมูลพลังงานที่บันทึกไว้':''}</small></div><button class="v62-use ${f.favorite?'primary-v62':''}" type="button" onclick="v62UseFoodById(${Number(f.id)})">ใช้รายการนี้</button></div>`).join(''):'<div class="v62-empty">ยังไม่พบรายการอาหารในหมวดนี้<br>ลองบันทึกอาหารใหม่จากหน้าอาหารได้เลย 🌿</div>';
-    localStorage.setItem(KEYLIB,JSON.stringify(s.foodLibrary));
+    const uses=f=>(meta[key(f)]||{}).uses||0;
+    if(sort==='name')list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'th'));
+    else if(sort==='frequent')list.sort((a,b)=>uses(b)-uses(a)||(b.createdAt||0)-(a.createdAt||0));
+    else list.sort((a,b)=>(!!b.favorite-!!a.favorite)||(b.createdAt||0)-(a.createdAt||0));
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+    set('v62Total',all.length);set('v62Fav',all.filter(f=>f.favorite).length);set('v62Recent',all.reduce((a,f)=>a+uses(f),0));
+    grid.innerHTML=list.length?list.map(f=>{const id=JSON.stringify(String(f.id)).replace(/"/g,'&quot;');const u=uses(f);return `<div class="v62-food"><div class="v62-thumb">${f.photo?`<img src="${f.photo}" alt="">`:'🍱'}</div><div><b>${esc(f.name)}</b><small>${f.favorite?'⭐ โปรด · ':''}${esc(f.meal||'อาหาร')}${f.kcal?' · '+Number(f.kcal)+' kcal':''}${u?' · ใช้ '+u+' ครั้ง':''}</small><div class="fw-lib-acts"><button type="button" onclick="fwLibRename(${id})">✏️ แก้ชื่อ</button><button type="button" onclick="fwLibRemove(${id})">🗑️ ลบ</button></div></div><button class="v62-use ${f.favorite?'primary-v62':''}" type="button" onclick="v62UseFoodById(${id})">ใช้รายการนี้</button></div>`}).join(''):'<div class="v62-empty">ยังไม่พบรายการอาหารในหมวดนี้<br>ลองบันทึกอาหารใหม่จากหน้าอาหารได้เลย 🌿</div>';
   }
   document.getElementById('v62Search')?.addEventListener('input',e=>{q=e.target.value.trim();render()});
   document.getElementById('v62Clear')?.addEventListener('click',()=>{q='';const e=document.getElementById('v62Search');if(e)e.value='';render()});
+  document.getElementById('fwLibSort')?.addEventListener('change',e=>{sort=e.target.value;render()});
   document.querySelectorAll('[data-v62-cat]').forEach(b=>b.addEventListener('click',()=>{cat=b.dataset.v62Cat;document.querySelectorAll('[data-v62-cat]').forEach(x=>x.classList.toggle('active',x===b));render()}));
   const oldGo=window.go;
   if(oldGo){window.go=function(p){oldGo(p);if(p==='foodLibrary')setTimeout(render,0)}}
-  // Preserve the library whenever an existing food is saved.
   const oldSave=window.save;
   if(oldSave){window.save=function(){syncLibrary();return oldSave()}}
-  setTimeout(()=>{syncLibrary();render()},120);
-})();
-</script>
-<script>
-// FoodWell v63 — Food Library 2.0
-(function(){
- const META='foodwell_library_meta_v63';
- let meta={};
- try{meta=JSON.parse(localStorage.getItem(META)||'{}')}catch(e){meta={}}
- const saveMeta=()=>localStorage.setItem(META,JSON.stringify(meta));
- const key=f=>String(f.name||'').trim().toLowerCase();
- function ensure(f){const k=key(f);if(!k)return null;if(!meta[k])meta[k]={uses:0,category:f.meal||'ทั่วไป',favorite:!!f.favorite};return meta[k]}
- function all(){return Array.isArray(s.foodLibrary)?s.foodLibrary:[]}
- function use(f){
-   const m=ensure(f);if(m)m.uses=(m.uses||0)+1;saveMeta();
-   if(typeof window.v62UseFood==='function')window.v62UseFood(f);else go('food');
-   render63();
- }
- window.v63Use=function(id){const f=all().find(x=>String(x.id)===String(id));if(f)use(f)};
- function renderFrequent(){
-   const box=document.getElementById('v63Frequent');if(!box)return;
-   const list=all().map(f=>{const m=ensure(f);return {...f,_uses:m?.uses||0}}).sort((a,b)=>b._uses-a._uses||((b.createdAt||0)-(a.createdAt||0))).slice(0,3);
-   box.innerHTML=list.length?list.map(f=>`<div class="v63-freq"><div class="pic">${f.photo?`<img src="${f.photo}" alt="">`:'🍱'}</div><main><b>${esc(f.name)}</b><small>ใช้ ${f._uses} ครั้ง · ${esc((ensure(f)||{}).category||f.meal||'ทั่วไป')}</small></main><button type="button" onclick="v63Use(${Number(f.id)})">ใช้</button></div>`).join(''):'<div style="color:#858892;font-size:9px;padding:6px">เมื่อใช้รายการจากคลังบ่อย ๆ จะปรากฏที่นี่ ✨</div>';
- }
- function renderManager(){
-   const box=document.getElementById('v63Manager');if(!box)return;
-   const list=all();
-   box.innerHTML=list.length?list.map(f=>{const m=ensure(f)||{};return `<div class="v63-item"><div><b>${esc(f.name)}</b><small>หมวด: ${esc(m.category||f.meal||'ทั่วไป')} · ใช้ ${m.uses||0} ครั้ง</small></div><div class="v63-actions"><button type="button" onclick="v63Edit('${String(f.id)}')">แก้ไข</button><button class="danger" type="button" onclick="v63Delete('${String(f.id)}')">ลบ</button></div></div>`}).join(''):'<div style="color:#858892;font-size:9px">ยังไม่มีรายการในคลัง</div>';
- }
- window.v63Edit=function(id){
-   const f=all().find(x=>String(x.id)===String(id));if(!f)return;
-   const m=ensure(f)||{};const name=prompt('ชื่ออาหาร',f.name||'');if(name===null)return;
-   const cat=prompt('หมวดหมู่ (เช่น เช้า / กลางวัน / เย็น / ของว่าง / อื่น ๆ)',m.category||f.meal||'ทั่วไป');if(cat===null)return;
-   f.name=name.trim()||f.name;m.category=cat.trim()||'ทั่วไป';meta[key(f)]=m;saveMeta();render63();if(typeof window.v62UseFoodById==='function')setTimeout(()=>window.v62UseFoodById(f.id),0);
- };
- window.v63Delete=function(id){
-   const f=all().find(x=>String(x.id)===String(id));if(!f)return;
-   if(!confirm('ลบรายการนี้ออกจากคลังอาหารหรือไม่?'))return;
-   s.foodLibrary=all().filter(x=>String(x.id)!==String(id));
-   delete meta[key(f)];saveMeta();
-   try{localStorage.setItem('foodwell_library_v62',JSON.stringify(s.foodLibrary))}catch(e){}
-   render63();
- };
- function sortLibrary(){
-   const sel=document.getElementById('v63Sort');if(!sel)return;
-   const list=all();
-   if(sel.value==='name')list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'th'));
-   else if(sel.value==='frequent')list.sort((a,b)=>(ensure(b)?.uses||0)-(ensure(a)?.uses||0));
-   else list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-   s.foodLibrary=list;saveMeta();render63();
-   if(typeof window.v62UseFoodById==='function'){}
- }
- function render63(){
-   all().forEach(ensure);saveMeta();
-   const c=document.getElementById('v63Count');if(c)c.textContent=all().length;
-   renderFrequent();renderManager();
- }
- document.getElementById('v63Sort')?.addEventListener('change',sortLibrary);
- document.getElementById('v63ManageBtn')?.addEventListener('click',()=>{
-   const b=document.getElementById('v63Manager');if(!b)return;b.hidden=!b.hidden;
- });
- const oldGo=window.go;
- if(oldGo)window.go=function(p){oldGo(p);if(p==='foodLibrary')setTimeout(render63,40)};
- setTimeout(render63,180);
+  setTimeout(render,120);
 })();
 </script>
 
@@ -1358,11 +1120,10 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 
 <!-- v92 Floating Menu: รวมปุ่มลอยด้านขวาทั้งหมดเป็นปุ่มกลมปุ่มเดียวแบบป๊อปอัพ -->
 <style>
-#fw67-btn,#fw71-btn,#quickFab{display:none!important}
+#fw67-btn,#fw71-btn{display:none!important}
 .fw92-fab{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:5900;width:60px;height:60px;border:0;border-radius:50%;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#24141b;font-size:28px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
 .fw92-fab:active{transform:scale(.92)}
 .fw92-fab.open{transform:rotate(45deg)}
-body:has(.quick-overlay.show) .fw92-fab,body:has(.quick-custom-modal.show) .fw92-fab{display:none}
 .fw92-backdrop{position:fixed;inset:0;z-index:5898;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .fw92-backdrop.show{opacity:1;pointer-events:auto}
 .fw92-menu{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(156px + env(safe-area-inset-bottom));z-index:5899;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
@@ -1377,30 +1138,16 @@ body:has(.quick-overlay.show) .fw92-fab,body:has(.quick-custom-modal.show) .fw92
 <script>
 (function(){
  // ปุ่มเดิมยังอยู่ใน DOM (ซ่อนไว้) — เมนูจะสั่ง .click() ปุ่มเดิม ฟีเจอร์เดิมจึงทำงานเหมือนเดิม
- // v93: การ์ด "ภาพรวมวันนี้" ย้ายไปอยู่หน้า #overview ของตัวเอง
- function openOverview(){
-  if(typeof go==='function')go('overview');
-  try{const d=JSON.parse(localStorage.getItem('foodwell_mimo_style')||'{}');const today=new Date().toISOString().slice(0,10);
-   const foods=(Array.isArray(d.foods)?d.foods:[]).filter(f=>!f.date||f.date===today);
-   const water=Number(d.water||0);const moves=Array.isArray(d.moves)?d.moves:[];
-   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
-   set('coreFood',foods.length?foods.length+' รายการที่บันทึก':'ยังไม่มีรายการ');
-   set('coreWater',water?water.toLocaleString()+' ml':'ยังไม่มีการบันทึก');
-   set('coreMove',moves.length?moves.reduce((a,x)=>a+Number(x.min||0),0)+' นาที':'ยังไม่มีการบันทึก');
-  }catch(e){}
-  window.scrollTo({top:0});
- }
  // Gmail sign-in / sync card lives on the More page (#fw96)
  function openAccount(){
   if(typeof go==='function')go('more');
   setTimeout(()=>{const c=document.getElementById('fw96');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})},60);
  }
+ document.getElementById('dashInsights')?.addEventListener('click',()=>document.getElementById('fw71-btn')?.click());
  const ITEMS=[
-  {action:openOverview,icon:'🌿',label:'ภาพรวมวันนี้'},
+  {action:()=>{go('dashboard');window.scrollTo({top:0})},icon:'📊',label:'Dashboard'},
   {action:openAccount,icon:'☁️',label:'บัญชี / ซิงก์'},
-  {sel:'#fw67-btn',icon:'🗓️',label:'แผนอาหาร'},
-  {sel:'#fw71-btn',icon:'📊',label:'Meal Insights'},
-  {sel:'#quickFab',icon:'⚡',label:'ทางลัด'}
+  {sel:'#fw67-btn',icon:'🗓️',label:'แผนอาหาร'}
  ];
  let fab,menu,backdrop;
  function close(){fab.classList.remove('open');fab.setAttribute('aria-expanded','false');menu.classList.remove('show');backdrop.classList.remove('show')}
