@@ -1437,6 +1437,72 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const bc=document.getElementById('bodyCard');if(bc)bc.after(entry());
 })();
 </script>
+<!-- v102 Thai food database: type a name, pick a dish, nutrients fill in -->
+<script src="foods_th.js"></script>
+<style>
+.fw-name-wrap{position:relative}
+.fw-sugg{position:absolute;left:0;right:0;top:100%;z-index:60;margin-top:4px;background:#1f2128;border:1px solid #34363f;border-radius:16px;box-shadow:0 16px 40px #0008;overflow:hidden;display:none;max-height:340px;overflow-y:auto}
+.fw-sugg.show{display:block}
+.fw-sugg button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-bottom:1px solid #2a2c33;background:none;color:#f5f3f5;padding:10px 12px;font-family:inherit}
+.fw-sugg button:last-child{border-bottom:0}.fw-sugg button:active{background:#2a2c33}
+.fw-sugg .k{margin-left:auto;text-align:right;flex:none}.fw-sugg .k b{display:block;font-size:15px;color:#f3a0bb}.fw-sugg .k small{color:#8f929b;font-size:10px}
+.fw-sugg .n b{display:block;font-size:14px}.fw-sugg .n small{display:block;color:#8f929b;font-size:11px;margin-top:1px}
+.fw-sugg .tag{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:1px 6px;margin-left:4px;vertical-align:1px;background:#f0a9c033;color:#f3a0bb}
+.fw-sugg .head{padding:7px 12px;font-size:11px;color:#8f929b;background:#18191f;font-weight:700}
+.fw-portion{display:none;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 10px;padding:9px 10px;border-radius:14px;background:#24262d;font-size:12px;color:#c9ccd4}
+.fw-portion.show{display:flex}.fw-portion b{color:#f5f3f5}
+.fw-portion button{border:1px solid #3a3d45;background:#1b1d22;color:#eee;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700;font-family:inherit}
+.fw-portion button.on{background:#f0a9c0;border-color:#f0a9c0;color:#2b1820}.fw-portion small{flex-basis:100%;color:#8f929b;font-size:10px}
+</style>
+<script>
+(function(){
+ const input=document.getElementById('foodName');if(!input||!window.FW_FOODS)return;
+ const norm=t=>String(t||'').toLowerCase().replace(/[\s\-()·.,/]/g,'');
+ const DB=window.FW_FOODS.map(r=>({name:r[0],cat:r[1],kcal:r[2],protein:r[3],carbs:r[4],fat:r[5],sugar:r[6],fiber:r[7],sodium:r[8],serving:r[9],keys:[r[0],...(r[10]?r[10].split(','):[])].map(norm)}));
+ const label=input.closest('label')||input.parentElement;
+ const wrap=document.createElement('div');wrap.className='fw-name-wrap';label.parentNode.insertBefore(wrap,label);wrap.appendChild(label);
+ const box=document.createElement('div');box.className='fw-sugg';box.setAttribute('role','listbox');wrap.appendChild(box);
+ const portion=document.createElement('div');portion.className='fw-portion';wrap.after(portion);
+ const FIELDS=['kcal','protein','carbs','fat','fiber','sodium','sugar'];
+ let picked=null,mult=1,results=[];
+ function score(keys,q){let best=0;for(const k of keys){if(k===q)return 100;if(k.startsWith(q))best=Math.max(best,70-Math.min(20,k.length-q.length));else if(k.includes(q))best=Math.max(best,40)}return best}
+ function search(q){
+  const qn=norm(q);if(!qn)return [];
+  const own=new Map();[...(s.foods||[]).slice().sort((a,b)=>(b.createdAt||b.id||0)-(a.createdAt||a.id||0)),...(s.foodLibrary||[])].forEach(f=>{const k=norm(f.name);if(k&&!own.has(k))own.set(k,f)});
+  const mine=[...own.values()].map(f=>({name:f.name,kcal:Number(f.kcal)||0,protein:f.protein,carbs:f.carbs,fat:f.fat,sugar:f.sugar,fiber:f.fiber,sodium:f.sodium,serving:f.meal||'',mine:true,sc:score([norm(f.name)],qn)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,3);
+  const names=new Set(mine.map(x=>norm(x.name)));
+  const db=DB.map(x=>({...x,sc:score(x.keys,qn)})).filter(x=>x.sc>0&&!names.has(norm(x.name))).sort((a,b)=>b.sc-a.sc||a.name.length-b.name.length).slice(0,8);
+  return [...mine,...db];
+ }
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function show(){
+  const q=input.value.trim();results=search(q);
+  if(!results.length){box.classList.remove('show');return}
+  let lastMine=null;
+  box.innerHTML=results.map((x,i)=>{let h='';if(x.mine!==lastMine){h=`<div class="head">${x.mine?'📚 จากคลังของคุณ':'🇹🇭 ฐานข้อมูลอาหารไทย (ค่าประมาณ)'}</div>`;lastMine=x.mine}
+   return h+`<button type="button" data-i="${i}"><span class="n"><b>${esc(x.name)}</b><small>${esc(x.serving||'')}${x.protein!=null&&x.protein!==''?` · P ${Math.round(x.protein)} · C ${Math.round(x.carbs||0)} · F ${Math.round(x.fat||0)}`:''}</small></span><span class="k"><b>${Math.round(x.kcal)||'–'}</b><small>kcal</small></span></button>`}).join('');
+  box.classList.add('show');
+ }
+ function fill(){
+  if(!picked)return;
+  FIELDS.forEach(k=>{const el=document.getElementById(k);if(!el)return;const v=Number(picked[k]);el.value=isFinite(v)&&picked[k]!==''&&picked[k]!=null?Math.round(v*mult*10)/10:''});
+  if(document.getElementById('kcal'))document.getElementById('kcal').value=Math.round((Number(picked.kcal)||0)*mult)||'';
+  portion.innerHTML=`<span>ปริมาณ</span>${[0.5,1,1.5,2].map(m=>`<button type="button" data-m="${m}" class="${m===mult?'on':''}">${m===0.5?'½':m===1.5?'1½':m} ${picked.mine?'ที่':''}</button>`).join('')}<b style="margin-left:auto">${Math.round(picked.kcal*mult)} kcal</b>${picked.mine?'':`<small>1 ที่ = ${esc(picked.serving)} · ค่าประมาณ แก้ตัวเลขได้ตามจริง</small>`}`;
+  portion.classList.add('show');
+  try{if(typeof updateBurnEst==='function'){}}catch(e){}
+ }
+ box.addEventListener('mousedown',e=>e.preventDefault());
+ box.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;picked=results[Number(b.dataset.i)];mult=1;input.value=picked.name;box.classList.remove('show');fill()});
+ portion.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;mult=Number(b.dataset.m);fill()});
+ input.addEventListener('input',()=>{if(picked&&input.value.trim()!==picked.name){picked=null;portion.classList.remove('show')}show()});
+ input.addEventListener('focus',()=>{if(input.value.trim()&&!picked)show()});
+ input.addEventListener('blur',()=>setTimeout(()=>box.classList.remove('show'),150));
+ input.addEventListener('keydown',e=>{if(e.key==='Escape')box.classList.remove('show')});
+ // clear the portion bar when the form is reset after saving
+ document.getElementById('addFood')?.addEventListener('click',()=>setTimeout(()=>{if(!input.value){picked=null;portion.classList.remove('show')}},50));
+ window.FWFoodDB={search,count:DB.length};
+})();
+</script>
 </body>
 </html>
 
