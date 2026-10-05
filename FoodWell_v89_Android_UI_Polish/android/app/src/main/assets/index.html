@@ -3075,7 +3075,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .wo-sheet .box{width:100%;max-width:560px;max-height:86vh;overflow-y:auto;background:var(--panel);color:var(--text);border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
 .wo-sheet .hd{display:flex;align-items:flex-start;gap:10px}.wo-sheet h2{margin:0;font-size:20px;flex:1}
 .wo-x{border:0;background:var(--panel2);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:16px;flex:none}
-.wo-step{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.wo-step .e{font-size:22px;width:30px;text-align:center}.wo-step b{display:block;font-size:14px}.wo-step small{color:var(--muted);font-size:12px;line-height:1.5}
+.wo-step{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.wo-step .e{font-size:22px;width:44px;flex:none;text-align:center}.wo-step b{display:block;font-size:14px}.wo-step small{color:var(--muted);font-size:12px;line-height:1.5}
 .wo-sec{margin:14px 0 4px;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 .wo-player{position:fixed;inset:0;z-index:7000;display:none;flex-direction:column;background:linear-gradient(180deg,#123527,#0d2219);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
 .wo-player.show{display:flex}.wo-player.rest{background:linear-gradient(180deg,#1b2a44,#121c2e)}
@@ -3084,7 +3084,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .wo-pbar{height:6px;border-radius:9px;background:#ffffff26;margin:10px 0 0;overflow:hidden}.wo-pbar i{display:block;height:100%;background:#7dd3a8}
 .wo-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
 .wo-main .ph{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:800}
-.wo-main .em{font-size:72px;line-height:1.1}.wo-main h2{margin:0;font-size:26px}
+.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain}.wo-main h2{margin:0;font-size:26px}
 .wo-main .amt{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
 .wo-main .cue{font-size:14px;opacity:.85;max-width:420px;line-height:1.6}.wo-main .nx{font-size:13px;opacity:.7;margin-top:8px}
 .wo-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px}
@@ -3148,6 +3148,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   rest:['พัก','Rest','😮‍💨','s',30,'หายใจลึก ๆ จิบน้ำได้','Breathe deeply, sip some water'],
  };
  const nm=id=>L(X[id][0],X[id][1]),cue=id=>L(X[id][5],X[id][6]);
+ // looping animations in assets/anim/<id>.webp (see EXERCISES.md); moves without one show their emoji
+ const ANIM=new Set(['march']);
+ const art=(id,cls)=>ANIM.has(id)?`<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`:X[id][2];
  // ---- session types ----
  const TYPES={
   full:{e:'🏋️',th:'เวทเต็มตัว',en:'Full-body strength',met:5},
@@ -3273,7 +3276,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  sheet.onclick=e=>{if(e.target===sheet)sheet.classList.remove('show')};
  function preview(S){const b=sheet.querySelector('.box'),ph={warm:L('วอร์มอัพ','Warm-up'),main:L('ออกกำลังกาย','Workout'),cool:L('คูลดาวน์','Cool-down')};
   let last='',html='';S.steps.forEach(st=>{if(st.id==='rest')return;if(st.ph!==last){html+=`<div class="wo-sec">${ph[st.ph]}</div>`;last=st.ph}
-   html+=`<div class="wo-step"><span class="e">${X[st.id][2]}</span><div><b>${esc(nm(st.id))} · ${amtText(st)}</b><small>${esc(cue(st.id))}</small></div></div>`});
+   html+=`<div class="wo-step"><span class="e">${art(st.id,'wo-thumb')}</span><div><b>${esc(nm(st.id))} · ${amtText(st)}</b><small>${esc(cue(st.id))}</small></div></div>`});
   b.innerHTML=`<div class="hd"><span style="font-size:36px">${S.e}</span><div style="flex:1"><h2>${esc(S.title)}</h2><div class="wo-sub">~${S.min} ${L('นาที','min')} · ~${kcalFor(S.met,S.min)} kcal</div></div><button type="button" class="wo-x" id="woSheetX" aria-label="${L('ปิด','Close')}">✕</button></div>${html}
    <button type="button" class="wo-btn" id="woGo" style="margin-top:14px">▶️ ${L('เริ่มเลย','Start now')}</button>`;
   b.querySelector('#woSheetX').onclick=()=>sheet.classList.remove('show');b.querySelector('#woGo').onclick=()=>{sheet.classList.remove('show');play(S)};
@@ -3295,7 +3298,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   pl.classList.toggle('rest',isRest);
   pl.innerHTML=`<div class="wo-ptop"><button type="button" id="woClose" aria-label="${L('ปิด','Close')}">✕</button><div class="t">${esc(cur.title)} · ${idx+1}/${cur.steps.length}</div></div>
    <div class="wo-pbar"><i style="width:${(idx/cur.steps.length*100).toFixed(1)}%"></i></div>
-   <div class="wo-main"><div class="ph">${ph}</div><div class="em">${X[st.id][2]}</div><h2>${esc(nm(st.id))}</h2>
+   <div class="wo-main"><div class="ph">${ph}</div><div class="em">${art(st.id,'wo-anim')}</div><h2>${esc(nm(st.id))}</h2>
     <div class="amt">${st.u==='r'?`${st.a}<span style="font-size:22px"> ${L('ครั้ง','reps')}</span>`:fmt(Math.max(0,left))}</div>
     <div class="cue">${esc(cue(st.id))}</div>${nx?`<div class="nx">${L('ถัดไป','Next')}: ${X[nx.id][2]} ${esc(nm(nx.id))} · ${amtText(nx)}</div>`:''}</div>
    <div class="wo-ctl"><button type="button" id="woPrev">⏮</button>
