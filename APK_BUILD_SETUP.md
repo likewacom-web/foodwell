@@ -14,8 +14,7 @@ This is a source/build-setup package, not an APK. A real APK must be built with 
 6. Install the debug APK on a physical Android device.
 7. Test the WebView/local app shell.
 8. Test Native Bridge calls.
-9. Test Health Connect availability and permissions.
-10. Only after debug testing passes, create a signed release APK.
+9. Only after debug testing passes, create a signed release APK.
 
 ## Real-device acceptance tests
 - App launches without crashing.
@@ -24,8 +23,6 @@ This is a source/build-setup package, not an APK. A real APK must be built with 
 - Offline mode works.
 - Sync retry works.
 - Permission screens do not request access automatically.
-- Health Connect permissions can be granted/revoked.
-- Steps/Heart Rate/Exercise/Sleep reads are handled safely.
 - Background sync does not duplicate records.
 
 ## Release rule

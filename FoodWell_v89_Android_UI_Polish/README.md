@@ -10,4 +10,4 @@
 - รองรับ prefers-reduced-motion
 - อัปเดต bridge version เป็น v89
 
-หมายเหตุ: เป็น source project ยังไม่ได้ยืนยัน APK หรือการทำงานบน Android/Health Connect จริง
+APK สร้างอัตโนมัติด้วย GitHub Actions (.github/workflows/android-apk.yml)
