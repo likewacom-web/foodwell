@@ -1528,7 +1528,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const cfg=()=>Object.assign({},DEF,(s.settings&&s.settings.reminders)||{});
  const DAYS=['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
  let perm=N()?N().permission():'none';
- function push(){if(N())try{N().configure(JSON.stringify(cfg()))}catch(e){}}
+ function push(){if(N())try{const f=(s.settings&&s.settings.fasting)||{};N().configure(JSON.stringify(Object.assign({},cfg(),{ifOn:!!(f.on&&f.notify!==false),ifStart:f.start||'12:00',ifEat:24-(Number(f.fast)||16)})))}catch(e){}}
+ window.fwNotifyPush=()=>push();
  function set(patch){s.settings=s.settings||{};s.settings.reminders=Object.assign(cfg(),patch);save();push();draw()}
  const anyOn=c=>c.meals||c.water||c.weigh;
  function draw(){
@@ -2033,6 +2034,71 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  if(after&&!document.getElementById('rcEntry')){const b=document.createElement('button');b.type='button';b.id='rcEntry';b.className='rc-entry';b.textContent='🍳 เมนูทำเอง (คำนวณจากวัตถุดิบ)';(document.querySelector('.bc-info')||after).after(b);b.onclick=()=>go('recipes')}
  const og=window.go;if(og)window.go=function(p){og(p);if(p==='recipes'){editing=null;list();window.scrollTo({top:0})}};
  window.FWRecipes={perServing,totals,use};
+})();
+</script>
+<!-- v111 Intermittent fasting: plan, live countdown, food-page notice, 7-day adherence, reminders -->
+<style>
+.if-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.if-top{display:flex;align-items:center;gap:16px}
+.if-ring{--p:0;width:112px;height:112px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--c,#e887aa) calc(var(--p)*1%),var(--panel2) 0)}
+.if-ring>div{width:88px;height:88px;border-radius:50%;background:var(--panel);display:grid;place-content:center;text-align:center}
+.if-ring b{font-size:20px;line-height:1.1}.if-ring small{font-size:11px;color:var(--muted)}
+.if-state{font-size:12px;font-weight:800;letter-spacing:.06em}.if-title{font-size:18px;font-weight:800;margin:2px 0}.if-sub{color:var(--muted);font-size:13px;line-height:1.5}
+.if-days{display:flex;gap:6px;margin-top:12px;justify-content:space-between}.if-days div{flex:1;text-align:center;font-size:11px;color:var(--muted)}.if-days i{display:block;height:26px;border-radius:9px;margin-bottom:3px;background:var(--panel2);font-style:normal;line-height:26px;font-size:13px}
+.if-days .ok i{background:#6ee7a833}.if-days .bad i{background:#f59f6b33}.if-days .today{color:var(--text);font-weight:800}
+.if-plans{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.if-plans button{border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 4px;font-weight:800;font-size:14px;font-family:inherit}
+.if-plans button small{display:block;font-size:10px;font-weight:600;color:var(--muted)}.if-plans button.on{border-color:#e887aa;background:#f0a9c022}
+.if-row{display:flex;align-items:center;gap:10px;margin-top:8px}.if-row label{flex:1;margin:0}
+.if-note{margin:0 0 12px;padding:10px 12px;border-radius:14px;background:#f4c76b1f;color:#9a6b00;font-size:13px;line-height:1.5}
+</style>
+<script>
+(function(){
+ const PLANS=[[14,'14:10','เริ่มต้น'],[16,'16:8','ยอดนิยม'],[18,'18:6','จริงจัง'],[20,'20:4','ขั้นสูง']];
+ const conf=()=>Object.assign({on:false,fast:16,start:'12:00',notify:true},(s.settings&&s.settings.fasting)||{});
+ const pad=n=>String(n).padStart(2,'0');
+ const hhmm=ms=>{const m=Math.max(0,Math.round(ms/60000));return `${Math.floor(m/60)}:${pad(m%60)}`};
+ const clock=d=>`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+ function windowOn(day,c){const [h,m]=c.start.split(':').map(Number);const a=new Date(day+'T00:00:00');a.setHours(h,m,0,0);return [a,new Date(a.getTime()+(24-c.fast)*3600e3)]}
+ // where are we now: eating window, or fasting until the next one
+ function state(now=new Date()){const c=conf(),today=localDay(now);let [a,b]=windowOn(today,c);
+  if(now<a){const y=new Date(now);y.setDate(y.getDate()-1);const [ya,yb]=windowOn(localDay(y),c);if(now<yb)return {eating:true,start:ya,end:yb,c};return {eating:false,from:yb,until:a,c}}
+  if(now<b)return {eating:true,start:a,end:b,c};
+  const t=new Date(now);t.setDate(t.getDate()+1);return {eating:false,from:b,until:windowOn(localDay(t),c)[0],c}}
+ // a day "kept the plan" when every food logged that day falls inside its eating window
+ function kept(day){const c=conf(),[a,b]=windowOn(day,c);const fs=s.foods.filter(f=>foodDay(f)===day&&f.createdAt);if(!fs.length)return null;return fs.every(f=>f.createdAt>=a.getTime()&&f.createdAt<b.getTime())}
+ function homeCard(){const box=document.getElementById('ifHome');if(!box)return;const c=conf();if(!c.on){box.style.display='none';return}box.style.display='';
+  const st=state(),now=Date.now();let p,html;
+  if(st.eating){p=(now-st.start)/(st.end-st.start)*100;html=`<div class="if-state" style="color:#2f9e6e">🍽️ ช่วงกิน</div><div class="if-title">ปิดในอีก ${hhmm(st.end-now)} ชม.</div><div class="if-sub">กินได้ถึง ${clock(st.end)} · แผน ${c.fast}:${24-c.fast}</div>`}
+  else{p=(now-st.from)/(st.until-st.from)*100;html=`<div class="if-state" style="color:#d4568a">⏱️ กำลังอด</div><div class="if-title">อีก ${hhmm(st.until-now)} ชม.</div><div class="if-sub">อดมาแล้ว ${hhmm(now-st.from)} ชม. · เริ่มกินได้ ${clock(st.until)}<br>น้ำเปล่า ชา กาแฟดำ ดื่มได้</div>`}
+  const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return localDay(d)});
+  const ks=days.map(kept),okN=ks.filter(x=>x===true).length,logged=ks.filter(x=>x!==null).length;
+  box.innerHTML=`<div class="if-top"><div class="if-ring" style="--p:${Math.min(100,Math.max(0,p)).toFixed(1)};--c:${st.eating?'#6ee7a8':'#e887aa'}"><div><b>${Math.round(Math.min(100,p))}%</b><small>${st.eating?'ช่วงกิน':'ช่วงอด'}</small></div></div><div>${html}</div></div>
+   <div class="if-days">${days.map((d,i)=>`<div class="${ks[i]===true?'ok':ks[i]===false?'bad':''}${d===localDay()?' today':''}"><i>${ks[i]===true?'✓':ks[i]===false?'✕':'·'}</i>${new Date(d+'T12:00:00').toLocaleDateString('th-TH',{weekday:'narrow'})}</div>`).join('')}</div>
+   <div class="if-sub" style="margin-top:8px">7 วันล่าสุด กินตามช่วงเวลา ${okN}/${logged||0} วันที่บันทึก</div>`}
+ function foodNotice(){const n=document.getElementById('ifFoodNote');if(!n)return;const c=conf();if(!c.on){n.hidden=true;return}const st=state();
+  if(st.eating){n.hidden=true;return}n.hidden=false;n.innerHTML=`⏱️ ตอนนี้อยู่ในช่วงอดของแผน ${c.fast}:${24-c.fast} · อีก ${hhmm(st.until-Date.now())} ชม. ถึงช่วงกิน (${clock(st.until)}) · บันทึกได้ตามปกติถ้าจำเป็น`}
+ function settingsCard(){const box=document.getElementById('ifSet');if(!box)return;const c=conf(),eatEnd=(()=>{const [h,m]=c.start.split(':').map(Number);const t=(h*60+m+(24-c.fast)*60)%1440;return `${pad(Math.floor(t/60))}:${pad(t%60)}`})();
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><h2 style="margin:0;flex:1">⏱️ IF (อดอาหารเป็นช่วง)</h2><input class="switch" type="checkbox" id="ifOn" ${c.on?'checked':''}></div>
+   <div class="if-sub" style="margin-top:4px">เลือกจำนวนชั่วโมงที่อด : ชั่วโมงที่กิน แล้วตั้งเวลาเริ่มกินมื้อแรก</div>
+   <div class="if-plans">${PLANS.map(([f,l,t])=>`<button type="button" data-fast="${f}" class="${c.fast===f?'on':''}">${l}<small>${t}</small></button>`).join('')}</div>
+   <div class="if-row"><label>เริ่มกิน<input type="time" id="ifStart" value="${c.start}"></label><label>หมดช่วงกิน<input type="time" value="${eatEnd}" disabled></label></div>
+   <div class="if-row"><span style="flex:1;font-size:14px">🔔 เตือนตอนเริ่มกิน และก่อนหมดช่วงกิน 30 นาที</span><input class="switch" type="checkbox" id="ifNotify" ${c.notify?'checked':''}></div>
+   <div class="if-sub" style="margin-top:8px">ไม่แนะนำสำหรับผู้ที่ตั้งครรภ์ ให้นมบุตร เป็นเบาหวานที่ใช้ยา หรือมีประวัติความผิดปกติด้านการกิน ควรปรึกษาแพทย์ก่อน</div>`;
+  const set=patch=>{s.settings=s.settings||{};s.settings.fasting=Object.assign(conf(),patch);save();window.fwNotifyPush&&fwNotifyPush();draw()};
+  box.querySelector('#ifOn').onchange=e=>{set({on:e.target.checked});if(e.target.checked){toast(`เริ่มแผน IF ${conf().fast}:${24-conf().fast} แล้ว ⏱️`);if(conf().notify&&window.FoodWellNotify&&FoodWellNotify.permission()!=='granted')FoodWellNotify.request()}};
+  box.querySelectorAll('[data-fast]').forEach(b=>b.onclick=()=>set({fast:Number(b.dataset.fast)}));
+  box.querySelector('#ifStart').onchange=e=>{if(e.target.value)set({start:e.target.value})};
+  box.querySelector('#ifNotify').onchange=e=>set({notify:e.target.checked})}
+ function draw(){homeCard();foodNotice();settingsCard()}
+ // places: home (under the streak / weekly card), food form, More page (above notifications)
+ const after=document.getElementById('weekHome')||document.getElementById('streakRow');
+ if(after&&!document.getElementById('ifHome')){const c=document.createElement('div');c.className='if-card';c.id='ifHome';after.after(c)}
+ const form=document.querySelector('#food .food-editor');if(form&&!document.getElementById('ifFoodNote')){const n=document.createElement('div');n.className='if-note';n.id='ifFoodNote';n.hidden=true;form.prepend(n)}
+ const nt=document.getElementById('fwNotify')||document.getElementById('fwThemeCard');if(nt&&!document.getElementById('ifSet')){const c=document.createElement('div');c.className='card';c.id='ifSet';nt.before(c)}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){console.error(e)}return o};
+ setInterval(()=>{if(!document.hidden){homeCard();foodNotice()}},30000);
+ window.FWFast={state,kept,conf};
+ draw();
 })();
 </script>
 </body>

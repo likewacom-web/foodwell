@@ -65,6 +65,13 @@ object Reminders {
             val (h, m) = hm(cfg.optString("weighTime", "07:30"), "07:30")
             out += Slot(50, "weigh", h, m, cfg.optInt("weighDay", 1).coerceIn(1, 7))
         }
+        if (cfg.optBoolean("ifOn")) {
+            val (h, m) = hm(cfg.optString("ifStart", "12:00"), "12:00")
+            val eat = cfg.optInt("ifEat", 8).coerceIn(1, 23)
+            out += Slot(60, "if_open", h, m)
+            val close = ((h * 60 + m + eat * 60 - 30) % 1440 + 1440) % 1440
+            out += Slot(61, "if_close", close / 60, close % 60)
+        }
         return out
     }
 
@@ -118,6 +125,15 @@ object Reminders {
                 val last = st.optString("lastWeigh")
                 val recent = runCatching { !LocalDate.parse(last).isBefore(LocalDate.now().minusDays(5)) }.getOrDefault(false)
                 if (recent) null else Triple("⚖️ ชั่งน้ำหนักประจำสัปดาห์", "บันทึกน้ำหนักเพื่อดูความคืบหน้าของแผน", "weightPlan")
+            }
+            "if_open", "if_close" -> {
+                val cfg = runCatching { JSONObject(prefs(c).getString("config", "{}")!!) }.getOrElse { JSONObject() }
+                val (h, m) = hm(cfg.optString("ifStart", "12:00"), "12:00")
+                val eat = cfg.optInt("ifEat", 8).coerceIn(1, 23)
+                val end = (h * 60 + m + eat * 60) % 1440
+                val endText = "%02d:%02d".format(end / 60, end % 60)
+                if (kind == "if_open") Triple("🍽️ ถึงช่วงกินแล้ว", "เริ่มกินได้ถึง $endText · มื้อแรกเน้นโปรตีนและผักนะ", "food")
+                else Triple("⏱️ อีก 30 นาทีหมดช่วงกิน", "หลัง $endText เริ่มอด ${24 - eat} ชั่วโมง · น้ำเปล่า ชา กาแฟดำ ดื่มได้", "home")
             }
             else -> null
         }
