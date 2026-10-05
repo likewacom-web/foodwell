@@ -72,7 +72,8 @@ jobs:
             echo "===== JavaScript errors in the page (WebView console) ====="
             ! grep -E "CONSOLE.*Uncaught" logcat.txt || (echo "::error::The page threw a JavaScript error on start" && exit 1)
             echo "===== Home-screen widget ====="
-            adb shell dumpsys appwidget | grep -q "com.foodwell.app/.TodayWidget" && echo "TodayWidget provider registered" || (echo "::error::TodayWidget is not registered" && exit 1)
+            adb shell dumpsys appwidget | grep -i foodwell | head -5 || true
+            adb shell dumpsys appwidget | grep -qE "com\.foodwell\.app/(com\.foodwell\.app)?\.TodayWidget" && echo "TodayWidget provider registered" || (echo "::error::TodayWidget is not registered" && exit 1)
 
       - name: Upload logcat
         if: always()
