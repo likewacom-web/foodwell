@@ -240,7 +240,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="home-date"><div class="moon">🌙</div><h1>วันนี้</h1><p id="date"></p><div class="gear">⚙</div></div>
 <div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
 <div class="welcome home-sortable" data-home-key="welcome"><div class="bubble">ดูแลตัวเองทีละวัน<br>เก่งมากแล้วนะ ♡</div><div class="cat">🐈</div></div>
-<div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่บันทึก</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p>ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span>วันนี้<br>♡</span></div></div>
+<div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่ได้รับวันนี้</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p id="kcalSub">ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span id="kcalRing">วันนี้<br>♡</span></div></div>
 <div class="twocards home-sortable" data-home-key="twocards">
 <div class="mini"><div class="ico">💧</div><h3>ดื่มน้ำ</h3><div class="count"><span id="waterCount">0</span> <small>ml</small></div><div class="bar blue"><i></i></div></div>
 <div class="mini"><div class="ico">🏃</div><h3>เคลื่อนไหว</h3><div class="count"><span id="moveCount">0</span> <small>นาที</small></div><div class="bar green"><i></i></div></div>
@@ -304,6 +304,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
   <div class="trend-head"><h2>✨ วันนี้</h2><small>สรุปจากสิ่งที่บันทึกไว้</small></div>
   <div id="smartInsights" class="insight-list"></div>
 </div>
+<div class="dashboard-card"><h3>🔥 พลังงานที่ได้รับต่อวัน</h3><p id="dashKcalNote">kcal จากอาหารที่บันทึกในแต่ละวัน</p><div id="dashKcalBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>🍱 อาหารที่บันทึก</h3><p>จำนวนรายการในแต่ละวัน</p><div id="dashFoodBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>💧 น้ำ</h3><p>ปริมาณที่บันทึกในแต่ละวัน</p><div id="dashWaterBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>🏃 การเคลื่อนไหว</h3><p>เวลาที่บันทึกในแต่ละวัน</p><div id="dashMoveBars" class="dash-bars"></div></div>
@@ -603,9 +604,10 @@ function renderFoodPhotos(){const el=$("foodPhotoGrid");if(!el)return;const a=s.
 function renderFood(){renderCoreFoodLog();let q=$("search").value.toLowerCase();let a=s.foods.filter(f=>(meal==="ทั้งหมด"||f.meal===meal)&&f.name.toLowerCase().includes(q));$("foodList").innerHTML=a.length?a.map(foodCard).join(""):'<div class="item"><div class="meta"><b>ยังไม่มีรายการอาหาร</b><small>เพิ่มมื้ออาหารของคุณได้เลย</small></div></div>'}
 
 function dayRecord(date){
- const today=new Date().toISOString().slice(0,10);
- if(date===today)return {date,foods:s.foods.length,water:s.water,moves:s.moves.reduce((a,x)=>a+Number(x.min||0),0)};
- return s.history.find(x=>x.date===date)||{date,foods:0,water:0,moves:0};
+ const foods=s.foods.filter(f=>foodDay(f)===date).length;
+ if(date===localDay()||date===new Date().toISOString().slice(0,10))return {date,foods,water:s.water,moves:s.moves.reduce((a,x)=>a+Number(x.min||0),0)};
+ const rec=s.history.find(x=>x.date===date)||{date,foods:0,water:0,moves:0};
+ return {...rec,foods:Math.max(foods,Number(rec.foods||0))};
 }
 function fmtDay(date){return new Date(date+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}
 function renderTrends(){if(!$("foodTrend"))return;
@@ -618,7 +620,7 @@ function renderTrends(){if(!$("foodTrend"))return;
  $("moveTrendMax").textContent=draw("moveTrend","moves","movebar")+" นาที";
 }
 function showHistoryDate(date){
- const r=dayRecord(date);$("selectedHistory").innerHTML=`<b>${fmtDay(date)}</b><p>🍱 ${r.foods||0} รายการอาหาร · 💧 ${(r.water||0).toLocaleString()} ml · 🏃 ${r.moves||0} นาที</p>`;
+ const r=dayRecord(date);$("selectedHistory").innerHTML=`<b>${fmtDay(date)}</b><p>🔥 ${kcalOn(date).toLocaleString()} kcal · 🍱 ${Math.max(r.foods||0,s.foods.filter(f=>foodDay(f)===date).length)} รายการอาหาร · 💧 ${(r.water||0).toLocaleString()} ml · 🏃 ${r.moves||0} นาที</p>`;
 }
 function renderHistory(){
  const all=[...s.history];const today=new Date().toISOString().slice(0,10);
@@ -641,7 +643,7 @@ function exportData(){
 
 function renderInsights(){
  const today=new Date().toISOString().slice(0,10);
- const todayFoods=s.foods.length;
+ const todayFoods=s.foods.filter(f=>foodDay(f)===localDay()).length;
  const todayWater=Number(s.water||0);
  const todayMove=s.moves.reduce((a,x)=>a+Number(x.min||0),0);
  const totalLogged=todayFoods+todayWaterLogCount()+s.moves.length;
@@ -785,11 +787,11 @@ $("trophyDetailFav")&&($("trophyDetailFav").onclick=()=>{if(typeof window.foodwe
 
 function renderDashboard(){
 
- const now=new Date(),days=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(d.toISOString().slice(0,10));}
+ const days=lastDays(7);
  const recs=days.map(dayRecord);
  const totals={foods:recs.reduce((a,x)=>a+Number(x.foods||0),0),water:recs.reduce((a,x)=>a+Number(x.water||0),0),moves:recs.reduce((a,x)=>a+Number(x.moves||0),0)};
  $("dashFoods").textContent=totals.foods.toLocaleString();$("dashWater").textContent=totals.water.toLocaleString();$("dashMove").textContent=totals.moves.toLocaleString();
- $("dashActiveDays").textContent=recs.filter(x=>Number(x.foods||0)+Number(x.water||0)+Number(x.moves||0)>0).length;$("dashRecentFoods").textContent=s.foods.length;
+ $("dashActiveDays").textContent=recs.filter(x=>Number(x.foods||0)+Number(x.water||0)+Number(x.moves||0)>0).length;$("dashRecentFoods").textContent=recs[6].foods;
  const make=(id,key,fmt)=>{const vals=recs.map(x=>Number(x[key]||0)),max=Math.max(...vals,1);$(id).innerHTML=vals.map((v,i)=>`<div class="dash-col"><span class="dash-value">${fmt(v)}</span><div class="dash-bar" style="height:${Math.max(5,(v/max)*108)}px"></div><small>${new Date(days[i]+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short"}).replace(".","")}</small></div>`).join("")};
  make("dashFoodBars","foods",v=>v);make("dashWaterBars","water",v=>v.toLocaleString());make("dashMoveBars","moves",v=>v);
  
@@ -830,7 +832,24 @@ function renderWaterHistoryV54(){
  const current=Number(s.water||0); $("waterInsight").textContent=current?`วันนี้คุณบันทึกน้ำ ${current.toLocaleString()} ml จากรายการที่เพิ่มในแอป`:'ยังไม่มีการบันทึกน้ำวันนี้ — เพิ่มเมื่อคุณต้องการเช็กอินได้เลย 💧';
 }
 
-function render(){applySettings();startReminder();renderFoodPhotos();let d=new Date();$("date").textContent=d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});$("waterCount").textContent=s.water.toLocaleString();$("waterBig").textContent=s.water.toLocaleString();renderWaterHistoryV54();$("moveCount").textContent=s.moves.reduce((a,x)=>a+x.min,0);$("totalKcal").textContent=s.foods.reduce((a,x)=>a+x.kcal,0).toLocaleString();let icons=["🍳","🍜","🍤","🍎","🥗","🍙"];$("foodStrip").innerHTML=s.foods.length?s.foods.slice(0,6).map((f,i)=>`<div class="food">${f.photo?`<img src="${f.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:23px">`:icons[i%icons.length]}<span>${esc(f.name.slice(0,10))}</span></div>`).join(""):'<div class="food">🍱<span>ยังไม่มีอาหาร</span></div>';
+// Calories eaten per day. A food's day is the local date it was logged (createdAt); the stored
+// f.date is a UTC date, which puts anything logged before 07:00 in Thailand on the previous day.
+function localDay(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function foodDay(f){return f.createdAt?localDay(new Date(f.createdAt)):String(f.date||"").slice(0,10)}
+function kcalOn(day){return s.foods.filter(f=>foodDay(f)===day).reduce((a,f)=>a+Number(f.kcal||0),0)}
+function lastDays(n){const out=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(localDay(d))}return out}
+function renderKcal(){
+ const days=lastDays(7),vals=days.map(kcalOn),today=vals[6],yest=vals[5];
+ const logged=vals.filter(v=>v>0),avg=logged.length?Math.round(logged.reduce((a,v)=>a+v,0)/logged.length):0;
+ $("totalKcal").textContent=today.toLocaleString();
+ const meals=new Set(s.foods.filter(f=>foodDay(f)===days[6]).map(f=>f.meal)).size;
+ if($("kcalRing"))$("kcalRing").innerHTML=meals?`${meals}<br><small style="font-size:11px">มื้อ</small>`:"วันนี้<br>♡";
+ if($("kcalSub"))$("kcalSub").textContent=`เมื่อวาน ${yest.toLocaleString()} kcal`+(avg?` · เฉลี่ย 7 วัน ${avg.toLocaleString()} kcal`:"");
+ const box=$("dashKcalBars");if(!box)return;const max=Math.max(...vals,1);
+ box.innerHTML=vals.map((v,i)=>`<div class="dash-col"><span class="dash-value">${v.toLocaleString()}</span><div class="dash-bar" style="height:${Math.max(5,(v/max)*108)}px"></div><small>${new Date(days[i]+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short"})}</small></div>`).join("");
+ if($("dashKcalNote"))$("dashKcalNote").textContent=avg?`เฉลี่ย ${avg.toLocaleString()} kcal ต่อวัน (เฉพาะวันที่มีบันทึก)`:"kcal จากอาหารที่บันทึกในแต่ละวัน";
+}
+function render(){applySettings();startReminder();renderFoodPhotos();let d=new Date();$("date").textContent=d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});$("waterCount").textContent=s.water.toLocaleString();$("waterBig").textContent=s.water.toLocaleString();renderWaterHistoryV54();$("moveCount").textContent=s.moves.reduce((a,x)=>a+x.min,0);renderKcal();let icons=["🍳","🍜","🍤","🍎","🥗","🍙"];$("foodStrip").innerHTML=s.foods.length?s.foods.slice(0,6).map((f,i)=>`<div class="food">${f.photo?`<img src="${f.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:23px">`:icons[i%icons.length]}<span>${esc(f.name.slice(0,10))}</span></div>`).join(""):'<div class="food">🍱<span>ยังไม่มีอาหาร</span></div>';
 renderFood();
 renderInsights();
 renderTrophies();
