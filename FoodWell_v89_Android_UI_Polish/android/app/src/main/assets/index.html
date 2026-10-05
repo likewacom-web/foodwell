@@ -1852,7 +1852,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   const ml=q.reduce((a,x)=>a+(Number(x.ml)||0),0);save();toast(`เพิ่มน้ำจากวิดเจ็ต ${ml.toLocaleString()} ml 💧`)}
  let last='';
  function push(){try{const d=localDay(),T=bodyTargets&&bodyTargets(),target=(window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||0;
-  const j=JSON.stringify({date:d,kcal:kcalOn(d),target,water:waterOn(d),waterGoal:waterGoal()});if(j!==last){last=j;W().update(j)}}catch(e){}}
+  const j=JSON.stringify({date:d,kcal:kcalOn(d),target,water:waterOn(d),waterGoal:waterGoal(),streak:window.FWWeek?FWWeek.streak():0,meals:new Set(s.foods.filter(f=>foodDay(f)===d).map(f=>f.meal)).size});if(j!==last){last=j;W().update(j)}}catch(e){}}
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);push();return o};
  document.addEventListener('visibilitychange',()=>{if(!document.hidden){drain();push()}});
  drain();push();
