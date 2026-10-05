@@ -502,7 +502,8 @@ function snapshotDay(){
   s.history=[rec,...s.history.filter(x=>x.date!==today)].slice(0,30);
 }
 
-const save=()=>{snapshotDay();localStorage.setItem(KEY,JSON.stringify(s));render()};
+// localStorage holds ~5 MB; a full-size camera photo can exceed it and every later save would throw.
+const save=()=>{snapshotDay();try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){console.error("save failed",e);if(!save.warned){save.warned=true;toast("พื้นที่เก็บข้อมูลในแอปเต็ม · ลองลบรูปอาหารเก่าบางรายการ")}}render()};
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function toast(t){let e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1600)}
 function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===p));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===p))}
@@ -570,7 +571,7 @@ $("addFood").onclick=()=>{
    if(editingId)s.foods=s.foods.map(x=>x.id===editingId?f:x);else s.foods.unshift(f);
    addFavorite(f); resetFoodForm(); save(); toast(editingId?"แก้ไขแล้ว":"บันทึกอาหารแล้ว")
  };
- let file=$("photo").files[0];if(file){let r=new FileReader();r.onload=()=>finish(r.result);r.readAsDataURL(file)}else finish()
+ let file=$("photo").files[0];if(file){let r=new FileReader();r.onload=()=>shrinkImage(r.result,640,.75).then(finish);r.readAsDataURL(file)}else finish()
 };
 function openFoodModal(id){let f=s.foods.find(x=>x.id===id);if(!f)return;modalId=id;$("modalName").textContent=f.name;$("modalFav").classList.toggle("active",!!f.favorite);$("modalFav").textContent=f.favorite?"★":"☆";$("modalMeta").textContent=`${f.meal}${f.kcal?" · "+f.kcal+" kcal":""}`;
 $("modalPhoto").innerHTML=f.photo?`<img src="${f.photo}" alt="">`:"🍱";
@@ -970,6 +971,13 @@ s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);save();toast(
 });
 render();
 setupHomeCustomizer();
+(async()=>{
+ let changed=false;
+ try{localStorage.removeItem("foodwell_library_v62")}catch(e){}
+ (s.foodLibrary||[]).forEach(f=>{if(f.photo){f.photo="";changed=true}});
+ for(const f of s.foods){if(typeof f.photo==="string"&&f.photo.length>150000){const small=await shrinkImage(f.photo,640,.75);if(small&&small.length<f.photo.length){f.photo=small;changed=true}}}
+ if(changed)save();
+})();
 
 // Gentle tap feedback
 function addRipple(e){
@@ -1066,7 +1074,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 // FoodWell Food Library — one list built from what you log: search, meal filter, sort, use count, rename, remove.
 // (Merges the old v62 library and the v63 "คลังอาหาร 2.0" panel; keeps their storage keys.)
 (function(){
-  const KEYLIB='foodwell_library_v62', META='foodwell_library_meta_v63';
+  const META='foodwell_library_meta_v63';
   let cat='ทั้งหมด', q='', sort='recent';
   let meta={};try{meta=JSON.parse(localStorage.getItem(META)||'{}')||{}}catch(e){meta={}}
   const saveMeta=()=>{try{localStorage.setItem(META,JSON.stringify(meta))}catch(e){}};
@@ -1079,7 +1087,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
     const byName=new Map();
     [...s.foods].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(f=>{
       const name=String(f.name||'').trim();if(!name||byName.has(name)||removed(f))return;
-      byName.set(name,{...f});
+      byName.set(name,{...f,photo:""});
     });
     s.foodLibrary.forEach(f=>{const name=String(f.name||'').trim();if(name&&!byName.has(name)&&!removed(f))byName.set(name,f)});
     s.foodLibrary=[...byName.values()].slice(0,100);
@@ -1108,7 +1116,6 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   };
   function render(){
     syncLibrary();
-    try{localStorage.setItem(KEYLIB,JSON.stringify(s.foodLibrary))}catch(e){}
     const grid=document.getElementById('v62LibraryGrid');if(!grid)return;
     const all=s.foodLibrary, search=q.toLowerCase();
     const list=all.filter(f=>{
@@ -1121,7 +1128,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
     else list.sort((a,b)=>(!!b.favorite-!!a.favorite)||(b.createdAt||0)-(a.createdAt||0));
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
     set('v62Total',all.length);set('v62Fav',all.filter(f=>f.favorite).length);set('v62Recent',all.reduce((a,f)=>a+uses(f),0));
-    grid.innerHTML=list.length?list.map(f=>{const id=JSON.stringify(String(f.id)).replace(/"/g,'&quot;');const u=uses(f);return `<div class="v62-food"><div class="v62-thumb">${f.photo?`<img src="${f.photo}" alt="">`:'🍱'}</div><div><b>${esc(f.name)}</b><small>${f.favorite?'⭐ โปรด · ':''}${esc(f.meal||'อาหาร')}${f.kcal?' · '+Number(f.kcal)+' kcal':''}${u?' · ใช้ '+u+' ครั้ง':''}</small><div class="fw-lib-acts"><button type="button" onclick="fwLibRename(${id})">✏️ แก้ชื่อ</button><button type="button" onclick="fwLibRemove(${id})">🗑️ ลบ</button></div></div><button class="v62-use ${f.favorite?'primary-v62':''}" type="button" onclick="v62UseFoodById(${id})">ใช้รายการนี้</button></div>`}).join(''):'<div class="v62-empty">ยังไม่พบรายการอาหารในหมวดนี้<br>ลองบันทึกอาหารใหม่จากหน้าอาหารได้เลย 🌿</div>';
+    grid.innerHTML=list.length?list.map(f=>{const id=JSON.stringify(String(f.id)).replace(/"/g,'&quot;');const u=uses(f);return `<div class="v62-food"><div class="v62-thumb">${(p=>p?`<img src="${p}" alt="">`:'🍱')(f.photo||(s.foods.find(x=>x.name===f.name&&x.photo)||{}).photo)}</div><div><b>${esc(f.name)}</b><small>${f.favorite?'⭐ โปรด · ':''}${esc(f.meal||'อาหาร')}${f.kcal?' · '+Number(f.kcal)+' kcal':''}${u?' · ใช้ '+u+' ครั้ง':''}</small><div class="fw-lib-acts"><button type="button" onclick="fwLibRename(${id})">✏️ แก้ชื่อ</button><button type="button" onclick="fwLibRemove(${id})">🗑️ ลบ</button></div></div><button class="v62-use ${f.favorite?'primary-v62':''}" type="button" onclick="v62UseFoodById(${id})">ใช้รายการนี้</button></div>`}).join(''):'<div class="v62-empty">ยังไม่พบรายการอาหารในหมวดนี้<br>ลองบันทึกอาหารใหม่จากหน้าอาหารได้เลย 🌿</div>';
   }
   document.getElementById('v62Search')?.addEventListener('input',e=>{q=e.target.value.trim();render()});
   document.getElementById('v62Clear')?.addEventListener('click',()=>{q='';const e=document.getElementById('v62Search');if(e)e.value='';render()});
@@ -1272,8 +1279,9 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function finish(save_){
   s.profile=s.profile||{};
   if(save_){['sex','age','height','weight','activity','goal'].forEach(k=>{if(d[k]!=null&&d[k]!=='')s.profile[k]=d[k]})}
-  s.profile[FLAG]=true;save();
+  s.profile[FLAG]=true;
   root.classList.remove('show');document.body.style.overflow='';
+  try{save()}catch(e){console.error(e)}
   if(save_&&typeof toast==='function')toast('ตั้งค่าเป้าหมายเรียบร้อย 🎯');
   if(typeof go==='function')go('home');
  }
