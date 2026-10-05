@@ -43,7 +43,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dark = Color.rgb(16, 17, 22)
+        // Last theme chosen in the page (light by default), so the first frame isn't the wrong colour.
+        val themePrefs = getSharedPreferences("foodwell_theme", MODE_PRIVATE)
+        val dark = runCatching { Color.parseColor(themePrefs.getString("bg", "#f6f7fa")) }.getOrDefault(Color.rgb(246, 247, 250))
+        val lightBars = themePrefs.getBoolean("light", true)
         @Suppress("DEPRECATION")
         window.statusBarColor = dark
         @Suppress("DEPRECATION")
@@ -94,6 +97,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(CloudApi(), "FoodWellCloud")
             addJavascriptInterface(ProApi(), "FoodWellPro")
             addJavascriptInterface(NotifyApi(), "FoodWellNotify")
+            addJavascriptInterface(ThemeApi(), "FoodWellTheme")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -104,6 +108,7 @@ class MainActivity : ComponentActivity() {
         // Banner ad slot under the page; stays GONE unless ads are enabled and not removed.
         val adSlot = FrameLayout(this).apply { visibility = View.GONE; setBackgroundColor(dark) }
         val root = LinearLayout(this).apply {
+            this@MainActivity.rootLayout = this
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(dark)
             addView(web, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
@@ -117,12 +122,7 @@ class MainActivity : ComponentActivity() {
         }
         setContentView(root)
         // getInsetsController() needs the DecorView, which exists only after setContentView().
-        if (Build.VERSION.SDK_INT >= 30) {
-            window.insetsController?.setSystemBarsAppearance(
-                0,
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-            )
-        }
+        applyBars(dark, lightBars)
 
         pro = Monetization(this, adSlot) { fn, arg -> callJs(fn, arg) }
         pro.start()
@@ -134,6 +134,35 @@ class MainActivity : ComponentActivity() {
                 isEnabled = false
                 onBackPressedDispatcher.onBackPressed()
             }
+        }
+    }
+
+    private var rootLayout: LinearLayout? = null
+
+    /** Status/navigation bar colour and icon contrast to match the page theme. */
+    private fun applyBars(color: Int, light: Boolean) {
+        @Suppress("DEPRECATION")
+        window.statusBarColor = color
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = color
+        rootLayout?.setBackgroundColor(color)
+        if (::web.isInitialized) web.setBackgroundColor(color)
+        val flags = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+        if (Build.VERSION.SDK_INT >= 30) {
+            window.insetsController?.setSystemBarsAppearance(if (light) flags else 0, flags)
+        } else {
+            WindowCompat.getInsetsController(window, window.decorView).run {
+                isAppearanceLightStatusBars = light
+                isAppearanceLightNavigationBars = light
+            }
+        }
+    }
+
+    inner class ThemeApi {
+        @JavascriptInterface fun setBars(hex: String, light: Boolean) = runOnUiThread {
+            val c = runCatching { Color.parseColor(hex) }.getOrNull() ?: return@runOnUiThread
+            getSharedPreferences("foodwell_theme", MODE_PRIVATE).edit().putString("bg", hex).putBoolean("light", light).apply()
+            applyBars(c, light)
         }
     }
 

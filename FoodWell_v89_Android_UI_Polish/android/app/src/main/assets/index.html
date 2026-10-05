@@ -515,10 +515,10 @@ function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle(
 document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
-function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme").checked=!!s.settings.softTheme;$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🌿";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
+function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🌿";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
 $("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🌿"};
 $("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"FoodWell";s.profile.emoji=$("profileEmoji").value.trim()||"🌿";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
-$("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()};
+$("softTheme")&&($("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()});
 let reminderTimer=null;
 function reminderMessage(){const msgs=["พักสายตาสักครู่ และดูแลตัวเองตามที่รู้สึกเหมาะสมนะ ♡","ถึงเวลาเช็กอินกับตัวเองสักนิดนะ 🌿","ถ้ารู้สึกกระหาย ลองจิบน้ำสักหน่อยก็ได้ 💧","พักจากหน้าจอสักครู่เมื่อสะดวกนะ ✨"];return msgs[Math.floor(Math.random()*msgs.length)]}
 function startReminder(){clearInterval(reminderTimer);if(!s.settings.gentleReminder)return;const ms=Math.max(30,Number(s.settings.reminderMinutes||180))*60*1000;reminderTimer=setInterval(()=>{if(document.visibilityState!=="visible")return;const body=reminderMessage();toast(body);},ms)}
@@ -1565,6 +1565,89 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  if(settings)settings.after(card);else document.getElementById('more')?.appendChild(card);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&N()){const p=N().permission();if(p!==perm){perm=p;draw()}}});
  push();report();draw();
+})();
+</script>
+<!-- v104 Themes: light / dark / system + accent colour. Light styles are generated from the
+     existing (dark) CSS at runtime, so every screen follows without a second stylesheet. -->
+<style>
+.th-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.th-mode{border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:16px;padding:12px 6px;font-family:inherit;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.th-mode .pv{width:46px;height:30px;border-radius:9px;border:1px solid #0002;display:grid;grid-template-rows:1fr 1fr;overflow:hidden}
+.th-mode.sel{border-color:var(--accent,#f0a9c0);box-shadow:0 0 0 2px var(--accent,#f0a9c0) inset}
+.th-accents{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.th-acc{width:42px;height:42px;border-radius:50%;border:3px solid transparent;padding:0;box-shadow:0 2px 8px #0003;position:relative}
+.th-acc.sel{border-color:var(--text)}.th-acc.sel:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:900;text-shadow:0 1px 2px #0006}
+.th-label{font-size:12px;color:var(--muted);margin-top:14px;font-weight:700}
+</style>
+<script>
+(function(){
+ const ACCENTS={pink:['ชมพู',340,'#f0a9c0'],peach:['พีช',22,'#f7b08a'],mint:['มิ้นต์',158,'#7fd8b4'],sky:['ฟ้า',205,'#86c5f0'],lavender:['ลาเวนเดอร์',262,'#b9a3f2'],lime:['มะนาว',88,'#b5dc7a']};
+ const KEEP=new Set(['239,113,141','229,72,77','239,68,68','217,72,15','181,57,10']); // reds/oranges that mean "delete/over limit"
+ const theme=()=>Object.assign({mode:'light',accent:'pink'},(s.settings&&s.settings.theme)||{});
+ // ---- colour maths ----
+ function parse(str){const m=/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?\s*\)/.exec(str);if(!m)return null;let a=m[4]==null?1:m[4].endsWith('%')?parseFloat(m[4])/100:parseFloat(m[4]);return {r:+m[1],g:+m[2],b:+m[3],a}}
+ function hsl({r,g,b}){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}return {h,s,l}}
+ function rgb(h,s,l){h=((h%360)+360)%360/360;const f=(p,q,t)=>{t=(t+1)%1;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p};if(!s){const v=Math.round(l*255);return [v,v,v]}const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;return [f(p,q,h+1/3),f(p,q,h),f(p,q,h-1/3)].map(x=>Math.round(x*255))}
+ const out=(c,[r,g,b],a)=>a<1?`rgba(${r}, ${g}, ${b}, ${+a.toFixed(3)})`:`rgb(${r}, ${g}, ${b})`;
+ function accentShift(c,H){if(H==null)return c;const k=`${c.r},${c.g},${c.b}`;if(KEEP.has(k))return c;const x=hsl(c);if(x.s<.25||!(x.h>=300||x.h<=8))return c;const [r,g,b]=rgb(H,x.s,x.l);return {r,g,b,a:c.a}}
+ function mapColor(c,role,light){
+  if(!light)return c;const x=hsl(c);
+  if(role==='text'){if(x.l>.55&&x.s<.3)return lit(x.h,x.s,.1+(1-x.l)*.75,c.a);if(x.l>.55)return lit(x.h,Math.min(1,x.s+.1),.42,c.a);return c}
+  // translucent white layers on dark -> translucent black on light
+  if(x.l>.85&&c.a<.2)return {r:20,g:22,b:30,a:+(c.a*.6).toFixed(3)};
+  if(x.l<.38){if(c.a<.5)return c;const base=role==='border'?.86:.935,step=role==='border'?.3:.25;return lit(x.h,x.s*.5,Math.min(.995,base+(x.l-.04)*step),c.a)}
+  return c;
+ }
+ const lit=(h,s,l,a)=>{const [r,g,b]=rgb(h,s,l);return {r,g,b,a}};
+ const hex2rgb=h=>{h=h.slice(1);if(h.length<=4)h=h.split('').map(x=>x+x).join('');const n=i=>parseInt(h.slice(i,i+2),16);return `rgba(${n(0)}, ${n(2)}, ${n(4)}, ${h.length===8?+(n(6)/255).toFixed(3):1})`};
+ function mapValue(v,role,light,H){return v.replace(/#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b/g,hex2rgb).replace(/rgba?\([^)]*\)/g,m=>{const c=parse(m);if(!c)return m;const d=accentShift(mapColor(c,role,light),H);return out(c,[d.r,d.g,d.b],d.a)})}
+ const roleOf=p=>p==='color'||p==='caret-color'||p==='-webkit-text-fill-color'?'text':/border|outline/.test(p)?'border':/^(background|box-shadow)/.test(p)?'bg':p.startsWith('--')?(/(^|-)(text|muted|ink)(-|$)/.test(p)?'text':/line|border/.test(p)?'border':'bg'):p==='fill'||p==='stroke'?'text':null;
+ function declText(style,light,H){let t='';for(let i=0;i<style.length;i++){const p=style[i],role=roleOf(p);if(!role||(p==='box-shadow'&&light===false))continue;const v=style.getPropertyValue(p);if(!/rgb|#[0-9a-fA-F]{3}/.test(v))continue;
+   if(p==='box-shadow'&&light)continue;const nv=mapValue(v,role,light,H);if(nv!==v)t+=`${p}:${nv} !important;`}return t}
+ function rulesText(rules,light,H){let t='';for(const r of rules){
+   if(r.type===1){if(r.selectorText&&r.selectorText.includes('.th-'))continue;const d=declText(r.style,light,H);if(d)t+=`${r.selectorText}{${d}}\n`}
+   else if(r.cssRules&&r.media){const inner=rulesText(r.cssRules,light,H);if(inner)t+=`@media ${r.media.mediaText}{${inner}}\n`}}return t}
+ let sheet=document.getElementById('fwThemeCSS');if(!sheet){sheet=document.createElement('style');sheet.id='fwThemeCSS'}
+ function isLight(t){return t.mode==='light'||(t.mode==='system'&&!matchMedia('(prefers-color-scheme: dark)').matches)}
+ // inline style="" attributes (generated markup) follow the theme too
+ let curLight=false,curH=null,patching=false;
+ function patchInline(root){if(!curLight&&curH==null)return;patching=true;try{(root.querySelectorAll?[root,...root.querySelectorAll('[style]')]:[]).forEach(el=>{if(!el.getAttribute||!el.getAttribute('style'))return;if(el.closest&&el.closest('#fwThemeCard'))return;
+   if(el.dataset.fwStyle==null)el.dataset.fwStyle=el.getAttribute('style');const st=el.style;for(let i=0;i<st.length;i++){const p=st[i],role=roleOf(p);if(!role)continue;const v=st.getPropertyValue(p);if(!/rgb|#[0-9a-fA-F]{3}/.test(v))continue;const nv=mapValue(v,role,curLight,curH);if(nv!==v)st.setProperty(p,nv)}})}finally{patching=false}}
+ function restoreInline(){patching=true;document.querySelectorAll('[data-fw-style]').forEach(el=>{el.setAttribute('style',el.dataset.fwStyle);delete el.dataset.fwStyle});patching=false}
+ new MutationObserver(ms=>{if(patching)return;for(const m of ms){if(m.type==='childList')m.addedNodes.forEach(n=>n.nodeType===1&&patchInline(n));else if(m.type==='attributes'&&m.target.dataset){delete m.target.dataset.fwStyle;patchInline(m.target)}}}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
+ function apply(){
+  const t=theme(),light=isLight(t),H=t.accent!=='pink'&&ACCENTS[t.accent]?ACCENTS[t.accent][1]:null;
+  sheet.remove();restoreInline();curLight=light;curH=H;
+  let css='';if(light||H!=null){for(const sh of document.styleSheets){try{css+=rulesText(sh.cssRules,light,H)}catch(e){}}}
+  if(light)css+=`body{background:#eef0f4 !important}.app{box-shadow:none}input.switch{background:#cfd2da !important}input.switch:checked{background:var(--accent) !important}`;
+  sheet.textContent=css;document.body.appendChild(sheet);
+  document.documentElement.dataset.theme=light?'light':'dark';
+  document.documentElement.style.setProperty('--accent',(ACCENTS[t.accent]||ACCENTS.pink)[2]);
+  patchInline(document.body);
+  if(window.FoodWellTheme)try{FoodWellTheme.setBars(light?'#f6f7fa':'#101116',light)}catch(e){}
+  drawCard();
+ }
+ function setTheme(patch){s.settings=s.settings||{};s.settings.theme=Object.assign(theme(),patch);if(s.settings.softTheme){s.settings.softTheme=false}save();apply()}
+ function drawCard(){
+  const box=document.getElementById('fwThemeCard');if(!box)return;const t=theme();
+  const pv=(a,b)=>`<span class="pv"><span style="background:${a}"></span><span style="background:${b}"></span></span>`;
+  box.innerHTML=`<h2>🎨 ธีมและสี</h2><div class="th-modes">
+   <button type="button" class="th-mode${t.mode==='light'?' sel':''}" data-mode="light">${pv('#ffffff','#eef0f4')}☀️ สว่าง</button>
+   <button type="button" class="th-mode${t.mode==='dark'?' sel':''}" data-mode="dark">${pv('#1a1c22','#101116')}🌙 มืด</button>
+   <button type="button" class="th-mode${t.mode==='system'?' sel':''}" data-mode="system">${pv('#ffffff','#101116')}📱 ตามเครื่อง</button></div>
+   <div class="th-label">สีหลักของแอป</div><div class="th-accents">${Object.entries(ACCENTS).map(([k,[n,,c]])=>`<button type="button" class="th-acc${t.accent===k?' sel':''}" data-acc="${k}" style="background:${c}" aria-label="${n}" title="${n}"></button>`).join('')}</div>`;
+  box.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setTheme({mode:b.dataset.mode}));
+  box.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>setTheme({accent:b.dataset.acc}));
+ }
+ // card at the top of the More page settings; the old "soft colours" switch is replaced by it
+ const settings=[...document.querySelectorAll('#more .card h2')].find(h=>h.textContent.includes('ตั้งค่า'))?.closest('.card');
+ const card=document.createElement('div');card.className='card';card.id='fwThemeCard';
+ if(settings)settings.before(card);else document.getElementById('more')?.appendChild(card);
+ document.getElementById('softTheme')?.closest('.setting-row')?.remove();
+ if(s.settings&&s.settings.softTheme){s.settings.softTheme=false;document.body.classList.remove('theme-soft')}
+ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(theme().mode==='system')apply()});
+ window.fwApplyTheme=apply;
+ apply();
 })();
 </script>
 </body>
