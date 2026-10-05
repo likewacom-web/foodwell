@@ -561,7 +561,7 @@ if($("aiEndpoint"))$("aiEndpoint").value=s.settings.aiEndpoint||"";
 const v40OldPreview=previewPhotoFile;previewPhotoFile=function(file){v40OldPreview(file);showAiCard(!!file)};
 
 let editingId=null, modalId=null;
-function resetFoodForm(){editingId=null;$("foodFormTitle").textContent="เพิ่มอาหาร";$("addFood").textContent="บันทึกอาหาร";$("cancelEdit").style.display="none";["foodName","kcal","protein","carbs","fat","fiber","sodium","sugar","note","foodTime"].forEach(id=>{if($(id))$(id).value=""});$("photo").value=""}
+function resetFoodForm(){editingId=null;$("foodFormTitle").textContent="เพิ่มอาหาร";$("addFood").textContent="บันทึกอาหาร";$("cancelEdit").style.display="none";["foodName","kcal","protein","carbs","fat","fiber","sodium","sugar","note","foodTime"].forEach(id=>{if($(id))$(id).value=""});$("photo").value="";window.fwPendingPhoto=null}
 function startEdit(id){let f=s.foods.find(x=>x.id===id);if(!f)return;go("food");editingId=id;$("foodFormTitle").textContent="แก้ไขอาหาร";$("addFood").textContent="บันทึกการแก้ไข";$("cancelEdit").style.display="block";$("foodName").value=f.name;$("meal").value=f.meal;$("kcal").value=f.kcal||"";$("protein").value=f.protein||"";$("carbs").value=f.carbs||"";$("fat").value=f.fat||"";$("fiber").value=f.fiber||"";$("sodium").value=f.sodium||"";$("sugar").value=f.sugar||"";$("foodTime").value=f.time||"";$("note").value=f.note||"";window.scrollTo({top:0,behavior:"smooth"})}
 $("cancelEdit").onclick=resetFoodForm;
 function isFoodFavorite(id){const f=s.foods.find(x=>x.id===id);return !!f?.favorite}
@@ -576,7 +576,7 @@ $("addFood").onclick=()=>{
    if(editingId)s.foods=s.foods.map(x=>x.id===editingId?f:x);else s.foods.unshift(f);
    addFavorite(f); resetFoodForm(); save(); toast(editingId?"แก้ไขแล้ว":"บันทึกอาหารแล้ว")
  };
- let file=$("photo").files[0];if(file){let r=new FileReader();r.onload=()=>shrinkImage(r.result,640,.75).then(finish);r.readAsDataURL(file)}else finish()
+ let file=$("photo").files[0];if(file){let r=new FileReader();r.onload=()=>shrinkImage(r.result,640,.75).then(finish);r.readAsDataURL(file)}else finish(window.fwPendingPhoto||undefined)
 };
 function openFoodModal(id){let f=s.foods.find(x=>x.id===id);if(!f)return;modalId=id;$("modalName").textContent=f.name;$("modalFav").classList.toggle("active",!!f.favorite);$("modalFav").textContent=f.favorite?"★":"☆";$("modalMeta").textContent=`${f.meal}${f.kcal?" · "+f.kcal+" kcal":""}`;
 $("modalPhoto").innerHTML=f.photo?`<img src="${f.photo}" alt="">`:"🍱";
@@ -1783,12 +1783,20 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  render();
 })();
 </script>
-<!-- v107 Barcode scanning: Open Food Facts lookup + barcodes you've saved yourself -->
+<!-- v107 Barcode scanning: Open Food Facts lookup (with product photo and amount eaten) + barcodes you've saved -->
 <style>
 .bc-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:2px 0 12px;border:1.5px dashed var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:11px;font-weight:800;font-size:14px;font-family:inherit}
 .bc-btn[disabled]{opacity:.6}
-.bc-info{margin:-4px 0 12px;padding:9px 11px;border-radius:12px;background:var(--panel2);font-size:12px;color:var(--muted);line-height:1.5}
+.bc-info{margin:-4px 0 12px;padding:10px 11px;border-radius:14px;background:var(--panel2);font-size:12px;color:var(--muted);line-height:1.5}
 .bc-info b{color:var(--text)}
+.bc-prod{display:flex;gap:10px;align-items:center}.bc-prod img{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#fff;flex:none}
+.bc-amt{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.bc-amt-row{display:flex;align-items:center;gap:8px;color:var(--text);font-weight:700;font-size:13px}
+.bc-amt-row input{width:96px;font-size:18px;font-weight:800;text-align:right;padding:8px 10px;border-radius:12px}
+.bc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bc-chips button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;font-family:inherit}
+.bc-chips button.on{background:#f0a9c0;border-color:#f0a9c0;color:#2b1820}
+.bc-total{margin-top:8px;font-size:13px;color:var(--text)}.bc-total b{font-size:16px}
 </style>
 <script>
 (function(){
@@ -1799,33 +1807,54 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const info=document.createElement('div');info.className='bc-info';info.hidden=true;
  const anchor=document.querySelector('.fw-portion')||wrap;anchor.after(btn);btn.after(info);
  if(!S())btn.hidden=true; // scanner exists only in the Android app
- let pending=null; // barcode waiting to be remembered when the food is saved
+ let pending=null,cur=null,amount=0;
  const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const FIELDS=['kcal','protein','carbs','fat','fiber','sodium','sugar'];
+ const OFFK={protein:'proteins',carbs:'carbohydrates',fat:'fat',sugar:'sugars',fiber:'fiber',sodium:'sodium'};
  function say(html){info.innerHTML=html;info.hidden=!html}
- // a product we can't find starts from an empty form (no numbers left over from the last scan)
- function clearForm(){FIELDS.forEach(k=>{const e=document.getElementById(k);if(e)e.value=''});input.value='';input.dispatchEvent(new Event('input'))}
  function busy(on){btn.disabled=on;btn.innerHTML=on?'⏳ กำลังค้นหาสินค้า…':'📷 สแกนบาร์โค้ดสินค้า'}
- function pick(item){if(window.FWPickFood)FWPickFood(item);else{input.value=item.name;FIELDS.forEach(k=>{const e=document.getElementById(k);if(e)e.value=item[k]??''})}}
- // Open Food Facts product -> one serving (or 100 g/ml when no serving size is given)
- function fromOFF(p){
-  const n=p.nutriments||{},q=Number(p.serving_quantity);
-  const per100=k=>{const v=n[k+'_100g'];return v==null||v===''?null:Number(v)};
-  let kcal=per100('energy-kcal');if(kcal==null&&per100('energy')!=null)kcal=per100('energy')/4.184;
-  if(kcal==null&&n['energy-kcal_serving']==null)return null;
-  const unit=q>0?q/100:1,val=(k,mul=1)=>{const sv=n[k+'_serving'];if(q>0&&sv!=null&&sv!=='')return Math.round(Number(sv)*mul*10)/10;const v=per100(k);return v==null?'':Math.round(v*unit*mul*10)/10};
+ function clearForm(){FIELDS.forEach(k=>{const e=document.getElementById(k);if(e)e.value=''});input.value='';input.dispatchEvent(new Event('input'));setPhoto(null)}
+ // product photo: kept small and attached to the food when it is saved
+ function setPhoto(src){window.fwPendingPhoto=src||null;const box=document.getElementById('photoPreview'),img=document.getElementById('photoPreviewImg');if(box&&img){if(src){img.src=src;box.style.display='block'}else if(!document.getElementById('photo')?.files?.[0]){box.style.display='none'}}}
+ async function loadPhoto(url){if(!url)return;try{const r=await fetch(url);if(!r.ok)throw 0;const blob=await r.blob();const data=await new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(f.result);f.onerror=rej;f.readAsDataURL(blob)});setPhoto(typeof shrinkImage==='function'?await shrinkImage(data,640,.75):data)}catch(e){setPhoto(url)}}
+ // Open Food Facts product -> values per 100 g/ml, sizes and photo
+ function model(p,code){
+  const n=p.nutriments||{},per={};let kcal=n['energy-kcal_100g'];if((kcal==null||kcal==='')&&n['energy_100g']!=null)kcal=Number(n['energy_100g'])/4.184;
+  if(kcal==null||kcal==='')return null;per.kcal=Number(kcal);
+  for(const k in OFFK){const v=n[OFFK[k]+'_100g'];per[k]=v==null||v===''?null:Number(v)*(k==='sodium'?1000:1)}
+  const qs=String(p.quantity||'')+' '+String(p.serving_size||''),unit=/(\d\s*(ml|cl|l)\b|ลิตร|มล)/i.test(qs)?'ml':'g';
+  const pack=Number(p.product_quantity)||null,serving=Number(p.serving_quantity)||null;
   const name=(p.product_name_th||p.product_name||p.product_name_en||'').trim()+(p.brands?` (${p.brands.split(',')[0].trim()})`:'');
-  return {name:name||'สินค้าบาร์โค้ด',kcal:Math.round(n['energy-kcal_serving']!=null&&q>0?Number(n['energy-kcal_serving']):kcal*unit),protein:val('proteins'),carbs:val('carbohydrates'),fat:val('fat'),sugar:val('sugars'),fiber:val('fiber'),sodium:val('sodium',1000),
-   serving:q>0?`1 หน่วยบริโภค (${p.serving_size||q+' g'})`:'100 g/ml',mine:false};
+  return {code,name:name||'สินค้าบาร์โค้ด',unit,per,pack,packLabel:p.quantity||'',serving,servingLabel:p.serving_size||'',image:p.image_front_small_url||p.image_front_url||p.image_url||''};
+ }
+ function itemAt(m,amt){const f=amt/100,it={name:m.name,serving:`${amt} ${m.unit}`,mine:false};for(const k in m.per){const v=m.per[k];it[k]=v==null?'':Math.round(v*f*(k==='kcal'||k==='sodium'?1:10))/(k==='kcal'||k==='sodium'?1:10)}return it}
+ function defaultAmount(m){if(m.serving)return m.serving;if(m.pack&&m.pack<=600)return m.pack;return m.unit==='ml'?250:100}
+ function apply(){if(!cur)return;const it=itemAt(cur,amount);if(window.FWPickFood)FWPickFood(it);else{input.value=it.name;FIELDS.forEach(k=>{const e=document.getElementById(k);if(e)e.value=it[k]})}
+  document.querySelector('.fw-portion')?.classList.remove('show'); // the amount box below replaces ½/1/2
+  const t=info.querySelector('.bc-total');if(t)t.innerHTML=`= <b>${it.kcal} kcal</b> · โปรตีน ${it.protein||0} g · น้ำตาล ${it.sugar||0} g`;
+  info.querySelectorAll('[data-amt]').forEach(b=>b.classList.toggle('on',Number(b.dataset.amt)===amount))}
+ function showProduct(m,src){
+  cur=m;amount=Math.round(m.lastAmount||defaultAmount(m));const u=m.unit;
+  const chips=[];if(m.serving)chips.push([m.serving,`1 หน่วยบริโภค (${m.serving} ${u})`]);
+  (u==='ml'?[100,200,250,330,500]:[30,50,100,150,200]).forEach(v=>{if(!chips.some(c=>c[0]===v))chips.push([v,`${v} ${u}`])});
+  if(m.pack&&!chips.some(c=>c[0]===m.pack))chips.push([m.pack,`ทั้ง${u==='ml'?'ขวด':'ห่อ'} (${m.packLabel||m.pack+' '+u})`]);
+  say(`<div class="bc-prod">${m.image?`<img src="${esc(m.image)}" alt="">`:''}<div><b>${esc(m.name)}</b><br>${m.packLabel?esc(m.packLabel)+' · ':''}${Math.round(m.per.kcal)} kcal ต่อ 100 ${u}<br><small>${esc(src)}</small></div></div>
+   <div class="bc-amt"><div class="bc-amt-row">ปริมาณที่กิน <input id="bcAmount" type="number" inputmode="decimal" min="1" max="5000" value="${amount}"> ${u}</div>
+   <div class="bc-chips">${chips.map(([v,l])=>`<button type="button" data-amt="${v}">${esc(l)}</button>`).join('')}</div><div class="bc-total"></div></div>`);
+  info.querySelector('#bcAmount').oninput=e=>{const v=Number(e.target.value);if(v>0){amount=v;apply()}};
+  info.querySelectorAll('[data-amt]').forEach(b=>b.onclick=()=>{amount=Number(b.dataset.amt);info.querySelector('#bcAmount').value=amount;apply()});
+  apply();
  }
  async function lookup(code){
+  cur=null;setPhoto(null);
   const mine=(s.barcodes||{})[code];
-  if(mine){pick({...mine,mine:true,serving:'ที่คุณบันทึกไว้'});say(`✅ <b>${esc(mine.name)}</b> · จากบาร์โค้ดที่คุณเคยบันทึก`);pending=code;return}
+  if(mine&&mine.off){showProduct({...mine.off,lastAmount:mine.amount},'จากบาร์โค้ดที่คุณเคยบันทึก');loadPhoto(mine.off.image);pending=code;return}
+  if(mine){FWPickFood?FWPickFood({...mine,mine:true,serving:'ที่คุณบันทึกไว้'}):0;say(`✅ <b>${esc(mine.name)}</b> · จากบาร์โค้ดที่คุณเคยบันทึก`);pending=code;return}
   busy(true);
   try{
-   const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,product_name_th,product_name_en,brands,serving_size,serving_quantity,nutriments`);
-   const j=r.ok?await r.json():null,item=j&&j.status===1&&j.product?fromOFF(j.product):null;
-   if(item){pick(item);say(`✅ <b>${esc(item.name)}</b> · ${esc(item.serving)}<br>ข้อมูลจาก Open Food Facts (ผู้ใช้ทั่วโลกช่วยกันเพิ่ม) · ตรวจกับฉลากก่อนบันทึก`)}
+   const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,product_name_th,product_name_en,brands,quantity,product_quantity,serving_size,serving_quantity,nutriments,image_front_small_url,image_front_url,image_url`);
+   const j=r.ok?await r.json():null,m=j&&j.status===1&&j.product?model(j.product,code):null;
+   if(m){showProduct(m,'ข้อมูลจาก Open Food Facts · ตรวจกับฉลากก่อนบันทึก');loadPhoto(m.image)}
    else{clearForm();say(`🔎 ไม่พบบาร์โค้ด <b>${esc(code)}</b> ในฐานข้อมูล · กรอกชื่อและค่าจากฉลากแล้วบันทึก ครั้งหน้าสแกนแล้วจะเติมให้อัตโนมัติ`);input.focus()}
    pending=code;
   }catch(e){say('⚠️ ค้นหาไม่ได้ (ไม่มีอินเทอร์เน็ต?) · กรอกเองได้ แล้วระบบจะจำบาร์โค้ดนี้ไว้');pending=code}
@@ -1836,10 +1865,12 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  window.onBarcodeCancel=()=>{};
  window.onBarcodeError=m=>say('⚠️ เปิดตัวสแกนไม่ได้'+(/download|module/i.test(m||'')?' · กำลังดาวน์โหลดตัวสแกนจาก Google Play ลองใหม่อีกครั้งในอีกสักครู่':''));
  // remember the barcode with what was actually saved (runs before the form is cleared)
- document.addEventListener('click',e=>{if(!pending||!e.target.closest('#addFood'))return;const name=input.value.trim();if(!name)return;
-  const rec={name};FIELDS.forEach(k=>{const v=document.getElementById(k)?.value;if(v!==''&&v!=null)rec[k]=Number(v)});
-  s.barcodes=s.barcodes||{};s.barcodes[pending]=rec;pending=null;setTimeout(()=>say(''),50)},true);
- window.FWBarcode={lookup,fromOFF};
+ document.addEventListener('click',e=>{if(!e.target.closest('#addFood'))return;
+  if(pending){const name=input.value.trim();if(name){const rec={name};FIELDS.forEach(k=>{const v=document.getElementById(k)?.value;if(v!==''&&v!=null)rec[k]=Number(v)});
+   if(cur){const {lastAmount,...off}=cur;rec.off=off;rec.amount=amount}
+   s.barcodes=s.barcodes||{};s.barcodes[pending]=rec}}
+  pending=null;cur=null;setTimeout(()=>say(''),50)},true);
+ window.FWBarcode={lookup,model,itemAt};
 })();
 </script>
 <!-- v108 Home-screen widget bridge (window.FoodWellWidget) -->
