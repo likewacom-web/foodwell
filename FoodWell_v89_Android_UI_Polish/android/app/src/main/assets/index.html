@@ -1578,10 +1578,78 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  let device=localStorage.getItem(DEV);if(!device){device='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);origSet.call(localStorage,DEV,device)}
  let configured=false,notReady='',user=null,applying=false,firstSnapshot=true,state='idle',lastSync=null,lastError='',timer=null;
  const dirty=new Set();
+ // ---- Item-level merge for the main data key (v101) ----------------------------------------
+ // Lists merge item by item (union by id, newer side wins on the same item); deletions travel as
+ // tombstones in d._deleted. Food photos are replaced by "fwimg:<hash>" refs when uploaded and
+ // stored once each in the cloud's img collection.
+ const MAIN='foodwell_mimo_style',SEEN='fwsync_seen';
+ const LISTS={foods:'id',moves:'id',waterLog:'id',weightLog:'date'};
+ const keyOf=(x,k)=>x&&x[k]!=null?String(x[k]):null;
+ const isData=p=>typeof p==='string'&&p.startsWith('data:');
+ const isRef=p=>typeof p==='string'&&p.startsWith('fwimg:');
+ function hashStr(str){let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (h2>>>0).toString(16).padStart(8,'0')+(h1>>>0).toString(16).padStart(8,'0')}
+ const unionDel=(...ds)=>{const o={};ds.forEach(d=>{for(const k in (d||{}))o[k]=[...new Set([...(o[k]||[]),...d[k].map(String)])].slice(-3000)});return o};
+ function withTombstones(oldRaw,newRaw){
+  let o,n;try{o=JSON.parse(oldRaw||'null');n=JSON.parse(newRaw)}catch(e){return newRaw}
+  if(!n||typeof n!=='object')return newRaw;
+  const del=unionDel(o&&o._deleted,n._deleted);
+  if(o)for(const L in LISTS){const k=LISTS[L],before=(o[L]||[]).map(x=>keyOf(x,k)).filter(Boolean);if(!before.length)continue;
+   const now=new Set((n[L]||[]).map(x=>keyOf(x,k)));const gone=before.filter(id=>!now.has(id));
+   if(!gone.length||(!now.size&&before.length>3))continue; // a whole list wiped at once = local reset, not synced deletions
+   del[L]=[...new Set([...(del[L]||[]),...gone])].slice(-3000)}
+  for(const L in del){const k=LISTS[L];if(!k)continue;const now=new Set((n[L]||[]).map(x=>keyOf(x,k)));del[L]=del[L].filter(id=>!now.has(id));if(!del[L].length)delete del[L]}
+  if(JSON.stringify(del)===JSON.stringify(n._deleted||{}))return newRaw;
+  n._deleted=del;return JSON.stringify(n);
+ }
+ function mergeMain(localRaw,remoteRaw,remoteNewer,firstMerge){
+  let L,R;try{L=JSON.parse(localRaw||'null');R=JSON.parse(remoteRaw||'null')}catch(e){return remoteNewer?remoteRaw:localRaw}
+  if(!L||typeof L!=='object')return remoteRaw;if(!R||typeof R!=='object')return localRaw;
+  const newer=remoteNewer||firstMerge?R:L,older=newer===R?L:R,out={...older,...newer};
+  if(firstMerge&&L.profile&&R.profile)out.profile={...L.profile,...R.profile};
+  const del=unionDel(L._deleted,R._deleted);if(Object.keys(del).length)out._deleted=del;else delete out._deleted;
+  for(const list in LISTS){const k=LISTS[list],dead=new Set(del[list]||[]),map=new Map();
+   for(const x of (older[list]||[])){const id=keyOf(x,k);if(id&&!dead.has(id))map.set(id,x)}
+   for(const x of (newer[list]||[])){const id=keyOf(x,k);if(!id||dead.has(id))continue;const prev=map.get(id),item={...x};
+    if(prev&&!item.photo&&!item.photoRef&&(prev.photo||prev.photoRef)){item.photo=prev.photo;if(prev.photoRef)item.photoRef=prev.photoRef}
+    map.set(id,item)}
+   if(!map.size&&!(newer[list]||older[list]))continue;
+   const arr=[...map.values()];
+   if(list==='weightLog')arr.sort((a,b)=>String(a.date).localeCompare(String(b.date)));else arr.sort((a,b)=>(Number(b.id)||0)-(Number(a.id)||0));
+   out[list]=arr}
+  const sum=d=>(d.waterLog||[]).reduce((a,x)=>a+Number(x.ml||0),0);
+  if(sum(L)===Number(L.water||0)&&sum(R)===Number(R.water||0))out.water=sum(out);
+  return JSON.stringify(out);
+ }
+ // Photos: local data URLs <-> cloud refs
+ function toCloud(raw,upload){let d;try{d=JSON.parse(raw)}catch(e){return raw}if(!d||typeof d!=='object')return raw;
+  (d.foods||[]).forEach(f=>{if(isData(f.photo)){const h=hashStr(f.photo);if(upload)upload(h,f.photo);f.photo='fwimg:'+h}else if(!f.photo&&f.photoRef)f.photo='fwimg:'+f.photoRef;delete f.photoRef});
+  (d.foodLibrary||[]).forEach(f=>{if(isData(f.photo)||isRef(f.photo))f.photo=''});
+  return JSON.stringify(d)}
+ function fromCloud(d,localD,cache){const mine=new Map();(localD&&localD.foods||[]).forEach(f=>{if(isData(f.photo))mine.set(hashStr(f.photo),f.photo)});
+  (d.foods||[]).forEach(f=>{if(isRef(f.photo)){const h=f.photo.slice(6),p=mine.get(h)||cache[h];if(p){f.photo=p;delete f.photoRef}else{f.photo='';f.photoRef=h}}});return d}
+ window.FWMerge={withTombstones,mergeMain,toCloud,fromCloud,hashStr};
+ let seen={};try{seen=JSON.parse(localStorage.getItem(SEEN)||'{}')||{}}catch(e){}
+ const saveSeen=()=>origSet.call(localStorage,SEEN,JSON.stringify(seen));
+ const imgKey=()=>'fwsync_imgs_'+(user&&user.uid||'');
+ let pushedImgs=new Set();const loadImgs=()=>{try{pushedImgs=new Set(JSON.parse(localStorage.getItem(imgKey())||'[]'))}catch(e){pushedImgs=new Set()}};
+ const upInflight=new Set(),fetchInflight=new Set(),imgCache={};
+ function upload(h,data){if(pushedImgs.has(h)||upInflight.has(h)||!C()||!C().pushImage)return;upInflight.add(h);C().pushImage(h,data)}
+ window.onCloudImagePushed=h=>{upInflight.delete(h);pushedImgs.add(h);try{origSet.call(localStorage,imgKey(),JSON.stringify([...pushedImgs]))}catch(e){}};
+ function requestPhotos(){if(!user||!C()||!C().fetchImage)return;let d;try{d=JSON.parse(localStorage.getItem(MAIN)||'null')}catch(e){return}
+  (d&&d.foods||[]).forEach(f=>{if(f.photoRef&&!fetchInflight.has(f.photoRef)){fetchInflight.add(f.photoRef);C().fetchImage(f.photoRef)}})}
+ window.onCloudImage=(h,data)=>{fetchInflight.delete(h);if(!data)return;imgCache[h]=data;pushedImgs.add(h);
+  let d;try{d=JSON.parse(localStorage.getItem(MAIN)||'null')}catch(e){return}if(!d)return;let hit=false;
+  (d.foods||[]).forEach(f=>{if(f.photoRef===h){f.photo=data;delete f.photoRef;hit=true}});if(!hit)return;
+  applying=true;try{origSet.call(localStorage,MAIN,JSON.stringify(d))}catch(e){}finally{applying=false}
+  // patch the running app too, so the photo shows without a reload
+  try{if(typeof s!=='undefined'&&s&&Array.isArray(s.foods)){s.foods.forEach(f=>{if(f.photoRef===h){f.photo=data;delete f.photoRef}});if(typeof window.render==='function')window.render()}}catch(e){}
+ };
 
  Storage.prototype.setItem=function(k,v){
   if(this===localStorage&&tracked(k)&&!applying){
-   const old=localStorage.getItem(k);origSet.call(this,k,v);
+   const old=localStorage.getItem(k);if(k===MAIN)v=withTombstones(old,String(v));origSet.call(this,k,v);
    if(old!==String(v)){meta[k]=Date.now();saveMeta();dirty.add(k);schedule()}
    return;
   }
@@ -1589,7 +1657,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  };
  function schedule(){if(!user||!C())return;clearTimeout(timer);timer=setTimeout(flush,2000)}
  function flush(){if(!user||!C()||!dirty.size)return;state='busy';render();
-  dirty.forEach(k=>C().push(k,localStorage.getItem(k)??'',meta[k]||Date.now(),device));dirty.clear()}
+  dirty.forEach(k=>{let v=localStorage.getItem(k)??'';if(k===MAIN)v=toCloud(v,upload);C().push(k,v,meta[k]||Date.now(),device)});dirty.clear()}
  function reloadWhenIdle(){const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){setTimeout(reloadWhenIdle,2000);return}
   try{sessionStorage.setItem('fwsync_reloaded','1')}catch(e){}location.reload()}
 
@@ -1597,6 +1665,17 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const items=JSON.parse(raw),remoteTs={};let changed=false;
   items.forEach(it=>{remoteTs[it.key]=it.updatedAt;
    if(it.device===device)return;
+   if(it.key===MAIN){
+    if(it.updatedAt<=(seen[MAIN]||0))return;
+    const first=!seen[MAIN],local=localStorage.getItem(MAIN);seen[MAIN]=it.updatedAt;saveSeen();
+    let d;try{d=JSON.parse(mergeMain(local,it.value,it.updatedAt>(meta[MAIN]||0),first))}catch(e){return}
+    fromCloud(d,(()=>{try{return JSON.parse(local||'null')}catch(e){return null}})(),imgCache);
+    const merged=JSON.stringify(d);
+    if(merged!==local){applying=true;try{origSet.call(localStorage,MAIN,merged)}catch(e){}finally{applying=false}changed=true}
+    // the cloud copy is missing something this phone has: send the merged copy back up
+    if(toCloud(merged)!==it.value){meta[MAIN]=Date.now();dirty.add(MAIN)}
+    return;
+   }
    if(it.updatedAt>(meta[it.key]||0)){applying=true;try{origSet.call(localStorage,it.key,it.value)}finally{applying=false}meta[it.key]=it.updatedAt;changed=true}});
   if(firstSnapshot){firstSnapshot=false;
    // Push local keys the cloud doesn't have yet, or has an older copy of.
@@ -1605,11 +1684,12 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    flush();
   }
   saveMeta();lastSync=Date.now();if(state!=='busy'||!dirty.size)state='ok';render();
+  if(dirty.size)schedule();requestPhotos();
   if(changed)reloadWhenIdle();
  };
  window.onCloudPushed=()=>{lastSync=Date.now();state='ok';lastError='';render()};
  window.onCloudError=msg=>{state='err';lastError=msg;render();say(msg)};
- window.onCloudUser=raw=>{const was=user;user=raw?JSON.parse(raw):null;setBusy(false);
+ window.onCloudUser=raw=>{const was=user;user=raw?JSON.parse(raw):null;setBusy(false);loadImgs();
   if(user){firstSnapshot=true;C().start();if(!was)say('เข้าสู่ระบบแล้ว: '+user.email)}else{state='idle';if(was)say('ออกจากระบบแล้ว · ข้อมูลในเครื่องยังอยู่')}
   render()};
 
@@ -1626,7 +1706,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const txt=state==='busy'?'กำลังซิงก์…':state==='err'?esc(lastError):lastSync?'ซิงก์แล้ว · '+new Date(lastSync).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'กำลังเชื่อมต่อ…';
   box.innerHTML=head+`<div class="fw96-user">${pic}<div style="min-width:0"><b>${esc(user.name||'บัญชี Google')}</b><small>${esc(user.email)}</small></div></div>
    <div class="fw96-status"><span class="fw96-dot ${state==='busy'?'busy':state==='err'?'err':''}"></span><span>${txt}</span></div>
-   <div class="fw96-small">แก้ข้อมูลในเครื่องไหน เครื่องอื่นจะอัปเดตตามเอง · ออฟไลน์ได้ จะซิงก์เมื่อมีเน็ต</div>
+   <div class="fw96-small">ซิงก์ทุกอย่าง: อาหาร (รวมรูป) น้ำ กิจกรรม น้ำหนัก แผน และการตั้งค่า · บันทึกพร้อมกันหลายเครื่องได้ ไม่ทับกัน · ออฟไลน์ได้ จะซิงก์เมื่อมีเน็ต</div>
    <div class="fw96-row"><button class="fw96-btn" id="fw96-now">↻ ซิงก์ตอนนี้</button><button class="fw96-btn" id="fw96-out" style="background:transparent;color:#e88ea9">ออกจากระบบ</button></div>`;
   box.querySelector('#fw96-now').onclick=()=>{firstSnapshot=true;state='busy';render();C().start()};
   box.querySelector('#fw96-out').onclick=()=>{if(confirm('ออกจากระบบ? ข้อมูลในเครื่องนี้ยังอยู่ แต่จะหยุดซิงก์')){setBusy(true);C().signOut()}};
@@ -1636,6 +1716,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const card=document.createElement('section');card.id='fw96';card.className='fw96-card';
   const anchor=document.getElementById('fw70Backup');if(anchor)anchor.before(card);else (document.getElementById('more')||document.body).appendChild(card);
   if(C()){try{const s=JSON.parse(C().status());configured=!!s.configured;notReady=s.reason||'';user=s.user||null}catch(e){}}
+  loadImgs();
   render();
   if(user){C().start()}
   try{if(sessionStorage.getItem('fwsync_reloaded')){sessionStorage.removeItem('fwsync_reloaded');setTimeout(()=>say('อัปเดตข้อมูลจากอีกเครื่องแล้ว ☁️'),600)}}catch(e){}

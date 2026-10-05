@@ -182,6 +182,25 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface fun start() = runOnUiThread { cloud.start() }
 
+        @JavascriptInterface fun pushImage(hash: String, data: String) = runOnUiThread {
+            lifecycleScope.launch {
+                try {
+                    cloud.pushImage(hash, data)
+                    callJs("onCloudImagePushed", JSONObject.quote(hash))
+                } catch (e: Exception) {
+                    Log.w(TAG, "image push failed", e)
+                }
+            }
+        }
+
+        /** Answers with onCloudImage(hash, dataUrl), or an empty string when it isn't uploaded yet. */
+        @JavascriptInterface fun fetchImage(hash: String) = runOnUiThread {
+            lifecycleScope.launch {
+                val data = try { cloud.fetchImage(hash) } catch (e: Exception) { Log.w(TAG, "image fetch failed", e); null }
+                callJs("onCloudImage", JSONObject.quote(hash) + "," + JSONObject.quote(data ?: ""))
+            }
+        }
+
         @JavascriptInterface fun push(key: String, value: String, updatedAt: Double, device: String) = runOnUiThread {
             lifecycleScope.launch {
                 try {

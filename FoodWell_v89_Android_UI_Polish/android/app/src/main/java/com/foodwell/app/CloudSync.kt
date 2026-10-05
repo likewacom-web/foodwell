@@ -103,6 +103,23 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
 
     private fun kv(uid: String) = db.collection("users").document(uid).collection("kv")
 
+    /** Food photos live in their own collection, one document per image (keyed by content hash),
+     *  so they are uploaded once instead of with every change to the food log. */
+    private fun img(uid: String) = db.collection("users").document(uid).collection("img")
+
+    suspend fun pushImage(hash: String, data: String) {
+        if (!configured) return
+        val uid = auth.currentUser?.uid ?: return
+        img(uid).document(hash).set(mapOf("data" to data, "updatedAt" to System.currentTimeMillis())).await()
+    }
+
+    /** null when the image isn't in the cloud (yet). */
+    suspend fun fetchImage(hash: String): String? {
+        if (!configured) return null
+        val uid = auth.currentUser?.uid ?: return null
+        return img(uid).document(hash).get().await().getString("data")
+    }
+
     /** Streams remote values to the page as onCloudSnapshot([{key,value,updatedAt,device}]). */
     fun start() {
         if (!configured) return
