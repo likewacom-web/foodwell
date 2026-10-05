@@ -431,6 +431,10 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="page-title"><div><p>WEIGHT PLAN</p><h1>📉 แผนลดน้ำหนัก</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
 <div id="wpView"></div>
 </section>
+<section id="recipes" class="page">
+<div class="page-title"><div><p>MY RECIPES</p><h1>🍳 เมนูทำเอง</h1></div><button class="secondary-btn" type="button" data-go="food">กลับ</button></div>
+<div id="rcBody"></div>
+</section>
 </main>
 
 <div id="foodModal" class="modal">
@@ -1468,7 +1472,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function score(keys,q){let best=0;for(const k of keys){if(k===q)return 100;if(k.startsWith(q))best=Math.max(best,70-Math.min(20,k.length-q.length));else if(k.includes(q))best=Math.max(best,40)}return best}
  function search(q){
   const qn=norm(q);if(!qn)return [];
-  const own=new Map();[...(s.foods||[]).slice().sort((a,b)=>(b.createdAt||b.id||0)-(a.createdAt||a.id||0)),...(s.foodLibrary||[])].forEach(f=>{const k=norm(f.name);if(k&&!own.has(k))own.set(k,f)});
+  const own=new Map();(s.recipes||[]).forEach(rc=>{const k=norm(rc.name);if(k&&window.FWRecipes&&!own.has(k))own.set(k,{name:rc.name,...FWRecipes.perServing(rc),meal:'เมนูทำเอง'})});[...(s.foods||[]).slice().sort((a,b)=>(b.createdAt||b.id||0)-(a.createdAt||a.id||0)),...(s.foodLibrary||[])].forEach(f=>{const k=norm(f.name);if(k&&!own.has(k))own.set(k,f)});
   const mine=[...own.values()].map(f=>({name:f.name,kcal:Number(f.kcal)||0,protein:f.protein,carbs:f.carbs,fat:f.fat,sugar:f.sugar,fiber:f.fiber,sodium:f.sodium,serving:f.meal||'',mine:true,sc:score([norm(f.name)],qn)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,3);
   const names=new Set(mine.map(x=>norm(x.name)));
   const db=DB.map(x=>({...x,sc:score(x.keys,qn)})).filter(x=>x.sc>0&&!names.has(norm(x.name))).sort((a,b)=>b.sc-a.sc||a.name.length-b.name.length).slice(0,8);
@@ -1939,6 +1943,96 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  if(anchor&&!document.getElementById('rpCard')){const c=document.createElement('div');c.className='rp-card';c.id='rpCard';anchor.after(c)}
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){console.error(e)}return o};
  draw();
+})();
+</script>
+<!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
+<script src="ingredients_th.js"></script>
+<style>
+.rc-entry{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:-4px 0 12px;border:1.5px dashed var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:11px;font-weight:800;font-size:14px;font-family:inherit}
+.rc-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.rc-card h3{margin:0 0 10px;font-size:17px}
+.rc-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}.rc-item:first-of-type{border-top:0}
+.rc-item .tx{flex:1;min-width:0}.rc-item b{display:block;font-size:15px}.rc-item small{display:block;color:var(--muted);font-size:12px}
+.rc-btn{border:0;border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.rc-ghost{border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+.rc-icon{border:0;background:none;font-size:17px;padding:4px 6px;color:var(--muted)}
+.rc-two{display:grid;grid-template-columns:2fr 1fr;gap:10px}.rc-two label{margin:0}
+.rc-search{position:relative;margin-top:12px}
+.rc-drop{position:absolute;left:0;right:0;top:100%;z-index:60;margin-top:4px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px #0004;max-height:300px;overflow-y:auto;display:none}
+.rc-drop.show{display:block}
+.rc-drop button{display:flex;width:100%;gap:8px;align-items:center;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);padding:10px 12px;font-family:inherit}
+.rc-drop button small{margin-left:auto;color:var(--muted);font-size:11px;text-align:right}
+.rc-line{display:grid;grid-template-columns:1fr 84px 30px;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.rc-line b{display:block;font-size:14px}.rc-line small{color:var(--muted);font-size:11px}
+.rc-line input{padding:8px;font-size:15px;font-weight:700;text-align:right;border-radius:10px}
+.rc-total{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.rc-total div{background:var(--panel2);border-radius:12px;padding:8px;text-align:center}.rc-total b{display:block;font-size:16px}.rc-total small{color:var(--muted);font-size:11px}
+.rc-hl{margin-top:12px;padding:12px;border-radius:16px;background:linear-gradient(135deg,#f7bfd033,#e887aa22);text-align:center}.rc-hl b{font-size:26px}
+.rc-empty{color:var(--muted);font-size:13px;padding:8px 0}
+</style>
+<script>
+(function(){
+ if(!window.FW_INGREDIENTS)return;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const norm=t=>String(t||'').toLowerCase().replace(/[\s\-()·.,/]/g,'');
+ const K=['kcal','protein','carbs','fat','sugar','fiber','sodium'];
+ const ING=FW_INGREDIENTS.map((r,i)=>({id:'i'+i,name:r[0],unit:r[1],v:{kcal:r[2],protein:r[3],carbs:r[4],fat:r[5],sugar:r[6],fiber:r[7],sodium:r[8]},keys:[r[0],...(r[9]?r[9].split(','):[])].map(norm)}));
+ // Thai dishes can be ingredients too (per serving)
+ const DISH=(window.FW_FOODS||[]).map((r,i)=>({id:'d'+i,name:r[0],unit:r[9]||'ที่',v:{kcal:r[2],protein:r[3],carbs:r[4],fat:r[5],sugar:r[6],fiber:r[7],sodium:r[8]},keys:[r[0],...(r[10]?r[10].split(','):[])].map(norm)}));
+ const isG=u=>u==='g';
+ const unitLabel=u=>isG(u)?'กรัม':u;
+ const factor=l=>isG(l.unit)?l.qty/100:l.qty;
+ function totals(lines){const t={};K.forEach(k=>t[k]=0);lines.forEach(l=>K.forEach(k=>t[k]+=Number(l.v[k]||0)*factor(l)));return t}
+ const r1=x=>Math.round(x*10)/10;
+ function perServing(rc){const t=totals(rc.lines),n=Math.max(1,Number(rc.servings)||1),o={};K.forEach(k=>o[k]=k==='kcal'||k==='sodium'?Math.round(t[k]/n):r1(t[k]/n));return o}
+ let editing=null; // recipe being edited
+ const page=document.getElementById('recipes');
+ function list(){
+  const rs=s.recipes||[];
+  page.querySelector('#rcBody').innerHTML=`<div class="rc-card"><h3>📒 เมนูของฉัน</h3>${rs.length?rs.map(rc=>{const p=perServing(rc);return `<div class="rc-item"><div class="tx"><b>${esc(rc.name)}</b><small>${p.kcal.toLocaleString()} kcal ต่อที่ · ทำได้ ${rc.servings} ที่ · ${rc.lines.length} วัตถุดิบ</small></div><button class="rc-icon" data-edit="${rc.id}" aria-label="แก้ไข">✏️</button><button class="rc-btn" data-use="${rc.id}">ใช้</button></div>`}).join(''):'<div class="rc-empty">ยังไม่มีเมนู · สร้างเมนูที่ทำกินเองบ่อย ๆ แล้วบันทึกได้ในแตะเดียว</div>'}
+   <button class="rc-btn" id="rcNew" style="width:100%;margin-top:12px;padding:13px">➕ สร้างเมนูใหม่</button></div>`;
+  page.querySelector('#rcNew').onclick=()=>{editing={id:Date.now(),name:'',servings:1,lines:[]};editor()};
+  page.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{editing=JSON.parse(JSON.stringify(rs.find(x=>String(x.id)===b.dataset.edit)));editor()});
+  page.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>use(rs.find(x=>String(x.id)===b.dataset.use)));
+ }
+ function use(rc){if(!rc)return;const p=perServing(rc);go('food');
+  const item={name:rc.name,...p,serving:`1 ที่ (จาก ${rc.servings} ที่)`,mine:true};
+  if(window.FWPickFood)FWPickFood(item);else{document.getElementById('foodName').value=rc.name;K.forEach(k=>{const e=document.getElementById(k);if(e)e.value=p[k]})}
+  toast('เติมข้อมูลเมนูแล้ว · ตรวจแล้วกดบันทึก');setTimeout(()=>document.getElementById('addFood')?.scrollIntoView({block:'center'}),100)}
+ let redraw=0;const later=()=>{clearTimeout(redraw);redraw=setTimeout(editor,0)};
+ function editor(){
+  if(!editing)return;const rc=editing,t=totals(rc.lines),p=perServing(rc);
+  page.querySelector('#rcBody').innerHTML=`<div class="rc-card"><h3>${(s.recipes||[]).some(x=>x.id===rc.id)?'✏️ แก้ไขเมนู':'🍳 สร้างเมนูใหม่'}</h3>
+   <div class="rc-two"><label>ชื่อเมนู<input id="rcName" value="${esc(rc.name)}" placeholder="เช่น ข้าวผัดไข่ใส่อกไก่"></label><label>ทำได้กี่ที่<input id="rcServ" type="number" inputmode="numeric" min="1" max="50" value="${rc.servings}"></label></div>
+   <div class="rc-search"><input id="rcFind" placeholder="🔎 เพิ่มวัตถุดิบ เช่น ไข่ ข้าว น้ำมัน อกไก่" autocomplete="off"><div class="rc-drop" id="rcDrop"></div></div>
+   ${rc.lines.length?rc.lines.map((l,i)=>`<div class="rc-line"><div><b>${esc(l.name)}</b><small>${Math.round(Number(l.v.kcal||0)*factor(l))} kcal</small></div><div style="display:flex;align-items:center;gap:4px"><input type="number" inputmode="decimal" min="0" step="${isG(l.unit)?10:0.5}" value="${l.qty}" data-q="${i}"><small style="white-space:nowrap">${esc(unitLabel(l.unit)).replace(/ \(.+\)/,'')}</small></div><button class="rc-icon" data-rm="${i}" aria-label="ลบ">✕</button></div>`).join(''):'<div class="rc-empty">ค้นหาแล้วแตะวัตถุดิบเพื่อเพิ่ม</div>'}
+   <div class="rc-hl"><small>ต่อ 1 ที่</small><br><b>${p.kcal.toLocaleString()}</b> kcal</div>
+   <div class="rc-total"><div><b>${p.protein}</b><small>โปรตีน g</small></div><div><b>${p.carbs}</b><small>คาร์บ g</small></div><div><b>${p.fat}</b><small>ไขมัน g</small></div><div><b>${p.sodium}</b><small>โซเดียม mg</small></div></div>
+   <div class="rc-empty" style="text-align:center">ทั้งหม้อ ${Math.round(t.kcal).toLocaleString()} kcal · น้ำตาลต่อที่ ${p.sugar} g</div>
+   <div class="rc-two" style="grid-template-columns:1fr 1fr;margin-top:10px"><button class="rc-btn rc-ghost" id="rcCancel">ยกเลิก</button><button class="rc-btn" id="rcSave">💾 บันทึกเมนู</button></div>
+   ${(s.recipes||[]).some(x=>x.id===rc.id)?'<button class="rc-btn rc-ghost" id="rcDel" style="width:100%;margin-top:8px;color:#d9480f">ลบเมนูนี้</button>':''}</div>`;
+  const q=id=>page.querySelector(id);
+  q('#rcName').oninput=e=>rc.name=e.target.value;
+  q('#rcServ').onchange=e=>{rc.servings=Math.max(1,Number(e.target.value)||1);later()};
+  page.querySelectorAll('[data-q]').forEach(el=>el.onchange=()=>{rc.lines[Number(el.dataset.q)].qty=Math.max(0,Number(el.value)||0);later()});
+  page.querySelectorAll('[data-rm]').forEach(el=>el.onclick=()=>{rc.lines.splice(Number(el.dataset.rm),1);later()});
+  const find=q('#rcFind'),drop=q('#rcDrop');let res=[];
+  find.oninput=()=>{const qn=norm(find.value);if(!qn){drop.classList.remove('show');return}
+   const sc=x=>x.keys.some(k=>k.startsWith(qn))?2:x.keys.some(k=>k.includes(qn))?1:0;
+   res=[...ING.map(x=>({...x,sc:sc(x)+1})),...DISH.map(x=>({...x,sc:sc(x)}))].filter(x=>x.sc>(x.id[0]==='d'?0:1)).sort((a,b)=>b.sc-a.sc).slice(0,10);
+   drop.innerHTML=res.map((x,i)=>`<button type="button" data-i="${i}">${esc(x.name)}<small>${esc(isG(x.unit)?'100 g':x.unit)}<br>${Math.round(x.v.kcal)} kcal</small></button>`).join('')||'<div class="rc-empty" style="padding:10px">ไม่พบ</div>';drop.classList.add('show')};
+  drop.addEventListener('mousedown',e=>e.preventDefault());
+  drop.onclick=e=>{const b=e.target.closest('[data-i]');if(!b)return;const x=res[Number(b.dataset.i)];rc.lines.push({name:x.name,unit:x.unit,qty:isG(x.unit)?100:1,v:x.v});later();setTimeout(()=>page.querySelector('#rcFind')?.focus(),30)};
+  q('#rcCancel').onclick=()=>{editing=null;list()};
+  q('#rcSave').onclick=()=>{rc.name=rc.name.trim();if(!rc.name){toast('ตั้งชื่อเมนูก่อน');return}if(!rc.lines.length){toast('เพิ่มวัตถุดิบอย่างน้อย 1 อย่าง');return}
+   s.recipes=[rc,...(s.recipes||[]).filter(x=>x.id!==rc.id)];save();editing=null;list();toast('บันทึกเมนูแล้ว 🍳')};
+  const del=q('#rcDel');if(del)del.onclick=()=>{if(!confirm(`ลบเมนู "${rc.name}"?`))return;s.recipes=(s.recipes||[]).filter(x=>x.id!==rc.id);save();editing=null;list()};
+ }
+ // entry button on the food page (under the barcode button)
+ const after=document.querySelector('.bc-btn')||document.querySelector('.fw-name-wrap');
+ if(after&&!document.getElementById('rcEntry')){const b=document.createElement('button');b.type='button';b.id='rcEntry';b.className='rc-entry';b.textContent='🍳 เมนูทำเอง (คำนวณจากวัตถุดิบ)';(document.querySelector('.bc-info')||after).after(b);b.onclick=()=>go('recipes')}
+ const og=window.go;if(og)window.go=function(p){og(p);if(p==='recipes'){editing=null;list();window.scrollTo({top:0})}};
+ window.FWRecipes={perServing,totals,use};
 })();
 </script>
 </body>
