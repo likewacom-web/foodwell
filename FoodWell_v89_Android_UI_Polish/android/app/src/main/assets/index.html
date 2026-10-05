@@ -20,7 +20,8 @@ main{padding:0 12px 94px}
 .home-date{text-align:center;padding:14px 0 10px;position:relative}.home-date .moon{position:absolute;left:4px;top:13px;width:48px;height:48px;border-radius:50%;background:#252933;display:grid;place-items:center;font-size:28px}.home-date .gear{position:absolute;right:4px;top:17px;font-size:25px}.home-date h1{font-size:35px;margin:0;line-height:1.1}.home-date p{margin:3px 0 0;color:#9698a0;font-size:16px}
 .welcome{margin:0 0 14px;padding:22px 18px;border-radius:28px;background:linear-gradient(135deg,#242129,#201f25);min-height:145px;display:flex;align-items:center;justify-content:space-between;border:1px solid #2d2c33}.welcome .bubble{background:#f2b4c8;color:#3a2730;border-radius:22px;padding:16px 18px;font-size:18px;font-weight:700;line-height:1.5;max-width:70%}.cat{font-size:58px;filter:saturate(.75)}
 .summary{background:#f1adc3;color:#30232a;border-radius:26px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.summary .label{font-size:18px;font-weight:800}.summary .value{font-size:44px;font-weight:800;line-height:1}.summary .unit{font-size:17px;margin-left:5px}.summary p{margin:6px 0 0;color:#654c56;font-size:13px}.ring{width:108px;height:108px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#17191f 0 230deg,#e58ea9 230deg 360deg);position:relative}.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#f1adc3}.ring span{position:relative;z-index:1;font-size:18px;font-weight:800;text-align:center}
-.twocards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mini{background:#1a1c22;border:1px solid #272a31;border-radius:22px;padding:17px 14px;min-height:145px}.mini .ico{font-size:31px}.mini h3{margin:7px 0 0;font-size:18px}.mini .count{font-size:25px;font-weight:800}.mini small{color:#9698a0}.bar{height:9px;background:#353840;border-radius:99px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px}.blue i{background:var(--blue);width:63%}.green i{background:var(--green);width:67%}
+.twocards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mini{background:#1a1c22;border:1px solid #272a31;border-radius:22px;padding:17px 14px;min-height:145px}.mini .ico{font-size:31px}.mini h3{margin:7px 0 0;font-size:18px}.mini .count{font-size:25px;font-weight:800}.mini small{color:#9698a0}.bar{height:9px;background:#353840;border-radius:99px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px}.blue i{background:var(--blue);width:0;transition:width .4s}.green i{background:var(--green);width:0;transition:width .4s}
+.mini-goal{display:block;margin-top:6px;color:#8f929b;font-size:11px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:4px 3px 10px}.section-head h2{font-size:22px;margin:0}.section-head button{border:0;background:none;color:#ee8eb0;font-weight:800;font-size:15px}
 .food-row{display:flex;gap:12px;overflow-x:auto;padding:2px 0 10px}.food{min-width:92px;height:104px;background:#303139;border-radius:23px;display:grid;place-items:center;font-size:49px;border:1px solid #3a3c45}.food span{font-size:11px;color:#d2d2d6;margin-top:-20px}
 .page{display:none;padding-top:18px}.page.active{display:block}
@@ -258,8 +259,8 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="welcome home-sortable" data-home-key="welcome"><div class="bubble">ดูแลตัวเองทีละวัน<br>เก่งมากแล้วนะ ♡</div><div class="cat">🐈</div></div>
 <div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่ได้รับวันนี้</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p id="kcalSub">ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span id="kcalRing">วันนี้<br>♡</span></div><div class="nutri-grid" id="nutriToday"></div></div>
 <div class="twocards home-sortable" data-home-key="twocards">
-<div class="mini"><div class="ico">💧</div><h3>ดื่มน้ำ</h3><div class="count"><span id="waterCount">0</span> <small>ml</small></div><div class="bar blue"><i></i></div></div>
-<div class="mini"><div class="ico">🏃</div><h3>เคลื่อนไหว</h3><div class="count"><span id="moveCount">0</span> <small>นาที</small></div><div class="bar green"><i></i></div></div>
+<div class="mini"><div class="ico">💧</div><h3>ดื่มน้ำ</h3><div class="count"><span id="waterCount">0</span> <small>ml</small></div><div class="bar blue"><i id="waterBarFill"></i></div><small class="mini-goal" id="waterGoalTxt"></small></div>
+<div class="mini"><div class="ico">🏃</div><h3>เคลื่อนไหว</h3><div class="count"><span id="moveCount">0</span> <small>นาที</small></div><div class="bar green"><i id="moveBarFill"></i></div><small class="mini-goal" id="moveGoalTxt"></small></div>
 </div>
 <div class="dashboard-entry home-sortable" data-home-key="dashboard-entry" style="margin:12px 0"><button class="primary" type="button" data-go="dashboard" style="width:100%">📊 ดู Dashboard ของฉัน</button></div>
 <div class="home-food-section home-sortable" data-home-key="food-section"><div class="section-head"><h2>มื้ออาหารวันนี้</h2><button data-go="food">ดูทั้งหมด</button></div><div id="foodStrip" class="food-row"></div></div>
@@ -502,7 +503,7 @@ s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);
 s.foods=s.foods.map(f=>({...f,favorite:!!f.favorite}));
 function snapshotDay(){
   const today=new Date().toISOString().slice(0,10);
-  const rec={date:today,foods:s.foods.length,water:s.water,moves:s.moves.reduce((a,x)=>a+Number(x.min||0),0)};
+  const rec={date:today,foods:s.foods.filter(f=>foodDay(f)===localDay()).length,water:waterOn(localDay()),moves:todayMoveMin()};
   s.history=[rec,...s.history.filter(x=>x.date!==today)].slice(0,30);
 }
 
@@ -588,7 +589,7 @@ $("modalEdit").onclick=()=>{let id=modalId;closeFoodModal();startEdit(id)};
 $("modalDelete").onclick=()=>{if(modalId!=null){s.foods=s.foods.filter(x=>x.id!==modalId);closeFoodModal();save();toast("ลบรายการแล้ว")}};
 
 document.querySelectorAll("[data-water]").forEach(b=>b.onclick=()=>{let ml=Number(b.dataset.water);const now=new Date();s.water+=ml;s.waterLog.unshift({id:Date.now(),ml,date:now.toISOString().slice(0,10),time:now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});save();toast(`เพิ่มน้ำ ${ml} ml แล้ว`)});
-$("clearWater").onclick=()=>{const mode=$("waterHistoryDay")?.value||"today";if(mode==='all'){s.water=0;s.waterLog=[]}else{const today=new Date().toISOString().slice(0,10);const removed=s.waterLog.filter(x=>String(x.date||'').slice(0,10)===today).reduce((a,x)=>a+Number(x.ml||0),0);s.water=Math.max(0,Number(s.water)-removed);s.waterLog=s.waterLog.filter(x=>String(x.date||'').slice(0,10)!==today)}save();toast(mode==='all'?"ล้างรายการน้ำทั้งหมดแล้ว":"ล้างรายการน้ำวันนี้แล้ว")};
+$("clearWater").onclick=()=>{const mode=$("waterHistoryDay")?.value||"today";if(mode==='all'){s.water=0;s.waterLog=[]}else{const today=localDay();s.waterLog=s.waterLog.filter(x=>entryDay(x)!==today);s.water=0}save();toast(mode==='all'?"ล้างรายการน้ำทั้งหมดแล้ว":"ล้างรายการน้ำวันนี้แล้ว")};
 $("waterHistoryDay")?.addEventListener('change',()=>renderWaterHistoryV54());
 // Calorie burn estimate: kcal = MET × body weight (kg) × hours (Compendium of Physical Activities values).
 const MOVE_METS=[[/วิ่ง|จ็อก|run|jog/i,9.8],[/ปั่น|จักรยาน|bike|cycl/i,7.5],[/ว่าย|swim/i,7],[/กระโดดเชือก|rope/i,11],[/ฟุตบอล|ฟุตซอล|soccer|football/i,7],[/บาส|basket/i,6.5],[/แบด|badminton/i,5.5],[/เทนนิส|tennis/i,7.3],[/วอลเลย์|volley/i,4],[/ปิงปอง|table tennis/i,4],[/มวย|box|ต่อย/i,7.8],[/hiit|เวทเทรน|circuit/i,8],[/เวท|ยกน้ำหนัก|weight|gym|ฟิตเนส/i,5],[/เต้น|แอโรบิก|zumba|dance|aerobic/i,6],[/ขึ้นบันได|stair/i,8],[/ปีนเขา|เดินป่า|hik/i,6],[/เดินเร็ว|brisk/i,4.3],[/เดิน|walk/i,3.5],[/โยคะ|yoga/i,2.5],[/พิลาทิส|pilates/i,3],[/ยืด|stretch/i,2.3],[/ทำสวน|garden/i,3.8],[/ทำความสะอาด|ถูบ้าน|กวาด|clean/i,3.3]];
@@ -639,9 +640,9 @@ function renderFood(){renderCoreFoodLog();let q=$("search").value.toLowerCase();
 
 function dayRecord(date){
  const foods=s.foods.filter(f=>foodDay(f)===date).length;
- if(date===localDay()||date===new Date().toISOString().slice(0,10))return {date,foods,water:s.water,moves:s.moves.reduce((a,x)=>a+Number(x.min||0),0)};
+ if(date===localDay()||date===new Date().toISOString().slice(0,10))return {date,foods,water:waterOn(localDay()),moves:todayMoveMin()};
  const rec=s.history.find(x=>x.date===date)||{date,foods:0,water:0,moves:0};
- return {...rec,foods:Math.max(foods,Number(rec.foods||0))};
+ return {...rec,foods:Math.max(foods,Number(rec.foods||0)),water:Math.max(waterOn(date),Number(rec.water||0)),moves:Math.max(moveMinOn(date),Number(rec.moves||0))};
 }
 function fmtDay(date){return new Date(date+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}
 function renderTrends(){if(!$("foodTrend"))return;
@@ -679,7 +680,7 @@ function renderInsights(){
  const today=new Date().toISOString().slice(0,10);
  const todayFoods=s.foods.filter(f=>foodDay(f)===localDay()).length;
  const todayWater=Number(s.water||0);
- const todayMove=s.moves.reduce((a,x)=>a+Number(x.min||0),0);
+ const todayMove=todayMoveMin();
  const totalLogged=todayFoods+todayWaterLogCount()+s.moves.length;
  const items=[];
  items.push({i:"🍱",t:todayFoods?`วันนี้บันทึกอาหารแล้ว ${todayFoods} รายการ`:"วันนี้ยังไม่มีรายการอาหารที่บันทึก",d:"ใช้หน้านี้เพื่อเก็บข้อมูลตามที่สะดวก"});
@@ -856,12 +857,12 @@ function applyHomePrefs(){const box=document.getElementById('home');if(!box)retu
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
 function setupHomeCustomizer(){applyHomePrefs();const btn=document.getElementById('customizeHome'),menu=document.getElementById('homeWidgetMenu'),home=document.getElementById('home');if(!btn||btn.dataset.ready)return;btn.dataset.ready='1';btn.onclick=()=>{home.classList.toggle('home-editing');menu.classList.toggle('open');if(home.classList.contains('home-editing')){document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=true);toast('โหมดปรับแต่ง Home เปิดแล้ว')}else{saveHomePrefs();document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=false);toast('บันทึกเลย์เอาต์แล้ว')}};document.getElementById('resetHomeLayout').onclick=()=>{localStorage.removeItem('foodwell_home_layout_v36');location.reload()};document.querySelectorAll('[data-widget-toggle]').forEach(b=>b.onclick=()=>{const n=home.querySelector(`[data-home-key="${b.dataset.widgetToggle}"]`);if(n){n.classList.toggle('home-card-hidden');saveHomePrefs();}});let drag=null;home.addEventListener('dragstart',e=>{const n=e.target.closest('[data-home-key]');if(!home.classList.contains('home-editing')||!n)return;drag=n;n.classList.add('dragging')});home.addEventListener('dragend',e=>{if(drag){drag.classList.remove('dragging');saveHomePrefs();drag=null}});home.addEventListener('dragover',e=>{if(!drag||!home.classList.contains('home-editing'))return;e.preventDefault();const target=e.target.closest('[data-home-key]');if(!target||target===drag)return;const r=target.getBoundingClientRect();const before=e.clientY<r.top+r.height/2;if(before)target.before(drag);else target.after(drag)});}
 function renderWaterHistoryV54(){
- const logs=(s.waterLog||[]).slice(); const today=new Date().toISOString().slice(0,10); const mode=$("waterHistoryDay")?.value||"today";
- const shown=mode==='today'?logs.filter(x=>String(x.date||'').slice(0,10)===today):logs;
+ const logs=(s.waterLog||[]).slice(); const today=localDay(); const mode=$("waterHistoryDay")?.value||"today";
+ const shown=mode==='today'?logs.filter(x=>entryDay(x)===today):logs;
  const total=shown.reduce((a,x)=>a+Number(x.ml||0),0);
  $("waterHistoryTitle").textContent=mode==='today'?`รายการที่เพิ่มวันนี้ · ${total.toLocaleString()} ml`:`รายการน้ำทั้งหมด · ${total.toLocaleString()} ml`;
- $("waterHistory").innerHTML=shown.length?shown.slice(0,30).map(x=>`<div class="item"><div class="thumb">💧</div><div class="meta"><b>+${Number(x.ml||0).toLocaleString()} ml</b><small>${x.date?fmtDay(x.date)+' · ':''}${x.time||''}</small></div></div>`).join(''):'<div class="item"><div class="meta"><b>ยังไม่มีรายการ</b><small>เลือกปริมาณด้านบนเพื่อบันทึก</small></div></div>';
- const days=[]; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);const totalDay=logs.filter(x=>String(x.date||'').slice(0,10)===key).reduce((a,x)=>a+Number(x.ml||0),0);days.push({key,total:totalDay,label:d.toLocaleDateString('th-TH',{weekday:'short'}).replace('พ.','พ.'),day:d.getDate()})}
+ $("waterHistory").innerHTML=shown.length?shown.slice(0,30).map(x=>`<div class="item"><div class="thumb">💧</div><div class="meta"><b>+${Number(x.ml||0).toLocaleString()} ml</b><small>${entryDay(x)?fmtDay(entryDay(x))+' · ':''}${x.time||''}</small></div></div>`).join(''):'<div class="item"><div class="meta"><b>ยังไม่มีรายการ</b><small>เลือกปริมาณด้านบนเพื่อบันทึก</small></div></div>';
+ const days=[]; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=localDay(d);const totalDay=logs.filter(x=>entryDay(x)===key).reduce((a,x)=>a+Number(x.ml||0),0);days.push({key,total:totalDay,label:d.toLocaleDateString('th-TH',{weekday:'short'}).replace('พ.','พ.'),day:d.getDate()})}
  $("waterWeek").innerHTML=days.map(x=>`<div class="water-day ${x.key===today?'active':''}"><b>${x.total?x.total.toLocaleString():'0'}</b><small>${x.label} ${x.day}</small></div>`).join('');
  const current=Number(s.water||0); $("waterInsight").textContent=current?`วันนี้คุณบันทึกน้ำ ${current.toLocaleString()} ml จากรายการที่เพิ่มในแอป`:'ยังไม่มีการบันทึกน้ำวันนี้ — เพิ่มเมื่อคุณต้องการเช็กอินได้เลย 💧';
 }
@@ -870,6 +871,14 @@ function renderWaterHistoryV54(){
 // f.date is a UTC date, which puts anything logged before 07:00 in Thailand on the previous day.
 function localDay(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function foodDay(f){return f.createdAt?localDay(new Date(f.createdAt)):String(f.date||"").slice(0,10)}
+// Water and activity per local day, from the log entries (their id is the time they were added).
+function entryDay(x){const t=Number(x&&x.id);return t>1e12?localDay(new Date(t)):String(x&&x.date||"").slice(0,10)}
+function waterOn(day){return (s.waterLog||[]).filter(x=>entryDay(x)===day).reduce((a,x)=>a+Number(x.ml||0),0)}
+function movesOn(day){return (s.moves||[]).filter(x=>entryDay(x)===day)}
+function moveMinOn(day){return movesOn(day).reduce((a,x)=>a+Number(x.min||0),0)}
+function todayMoveMin(){return moveMinOn(localDay())}
+function waterGoal(){const w=Number(s.profile&&s.profile.weight);return w>=20?Math.round(w*33/50)*50:2000}
+const MOVE_GOAL=30;
 function kcalOn(day){return s.foods.filter(f=>foodDay(f)===day).reduce((a,f)=>a+Number(f.kcal||0),0)}
 function lastDays(n){const out=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(localDay(d))}return out}
 // Personal targets from sex, age, height, weight, activity and goal.
@@ -950,14 +959,14 @@ function renderKcal(){
  box.innerHTML=vals.map((v,i)=>`<div class="dash-col"><span class="dash-value">${v.toLocaleString()}</span><div class="dash-bar" style="height:${Math.max(5,(v/max)*108)}px"></div><small>${new Date(days[i]+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short"})}</small></div>`).join("");
  if($("dashKcalNote"))$("dashKcalNote").textContent=avg?`เฉลี่ย ${avg.toLocaleString()} kcal ต่อวัน (เฉพาะวันที่มีบันทึก)`:"kcal จากอาหารที่บันทึกในแต่ละวัน";
 }
-function render(){applySettings();startReminder();renderFoodPhotos();let d=new Date();$("date").textContent=d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});$("waterCount").textContent=s.water.toLocaleString();$("waterBig").textContent=s.water.toLocaleString();renderWaterHistoryV54();$("moveCount").textContent=s.moves.reduce((a,x)=>a+x.min,0);renderKcal();let icons=["🍳","🍜","🍤","🍎","🥗","🍙"];$("foodStrip").innerHTML=s.foods.length?s.foods.slice(0,6).map((f,i)=>`<div class="food">${f.photo?`<img src="${f.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:23px">`:icons[i%icons.length]}<span>${esc(f.name.slice(0,10))}</span></div>`).join(""):'<div class="food">🍱<span>ยังไม่มีอาหาร</span></div>';
+function render(){if(Array.isArray(s.waterLog))s.water=waterOn(localDay());applySettings();startReminder();renderFoodPhotos();let d=new Date();$("date").textContent=d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});$("waterCount").textContent=s.water.toLocaleString();$("waterBig").textContent=s.water.toLocaleString();renderWaterHistoryV54();$("moveCount").textContent=todayMoveMin();{const wg=waterGoal(),wm=todayMoveMin();if($("waterBarFill"))$("waterBarFill").style.width=Math.min(100,s.water/wg*100)+"%";if($("moveBarFill"))$("moveBarFill").style.width=Math.min(100,wm/MOVE_GOAL*100)+"%";if($("waterGoalTxt"))$("waterGoalTxt").textContent=s.water>=wg?"ครบเป้า "+wg.toLocaleString()+" ml 🎉":"เป้า "+wg.toLocaleString()+" ml";if($("moveGoalTxt"))$("moveGoalTxt").textContent=wm>=MOVE_GOAL?"ครบ "+MOVE_GOAL+" นาทีแล้ว 🎉":"เป้า "+MOVE_GOAL+" นาที/วัน"}renderKcal();let icons=["🍳","🍜","🍤","🍎","🥗","🍙"];$("foodStrip").innerHTML=s.foods.length?s.foods.slice(0,6).map((f,i)=>`<div class="food">${f.photo?`<img src="${f.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:23px">`:icons[i%icons.length]}<span>${esc(f.name.slice(0,10))}</span></div>`).join(""):'<div class="food">🍱<span>ยังไม่มีอาหาร</span></div>';
 renderFood();
 renderInsights();
 renderTrophies();
 setTimeout(()=>{getTrophyItems().forEach((x,i)=>{if(x.v>=x.max) celebrateTrophy(i);});},120);
 $("favList")&&($("favList").innerHTML=s.favorites.length?s.favorites.map((f,i)=>`<button class="quick-food" onclick="useFavorite(${i})"><b>↺ ${esc(f.name)}</b><small>${esc(f.meal)}${f.kcal?" · "+f.kcal+" kcal":""}</small></button>`).join(""):'<div class="history-pill">ยังไม่มีอาหารที่บันทึกบ่อย</div>');
 $("waterHistory").innerHTML=s.waterLog.length?s.waterLog.slice(0,10).map(x=>`<div class="item"><div class="thumb">💧</div><div class="meta"><b>+${x.ml} ml</b><small>${x.time}</small></div></div>`).join(""):'<div class="item"><div class="meta"><b>ยังไม่มีรายการน้ำ</b><small>กดปุ่มด้านบนเพื่อบันทึก</small></div></div>';
-$("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">${moveIcon(x)}</div><div class="meta"><b>${esc(x.name)}</b><small>${x.type&&x.type!==x.name&&x.type!==EX_AUTO?esc(x.type)+" · ":""}${x.min} นาที · 🔥 ~${moveKcalOf(x)} kcal · ${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';$("burnToday")&&($("burnToday").textContent=s.moves.reduce((a,x)=>a+moveKcalOf(x),0).toLocaleString());
+$("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">${moveIcon(x)}</div><div class="meta"><b>${esc(x.name)}</b><small>${x.type&&x.type!==x.name&&x.type!==EX_AUTO?esc(x.type)+" · ":""}${x.min} นาที · 🔥 ~${moveKcalOf(x)} kcal · ${entryDay(x)===localDay()?"":esc(fmtDay(entryDay(x)))+" · "}${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';$("burnToday")&&($("burnToday").textContent=movesOn(localDay()).reduce((a,x)=>a+moveKcalOf(x),0).toLocaleString());
 renderHistory();
 renderDashboard();
 
