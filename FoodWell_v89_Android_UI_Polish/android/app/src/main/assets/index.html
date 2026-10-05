@@ -891,7 +891,7 @@ const BMI_LEVELS=[[18.5,"น้ำหนักน้อย / ผอม","#7cc4f5
 function bodyTargets(){
  const p=s.profile||{},w=Number(p.weight),h=Number(p.height),a=Number(p.age);
  if(!(w>=20&&h>=100&&a>=10))return null;
- const bmi=w/((h/100)**2),lvl=BMI_LEVELS.find(x=>bmi<x[0]);
+ const bmi=Math.round(w/((h/100)**2)*10)/10,lvl=BMI_LEVELS.find(x=>bmi<x[0]);
  const out={bmi:Math.round(bmi*10)/10,bmiLabel:lvl[1],bmiColor:lvl[2],healthy:[18.5,22.9].map(b=>Math.round(b*(h/100)**2*10)/10)};
  if(p.sex!=="m"&&p.sex!=="f")return out;
  const bmr=10*w+6.25*h-5*a+(p.sex==="m"?5:-161),tdee=bmr*Number(p.activity||1.2),goal=p.goal||"maintain";
@@ -2099,6 +2099,70 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  setInterval(()=>{if(!document.hidden){homeCard();foodNotice()}},30000);
  window.FWFast={state,kept,conf};
  draw();
+})();
+</script>
+<!-- v112 Health report (7/30/90 days) as a printable A4 document -> PDF via Android's print dialog -->
+<style>
+.rpt-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.rpt-card h3{margin:0 0 4px;font-size:17px}.rpt-sub{color:var(--muted);font-size:13px;line-height:1.5}
+.rpt-periods{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.rpt-periods button{border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 4px;font-weight:800;font-size:14px;font-family:inherit}.rpt-periods button.on{border-color:#e887aa;background:#f0a9c022}
+.rpt-go{width:100%;border:0;border-radius:14px;padding:13px;font-weight:800;font-size:15px;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+</style>
+<script>
+(function(){
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const fmtD=(d,o)=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',o||{day:'numeric',month:'short',year:'2-digit'});
+ const n0=v=>Math.round(v).toLocaleString(),n1=v=>(Math.round(v*10)/10).toLocaleString();
+ function build(days){
+  const list=[...Array(days)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1)+i);return localDay(d)});
+  const rows=list.map(d=>({d,kcal:kcalOn(d),n:nutrientsOn(d),water:waterOn(d),move:moveMinOn(d),foods:s.foods.filter(f=>foodDay(f)===d).length}));
+  const logged=rows.filter(r=>r.foods>0),avg=k=>logged.length?logged.reduce((a,r)=>a+(k==='kcal'?r.kcal:r.n[k]),0)/logged.length:0;
+  const wd=rows.filter(r=>r.water>0),avgWater=wd.length?wd.reduce((a,r)=>a+r.water,0)/wd.length:0,moveTotal=rows.reduce((a,r)=>a+r.move,0);
+  const p=s.profile||{},T=bodyTargets&&bodyTargets(),target=(window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||null;
+  const wl=(s.weightLog||[]).filter(x=>x.date>=list[0]&&x.date<=list[list.length-1]).sort((a,b)=>a.date.localeCompare(b.date));
+  const wChange=wl.length>1?wl[wl.length-1].kg-wl[0].kg:null;
+  // top foods by how often they were logged
+  const freq={};s.foods.filter(f=>list.includes(foodDay(f))).forEach(f=>{const k=f.name;freq[k]=freq[k]||{n:0,k:0};freq[k].n++;freq[k].k+=Number(f.kcal||0)});
+  const top=Object.entries(freq).sort((a,b)=>b[1].n-a[1].n).slice(0,10);
+  // charts (inline SVG)
+  const W=640,H=150,bw=W/list.length,maxK=Math.max(target||0,...rows.map(r=>r.kcal),1);
+  const kcalSvg=`<svg viewBox="0 0 ${W} ${H+18}" width="100%"><g>${rows.map((r,i)=>{const h=r.kcal/maxK*H;return `<rect x="${i*bw+bw*.15}" y="${H-h}" width="${bw*.7}" height="${h}" rx="2" fill="${target&&r.kcal>target*1.1?'#f59f6b':'#e887aa'}"/>`}).join('')}</g>${target?`<line x1="0" x2="${W}" y1="${H-target/maxK*H}" y2="${H-target/maxK*H}" stroke="#2f9e6e" stroke-dasharray="5 4"/><text x="${W-4}" y="${H-target/maxK*H-4}" text-anchor="end" font-size="11" fill="#2f9e6e">เป้า ${n0(target)}</text>`:''}${rows.map((r,i)=>i%Math.ceil(list.length/10)===0?`<text x="${i*bw+bw/2}" y="${H+14}" text-anchor="middle" font-size="10" fill="#888">${fmtD(r.d,{day:'numeric',month:'short'})}</text>`:'').join('')}</svg>`;
+  let wSvg='';if(wl.length>1){const ks=wl.map(x=>x.kg),mx=Math.max(...ks)+.5,mn=Math.min(...ks)-.5,X=d=>(list.indexOf(d)+.5)*bw,Y=k=>10+(mx-k)/(mx-mn)*(H-20);
+   wSvg=`<svg viewBox="0 0 ${W} ${H+18}" width="100%"><polyline points="${wl.map(x=>X(x.date)+','+Y(x.kg)).join(' ')}" fill="none" stroke="#e887aa" stroke-width="3"/>${wl.map(x=>`<circle cx="${X(x.date)}" cy="${Y(x.kg)}" r="4" fill="#e887aa"/><text x="${X(x.date)}" y="${Y(x.kg)-8}" text-anchor="middle" font-size="10" fill="#555">${x.kg}</text>`).join('')}</svg>`}
+  const tile=(l,v,u)=>`<div class="t"><small>${l}</small><b>${v}</b><small>${u||''}</small></div>`;
+  const css=`@page{size:A4;margin:14mm}body{font-family:"Noto Sans Thai",sans-serif;color:#222;font-size:12px;margin:0}h1{font-size:22px;margin:0;color:#c2477a}h2{font-size:15px;margin:18px 0 8px;border-bottom:2px solid #f3c3d3;padding-bottom:4px}
+   .head{display:flex;justify-content:space-between;align-items:flex-end}.muted{color:#777}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.t{background:#fdf1f5;border-radius:10px;padding:8px}.t small{display:block;color:#777;font-size:10px}.t b{font-size:16px}
+   table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{padding:4px 5px;border-bottom:1px solid #eee;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#fdf1f5}tr.empty td{color:#bbb}.over{color:#d9480f;font-weight:700}
+   .note{margin-top:16px;font-size:10px;color:#888}.prof{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px}`;
+  const sexT=p.sex==='m'?'ชาย':p.sex==='f'?'หญิง':'–';
+  return `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>FoodWell report</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet"><style>${css}</style></head><body>
+   <div class="head"><div><h1>🌿 รายงานสุขภาพ FoodWell</h1><div class="muted">${esc(p.name&&p.name!=='FoodWell'?p.name+' · ':'')}${fmtD(list[0])} – ${fmtD(list[list.length-1])} (${days} วัน)</div></div><div class="muted">สร้างเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</div></div>
+   <h2>ข้อมูลร่างกาย</h2><div class="prof"><div>เพศ: <b>${sexT}</b></div><div>อายุ: <b>${p.age||'–'}</b> ปี</div><div>ส่วนสูง: <b>${p.height||'–'}</b> ซม.</div><div>น้ำหนัก: <b>${p.weight||'–'}</b> กก.</div>
+    <div>BMI: <b>${T?T.bmi:'–'}</b> ${T?esc(T.bmiLabel):''}</div><div>เป้าพลังงาน: <b>${target?n0(target):'–'}</b> kcal/วัน</div><div>${s.weightPlan?`แผนลดน้ำหนัก: <b>${s.weightPlan.start}→${s.weightPlan.target}</b> กก.`:''}</div><div>${s.settings&&s.settings.fasting&&s.settings.fasting.on?`IF: <b>${s.settings.fasting.fast}:${24-s.settings.fasting.fast}</b>`:''}</div></div>
+   <h2>สรุปภาพรวม</h2><div class="grid">${tile('วันที่บันทึกอาหาร',`${logged.length}/${days}`,'วัน')}${tile('พลังงานเฉลี่ย',n0(avg('kcal')),'kcal/วัน')}${tile('โปรตีนเฉลี่ย',n1(avg('protein')),'g/วัน')}${tile('น้ำตาลเฉลี่ย',n1(avg('sugar')),'g/วัน')}
+    ${tile('คาร์บเฉลี่ย',n1(avg('carbs')),'g/วัน')}${tile('ไขมันเฉลี่ย',n1(avg('fat')),'g/วัน')}${tile('โซเดียมเฉลี่ย',n0(avg('sodium')),'mg/วัน')}${tile('น้ำเฉลี่ย',n0(avgWater),'ml/วัน')}
+    ${tile('ขยับรวม',n0(moveTotal),'นาที')}${tile('น้ำหนักเปลี่ยน',wChange==null?'–':(wChange>0?'+':'')+n1(wChange),'กก.')}${target?tile('วันที่ใกล้เป้า ±10%',logged.filter(r=>Math.abs(r.kcal-target)<=target*.1).length,'วัน'):''}</div>
+   <h2>พลังงานรายวัน (kcal)</h2>${kcalSvg}
+   ${wSvg?`<h2>น้ำหนัก (กก.)</h2>${wSvg}`:''}
+   <h2>รายละเอียดรายวัน</h2><table><tr><th>วันที่</th><th>kcal</th><th>โปรตีน g</th><th>คาร์บ g</th><th>ไขมัน g</th><th>น้ำตาล g</th><th>โซเดียม mg</th><th>น้ำ ml</th><th>ขยับ นาที</th></tr>
+    ${rows.slice().reverse().map(r=>`<tr class="${r.foods||r.water||r.move?'':'empty'}"><td>${fmtD(r.d,{weekday:'short',day:'numeric',month:'short'})}</td><td class="${target&&r.kcal>target*1.1?'over':''}">${r.kcal?n0(r.kcal):'–'}</td><td>${r.foods?n1(r.n.protein):'–'}</td><td>${r.foods?n1(r.n.carbs):'–'}</td><td>${r.foods?n1(r.n.fat):'–'}</td><td>${r.foods?n1(r.n.sugar):'–'}</td><td>${r.foods?n0(r.n.sodium):'–'}</td><td>${r.water?n0(r.water):'–'}</td><td>${r.move||'–'}</td></tr>`).join('')}</table>
+   ${top.length?`<h2>อาหารที่กินบ่อย</h2><table><tr><th>อาหาร</th><th>ครั้ง</th><th>kcal เฉลี่ย</th></tr>${top.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v.n}</td><td>${n0(v.k/v.n)}</td></tr>`).join('')}</table>`:''}
+   <div class="note">ค่าพลังงานและสารอาหารเป็นค่าประมาณจากรายการที่ผู้ใช้บันทึกเอง · เกณฑ์ BMI สำหรับคนเอเชีย · รายงานนี้ไม่ใช่การวินิจฉัยทางการแพทย์</div></body></html>`;
+ }
+ let period=30;
+ function card(){const box=document.getElementById('rptCard');if(!box)return;
+  box.innerHTML=`<h3>📄 รายงานสุขภาพ (PDF)</h3><div class="rpt-sub">สรุปพลังงาน สารอาหาร น้ำ การเคลื่อนไหว น้ำหนัก และอาหารที่กินบ่อย สำหรับเก็บไว้ดูเองหรือให้แพทย์/นักโภชนาการดู</div>
+   <div class="rpt-periods">${[7,30,90].map(d=>`<button type="button" data-d="${d}" class="${d===period?'on':''}">${d} วัน</button>`).join('')}</div>
+   <button class="rpt-go" id="rptGo" type="button">📄 สร้างรายงาน PDF</button><div class="rpt-sub" style="margin-top:8px">ในหน้าพิมพ์ เลือกเครื่องพิมพ์เป็น “บันทึกเป็น PDF” แล้วกดปุ่มดาวน์โหลด</div>`;
+  box.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{period=Number(b.dataset.d);card()});
+  box.querySelector('#rptGo').onclick=()=>{const html=build(period),title=`FoodWell-report-${localDay()}`;
+   if(window.FoodWellPrint){FoodWellPrint.print(html,title);toast('กำลังเปิดหน้าพิมพ์ / บันทึก PDF…')}
+   else{const w=window.open('','_blank');if(!w){toast('เบราว์เซอร์บล็อกหน้าต่างใหม่');return}w.document.write(html);w.document.close();setTimeout(()=>w.print(),600)}}}
+ const dash=document.querySelector('#dashboard #weekDash')||document.querySelector('#dashboard .dashboard-hero');
+ if(dash&&!document.getElementById('rptCard')){const c=document.createElement('div');c.className='rpt-card';c.id='rptCard';const ins=document.getElementById('dashInsights');(ins||dash).after(c)}
+ window.FWReport={build};
+ card();
 })();
 </script>
 </body>

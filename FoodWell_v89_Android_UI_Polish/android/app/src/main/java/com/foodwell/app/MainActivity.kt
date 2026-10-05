@@ -103,6 +103,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(ThemeApi(), "FoodWellTheme")
             addJavascriptInterface(ScanApi(), "FoodWellScan")
             addJavascriptInterface(WidgetApi(), "FoodWellWidget")
+            addJavascriptInterface(PrintApi(), "FoodWellPrint")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -159,6 +160,30 @@ class MainActivity : ComponentActivity() {
             WindowCompat.getInsetsController(window, window.decorView).run {
                 isAppearanceLightStatusBars = light
                 isAppearanceLightNavigationBars = light
+            }
+        }
+    }
+
+    /** Reports: the page sends a self-contained HTML document; Android's print dialog prints it or saves it as PDF. */
+    private var printWeb: WebView? = null
+
+    inner class PrintApi {
+        @JavascriptInterface fun print(html: String, title: String) = runOnUiThread {
+            val name = title.ifBlank { "FoodWell" }
+            var sent = false
+            printWeb = WebView(this@MainActivity).apply {
+                webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView, url: String?) {
+                        if (sent) return
+                        sent = true
+                        val pm = getSystemService(PRINT_SERVICE) as android.print.PrintManager
+                        pm.print(
+                            name, view.createPrintDocumentAdapter(name),
+                            android.print.PrintAttributes.Builder().setMediaSize(android.print.PrintAttributes.MediaSize.ISO_A4).build()
+                        )
+                    }
+                }
+                loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null)
             }
         }
     }
