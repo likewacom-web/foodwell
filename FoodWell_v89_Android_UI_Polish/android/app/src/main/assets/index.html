@@ -183,9 +183,16 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 .v40-ai-card{margin-top:10px;padding:12px;border-radius:18px;background:linear-gradient(135deg,rgba(239,160,188,.10),rgba(142,112,255,.08));border:1px solid rgba(239,160,188,.20)}.v40-ai-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.v40-ai-head b{font-size:13px}.v40-ai-head span{font-size:10px;color:#aaa}.v40-ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.v40-ai-btn{border:1px solid #454751;background:#252831;color:#fff;border-radius:13px;padding:10px;font-weight:800;cursor:pointer}.v40-ai-btn.primary-ai{background:linear-gradient(135deg,#f2b1c7,#b889e8);color:#2d2430;border:0}.v40-ai-status{font-size:10px;color:#aaa;line-height:1.55;margin-top:8px}.v40-ai-result{margin-top:9px;display:none}.v40-ai-result.show{display:block}.v40-ai-result .ai-result-box{background:#20232a;border:1px solid #393c46;border-radius:15px;padding:11px}.v40-ai-candidates{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.v40-ai-candidates button{border:1px solid #464954;background:#292c34;color:#eee;border-radius:12px;padding:7px 9px;font-size:10px}.v40-ai-settings small{display:block;color:#999;font-size:10px;line-height:1.5;margin-top:5px}.v40-ai-settings input{width:100%;margin-top:8px}
 
 
-<style>
 
 
+.summary{flex-wrap:wrap}.summary>div:first-child{flex:1 1 0;min-width:0}.summary>.ring{flex:none}
+.nutri-grid{flex-basis:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.nutri{background:#ffffff59;border-radius:14px;padding:8px 9px}.nutri b{display:block;font-size:16px;color:#30232a}.nutri b small{font-size:11px;font-weight:600}
+.nutri span{display:block;font-size:11px;color:#654c56}.nutri i{display:block;height:5px;border-radius:9px;background:#30232a1f;margin-top:5px;overflow:hidden}
+.nutri i em{display:block;height:100%;border-radius:9px;background:#30232a}.nutri.over i em{background:#d9480f}.nutri.over b{color:#b5390a}
+.nutri-table-wrap{overflow-x:auto}.nutri-table{width:100%;border-collapse:collapse;font-size:12px;text-align:right}
+.nutri-table th{color:#9ea0aa;font-weight:700;padding:6px 4px;border-bottom:1px solid #30333b}.nutri-table td{padding:7px 4px;border-bottom:1px solid #24262d}
+.nutri-table th:first-child,.nutri-table td:first-child{text-align:left}.nutri-table tr.today td{color:#f3a0bb;font-weight:800}.nutri-table tr.avg td{color:#9ea0aa;border-bottom:0}
 .dash-insights{width:100%;margin:4px 0 12px;padding:14px}
 .burn-total{margin-top:10px;display:inline-block;background:#2a2026;color:#f3a0bb;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700}.burn-total b{font-size:16px}
 .burn-est{margin:10px 0 2px;padding:10px 12px;border-radius:13px;background:#24262d;color:#f3c7d6;font-size:14px}.burn-est small{display:block;color:#8f929b;font-size:11px;margin-top:2px}
@@ -240,7 +247,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="home-date"><div class="moon">🌙</div><h1>วันนี้</h1><p id="date"></p><div class="gear">⚙</div></div>
 <div class="home-custom-tools"><button type="button" id="customizeHome">✦ ปรับหน้า Home</button><button type="button" id="resetHomeLayout">↺ รีเซ็ต</button></div><div id="homeEditHint" class="home-edit-hint">ลากการ์ดเพื่อจัดลำดับได้เลย · แตะ “ปรับหน้า Home” อีกครั้งเพื่อจบ</div><div id="homeWidgetMenu" class="home-widget-menu"><div class="home-widget-row"><span>💗 การ์ดพลังงาน</span><button data-widget-toggle="summary">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>💧 น้ำ + 🏃 เคลื่อนไหว</span><button data-widget-toggle="twocards">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>📊 Dashboard</span><button data-widget-toggle="dashboard-entry">แสดง/ซ่อน</button></div><div class="home-widget-row"><span>🍱 อาหารวันนี้</span><button data-widget-toggle="food-section">แสดง/ซ่อน</button></div></div>
 <div class="welcome home-sortable" data-home-key="welcome"><div class="bubble">ดูแลตัวเองทีละวัน<br>เก่งมากแล้วนะ ♡</div><div class="cat">🐈</div></div>
-<div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่ได้รับวันนี้</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p id="kcalSub">ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span id="kcalRing">วันนี้<br>♡</span></div></div>
+<div class="summary home-sortable" data-home-key="summary"><div><div class="label">✦ พลังงานที่ได้รับวันนี้</div><div><span class="value" id="totalKcal">0</span><span class="unit">kcal</span></div><p id="kcalSub">ค่าประมาณจากรายการอาหารที่บันทึก</p></div><div class="ring"><span id="kcalRing">วันนี้<br>♡</span></div><div class="nutri-grid" id="nutriToday"></div></div>
 <div class="twocards home-sortable" data-home-key="twocards">
 <div class="mini"><div class="ico">💧</div><h3>ดื่มน้ำ</h3><div class="count"><span id="waterCount">0</span> <small>ml</small></div><div class="bar blue"><i></i></div></div>
 <div class="mini"><div class="ico">🏃</div><h3>เคลื่อนไหว</h3><div class="count"><span id="moveCount">0</span> <small>นาที</small></div><div class="bar green"><i></i></div></div>
@@ -305,6 +312,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
   <div id="smartInsights" class="insight-list"></div>
 </div>
 <div class="dashboard-card"><h3>🔥 พลังงานที่ได้รับต่อวัน</h3><p id="dashKcalNote">kcal จากอาหารที่บันทึกในแต่ละวัน</p><div id="dashKcalBars" class="dash-bars"></div></div>
+<div class="dashboard-card"><h3>🥗 สารอาหารที่ได้รับต่อวัน</h3><p>รวมจากอาหารที่บันทึก · กรัม (โซเดียมเป็น mg)</p><div class="nutri-table-wrap"><table class="nutri-table" id="dashNutri"></table></div></div>
 <div class="dashboard-card"><h3>🍱 อาหารที่บันทึก</h3><p>จำนวนรายการในแต่ละวัน</p><div id="dashFoodBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>💧 น้ำ</h3><p>ปริมาณที่บันทึกในแต่ละวัน</p><div id="dashWaterBars" class="dash-bars"></div></div>
 <div class="dashboard-card"><h3>🏃 การเคลื่อนไหว</h3><p>เวลาที่บันทึกในแต่ละวัน</p><div id="dashMoveBars" class="dash-bars"></div></div>
@@ -620,7 +628,7 @@ function renderTrends(){if(!$("foodTrend"))return;
  $("moveTrendMax").textContent=draw("moveTrend","moves","movebar")+" นาที";
 }
 function showHistoryDate(date){
- const r=dayRecord(date);$("selectedHistory").innerHTML=`<b>${fmtDay(date)}</b><p>🔥 ${kcalOn(date).toLocaleString()} kcal · 🍱 ${Math.max(r.foods||0,s.foods.filter(f=>foodDay(f)===date).length)} รายการอาหาร · 💧 ${(r.water||0).toLocaleString()} ml · 🏃 ${r.moves||0} นาที</p>`;
+ const r=dayRecord(date);$("selectedHistory").innerHTML=`<b>${fmtDay(date)}</b><p>🔥 ${kcalOn(date).toLocaleString()} kcal · ${(t=>`โปรตีน ${t.protein} g · คาร์บ ${t.carbs} g · ไขมัน ${t.fat} g · น้ำตาล ${t.sugar} g · โซเดียม ${t.sodium.toLocaleString()} mg`)(nutrientsOn(date))}<br>🍱 ${Math.max(r.foods||0,s.foods.filter(f=>foodDay(f)===date).length)} รายการอาหาร · 💧 ${(r.water||0).toLocaleString()} ml · 🏃 ${r.moves||0} นาที</p>`;
 }
 function renderHistory(){
  const all=[...s.history];const today=new Date().toISOString().slice(0,10);
@@ -838,8 +846,30 @@ function localDay(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMont
 function foodDay(f){return f.createdAt?localDay(new Date(f.createdAt)):String(f.date||"").slice(0,10)}
 function kcalOn(day){return s.foods.filter(f=>foodDay(f)===day).reduce((a,f)=>a+Number(f.kcal||0),0)}
 function lastDays(n){const out=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(localDay(d))}return out}
+// Daily reference values: Thai RDI (protein, carbs, fat, fiber, sodium) and the Department of
+// Health limit of 6 teaspoons (24 g) of sugar. "limit" ones turn orange when exceeded.
+const NUTRIENTS=[
+ {k:"protein",label:"โปรตีน",unit:"g",ref:50},
+ {k:"carbs",label:"คาร์บ",unit:"g",ref:300},
+ {k:"fat",label:"ไขมัน",unit:"g",ref:65,limit:true},
+ {k:"sugar",label:"น้ำตาล",unit:"g",ref:24,limit:true},
+ {k:"fiber",label:"ใยอาหาร",unit:"g",ref:25},
+ {k:"sodium",label:"โซเดียม",unit:"mg",ref:2000,limit:true}];
+function nutrientsOn(day){const t={};NUTRIENTS.forEach(n=>t[n.k]=0);s.foods.filter(f=>foodDay(f)===day).forEach(f=>NUTRIENTS.forEach(n=>t[n.k]+=Number(f[n.k]||0)));NUTRIENTS.forEach(n=>t[n.k]=Math.round(t[n.k]*10)/10);return t}
+function renderNutrients(days){
+ const box=$("nutriToday");
+ if(box){const t=nutrientsOn(days[6]);box.innerHTML=NUTRIENTS.map(n=>{const v=t[n.k],pct=Math.min(100,v/n.ref*100),over=n.limit&&v>n.ref;return `<div class="nutri${over?" over":""}"><span>${n.label}</span><b>${v.toLocaleString()}<small> ${n.unit}</small></b><i><em style="width:${pct}%"></em></i><span>${n.limit?"ไม่เกิน":"แนะนำ"} ${n.ref.toLocaleString()}</span></div>`}).join("")}
+ const tb=$("dashNutri");if(!tb)return;
+ const rows=days.map(d=>({d,t:nutrientsOn(d)})).reverse(),cols=NUTRIENTS.filter(n=>n.k!=="fiber");
+ const logged=rows.filter(r=>kcalOn(r.d)>0||cols.some(n=>r.t[n.k]>0));
+ const avg=k=>logged.length?Math.round(logged.reduce((a,r)=>a+r.t[k],0)/logged.length):0;
+ tb.innerHTML=`<tr><th>วัน</th>${cols.map(n=>`<th>${n.label}</th>`).join("")}</tr>`
+  +rows.map((r,i)=>`<tr class="${i===0?"today":""}"><td>${i===0?"วันนี้":new Date(r.d+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric"})}</td>${cols.map(n=>`<td>${r.t[n.k]?r.t[n.k].toLocaleString():"–"}</td>`).join("")}</tr>`).join("")
+  +(logged.length?`<tr class="avg"><td>เฉลี่ย</td>${cols.map(n=>`<td>${avg(n.k).toLocaleString()}</td>`).join("")}</tr>`:"");
+}
 function renderKcal(){
  const days=lastDays(7),vals=days.map(kcalOn),today=vals[6],yest=vals[5];
+ renderNutrients(days);
  const logged=vals.filter(v=>v>0),avg=logged.length?Math.round(logged.reduce((a,v)=>a+v,0)/logged.length):0;
  $("totalKcal").textContent=today.toLocaleString();
  const meals=new Set(s.foods.filter(f=>foodDay(f)===days[6]).map(f=>f.meal)).size;
