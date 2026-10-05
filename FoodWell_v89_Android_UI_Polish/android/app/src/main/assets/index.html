@@ -2152,6 +2152,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    <h2>รายละเอียดรายวัน</h2><table><tr><th>วันที่</th><th>kcal</th><th>โปรตีน g</th><th>คาร์บ g</th><th>ไขมัน g</th><th>น้ำตาล g</th><th>โซเดียม mg</th><th>น้ำ ml</th><th>ขยับ นาที</th></tr>
     ${rows.slice().reverse().map(r=>`<tr class="${r.foods||r.water||r.move?'':'empty'}"><td>${fmtD(r.d,{weekday:'short',day:'numeric',month:'short'})}</td><td class="${target&&r.kcal>target*1.1?'over':''}">${r.kcal?n0(r.kcal):'–'}</td><td>${r.foods?n1(r.n.protein):'–'}</td><td>${r.foods?n1(r.n.carbs):'–'}</td><td>${r.foods?n1(r.n.fat):'–'}</td><td>${r.foods?n1(r.n.sugar):'–'}</td><td>${r.foods?n0(r.n.sodium):'–'}</td><td>${r.water?n0(r.water):'–'}</td><td>${r.move||'–'}</td></tr>`).join('')}</table>
    ${top.length?`<h2>อาหารที่กินบ่อย</h2><table><tr><th>อาหาร</th><th>ครั้ง</th><th>kcal เฉลี่ย</th></tr>${top.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v.n}</td><td>${n0(v.k/v.n)}</td></tr>`).join('')}</table>`:''}
+   ${window.FWInsights?FWInsights.reportHtml(days):''}
    <div class="note">ค่าพลังงานและสารอาหารเป็นค่าประมาณจากรายการที่ผู้ใช้บันทึกเอง · เกณฑ์ BMI สำหรับคนเอเชีย · รายงานนี้ไม่ใช่การวินิจฉัยทางการแพทย์</div></body></html>`;
  }
  let period=30;
@@ -2232,7 +2233,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 .hl-item .em{font-size:28px;flex:none;width:36px;text-align:center}.hl-item .tx{flex:1;min-width:0}
 .hl-item b{display:block;font-size:15px}.hl-item small{display:block;font-size:12px;color:var(--muted)}
 .hl-item .kc{font-weight:800;font-size:14px;white-space:nowrap}.hl-item .why{color:#2f9e6e;font-weight:700}
-.hl-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px;padding:4px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.hl-tabs{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:6px;margin:0 0 12px;padding:4px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
 .hl-tabs button{border:0;border-radius:11px;padding:9px;font-weight:800;font-family:inherit;background:none;color:var(--muted)}
 .hl-tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 2px 8px #0002}
 .hl-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
@@ -2263,6 +2264,17 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 .hl-shop .tx{flex:1;min-width:0}.hl-shop b{display:block;font-size:15px}.hl-shop small{display:block;font-size:11px;color:var(--muted)}
 .hl-shop.done b{text-decoration:line-through;color:var(--muted)}
 .hl-shop .q{font-size:13px;color:var(--muted);white-space:nowrap}
+.hl-week{display:flex;align-items:center;justify-content:space-between;gap:8px}.hl-week b{font-size:16px}
+.hl-week button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:20px}
+.hl-day{padding:12px 14px}.hl-day.today{border-color:#2f9e6e;box-shadow:0 0 0 1px #2f9e6e inset}.hl-day.past{opacity:.72}
+.hl-dayh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.hl-dayh b{font-size:15px}.hl-dayh small{color:var(--muted);font-size:12px;white-space:nowrap}
+.hl-bar{height:6px;border-radius:9px;background:var(--panel2);margin:6px 0 2px;overflow:hidden}.hl-bar i{display:block;height:100%;background:#2f9e6e;border-radius:9px}
+.hl-slot{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-top:1px solid var(--line)}.hl-slot:first-of-type{border-top:0}
+.hl-slot .ml{flex:none;width:78px;font-size:12px;color:var(--muted);padding-top:6px}.hl-slot .its{flex:1;display:flex;flex-wrap:wrap;gap:6px}
+.hl-chip{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:6px 9px;font-size:13px;font-family:inherit;text-align:left;max-width:100%}
+.hl-chip small{color:var(--muted);font-size:11px}.hl-chip.ate{border-color:#2f9e6e;background:#2f9e6e1a}.hl-chip.ate::before{content:'✓ ';color:#2f9e6e;font-weight:800}
+.hl-plus{width:32px;height:32px;border-radius:10px;border:1.5px dashed var(--line);background:none;color:var(--muted);font-size:18px}
+.hl-pick label{display:block;font-size:13px;color:var(--muted);grid-column:1/-1}.hl-pick select{width:100%;margin-top:4px}
 .hl-entry{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:-4px 0 12px;border:1.5px dashed #8fd3ad;background:#2f9e6e14;color:var(--text);border-radius:14px;padding:11px;font-weight:800;font-size:14px;font-family:inherit}
 </style>
 <script>
@@ -2308,6 +2320,38 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    :light?(left>0?`เหลืออีก ${left.toLocaleString()} kcal วันนี้ · เลือกเมนูเบา ๆ`:`วันนี้ครบ ${goal.toLocaleString()} kcal แล้ว · ถ้าหิว เลือกเมนูเบา ๆ`)
    :`เหลืออีก ${left.toLocaleString()} kcal วันนี้ · มื้อ${meal}ควรประมาณ ${budget.toLocaleString()} kcal`;
   return {meal,budget,left,goal,head,top:scored.slice(0,3)}}
+ // ---- weekly meal plan: s.mealPlan = {"YYYY-MM-DD": [{id, k: "h:<healthy name>" | "r:<my recipe id>", meal}]} ----
+ const PLAN_MEALS=['เช้า','กลางวัน','เย็น','ของว่าง'];
+ const dailyGoal=()=>{const T=(typeof bodyTargets==='function'&&bodyTargets())||{};return (window.fwWeightPlanKcal&&fwWeightPlanKcal())||T.kcal||2000};
+ const addDay=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ const monday=d=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-(x.getDay()+6)%7);return localDay(x)};
+ const dayLabel=d=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+ function src(k){k=String(k||'');
+  if(k.startsWith('h:'))return R.find(r=>r.n===k.slice(2))||null;
+  if(k.startsWith('r:')&&window.FWRecipes){const rc=(s.recipes||[]).find(x=>String(x.id)===k.slice(2));if(!rc||!rc.lines)return null;
+   return {e:'🍳',n:rc.name,sv:Math.max(1,Number(rc.servings)||1),i:rc.lines.map(l=>[l.name,l.unit,l.qty]),p:FWRecipes.perServing(rc),m:PLAN_MEALS,t:[],min:0,s:[],mine:true,rid:rc.id}}
+  return null}
+ const keyOf=r=>r.mine?'r:'+r.rid:'h:'+r.n;
+ const plan=()=>{if(!s.mealPlan||typeof s.mealPlan!=='object')s.mealPlan={};return s.mealPlan};
+ const planOn=d=>(plan()[d]||[]).map(x=>({...x,r:src(x.k)})).filter(x=>x.r);
+ function planPush(d,meal,r){const P=plan();(P[d]=P[d]||[]).push({id:String(Date.now())+Math.floor(Math.random()*1e4),k:keyOf(r),meal})}
+ function planSave(){const P=plan(),old=addDay(localDay(),-35);Object.keys(P).forEach(d=>{if(d<old||!(P[d]||[]).length)delete P[d]});save()}
+ function planDel(d,id){const P=plan();P[d]=(P[d]||[]).filter(x=>String(x.id)!==String(id));planSave()}
+ const eatenOn=(d,name)=>s.foods.some(f=>foodDay(f)===d&&f.name===name);
+ const people=()=>Math.max(1,Number(s.settings&&s.settings.planPeople)||1);
+ // fill empty breakfast/lunch/dinner slots from today to Sunday with recipes that fit the day's target
+ function autoPlan(ws){const today=localDay(),goal=dailyGoal(),FR={'เช้า':.25,'กลางวัน':.35,'เย็น':.3};
+  const passed=PLAN_MEALS.indexOf(mealAt(new Date()));const used={};let added=0;
+  for(let i=0;i<7;i++)planOn(addDay(ws,i)).forEach(x=>used[x.r.n]=(used[x.r.n]||0)+1);
+  for(let i=0;i<7;i++){const d=addDay(ws,i);if(d<today)continue;
+   ['เช้า','กลางวัน','เย็น'].forEach((m,mi)=>{if(d===today&&mi<passed)return;if(planOn(d).some(x=>x.meal===m))return;
+    const budget=goal*FR[m],best=R.filter(r=>r.m.includes(m)).map(r=>({r,sc:-Math.abs(r.p.kcal-budget)/budget*10-(used[r.n]||0)*5+Math.random()*3+(r.t.includes('protein')?1:0)})).sort((a,b)=>b.sc-a.sc)[0];
+    if(best){planPush(d,m,best.r);used[best.r.n]=(used[best.r.n]||0)+1;added++}});
+   // still well under the day's target: add a snack that fits what's left
+   const kc=planOn(d).reduce((a,x)=>a+x.r.p.kcal,0),left=goal-kc;
+   if(left>=goal*.25&&!planOn(d).some(x=>x.meal==='ของว่าง')&&!(d===today&&passed>=3)){const sn=R.filter(r=>r.m.includes('ของว่าง')&&r.p.kcal<=left).sort((x,y)=>((used[x.n]||0)-(used[y.n]||0))||(y.p.kcal-x.p.kcal))[0];
+    if(sn){planPush(d,'ของว่าง',sn);used[sn.n]=(used[sn.n]||0)+1;added++}}}
+  planSave();return added}
  // ---- actions ----
  function eat(r){const now=new Date(),id=Date.now(),p=r.p;
   s.foods.unshift({id,createdAt:id,name:r.n,meal:mealAt(now),...p,note:'เมนูสุขภาพ · 1 ที่',date:localDay(now),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),favorite:false});
@@ -2317,25 +2361,26 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   if(!rc){rc={id:Date.now(),name:r.n,servings:r.sv,lines:r.i.map(([n,u,q])=>({name:n,unit:u,qty:q,v:ING.get(n+'|'+u)||{}}))};s.recipes.unshift(rc);save();toast('เพิ่มใน “เมนูทำเอง” แล้ว · ปรับวัตถุดิบได้ 🍳')}
   else toast('มีเมนูนี้ใน “เมนูทำเอง” แล้ว');
   close();go('recipes')}
- function addShopping(r,servings){const k=servings/r.sv;s.shopping=s.shopping||[];
+ function addShopping(r,servings,quiet){const k=servings/r.sv;s.shopping=s.shopping||[];
   r.i.forEach(([n,u,q])=>{let it=s.shopping.find(x=>x.name===n&&x.unit===u&&!x.done);
    if(!it){it={id:Date.now()+Math.random(),name:n,unit:u,qty:0,from:[],done:false};s.shopping.push(it)}
    it.qty=r1(it.qty+q*k);if(!it.from.includes(r.n))it.from.push(r.n)});
-  save();toast(`เพิ่ม ${r.i.length} วัตถุดิบในรายการซื้อของ 🛒`)}
+  if(quiet)return;save();toast(`เพิ่ม ${r.i.length} วัตถุดิบในรายการซื้อของ 🛒`)}
  // ---- page ----
  const page=document.getElementById('healthy');if(!page)return;
- let tab='menu',filter='all',query='',open=null,servings=1;
+ let tab='menu',filter='all',query='',open=null,servings=1,ctx=null,pickCtx=null,weekOff=0;
  const itemHtml=(r,why)=>`<button type="button" class="hl-item" data-r="${r.id}"><span class="em">${r.e}</span><span class="tx"><b>${esc(r.n)}</b><small>${why?`<span class="why">${esc(why)}</span>`:`⏱️ ${r.min} นาที · โปรตีน ${r.p.protein} g · โซเดียม ${r.p.sodium} mg`}</small></span><span class="kc">${r.p.kcal}<small>kcal</small></span></button>`;
  function draw(){
   const sg=suggest(),shop=s.shopping||[],left=shop.filter(x=>!x.done).length;
   let html=`<div class="hl-card"><h3>✨ แนะนำสำหรับคุณตอนนี้</h3><div class="hl-sub">${esc(sg.head)}</div><div class="hl-top">${sg.top.map(x=>itemHtml(x.r,x.why[0])).join('')}</div></div>
-   <div class="hl-tabs"><button type="button" data-tab="menu" class="${tab==='menu'?'on':''}">📖 เมนูทั้งหมด (${R.length})</button><button type="button" data-tab="shop" class="${tab==='shop'?'on':''}">🛒 ซื้อของ${left?` (${left})`:''}</button></div>`;
+   <div class="hl-tabs"><button type="button" data-tab="menu" class="${tab==='menu'?'on':''}">📖 เมนู (${R.length})</button><button type="button" data-tab="plan" class="${tab==='plan'?'on':''}">📅 แผนสัปดาห์</button><button type="button" data-tab="shop" class="${tab==='shop'?'on':''}">🛒 ซื้อของ${left?` (${left})`:''}</button></div>`;
   if(tab==='menu'){
    const qn=norm(query),list=R.filter(r=>(filter==='all'||r.t.includes(filter))&&(!qn||r.key.includes(qn)));
    html+=`<div class="hl-card"><input class="hl-find" id="hlFind" placeholder="🔎 ค้นหาเมนูหรือวัตถุดิบ เช่น อกไก่ เต้าหู้" value="${esc(query)}" autocomplete="off">
     <div class="hl-chips">${[['all','ทั้งหมด'],...Object.entries(TAGS)].map(([k,l])=>`<button type="button" data-f="${k}" class="${filter===k?'on':''}">${l}</button>`).join('')}</div>
     <div class="hl-list">${list.map(r=>itemHtml(r)).join('')||'<div class="hl-empty">ไม่พบเมนู</div>'}</div>
     <div class="hl-sub" style="margin-top:10px">ค่าโภชนาการคำนวณจากวัตถุดิบ เป็นค่าประมาณต่อ 1 ที่</div></div>`}
+  else if(tab==='plan')html+=planHtml();
   else{
    html+=`<div class="hl-card"><h3>🛒 รายการซื้อของ</h3>${shop.length?shop.map(x=>`<label class="hl-shop${x.done?' done':''}"><input type="checkbox" data-s="${x.id}" ${x.done?'checked':''}><span class="tx"><b>${esc(x.name)}</b><small>${esc((x.from||[]).join(' · '))}</small></span><span class="q">${esc(unitText(x.unit,x.qty))}</span></label>`).join('')
     :'<div class="hl-empty">ยังว่างอยู่ · เปิดเมนูแล้วกด “🛒 เพิ่มในรายการซื้อของ”</div>'}
@@ -2348,39 +2393,191 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   page.querySelectorAll('[data-s]').forEach(c=>c.onchange=()=>{const it=(s.shopping||[]).find(x=>String(x.id)===c.dataset.s);if(it){it.done=c.checked;save();draw()}});
   const cd=page.querySelector('#hlClearDone');if(cd)cd.onclick=()=>{s.shopping=shop.filter(x=>!x.done);save();draw()};
   const ca=page.querySelector('#hlClearAll');if(ca)ca.onclick=()=>{if(confirm('ล้างรายการซื้อของทั้งหมด?')){s.shopping=[];save();draw()}};
+  if(tab==='plan')bindPlan();
+ }
+ const weekStart=()=>addDay(monday(localDay()),weekOff*7);
+ function planHtml(){
+  const ws=weekStart(),today=localDay(),goal=dailyGoal(),days=[...Array(7)].map((_,i)=>addDay(ws,i));
+  const ahead=days.filter(d=>d>=today).reduce((a,d)=>a+planOn(d).length,0),any=days.some(d=>planOn(d).length);
+  return `<div class="hl-card"><div class="hl-week"><button type="button" data-wk="-1" aria-label="สัปดาห์ก่อน">‹</button><b>${dayLabel(days[0]).replace(/^\S+\s/,'')} – ${dayLabel(days[6]).replace(/^\S+\s/,'')}</b><button type="button" data-wk="1" aria-label="สัปดาห์ถัดไป">›</button></div>
+   <div class="hl-sub" style="text-align:center;margin-top:4px">เป้าวันละ ${goal.toLocaleString()} kcal · แตะ + เพื่อเพิ่มเมนู แตะเมนูเพื่อดูสูตรหรือเอาออก</div>
+   ${days[6]>=today?`<div class="hl-acts" style="margin-top:10px"><button type="button" id="hlAuto">✨ จัดเมนูให้อัตโนมัติ</button><button type="button" id="hlPlanShop">🛒 ซื้อของ (${ahead} เมนู)</button></div>
+   <div class="hl-sv" style="justify-content:center;margin-top:10px">ซื้อของสำหรับ<button type="button" data-pp="-1">−</button><b>${people()}</b><button type="button" data-pp="1">+</button>คน</div>`:''}</div>
+   ${days.map(d=>{const items=planOn(d),kc=items.reduce((a,x)=>a+x.r.p.kcal,0),past=d<today;
+    const slots=PLAN_MEALS.map(m=>{const its=items.filter(x=>x.meal===m);if(past&&!its.length)return '';
+     return `<div class="hl-slot"><span class="ml">${MEAL_ICON[m]} ${m}</span><span class="its">${its.map(x=>`<button type="button" class="hl-chip${eatenOn(d,x.r.n)?' ate':''}" data-pi="${d}|${x.id}">${x.r.e} ${esc(x.r.n)} <small>${x.r.p.kcal}</small></button>`).join('')}${past?'':`<button type="button" class="hl-plus" data-add="${d}|${m}" aria-label="เพิ่มเมนูมื้อ${m}">+</button>`}</span></div>`}).join('');
+    return `<div class="hl-card hl-day${d===today?' today':''}${past?' past':''}"><div class="hl-dayh"><b>${dayLabel(d)}${d===today?' · วันนี้':''}</b><small>${kc?`${kc.toLocaleString()} / ${goal.toLocaleString()} kcal`:'ยังไม่มีแผน'}</small></div>
+     ${kc?`<div class="hl-bar"><i style="width:${Math.min(100,kc/goal*100).toFixed(0)}%"></i></div>`:''}${slots||'<div class="hl-empty">ไม่มีแผน</div>'}
+     ${!past&&kc&&goal-kc>250?`<div class="hl-sub">เหลืออีก ~${Math.round(goal-kc).toLocaleString()} kcal · เติมผลไม้ นมจืด หรือของว่างได้</div>`:''}</div>`}).join('')}
+   ${any?`<button type="button" class="hl-btn" id="hlPlanClear" style="width:100%;margin-bottom:12px">ล้างแผนสัปดาห์นี้</button>`:''}`}
+ function bindPlan(){const q=sel=>page.querySelectorAll(sel);
+  q('[data-wk]').forEach(b=>b.onclick=()=>{weekOff=Math.max(-4,Math.min(4,weekOff+Number(b.dataset.wk)));draw()});
+  q('[data-pp]').forEach(b=>b.onclick=()=>{s.settings=s.settings||{};s.settings.planPeople=Math.max(1,Math.min(10,people()+Number(b.dataset.pp)));save();draw()});
+  q('[data-add]').forEach(b=>b.onclick=()=>{const [d,m]=b.dataset.add.split('|');pick(d,m)});
+  q('[data-pi]').forEach(b=>b.onclick=()=>{const [d,id]=b.dataset.pi.split('|');const x=planOn(d).find(y=>String(y.id)===id);if(x)show(x.r,{d,id})});
+  const au=page.querySelector('#hlAuto');if(au)au.onclick=()=>{const n=autoPlan(weekStart());toast(n?`จัดให้ ${n} มื้อแล้ว ✨ แตะเมนูเพื่อเปลี่ยนได้`:'ทุกมื้อมีแผนแล้ว');draw()};
+  const ps=page.querySelector('#hlPlanShop');if(ps)ps.onclick=()=>{const today=localDay(),ws=weekStart(),its=[...Array(7)].map((_,i)=>addDay(ws,i)).filter(d=>d>=today).flatMap(planOn);
+   if(!its.length){toast('ยังไม่มีเมนูในแผน');return}
+   if(!confirm(`เพิ่มวัตถุดิบของ ${its.length} เมนู (สำหรับ ${people()} คน) ลงรายการซื้อของ?`))return;
+   its.forEach(x=>addShopping(x.r,people(),true));save();tab='shop';draw();window.scrollTo({top:0});toast('เพิ่มลงรายการซื้อของแล้ว 🛒')};
+  const pc=page.querySelector('#hlPlanClear');if(pc)pc.onclick=()=>{if(!confirm('ล้างแผนเมนูของสัปดาห์นี้?'))return;const ws=weekStart();for(let i=0;i<7;i++)delete plan()[addDay(ws,i)];planSave();draw()};
  }
  // ---- detail sheet ----
  const sheet=document.createElement('div');sheet.className='hl-sheet';sheet.id='hlSheet';sheet.innerHTML='<div class="box"></div>';document.body.appendChild(sheet);
  sheet.onclick=e=>{if(e.target===sheet)close()};
- function close(){sheet.classList.remove('show');open=null}
- function show(r){open=r;servings=r.sv;sheetDraw();sheet.classList.add('show');sheet.querySelector('.box').scrollTop=0}
+ function close(){sheet.classList.remove('show');open=null;ctx=null;pickCtx=null}
+ function show(r,c){open=r;ctx=c||null;pickCtx=null;servings=r.sv;sheetDraw();sheet.classList.add('show');sheet.querySelector('.box').scrollTop=0}
  function sheetDraw(){const r=open;if(!r)return;const p=r.p,k=servings/r.sv;
-  sheet.querySelector('.box').innerHTML=`<div class="hl-head"><span class="em">${r.e}</span><div style="flex:1"><h2>${esc(r.n)}</h2><div class="hl-sub">⏱️ ${r.min} นาที · ${r.m.map(m=>MEAL_ICON[m]+' '+m).join(' ')}</div><div>${r.t.map(t=>`<span class="hl-tag">${TAGS[t]}</span>`).join('')}</div></div><button type="button" class="hl-x" id="hlClose" aria-label="ปิด">✕</button></div>
+  sheet.querySelector('.box').innerHTML=`<div class="hl-head"><span class="em">${r.e}</span><div style="flex:1"><h2>${esc(r.n)}</h2><div class="hl-sub">${r.mine?'🍳 เมนูทำเองของฉัน':`⏱️ ${r.min} นาที · ${r.m.map(m=>MEAL_ICON[m]+' '+m).join(' ')}`}</div><div>${r.t.map(t=>`<span class="hl-tag">${TAGS[t]}</span>`).join('')}</div></div><button type="button" class="hl-x" id="hlClose" aria-label="ปิด">✕</button></div>
    <div class="hl-nut"><div><b>${p.kcal}</b><small>kcal/ที่</small></div><div><b>${p.protein}</b><small>โปรตีน g</small></div><div><b>${p.carbs}</b><small>คาร์บ g</small></div><div><b>${p.fat}</b><small>ไขมัน g</small></div><div><b>${p.sugar}</b><small>น้ำตาล g</small></div><div><b>${p.fiber}</b><small>ใยอาหาร g</small></div><div style="grid-column:span 2"><b>${p.sodium}</b><small>โซเดียม mg</small></div></div>
    <div style="display:flex;align-items:center;justify-content:space-between"><div class="hl-sec">🧺 วัตถุดิบ</div><div class="hl-sv">ทำ<button type="button" data-sv="-1">−</button><b>${servings}</b><button type="button" data-sv="1">+</button>ที่</div></div>
    ${r.i.map(([n,u,q])=>`<div class="hl-ing"><span>${esc(n)}</span><span>${esc(unitText(u,q*k))}</span></div>`).join('')}
-   <div class="hl-sec">👩‍🍳 วิธีทำ</div><ol class="hl-steps">${r.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
-   <div class="hl-acts"><button type="button" class="go" id="hlEat">✅ กินแล้ว · บันทึก 1 ที่ (${p.kcal} kcal)</button><button type="button" id="hlCook">🍳 ทำเมนูนี้</button><button type="button" id="hlShop">🛒 เพิ่มในรายการซื้อของ</button></div>`;
+   ${r.s.length?`<div class="hl-sec">👩‍🍳 วิธีทำ</div><ol class="hl-steps">${r.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+   <div class="hl-acts"><button type="button" class="go" id="hlEat">✅ กินแล้ว · บันทึก 1 ที่ (${p.kcal} kcal)</button>${r.mine?'':'<button type="button" id="hlCook">🍳 ทำเมนูนี้</button>'}<button type="button" id="hlShop">🛒 เพิ่มในรายการซื้อของ</button>${ctx?'<button type="button" id="hlUnplan">🗑️ เอาออกจากแผน</button>':'<button type="button" id="hlPlan">📅 ใส่ในแผน</button>'}</div>`;
   const b=sheet.querySelector('.box');
   b.querySelector('#hlClose').onclick=close;
   b.querySelectorAll('[data-sv]').forEach(x=>x.onclick=()=>{servings=Math.max(1,Math.min(20,servings+Number(x.dataset.sv)));sheetDraw()});
   b.querySelector('#hlEat').onclick=()=>{eat(r);close()};
-  b.querySelector('#hlCook').onclick=()=>cook(r);
+  const ck=b.querySelector('#hlCook');if(ck)ck.onclick=()=>cook(r);
   b.querySelector('#hlShop').onclick=()=>{addShopping(r,servings);close()};
+  const un=b.querySelector('#hlUnplan');if(un)un.onclick=()=>{planDel(ctx.d,ctx.id);close();toast('เอาออกจากแผนแล้ว');draw()};
+  const pl=b.querySelector('#hlPlan');if(pl)pl.onclick=()=>{const acts=b.querySelector('.hl-acts'),t0=localDay(),cur=mealAt(new Date());
+   acts.classList.add('hl-pick');
+   acts.innerHTML=`<label>วัน<select id="hlPD">${[...Array(7)].map((_,i)=>{const d=addDay(t0,i);return `<option value="${d}">${i===0?'วันนี้':i===1?'พรุ่งนี้':''} ${dayLabel(d)}</option>`}).join('')}</select></label>
+    <label>มื้อ<select id="hlPM">${PLAN_MEALS.map(m=>`<option ${m===(r.m.includes(cur)?cur:r.m[0])?'selected':''}>${m}</option>`).join('')}</select></label>
+    <button type="button" class="go" id="hlPOk">📅 เพิ่มในแผน</button>`;
+   acts.querySelector('#hlPOk').onclick=()=>{planPush(acts.querySelector('#hlPD').value,acts.querySelector('#hlPM').value,r);planSave();close();toast('เพิ่มในแผนแล้ว 📅');draw()}};
+ }
+ // picker: add a recipe (mine first, then healthy ones that suit the meal) to a plan slot
+ function pick(d,meal){open=null;ctx=null;pickCtx={d,meal,q:''};pickDraw();sheet.classList.add('show');sheet.querySelector('.box').scrollTop=0}
+ function pickDraw(){const {d,meal,q}=pickCtx,qn=norm(q),b=sheet.querySelector('.box');
+  const mine=(s.recipes||[]).map(rc=>src('r:'+rc.id)).filter(Boolean),fit=R.filter(r=>r.m.includes(meal)),rest=R.filter(r=>!r.m.includes(meal));
+  const list=[...mine,...fit,...rest].filter(r=>!qn||norm(r.n+r.i.map(x=>x[0]).join('')).includes(qn));
+  b.innerHTML=`<div class="hl-head"><span class="em">${MEAL_ICON[meal]}</span><div style="flex:1"><h2>เพิ่มมื้อ${meal}</h2><div class="hl-sub">${dayLabel(d)}</div></div><button type="button" class="hl-x" id="hlClose" aria-label="ปิด">✕</button></div>
+   <input class="hl-find" id="hlPickFind" placeholder="🔎 ค้นหาเมนู" value="${esc(q)}" autocomplete="off" style="margin-top:12px">
+   <div class="hl-list">${list.map((r,i)=>`<button type="button" class="hl-item" data-pk="${i}"><span class="em">${r.e}</span><span class="tx"><b>${esc(r.n)}</b><small>${r.mine?'เมนูทำเองของฉัน':`⏱️ ${r.min} นาที · โปรตีน ${r.p.protein} g`}</small></span><span class="kc">${r.p.kcal}<small>kcal</small></span></button>`).join('')||'<div class="hl-empty">ไม่พบเมนู</div>'}</div>`;
+  b.querySelector('#hlClose').onclick=close;
+  const f=b.querySelector('#hlPickFind');f.oninput=()=>{pickCtx.q=f.value;const pos=f.selectionStart;pickDraw();const g=b.querySelector('#hlPickFind');g.focus();g.setSelectionRange(pos,pos)};
+  b.querySelectorAll('[data-pk]').forEach(x=>x.onclick=()=>{const r=list[Number(x.dataset.pk)];planPush(d,meal,r);planSave();close();toast(`เพิ่ม ${r.n} ในแผนแล้ว 📅`);draw()});
  }
  // ---- home card + food page entry ----
- function homeCard(){const box=document.getElementById('hlHome');if(!box)return;const sg=suggest(),x=sg.top[0];if(!x){box.style.display='none';return}box.style.display='';
-  box.innerHTML=`<h3>🥗 วันนี้กินอะไรดี?</h3><div class="sub">${esc(sg.head)}</div><button type="button" class="pick" data-r="${x.r.id}"><span class="em">${x.r.e}</span><span style="flex:1;min-width:0"><b>${esc(x.r.n)}</b><small>${x.r.p.kcal} kcal · ${esc(x.why[0])}</small></span><span>›</span></button><button type="button" class="more" id="hlMore">ดูเมนูสุขภาพทั้งหมด</button>`;
-  box.querySelector('[data-r]').onclick=()=>show(x.r);box.querySelector('#hlMore').onclick=()=>go('healthy')}
+ function homeCard(){const box=document.getElementById('hlHome');if(!box)return;const sg=suggest(),today=localDay(),m=mealAt(new Date());
+  const planned=planOn(today).find(y=>y.meal===m&&!eatenOn(today,y.r.n)),x=planned?{r:planned.r,why:[`📅 ตามแผนมื้อ${m}`]}:sg.top[0];
+  if(!x){box.style.display='none';return}box.style.display='';
+  box.innerHTML=`<h3>🥗 วันนี้กินอะไรดี?</h3><div class="sub">${esc(sg.head)}</div><button type="button" class="pick"><span class="em">${x.r.e}</span><span style="flex:1;min-width:0"><b>${esc(x.r.n)}</b><small>${x.r.p.kcal} kcal · ${esc(x.why[0])}</small></span><span>›</span></button><button type="button" class="more" id="hlMore">ดูเมนูสุขภาพ & แผนสัปดาห์</button>`;
+  box.querySelector('.pick').onclick=()=>planned?show(x.r,{d:today,id:planned.id}):show(x.r);box.querySelector('#hlMore').onclick=()=>go('healthy')}
  // home: under the calories / water / movement cards
  const after=document.querySelector('#home .twocards')||document.querySelector('#home [data-home-key="summary"]');
  if(after&&!document.getElementById('hlHome')){const c=document.createElement('div');c.className='hl-home home-sortable';c.id='hlHome';c.dataset.homeKey='healthy';after.after(c);if(typeof applyHomePrefs==='function')applyHomePrefs()}
  const rc=document.getElementById('rcEntry');
  if(rc&&!document.getElementById('hlEntry')){const b=document.createElement('button');b.type='button';b.id='hlEntry';b.className='hl-entry';b.textContent='🥗 เมนูสุขภาพแนะนำ (สูตร + ซื้อของ)';rc.after(b);b.onclick=()=>go('healthy')}
  const og=window.go;if(og)window.go=function(p){og(p);if(p==='healthy'){draw();window.scrollTo({top:0})}};
- const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{homeCard();if(page.classList.contains('active')&&document.activeElement?.id!=='hlFind')draw()}catch(e){console.error(e)}return o};
- window.FWHealthy={recipes:R,suggest,eat,cook,addShopping,show};
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{homeCard();if(page.classList.contains('active')&&!['hlFind','hlPickFind'].includes(document.activeElement?.id))draw()}catch(e){console.error(e)}return o};
+ window.FWHealthy={recipes:R,suggest,eat,cook,addShopping,show,planOn,autoPlan,pick};
  homeCard();
+})();
+</script>
+<!-- v115 Automatic insights (no AI): patterns from the last 7/30 days, on the Dashboard, the weekly home card and the PDF report -->
+<style>
+.ins-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.ins-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.ins-head h3{margin:0;font-size:17px}
+.ins-tabs{display:flex;gap:4px;padding:3px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.ins-tabs button{border:0;background:none;color:var(--muted);border-radius:9px;padding:6px 10px;font-size:12px;font-weight:800;font-family:inherit}
+.ins-tabs button.on{background:var(--panel);color:var(--text);box-shadow:0 2px 6px #0002}
+.ins-sub{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.ins-item{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line)}.ins-item:first-of-type{border-top:0}
+.ins-item .ic{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--panel2)}
+.ins-item.warn .ic{background:#f59f6b26}.ins-item.good .ic{background:#2f9e6e22}
+.ins-item b{display:block;font-size:14px;line-height:1.4}.ins-item p{margin:2px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.ins-item .tip{display:block;margin-top:4px;font-size:12px;color:#2f9e6e;font-weight:700}
+.ins-more{width:100%;margin-top:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px;font-weight:800;font-family:inherit}
+.wk-ins{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;line-height:1.6}
+</style>
+<script>
+(function(){
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const n0=v=>Math.round(v).toLocaleString();
+ const addDay=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ const WD=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+ const DRINK=/ชา|กาแฟ|ลาเต้|คาปู|มอคค่า|อเมริกาโน่|โกโก้|(^|[^ข])นม|โซดา|โค้ก|เป๊ปซี่|น้ำอัดลม|น้ำผลไม้|น้ำส้ม|น้ำหวาน|น้ำแดง|สมูทตี้|ปั่น|ไมโล|โอวัลติน|เบียร์|ไวน์|เครื่องดื่ม|ชูกำลัง|เกลือแร่/;
+ function hourOf(f){const m=String(f.time||'').match(/(\d{1,2})[:.](\d{2})/);if(m)return Number(m[1])+Number(m[2])/60;const ts=Number(f.createdAt||f.id);if(ts>1e12){const d=new Date(ts);return d.getHours()+d.getMinutes()/60}return null}
+ function target(){const T=(typeof bodyTargets==='function'&&bodyTargets())||{};return {kcal:(window.fwWeightPlanKcal&&fwWeightPlanKcal())||T.kcal||null,protein:T.protein||50,sugar:24,sodium:2000,fiber:T.fiber||25}}
+ // top contributors of one nutrient in a set of foods
+ function sources(foods,k,n=3){const m={};foods.forEach(f=>{const v=Number(f[k]||0);if(v>0)m[f.name]=(m[f.name]||0)+v});const tot=Object.values(m).reduce((a,v)=>a+v,0);
+  return {tot,top:Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([name,v])=>({name,v,share:tot?v/tot:0}))}}
+ function list(days=7,end=localDay()){
+  const T=target(),range=[...Array(days)].map((_,i)=>addDay(end,i-days+1)),inR=new Set(range);
+  const foods=s.foods.filter(f=>inR.has(foodDay(f))),byDay=range.map(d=>({d,foods:foods.filter(f=>foodDay(f)===d)})),fd=byDay.filter(x=>x.foods.length);
+  const out=[];const add=(lv,w,ic,title,text,tip)=>out.push({lv,w,ic,title,text,tip});
+  const need=Math.min(3,days);
+  if(fd.length<need)return {ready:false,need:need-fd.length,items:[],range};
+  const kc=fd.map(x=>kcalOn(x.d)),avg=kc.reduce((a,v)=>a+v,0)/fd.length,nu=fd.map(x=>nutrientsOn(x.d));
+  const mean=k=>nu.reduce((a,n)=>a+n[k],0)/fd.length;
+  // calories vs target
+  if(T.kcal){const over=fd.filter((x,i)=>kc[i]>T.kcal*1.1).length,near=fd.filter((x,i)=>Math.abs(kc[i]-T.kcal)<=T.kcal*.1).length,diff=avg-T.kcal;
+   if(diff>T.kcal*.1)add('warn',8,'🔥',`กินเกินเป้าเฉลี่ยวันละ ~${n0(diff)} kcal`,`เกินเป้า ${over} จาก ${fd.length} วันที่บันทึก (เป้า ${n0(T.kcal)} kcal)`,'ลองเปลี่ยนเครื่องดื่มหวานหรือของทอดหนึ่งอย่างต่อวัน');
+   else if(diff<-T.kcal*.2)add('warn',6,'🍽️',`กินน้อยกว่าเป้าเฉลี่ยวันละ ~${n0(-diff)} kcal`,`กินน้อยเกินไปทำให้หิวจัดและกล้ามเนื้อลดได้`,'อย่าลืมบันทึกทุกมื้อ และกินโปรตีนให้พอ');
+   else add('good',5,'🎯',`กินใกล้เป้า ${near} จาก ${fd.length} วัน`,`เฉลี่ย ${n0(avg)} kcal/วัน จากเป้า ${n0(T.kcal)} kcal`,null)}
+  // weekday pattern (last 28 days, weekdays with at least 2 logged days)
+  {const L=[...Array(28)].map((_,i)=>addDay(end,i-27)).filter(d=>kcalOn(d)>0),by={};L.forEach(d=>{const w=new Date(d+'T12:00:00').getDay();(by[w]=by[w]||[]).push(kcalOn(d))});
+   const all=L.length?L.reduce((a,d)=>a+kcalOn(d),0)/L.length:0,ws=Object.entries(by).filter(([,v])=>v.length>=2).map(([w,v])=>[Number(w),v.reduce((a,x)=>a+x,0)/v.length]).sort((a,b)=>b[1]-a[1]);
+   if(ws.length>=4&&ws[0][1]>all*1.15&&ws[0][1]-all>=250)add('warn',6,'📆',`วัน${WD[ws[0][0]]}กินมากกว่าวันอื่น ~${n0(ws[0][1]-all)} kcal`,`เฉลี่ยวัน${WD[ws[0][0]]} ${n0(ws[0][1])} kcal เทียบกับเฉลี่ยทุกวัน ${n0(all)} kcal (4 สัปดาห์ล่าสุด)`,`วางแผนมื้อวัน${WD[ws[0][0]]}ล่วงหน้า หรือเลือกเมนูเบาในมื้ออื่นของวันนั้น`)}
+  // late eating
+  {const late=fd.filter(x=>x.foods.some(f=>{const h=hourOf(f);return h!=null&&(h>=21||h<4)}));
+   if(late.length>=2)add('warn',5,'🌙',`กินหลัง 3 ทุ่ม ${late.length} วัน`,`รวม ${n0(late.reduce((a,x)=>a+x.foods.filter(f=>{const h=hourOf(f);return h!=null&&(h>=21||h<4)}).reduce((b,f)=>b+Number(f.kcal||0),0),0))} kcal ในช่วงดึก`,'ถ้าหิวดึก ลองนมจืด ไข่ต้ม หรือผลไม้แทน และกินมื้อเย็นให้อิ่มพอ')}
+  // skipped breakfast
+  {const skip=fd.filter(x=>!x.foods.some(f=>f.meal==='เช้า'||(()=>{const h=hourOf(f);return h!=null&&h>=4&&h<10.5})())).length;
+   if(skip>=3)add('warn',4,'🌅',`ไม่ได้กินมื้อเช้า ${skip} วัน`,'การข้ามมื้อเช้าบ่อยอาจทำให้หิวจัดและกินเยอะช่วงบ่ายถึงเย็น','มื้อเช้าง่าย ๆ เช่น ไข่ต้ม + ขนมปังโฮลวีต หรือโยเกิร์ต + ผลไม้');
+   else if(fd.length>=5&&skip===0)add('good',2,'🌅','กินมื้อเช้าครบทุกวันที่บันทึก','ช่วยคุมความหิวตลอดวันได้ดี',null)}
+  // sugar
+  {const sg=nu.map(n=>n.sugar),overD=sg.filter(v=>v>T.sugar).length,src=sources(foods,'sugar'),drink=foods.filter(f=>DRINK.test(f.name)).reduce((a,f)=>a+Number(f.sugar||0),0);
+   if(overD>=2){const ds=src.tot?drink/src.tot:0;
+    add('warn',ds>=.4?8:7,'🍬',ds>=.4?`น้ำตาล ${Math.round(ds*100)}% มาจากเครื่องดื่ม`:`น้ำตาลเกิน 24 g (6 ช้อนชา) ${overD} วัน`,`เฉลี่ย ${Math.round(mean('sugar'))} g/วัน · มาจาก ${src.top.map(x=>`${esc(x.name)} ${Math.round(x.v)} g`).join(', ')}`,ds>=.4?'สั่งหวานน้อย/ไม่หวาน หรือเปลี่ยนเป็นน้ำเปล่า ชาไม่หวาน':'ลดขนมหวานหรือเครื่องดื่มหวานลงครึ่งหนึ่ง')}
+   else if(src.tot>0)add('good',2,'🍬','น้ำตาลอยู่ในเกณฑ์',`เฉลี่ย ${Math.round(mean('sugar'))} g/วัน ไม่เกิน 24 g`,null)}
+  // sodium
+  {const overD=nu.filter(n=>n.sodium>T.sodium).length,src=sources(foods,'sodium');
+   if(overD>=2)add('warn',6,'🧂',`โซเดียมเกิน 2,000 mg ${overD} วัน`,`เฉลี่ย ${n0(mean('sodium'))} mg/วัน · มากสุดจาก ${src.top.map(x=>esc(x.name)).join(', ')}`,'ซดน้ำซุปน้อยลง ลดน้ำจิ้ม และไม่เติมเครื่องปรุงเพิ่ม')}
+  // protein
+  {const p=mean('protein');if(T.protein&&p<T.protein*.8)add('warn',5,'💪',`โปรตีนเฉลี่ย ${Math.round(p)} g/วัน ต่ำกว่าเป้า ${T.protein} g`,'โปรตีนช่วยให้อิ่มนานและรักษากล้ามเนื้อขณะลดน้ำหนัก','เพิ่มไข่ อกไก่ ปลา เต้าหู้ หรือนมจืดในแต่ละมื้อ');
+   else if(T.protein&&p>=T.protein*.95)add('good',3,'💪',`โปรตีนถึงเป้า (เฉลี่ย ${Math.round(p)} g/วัน)`,'ช่วยให้อิ่มนานและรักษากล้ามเนื้อ',null)}
+  // fiber
+  {const fi=mean('fiber');if(foods.some(f=>f.fiber!=null&&f.fiber!=='')&&fi<T.fiber*.5)add('warn',3,'🥦',`ใยอาหารเฉลี่ยแค่ ${Math.round(fi)} g/วัน`,`แนะนำราว ${T.fiber} g/วัน`,'เพิ่มผักครึ่งจาน เปลี่ยนเป็นข้าวกล้อง และกินผลไม้ทั้งลูก')}
+  // water + movement
+  {const wg=waterGoal(),wd=range.filter(d=>waterOn(d)>=wg).length,wAny=range.filter(d=>waterOn(d)>0).length;
+   if(wAny&&wd<Math.ceil(days*.4))add('warn',3,'💧',`ดื่มน้ำครบเป้าแค่ ${wd} จาก ${days} วัน`,`เป้า ${n0(wg)} ml/วัน`,'ตั้งแจ้งเตือนดื่มน้ำ หรือวางขวดน้ำไว้ใกล้ตัว');
+   else if(wd>=Math.ceil(days*.7))add('good',3,'💧',`ดื่มน้ำครบเป้า ${wd} จาก ${days} วัน`,'ร่างกายสดชื่นและช่วยคุมความหิว',null)}
+  {const mv=range.reduce((a,d)=>a+moveMinOn(d),0),goal=Math.round(150*days/7);
+   if(mv>=goal)add('good',4,'🏃',`ขยับรวม ${n0(mv)} นาที ถึงคำแนะนำแล้ว`,`WHO แนะนำอย่างน้อย 150 นาที/สัปดาห์`,null);
+   else if(mv>0||fd.length>=3)add('warn',2,'🏃',`ขยับรวม ${n0(mv)} นาที จากที่แนะนำ ${n0(goal)} นาที`,'ไม่ต้องออกกำลังหนัก เดินเร็ว ขึ้นบันได ก็นับ','เริ่มจากเดินหลังมื้อเย็น 15 นาที')}
+  // change vs the previous period
+  {const prev=[...Array(days)].map((_,i)=>addDay(end,i-2*days+1)).filter(d=>kcalOn(d)>0);
+   if(prev.length>=Math.min(3,days)){const pa=prev.reduce((a,d)=>a+kcalOn(d),0)/prev.length,ch=avg-pa;
+    if(Math.abs(ch)>=150)add(T.kcal&&avg>T.kcal&&ch>0?'warn':'info',3,ch>0?'📈':'📉',`กินเฉลี่ย${ch>0?'มากขึ้น':'น้อยลง'} ${n0(Math.abs(ch))} kcal/วัน`,`เทียบกับ ${days} วันก่อนหน้า (${n0(pa)} → ${n0(avg)} kcal)`,null)}}
+  // logging consistency
+  if(fd.length===days)add('good',2,'📒',`บันทึกอาหารครบทุกวัน`,`ข้อมูลยิ่งครบ ข้อสังเกตยิ่งแม่นยำ`,null);
+  const order={warn:0,info:1,good:2};out.sort((a,b)=>order[a.lv]-order[b.lv]||b.w-a.w);
+  return {ready:true,items:out,range,days:fd.length};
+ }
+ const itemHtml=x=>`<div class="ins-item ${x.lv}"><div class="ic">${x.ic}</div><div><b>${x.title}</b><p>${x.text}</p>${x.tip?`<span class="tip">💡 ${x.tip}</span>`:''}</div></div>`;
+ let period=7,all=false;
+ function card(){const box=document.getElementById('insDash');if(!box)return;const L=list(period);
+  const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  let body;if(!L.ready)body=`<div class="ins-sub">บันทึกอาหารอีก ${L.need} วันเพื่อดูข้อสังเกต</div>`;
+  else{const shown=all?L.items:L.items.slice(0,5);body=`<div class="ins-sub">${fmt(L.range[0])} – ${fmt(L.range[L.range.length-1])} · จาก ${L.days} วันที่บันทึกอาหาร</div>${shown.map(itemHtml).join('')}${L.items.length>5?`<button type="button" class="ins-more" id="insMore">${all?'ย่อ':'ดูทั้งหมด '+L.items.length+' ข้อ'}</button>`:''}`}
+  box.innerHTML=`<div class="ins-head"><h3>💡 ข้อสังเกตจากการกิน</h3><div class="ins-tabs">${[7,30].map(d=>`<button type="button" data-p="${d}" class="${d===period?'on':''}">${d} วัน</button>`).join('')}</div></div>${body}`;
+  box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{period=Number(b.dataset.p);all=false;card()});
+  const m=box.querySelector('#insMore');if(m)m.onclick=()=>{all=!all;card()}}
+ // the "last week" card on home gets the top findings of that week
+ function homeWeek(){const hc=document.getElementById('weekHome');if(!hc||hc.style.display==='none'||!hc.innerHTML||hc.querySelector('.wk-ins'))return;
+  const ws=window.FWWeek?FWWeek.weekStart(localDay()):null;if(!ws)return;const L=list(7,addDay(ws,-1));if(!L.ready)return;
+  const top=L.items.filter(x=>x.lv==='warn').slice(0,2).concat(L.items.filter(x=>x.lv==='good').slice(0,1));if(!top.length)return;
+  const d=document.createElement('div');d.className='wk-ins';d.innerHTML=top.map(x=>`${x.ic} ${x.title}`).join('<br>');const go=hc.querySelector('.go');go?go.before(d):hc.appendChild(d)}
+ function reportHtml(days){const L=list(days);if(!L.ready||!L.items.length)return '';
+  return `<h2>ข้อสังเกต</h2><table>${L.items.map(x=>`<tr><td style="width:24px">${x.ic}</td><td style="text-align:left"><b>${x.title}</b><br><span style="color:#777">${x.text}${x.tip?' · '+x.tip:''}</span></td></tr>`).join('')}</table>`}
+ const wk=document.getElementById('weekDash');if(wk&&!document.getElementById('insDash')){const c=document.createElement('div');c.className='ins-card';c.id='insDash';wk.after(c)}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{card();homeWeek()}catch(e){console.error(e)}return o};
+ window.FWInsights={list,reportHtml};
+ card();homeWeek();
 })();
 </script>
 </body>
