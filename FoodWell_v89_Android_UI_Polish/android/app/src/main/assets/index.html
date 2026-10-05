@@ -1501,6 +1501,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  // clear the portion bar when the form is reset after saving
  document.getElementById('addFood')?.addEventListener('click',()=>setTimeout(()=>{if(!input.value){picked=null;portion.classList.remove('show')}},50));
  window.FWFoodDB={search,count:DB.length};
+ window.FWPickFood=item=>{picked=item;mult=1;input.value=item.name;box.classList.remove('show');fill()};
 })();
 </script>
 <!-- v103 Reminders: real Android notifications (native bridge: window.FoodWellNotify) -->
@@ -1780,6 +1781,65 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{render()}catch(e){console.error(e)}return o};
  window.FWWeek={streak,best,stats,weekStart};
  render();
+})();
+</script>
+<!-- v107 Barcode scanning: Open Food Facts lookup + barcodes you've saved yourself -->
+<style>
+.bc-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:2px 0 12px;border:1.5px dashed var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:11px;font-weight:800;font-size:14px;font-family:inherit}
+.bc-btn[disabled]{opacity:.6}
+.bc-info{margin:-4px 0 12px;padding:9px 11px;border-radius:12px;background:var(--panel2);font-size:12px;color:var(--muted);line-height:1.5}
+.bc-info b{color:var(--text)}
+</style>
+<script>
+(function(){
+ const S=()=>window.FoodWellScan;
+ const input=document.getElementById('foodName');if(!input)return;
+ const wrap=input.closest('.fw-name-wrap')||input.closest('label');
+ const btn=document.createElement('button');btn.type='button';btn.className='bc-btn';btn.innerHTML='📷 สแกนบาร์โค้ดสินค้า';
+ const info=document.createElement('div');info.className='bc-info';info.hidden=true;
+ const anchor=document.querySelector('.fw-portion')||wrap;anchor.after(btn);btn.after(info);
+ if(!S())btn.hidden=true; // scanner exists only in the Android app
+ let pending=null; // barcode waiting to be remembered when the food is saved
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const FIELDS=['kcal','protein','carbs','fat','fiber','sodium','sugar'];
+ function say(html){info.innerHTML=html;info.hidden=!html}
+ // a product we can't find starts from an empty form (no numbers left over from the last scan)
+ function clearForm(){FIELDS.forEach(k=>{const e=document.getElementById(k);if(e)e.value=''});input.value='';input.dispatchEvent(new Event('input'))}
+ function busy(on){btn.disabled=on;btn.innerHTML=on?'⏳ กำลังค้นหาสินค้า…':'📷 สแกนบาร์โค้ดสินค้า'}
+ function pick(item){if(window.FWPickFood)FWPickFood(item);else{input.value=item.name;FIELDS.forEach(k=>{const e=document.getElementById(k);if(e)e.value=item[k]??''})}}
+ // Open Food Facts product -> one serving (or 100 g/ml when no serving size is given)
+ function fromOFF(p){
+  const n=p.nutriments||{},q=Number(p.serving_quantity);
+  const per100=k=>{const v=n[k+'_100g'];return v==null||v===''?null:Number(v)};
+  let kcal=per100('energy-kcal');if(kcal==null&&per100('energy')!=null)kcal=per100('energy')/4.184;
+  if(kcal==null&&n['energy-kcal_serving']==null)return null;
+  const unit=q>0?q/100:1,val=(k,mul=1)=>{const sv=n[k+'_serving'];if(q>0&&sv!=null&&sv!=='')return Math.round(Number(sv)*mul*10)/10;const v=per100(k);return v==null?'':Math.round(v*unit*mul*10)/10};
+  const name=(p.product_name_th||p.product_name||p.product_name_en||'').trim()+(p.brands?` (${p.brands.split(',')[0].trim()})`:'');
+  return {name:name||'สินค้าบาร์โค้ด',kcal:Math.round(n['energy-kcal_serving']!=null&&q>0?Number(n['energy-kcal_serving']):kcal*unit),protein:val('proteins'),carbs:val('carbohydrates'),fat:val('fat'),sugar:val('sugars'),fiber:val('fiber'),sodium:val('sodium',1000),
+   serving:q>0?`1 หน่วยบริโภค (${p.serving_size||q+' g'})`:'100 g/ml',mine:false};
+ }
+ async function lookup(code){
+  const mine=(s.barcodes||{})[code];
+  if(mine){pick({...mine,mine:true,serving:'ที่คุณบันทึกไว้'});say(`✅ <b>${esc(mine.name)}</b> · จากบาร์โค้ดที่คุณเคยบันทึก`);pending=code;return}
+  busy(true);
+  try{
+   const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,product_name_th,product_name_en,brands,serving_size,serving_quantity,nutriments`);
+   const j=r.ok?await r.json():null,item=j&&j.status===1&&j.product?fromOFF(j.product):null;
+   if(item){pick(item);say(`✅ <b>${esc(item.name)}</b> · ${esc(item.serving)}<br>ข้อมูลจาก Open Food Facts (ผู้ใช้ทั่วโลกช่วยกันเพิ่ม) · ตรวจกับฉลากก่อนบันทึก`)}
+   else{clearForm();say(`🔎 ไม่พบบาร์โค้ด <b>${esc(code)}</b> ในฐานข้อมูล · กรอกชื่อและค่าจากฉลากแล้วบันทึก ครั้งหน้าสแกนแล้วจะเติมให้อัตโนมัติ`);input.focus()}
+   pending=code;
+  }catch(e){say('⚠️ ค้นหาไม่ได้ (ไม่มีอินเทอร์เน็ต?) · กรอกเองได้ แล้วระบบจะจำบาร์โค้ดนี้ไว้');pending=code}
+  finally{busy(false)}
+ }
+ btn.onclick=()=>{if(!S())return;say('');S().scan()};
+ window.onBarcode=code=>{code=String(code||'').replace(/\D/g,'');if(code)lookup(code)};
+ window.onBarcodeCancel=()=>{};
+ window.onBarcodeError=m=>say('⚠️ เปิดตัวสแกนไม่ได้'+(/download|module/i.test(m||'')?' · กำลังดาวน์โหลดตัวสแกนจาก Google Play ลองใหม่อีกครั้งในอีกสักครู่':''));
+ // remember the barcode with what was actually saved (runs before the form is cleared)
+ document.addEventListener('click',e=>{if(!pending||!e.target.closest('#addFood'))return;const name=input.value.trim();if(!name)return;
+  const rec={name};FIELDS.forEach(k=>{const v=document.getElementById(k)?.value;if(v!==''&&v!=null)rec[k]=Number(v)});
+  s.barcodes=s.barcodes||{};s.barcodes[pending]=rec;pending=null;setTimeout(()=>say(''),50)},true);
+ window.FWBarcode={lookup,fromOFF};
 })();
 </script>
 </body>

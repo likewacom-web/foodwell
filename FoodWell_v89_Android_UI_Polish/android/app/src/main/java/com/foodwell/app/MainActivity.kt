@@ -28,6 +28,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
@@ -98,6 +101,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(ProApi(), "FoodWellPro")
             addJavascriptInterface(NotifyApi(), "FoodWellNotify")
             addJavascriptInterface(ThemeApi(), "FoodWellTheme")
+            addJavascriptInterface(ScanApi(), "FoodWellScan")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -155,6 +159,19 @@ class MainActivity : ComponentActivity() {
                 isAppearanceLightStatusBars = light
                 isAppearanceLightNavigationBars = light
             }
+        }
+    }
+
+    /** Barcode scanning through Google Play services' scanner UI (no camera permission needed). */
+    inner class ScanApi {
+        @JavascriptInterface fun scan() = runOnUiThread {
+            val opts = GmsBarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
+                .build()
+            GmsBarcodeScanning.getClient(this@MainActivity, opts).startScan()
+                .addOnSuccessListener { b -> callJs("onBarcode", JSONObject.quote(b.rawValue ?: "")) }
+                .addOnCanceledListener { callJs("onBarcodeCancel", "") }
+                .addOnFailureListener { e -> Log.w(TAG, "scan failed", e); callJs("onBarcodeError", JSONObject.quote(e.message ?: "")) }
         }
     }
 
