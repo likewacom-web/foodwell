@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Images the app shares to other apps (achievement cards) are written here first. -->
+<paths>
+    <cache-path name="share" path="share/" />
+</paths>

@@ -2195,6 +2195,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  // Overlays the back button should close first (most specific first, then any visible dialog)
  const OVERLAYS=[
   ['#fwOnb.show',()=>{const b=document.getElementById('onbBack');if(b&&!b.hidden)b.click()}], // first-run setup: step back, never skip it by accident
+  ['#shSheet.show',el=>el.classList.remove('show')],
+  ['#woSheet.show,#hlSheet.show',el=>el.classList.remove('show')],
   ['#rwSheet.show',el=>el.classList.remove('show')],
   ['#trophyCelebrate.open',el=>el.classList.remove('open')],
   ['#foodModal.open',()=>window.closeFoodModal&&closeFoodModal()],
@@ -3484,5 +3486,102 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  setInterval(()=>{if(!document.hidden&&document.querySelector('#home.page.active')&&!document.querySelector('#home.home-editing'))show(true)},45000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.querySelector('#home.page.active'))show(true)});
  window.FWGreet={count:MSG.length,show};
+})();
+</script>
+<!-- v119 Share to social apps: share sheet (LINE, Facebook, Instagram, X, Messenger, WhatsApp, Telegram, others,
+ copy, save image) via window.FoodWellShare, with an auto-made 1080x1080 image card; used by trophies and workouts -->
+<style>
+.sh-sheet{position:fixed;inset:0;z-index:8000;background:#0008;display:none;align-items:flex-end;justify-content:center}
+.sh-sheet.show{display:flex}
+.sh-box{width:100%;max-width:560px;background:var(--panel);color:var(--text);border-radius:24px 24px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto}
+.sh-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}.sh-head h3{margin:0;flex:1;font-size:18px}
+.sh-x{border:0;background:var(--panel2);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:16px}
+.sh-prev{display:block;width:min(70%,260px);margin:0 auto 12px;border-radius:16px;box-shadow:0 8px 24px #0003}
+.sh-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sh-grid button{border:0;background:none;color:var(--text);font-family:inherit;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0}
+.sh-grid i{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:24px;font-weight:900;color:#fff}
+.sh-note{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5}
+.wo-share{margin-top:10px}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th;
+ const N=()=>window.FoodWellShare;
+ const APPS=[
+  ['jp.naver.line.android','LINE','#06C755','L'],
+  ['com.facebook.katana','Facebook','#1877F2','f'],
+  ['com.instagram.android','Instagram','linear-gradient(45deg,#F58529,#DD2A7B,#8134AF)','◎'],
+  ['com.twitter.android','X','#111','𝕏'],
+  ['com.facebook.orca','Messenger','linear-gradient(45deg,#0078FF,#A033FF)','m'],
+  ['com.whatsapp','WhatsApp','#25D366','W'],
+  ['org.telegram.messenger','Telegram','#229ED9','✈']];
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ // ---- image card (1080 x 1080) ----
+ function wrap(ctx,text,x,y,max,lh,lines){const words=String(text).split(/(\s+)/);let line='',n=0;
+  for(const w of words){const t=line+w;if(ctx.measureText(t).width>max&&line.trim()){ctx.fillText(line.trim(),x,y);y+=lh;line=w.trimStart();if(++n>=lines-1)break}else line=t}
+  if(line.trim())ctx.fillText(line.trim(),x,y);return y}
+ function card({emoji='🏆',title='',lines=[],stats=[],sub=''}){
+  const c=document.createElement('canvas');c.width=c.height=1080;const x=c.getContext('2d'),F='"Noto Sans Thai",sans-serif';
+  const g=x.createLinearGradient(0,0,1080,1080);g.addColorStop(0,'#FFE3EC');g.addColorStop(.55,'#F7C6D7');g.addColorStop(1,'#E9F7EF');x.fillStyle=g;x.fillRect(0,0,1080,1080);
+  x.fillStyle='#ffffff99';[[150,170,90],[950,240,60],[880,900,120],[120,880,70]].forEach(([a,b,r])=>{x.beginPath();x.arc(a,b,r,0,7);x.fill()});
+  x.fillStyle='#ffffffd9';x.beginPath();x.roundRect?x.roundRect(90,150,900,780,56):x.rect(90,150,900,780);x.fill();
+  x.textAlign='center';x.fillStyle='#2B1820';x.font=`230px ${F}`;x.fillText(emoji,540,420);
+  x.font=`900 86px ${F}`;let y=wrap(x,title,540,550,800,98,2);
+  x.font=`500 48px ${F}`;x.fillStyle='#6B4A57';y+=76;for(const l of lines.slice(0,3)){y=wrap(x,l,540,y,800,60,2)+64}
+  if(stats.length){const w=800/stats.length;stats.slice(0,3).forEach(([v,l],i)=>{const cx=140+w*i+w/2;x.fillStyle='#E887AA';x.font=`900 88px ${F}`;x.fillText(v,cx,y+60);x.fillStyle='#8A6B77';x.font=`500 36px ${F}`;x.fillText(l,cx,y+112)});}
+  x.fillStyle='#C2477A';x.font=`800 44px ${F}`;x.fillText('🌿 FoodWell',540,1015);
+  if(sub){x.fillStyle='#8A6B77';x.font=`600 34px ${F}`;x.fillText(sub,540,895)}
+  return c.toDataURL('image/png')}
+ // ---- share sheet ----
+ const sheet=document.createElement('div');sheet.className='sh-sheet';sheet.id='shSheet';sheet.setAttribute('role','dialog');sheet.innerHTML='<div class="sh-box"></div>';document.body.appendChild(sheet);
+ sheet.onclick=e=>{if(e.target===sheet)close()};
+ const close=()=>sheet.classList.remove('show');
+ let installed=null;
+ const getInstalled=()=>{if(installed)return installed;try{installed=N()?JSON.parse(N().installed()):[]}catch(e){installed=[]}return installed};
+ async function copy(text){try{await navigator.clipboard.writeText(text);toast(L('คัดลอกข้อความแล้ว 📋','Text copied 📋'))}catch(e){window.prompt(L('คัดลอกข้อความนี้','Copy this text'),text)}}
+ function download(img){const a=document.createElement('a');a.href=img;a.download='foodwell.png';document.body.appendChild(a);a.click();a.remove();toast(L('บันทึกรูปแล้ว 💾','Image saved 💾'))}
+ async function webShare(text,img){try{if(img&&navigator.canShare){const b=await (await fetch(img)).blob(),f=new File([b],'foodwell.png',{type:'image/png'});if(navigator.canShare({files:[f]})){await navigator.share({text,files:[f]});return}}
+   if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==='AbortError')return}copy(text)}
+ /** open({title, text, image?, card?}) — card: {emoji,title,lines,stats,sub} to draw an image when none is given */
+ function open(o){const text=o.text||'',img=o.image||(o.card?card(o.card):''),apps=N()?APPS.filter(a=>getInstalled().includes(a[0])):[];
+  const box=sheet.querySelector('.sh-box');
+  box.innerHTML=`<div class="sh-head"><h3>📤 ${esc(o.title||L('แชร์','Share'))}</h3><button type="button" class="sh-x" aria-label="${L('ปิด','Close')}">✕</button></div>
+   ${img?`<img class="sh-prev" src="${img}" alt="">`:''}
+   <div class="sh-grid">${apps.map(a=>`<button type="button" data-pkg="${a[0]}"><i style="background:${a[2]}">${a[3]}</i>${a[1]}</button>`).join('')}
+    <button type="button" data-act="more"><i style="background:#8C93A8">⋯</i>${L('แอปอื่น ๆ','More apps')}</button>
+    <button type="button" data-act="copy"><i style="background:#5B6378">⧉</i>${L('คัดลอกข้อความ','Copy text')}</button>
+    ${img?`<button type="button" data-act="save"><i style="background:#2f9e6e">↓</i>${L('บันทึกรูป','Save image')}</button>`:''}</div>
+   ${apps.some(a=>/facebook\.katana|instagram/.test(a[0]))?`<div class="sh-note">${L('Facebook และ Instagram จะแชร์เป็นรูป · ข้อความถูกคัดลอกไว้ให้ วางในโพสต์ได้เลย','Facebook and Instagram share the image · the text is copied so you can paste it into your post')}</div>`:''}`;
+  box.querySelector('.sh-x').onclick=close;
+  box.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>{const p=b.dataset.pkg;
+   // Facebook and Instagram drop text that is passed in: copy it so the user can paste it
+   if(/facebook\.katana|instagram/.test(p)&&text)navigator.clipboard?.writeText(text).catch(()=>{});
+   N().share(text,img,p);close()});
+  box.querySelector('[data-act="more"]').onclick=()=>{if(N())N().share(text,img,'');else webShare(text,img);close()};
+  box.querySelector('[data-act="copy"]').onclick=()=>{copy(text);close()};
+  const sv=box.querySelector('[data-act="save"]');if(sv)sv.onclick=()=>{if(N())N().saveImage(img);else download(img);close()};
+  sheet.classList.add('show')}
+ window.FWShare={open,card};
+ // ---- trophies: replace the old share paths (navigator.share is missing in the app's WebView) ----
+ const T=s=>window.fwT?fwT(s):s;
+ window.shareTrophy=async function(name,desc,done){if(!done){toast(L('ปลดล็อกถ้วยนี้ก่อนเพื่อแชร์ 🏆','Unlock this trophy first to share it 🏆'));return}
+  const n=T(name),d=T(desc);
+  open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 FoodWell — ${n}\n${d}\n${L('ปลดล็อกแล้ว 💗','Unlocked 💗')}`,card:{emoji:'🏆',title:n,lines:[d],sub:L('ปลดล็อกแล้ว ✨','Unlocked ✨')}})};
+ window.shareTrophyCollection=function(){const items=getTrophyItems(),u=items.filter(x=>x.v>=x.max);
+  if(!u.length){toast(L('ปลดล็อกถ้วยแรกก่อนเพื่อแชร์คอลเลกชัน 🏆','Unlock your first trophy to share the collection 🏆'));return}
+  const names=u.map(x=>T(x.n));
+  open({title:L('แชร์คอลเลกชัน','Share collection'),text:`🏆 FoodWell — ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}\n${L('ปลดล็อกแล้ว','Unlocked')} ${u.length}/${items.length} ✨\n`+names.map(x=>'• '+x).join('\n'),
+   card:{emoji:'🏆',title:L('คอลเลกชันถ้วยรางวัล','Trophy collection'),lines:[names.slice(0,4).join(' · ')],stats:[[`${u.length}/${items.length}`,L('ถ้วยที่ปลดล็อก','unlocked')]]}})};
+ window.nativeShareTrophyCard=function(){const img=document.getElementById('trophySharePreview')?.src;if(!img||!img.startsWith('data:')){toast(L('กำลังสร้างการ์ด…','Creating card…'));return}
+  open({title:L('แชร์การ์ดถ้วยรางวัล','Share trophy card'),text:L('🏆 ฉันปลดล็อกถ้วยรางวัลใน FoodWell แล้ว','🏆 I unlocked a trophy in FoodWell'),image:img})};
+ window.downloadTrophyShareCard=function(){const img=document.getElementById('trophySharePreview')?.src;if(!img)return;if(N())N().saveImage(img);else download(img)};
+ // ---- workout finished: a share button under the summary ----
+ new MutationObserver(()=>{const fin=document.getElementById('woFin');if(!fin||document.getElementById('woShare'))return;
+  const pl=document.getElementById('woPlayer'),st=[...pl.querySelectorAll('.wo-done .stats div')].map(d=>[d.querySelector('b')?.textContent||'',d.textContent.replace(d.querySelector('b')?.textContent||'','').trim()]);
+  const title=pl.querySelector('.wo-ptop .t')?.textContent||'';
+  const b=document.createElement('button');b.type='button';b.id='woShare';b.className='wo-btn ghost wo-share';b.textContent='📤 '+L('แชร์ความสำเร็จ','Share my workout');fin.after(b);
+  b.onclick=()=>open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout done')}: ${title}\n${st.map(([v,l])=>v+' '+l).join(' · ')}\n#FoodWell`,
+   card:{emoji:'💪',title:L('ออกกำลังกายเสร็จแล้ว!','Workout done!'),lines:[title],stats:st,sub:new Date().toLocaleDateString(EN?'en-GB':'th-TH',{day:'numeric',month:'long',year:'numeric'})}})
+ }).observe(document.getElementById('woPlayer')||document.body,{childList:true,subtree:true});
 })();
 </script>

@@ -140,6 +140,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(WidgetApi(), "FoodWellWidget")
             addJavascriptInterface(PrintApi(), "FoodWellPrint")
             addJavascriptInterface(LangApi(), "FoodWellLang")
+            addJavascriptInterface(ShareApi(this@MainActivity), "FoodWellShare")
             loadUrl("file:///android_asset/index.html")
         }
 
