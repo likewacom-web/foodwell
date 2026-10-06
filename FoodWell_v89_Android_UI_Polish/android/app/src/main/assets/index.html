@@ -3348,3 +3348,141 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  draw();
 })();
 </script>
+<!-- v118 Home greeting: 100 rotating encouragement messages (Thai/English), no repeats until most have been shown -->
+<style>
+.welcome .bubble{transition:opacity .35s ease,transform .35s ease;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.welcome .bubble.fw-swap{opacity:0;transform:translateY(4px) scale(.98)}
+.welcome .cat{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.welcome .cat.fw-hop{animation:fwHop .45s ease}
+@keyframes fwHop{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px) rotate(-6deg)}}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en';
+ // [thai, english, when] — when: '' any time, m morning (5–11), d daytime (11–17), e evening (17–21), n night (21–5)
+ const MSG=[
+  ['ดูแลตัวเองทีละวัน<br>เก่งมากแล้วนะ ♡','One day at a time —<br>you\'re doing great ♡',''],
+  ['ก้าวเล็ก ๆ วันนี้<br>คือความเปลี่ยนแปลงในวันหน้า','Small steps today<br>add up to big changes',''],
+  ['ไม่ต้องสมบูรณ์แบบ<br>แค่ไม่หยุดก็พอ','You don\'t need to be perfect,<br>just keep going',''],
+  ['ร่างกายขอบคุณ<br>ทุกครั้งที่คุณใส่ใจมัน','Your body thanks you<br>every time you care for it',''],
+  ['วันนี้ทำได้เท่าไหน<br>ก็ดีเท่านั้นนะ','Whatever you manage today<br>is enough',''],
+  ['ความสม่ำเสมอ<br>ชนะความหักโหมเสมอ','Consistency beats<br>intensity every time',''],
+  ['ดื่มน้ำสักแก้ว<br>เป็นของขวัญให้ตัวเอง 💧','A glass of water —<br>a little gift to yourself 💧',''],
+  ['ทุกมื้อคือโอกาสใหม่<br>ไม่ต้องรอถึงพรุ่งนี้','Every meal is a fresh start —<br>no need to wait for tomorrow',''],
+  ['เมื่อวานเป็นยังไงก็ช่าง<br>วันนี้เริ่มใหม่ได้เสมอ','Whatever yesterday was,<br>today is a new start',''],
+  ['ใจดีกับตัวเองหน่อยนะ<br>คุณกำลังพยายามอยู่','Be kind to yourself —<br>you\'re trying, and that counts',''],
+  ['การบันทึกคือการรู้จักตัวเอง<br>มากขึ้นทีละนิด','Logging is getting to know<br>yourself, bit by bit',''],
+  ['ช้าแต่มั่นคง<br>ไปถึงเป้าแน่นอน','Slow and steady<br>gets you there',''],
+  ['ผักเพิ่มอีกนิด<br>ร่างกายยิ้มอีกหน่อย 🥦','A bit more veggies,<br>a bit more smile 🥦',''],
+  ['คุณมาไกลกว่า<br>ที่คิดไว้เยอะเลยนะ','You\'ve come further<br>than you think',''],
+  ['ไม่มีอาหารไหนผิด<br>มีแค่ความพอดี','No food is wrong —<br>it\'s all about balance',''],
+  ['เดินอีกนิดก็นับนะ<br>ทุกก้าวมีความหมาย 🚶','A short walk counts —<br>every step matters 🚶',''],
+  ['ภูมิใจในตัวเองได้เลย<br>ที่เปิดแอปวันนี้','Be proud you showed up<br>today',''],
+  ['สุขภาพดี<br>เริ่มจากเรื่องเล็ก ๆ','Good health starts<br>with little things',''],
+  ['พักบ้างก็ได้<br>การพักก็เป็นส่วนหนึ่งของการดูแลตัวเอง','Rest is allowed —<br>it\'s part of self-care too',''],
+  ['ตัวเลขไม่ได้บอกทุกอย่าง<br>ความรู้สึกดีก็สำคัญ','Numbers aren\'t everything —<br>feeling good matters too',''],
+  ['ร่างกายคุณ<br>ทำงานหนักเพื่อคุณทุกวัน','Your body works hard<br>for you every day',''],
+  ['กินช้า ๆ<br>ให้ร่างกายรู้ว่าอิ่ม','Eat slowly —<br>let your body notice it\'s full',''],
+  ['วันนี้ลองเลือก<br>สิ่งที่ดีกับตัวเองสักอย่าง','Today, choose one thing<br>that\'s good for you',''],
+  ['ความพยายามของคุณ<br>ไม่เคยสูญเปล่า','Your effort<br>is never wasted',''],
+  ['ยิ้มหน่อยนะ<br>วันนี้คุณทำได้ดีแล้ว 😊','Smile —<br>you\'re doing well today 😊',''],
+  ['ไม่ต้องเปรียบเทียบกับใคร<br>แค่ดีกว่าเมื่อวานก็พอ','No need to compare —<br>just a little better than yesterday',''],
+  ['นิสัยดี ๆ<br>สร้างได้ทีละวัน','Good habits<br>are built one day at a time',''],
+  ['ร่างกายต้องการน้ำ<br>ลองจิบสักหน่อยไหม 💧','Your body loves water —<br>how about a sip? 💧',''],
+  ['ทุกวันที่บันทึก<br>คือชัยชนะเล็ก ๆ','Every logged day<br>is a small win',''],
+  ['ขยับตัวสักนิด<br>ใจก็สดชื่นขึ้นนะ','Move a little,<br>feel a little brighter',''],
+  ['สุขภาพไม่ใช่การแข่งขัน<br>เป็นการเดินทาง','Health isn\'t a race,<br>it\'s a journey',''],
+  ['ให้อภัยตัวเองบ้าง<br>แล้วเริ่มใหม่ได้เลย','Forgive yourself,<br>then simply start again',''],
+  ['คุณสมควรได้รับ<br>การดูแลที่ดีที่สุด','You deserve<br>the best care',''],
+  ['ทำทีละอย่าง<br>ไม่ต้องรีบ','One thing at a time —<br>no rush',''],
+  ['โปรตีนดี ๆ สักมื้อ<br>อิ่มนานขึ้นเยอะ 🍳','A good protein meal<br>keeps you full longer 🍳',''],
+  ['นอนให้พอ<br>ก็คือการดูแลตัวเองนะ 😴','Enough sleep<br>is self-care too 😴',''],
+  ['คุณทำได้<br>เชื่อในตัวเองนะ ✨','You can do this —<br>believe in yourself ✨',''],
+  ['ความเปลี่ยนแปลงต้องใช้เวลา<br>อดทนอีกนิดนะ','Change takes time —<br>be patient with yourself',''],
+  ['ร่างกายแข็งแรง<br>ใจก็แข็งแรงตาม','A stronger body<br>grows a stronger mind',''],
+  ['ลองสังเกตว่า<br>อาหารไหนทำให้รู้สึกดี','Notice which foods<br>make you feel good',''],
+  ['ทุกแก้วน้ำ<br>ทุกก้าวเดิน มีค่าเสมอ','Every glass of water,<br>every step — they all count',''],
+  ['คุณไม่ได้อยู่คนเดียว<br>เราเชียร์อยู่นะ 📣','You\'re not alone —<br>we\'re cheering for you 📣',''],
+  ['ความตั้งใจของคุณ<br>น่าชื่นชมมาก','Your commitment<br>is truly admirable',''],
+  ['เป้าหมายใหญ่<br>เริ่มจากวันนี้','Big goals<br>start today',''],
+  ['สูดหายใจลึก ๆ<br>แล้วไปต่อกัน','Take a deep breath,<br>then let\'s keep going',''],
+  ['ดูแลตัวเอง<br>ไม่ใช่เรื่องเห็นแก่ตัว','Caring for yourself<br>isn\'t selfish',''],
+  ['เลือกผลไม้แทนขนม<br>สักครั้งก็เก่งแล้ว 🍎','Fruit instead of a snack,<br>even once — nice! 🍎',''],
+  ['ร่างกายเปลี่ยนช้า<br>แต่ไม่เคยลืมความพยายาม','Bodies change slowly<br>but never forget the effort',''],
+  ['วันแย่ ๆ ก็ผ่านไปได้<br>พรุ่งนี้ยังรออยู่','Hard days pass —<br>tomorrow is still waiting',''],
+  ['คุณกำลังลงทุน<br>ให้ตัวเองในอนาคต','You\'re investing<br>in your future self',''],
+  ['ความสุขเล็ก ๆ<br>ก็ช่วยให้สุขภาพดีได้','Small joys<br>are good for your health too',''],
+  ['ฟังร่างกายตัวเอง<br>มันรู้ดีที่สุด','Listen to your body —<br>it knows best',''],
+  ['ลดหวานลงนิด<br>ร่างกายเบาขึ้นเยอะ','A little less sugar,<br>a lot lighter feeling',''],
+  ['ทุกครั้งที่ลุกขึ้นเดิน<br>คือการเลือกสุขภาพ','Every time you stand and walk,<br>you choose health',''],
+  ['ไม่มีคำว่าสายเกินไป<br>ที่จะเริ่มดูแลตัวเอง','It\'s never too late<br>to start caring for yourself',''],
+  ['คุณเก่งกว่าที่คิด<br>จริง ๆ นะ','You\'re stronger<br>than you think — really',''],
+  ['ร่างกายคือบ้าน<br>ดูแลให้ดีนะ 🏡','Your body is your home —<br>take good care of it 🏡',''],
+  ['ความคืบหน้า<br>สำคัญกว่าความสมบูรณ์แบบ','Progress<br>over perfection',''],
+  ['มื้อหน้าลองเพิ่มผัก<br>สักครึ่งจานนะ 🥗','Next meal, try half a plate<br>of vegetables 🥗',''],
+  ['ขอบคุณตัวเอง<br>ที่ไม่ยอมแพ้','Thank yourself<br>for not giving up',''],
+  ['ทุกเช้าคือโอกาสใหม่<br>สู้ ๆ นะ ☀️','Every morning is a new chance —<br>you\'ve got this ☀️','m'],
+  ['อรุณสวัสดิ์!<br>เริ่มวันด้วยน้ำสักแก้วนะ 💧','Good morning!<br>Start the day with a glass of water 💧','m'],
+  ['มื้อเช้าดี ๆ<br>ทำให้ทั้งวันดีตาม 🍳','A good breakfast<br>makes the whole day better 🍳','m'],
+  ['ยืดตัวสักนิดตอนเช้า<br>ร่างกายจะขอบคุณ','A little morning stretch —<br>your body will thank you','m'],
+  ['เช้านี้ตั้งใจ<br>ทำสิ่งดี ๆ ให้ตัวเองสักอย่าง','This morning, plan one good thing<br>for yourself','m'],
+  ['พักเที่ยงแล้ว<br>กินให้อร่อยและพอดีนะ','Lunch time —<br>enjoy it, and keep it balanced','d'],
+  ['บ่ายนี้ง่วงไหม<br>ลุกเดินสักห้านาทีดูนะ','Sleepy this afternoon?<br>Try a five-minute walk','d'],
+  ['ครึ่งวันแล้ว<br>ดื่มน้ำไปกี่แก้วแล้วนะ 💧','Half the day done —<br>how many glasses of water so far? 💧','d'],
+  ['ทำงานหนัก<br>อย่าลืมพักสายตาด้วยนะ','Working hard?<br>Remember to rest your eyes','d'],
+  ['ช่วงบ่ายนี้<br>ของว่างเป็นผลไม้ก็ดีนะ 🍊','This afternoon,<br>fruit makes a great snack 🍊','d'],
+  ['เหนื่อยมาทั้งวัน<br>เก่งมากแล้วนะ','A long day done —<br>you did great','e'],
+  ['มื้อเย็นเบา ๆ<br>นอนหลับสบายขึ้น 🌙','A light dinner<br>means better sleep 🌙','e'],
+  ['เย็นนี้ออกไปเดินเล่น<br>สักหน่อยไหม','How about a short walk<br>this evening?','e'],
+  ['ทบทวนวันนี้สักนิด<br>มีอะไรที่ทำได้ดีบ้าง','Look back on today —<br>what went well?','e'],
+  ['ใกล้จบวันแล้ว<br>ขอบคุณตัวเองหน่อยนะ','The day is nearly done —<br>thank yourself a little','e'],
+  ['ดึกแล้ว<br>พักผ่อนให้เต็มที่นะ 😴','It\'s late —<br>get some good rest 😴','n'],
+  ['นอนหลับดี<br>คือพื้นฐานของสุขภาพดี','Good sleep<br>is the base of good health','n'],
+  ['หิวดึก ๆ<br>ลองนมจืดหรือผลไม้นะ','Hungry late?<br>Try plain milk or fruit','n'],
+  ['วันนี้จบลงแล้ว<br>พรุ่งนี้เริ่มใหม่ด้วยกัน','Today is done —<br>tomorrow we start fresh together','n'],
+  ['วางมือถือ<br>แล้วนอนหลับฝันดีนะ 🌙','Put the phone down<br>and sleep well 🌙','n'],
+  ['ทุกความพยายาม<br>สะสมเป็นผลลัพธ์','All your efforts<br>add up to results',''],
+  ['คุณคือคนสำคัญ<br>ดูแลตัวเองให้ดีนะ','You matter —<br>take good care of yourself',''],
+  ['สุขภาพดี<br>ไม่จำเป็นต้องยาก','Healthy living<br>doesn\'t have to be hard',''],
+  ['ลองกินให้หลากหลาย<br>สีสันบนจานยิ่งเยอะยิ่งดี 🌈','Eat the rainbow —<br>the more colours the better 🌈',''],
+  ['ไม่ได้ออกกำลังกายวันนี้<br>ก็ยังเดินเล่นได้นะ','No workout today?<br>A walk still counts',''],
+  ['เป้าหมายไม่หนีไปไหน<br>ค่อย ๆ ไปก็ได้','Your goal isn\'t going anywhere —<br>take your time',''],
+  ['อยู่กับปัจจุบัน<br>ทำวันนี้ให้ดีที่สุด','Stay in the present —<br>make today count',''],
+  ['คุณกำลังสร้าง<br>ตัวคุณในเวอร์ชันที่ดีขึ้น','You\'re building<br>a better version of you',''],
+  ['ลดเค็มนิดหน่อย<br>หัวใจก็ขอบคุณ ❤️','A little less salt —<br>your heart says thanks ❤️',''],
+  ['ร่างกายเรา<br>เก่งกว่าที่เราคิดเสมอ','Our bodies are always<br>more capable than we think',''],
+  ['หัวเราะบ้าง<br>ก็ดีต่อสุขภาพนะ 😄','Laughing<br>is good for your health too 😄',''],
+  ['วันนี้ทำดีแล้ว<br>ไม่ต้องกดดันตัวเอง','You\'ve done well today —<br>no need to push yourself',''],
+  ['เดินขึ้นบันได<br>แทนลิฟต์สักครั้งไหม','Take the stairs<br>instead of the lift, just once?',''],
+  ['จำไว้ว่าทำไม<br>คุณถึงเริ่มต้น','Remember why<br>you started',''],
+  ['อาหารคือพลังงาน<br>ไม่ใช่ศัตรู','Food is fuel,<br>not the enemy',''],
+  ['ความรักตัวเอง<br>คือจุดเริ่มต้นของทุกอย่าง','Loving yourself<br>is where everything begins',''],
+  ['วันนี้ดีกว่าเมื่อวาน<br>แค่นิดเดียวก็พอ','Just a little better<br>than yesterday is enough',''],
+  ['ทุกคนมีจังหวะของตัวเอง<br>ไปตามจังหวะคุณนะ','Everyone has their own pace —<br>go at yours',''],
+  ['ดูแลตัวเองวันนี้<br>เพื่อรอยยิ้มในวันหน้า','Care for yourself today<br>for tomorrow\'s smile',''],
+  ['เก่งมากที่มาถึงตรงนี้<br>ไปต่อด้วยกันนะ ♡','Great job getting here —<br>let\'s keep going together ♡',''],
+ ];
+ const KEY='fw_greet_seen';
+ const slot=()=>{const h=new Date().getHours();return h>=5&&h<11?'m':h<17?'d':h<21?'e':'n'};
+ const seen=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}};
+ // pick a message for this time of day that hasn't been shown recently (remembers the last 70)
+ function pick(){const now=slot(),recent=seen(),ok=MSG.map((m,i)=>i).filter(i=>!MSG[i][2]||MSG[i][2]===now);
+  let pool=ok.filter(i=>!recent.includes(i));if(!pool.length)pool=ok.filter(i=>i!==recent[recent.length-1]);
+  const i=pool[Math.floor(Math.random()*pool.length)];
+  try{localStorage.setItem(KEY,JSON.stringify([...recent.filter(x=>x!==i),i].slice(-70)))}catch(e){}
+  return i}
+ const bubble=()=>document.querySelector('#home .welcome .bubble');
+ function show(animate){const b=bubble();if(!b)return;const m=MSG[pick()],html=EN?m[1]:m[0];
+  b.setAttribute('translate','no');
+  if(!animate){b.innerHTML=html;return}
+  b.classList.add('fw-swap');setTimeout(()=>{b.innerHTML=html;b.classList.remove('fw-swap')},300)}
+ show(false);
+ // a new message each time Home is opened, when tapping the bubble or the cat, and every 45 s while Home is on screen
+ const og=window.go;if(og)window.go=function(p){const was=document.querySelector('.page.active')?.id;og(p);if(p==='home'&&was!=='home')show(true)};
+ const w=document.querySelector('#home .welcome');
+ if(w){bubble()?.addEventListener('click',()=>show(true));const cat=w.querySelector('.cat');if(cat)cat.addEventListener('click',()=>{cat.classList.remove('fw-hop');void cat.offsetWidth;cat.classList.add('fw-hop');show(true)})}
+ setInterval(()=>{if(!document.hidden&&document.querySelector('#home.page.active')&&!document.querySelector('#home.home-editing'))show(true)},45000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.querySelector('#home.page.active'))show(true)});
+ window.FWGreet={count:MSG.length,show};
+})();
+</script>
