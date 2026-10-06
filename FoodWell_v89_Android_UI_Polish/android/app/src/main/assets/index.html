@@ -3580,8 +3580,73 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const pl=document.getElementById('woPlayer'),st=[...pl.querySelectorAll('.wo-done .stats div')].map(d=>[d.querySelector('b')?.textContent||'',d.textContent.replace(d.querySelector('b')?.textContent||'','').trim()]);
   const title=pl.querySelector('.wo-ptop .t')?.textContent||'';
   const b=document.createElement('button');b.type='button';b.id='woShare';b.className='wo-btn ghost wo-share';b.textContent='📤 '+L('แชร์ความสำเร็จ','Share my workout');fin.after(b);
-  b.onclick=()=>open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout done')}: ${title}\n${st.map(([v,l])=>v+' '+l).join(' · ')}\n#FoodWell`,
-   card:{emoji:'💪',title:L('ออกกำลังกายเสร็จแล้ว!','Workout done!'),lines:[title],stats:st,sub:new Date().toLocaleDateString(EN?'en-GB':'th-TH',{day:'numeric',month:'long',year:'numeric'})}})
+  const fig=/เดิน|walk/i.test(title)?'walk':/ยืด|mobility|yoga/i.test(title)?'catcow':/คาร์ดิโอ|cardio/i.test(title)?'jog':/HIIT/.test(title)?'jacks':/ช่วงล่าง|lower/i.test(title)?'lunge':/ช่วงบน|upper/i.test(title)?'push':'squat';
+  b.onclick=()=>window.FWShareWorkout?FWShareWorkout(title,st,fig):open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${title}`,card:{emoji:'💪',title}})
  }).observe(document.getElementById('woPlayer')||document.body,{childList:true,subtree:true});
+})();
+</script>
+<!-- v120 Share cards in the style of the trophy detail page: artwork panel, kicker, big title, description,
+ progress bar, status box and quote (colours follow the app theme) -->
+<script>
+(function(){
+ if(!window.FWShare)return;
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,T=s=>window.fwT?fwT(s):s;
+ const F='"Noto Sans Thai","Noto Sans",sans-serif';
+ const css=(sel,prop,def)=>{const e=document.querySelector(sel);if(!e)return def;const v=getComputedStyle(e)[prop];return v&&v!=='rgba(0, 0, 0, 0)'?v:def};
+ const load=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
+ function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+ function wrap(x,text,cx,y,max,lh,maxLines){const words=String(text).split(/(\s+)/);let line='',n=0;
+  for(const w of words){const t=line+w;if(x.measureText(t).width>max&&line.trim()){x.fillText(line.trim(),cx,y);y+=lh;line=w.trimStart();if(++n>=maxLines-1){line=line+'…';break}}else line=t}
+  if(line.trim())x.fillText(line.trim(),cx,y);return y}
+ // art: Image, or {emoji}; progress 0..1
+ async function detailCard({art,panel,emoji,kicker,title,desc,progress=1,count,status,statusSub,quote}){
+  const accent=css('#trophyDetailKicker','color','#2E7DC2'),bar=css('#trophyDetailBar','backgroundColor','#8FC5EE');
+  const W=1080,H=1500,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.textAlign='center';
+  x.fillStyle='#F3F4F6';x.fillRect(0,0,W,H);
+  // artwork panel
+  x.save();x.shadowColor='rgba(0,0,0,.22)';x.shadowBlur=40;x.shadowOffsetY=16;if(panel){const pg=x.createLinearGradient(90,70,990,770);pg.addColorStop(0,panel[0]);pg.addColorStop(1,panel[1]);x.fillStyle=pg}else x.fillStyle='#0B0A10';rr(x,90,70,900,700,56);x.fill();x.restore();
+  x.save();rr(x,90,70,900,700,56);x.clip();
+  if(art){const r=Math.min(860/art.width,660/art.height),w=art.width*r,h=art.height*r;x.drawImage(art,540-w/2,420-h/2,w,h)}
+  else{const g=x.createRadialGradient(540,420,40,540,420,420);g.addColorStop(0,'#3A1F33');g.addColorStop(1,'#0B0A10');x.fillStyle=g;x.fillRect(90,70,900,700);x.font=`300px ${F}`;x.fillText(emoji||'🏆',540,520)}
+  x.restore();
+  x.fillStyle=accent;x.font=`800 40px ${F}`;x.fillText(kicker,540,850);
+  x.fillStyle='#1B1B22';x.font=`900 96px ${F}`;wrap(x,title,540,965,900,104,2);
+  x.fillStyle='#5A5D66';x.font=`500 42px ${F}`;wrap(x,desc,540,1040,880,54,2);
+  x.fillStyle='#DCE1E8';rr(x,150,1090,780,20,10);x.fill();x.fillStyle=bar;rr(x,150,1090,Math.max(20,780*Math.min(1,progress)),20,10);x.fill();
+  x.fillStyle=accent;x.font=`800 42px ${F}`;x.fillText(count,540,1170);
+  x.fillStyle='#FAFAFB';x.strokeStyle='#E3E5EA';x.lineWidth=3;rr(x,110,1205,860,150,40);x.fill();x.stroke();
+  x.fillStyle=accent;x.font=`900 48px ${F}`;x.fillText(status,540,1272);x.fillStyle='#6B6E77';x.font=`500 34px ${F}`;x.fillText(statusSub,540,1324);
+  x.fillStyle=accent;x.font=`500 32px ${F}`;wrap(x,quote,540,1408,900,42,2);
+  x.fillStyle='#B0B3BC';x.font=`800 30px ${F}`;x.fillText('🌿 FoodWell',540,1475);
+  return c.toDataURL('image/png')}
+ const busy=()=>toast(L('กำลังสร้างการ์ด…','Creating card…'));
+ async function trophyImage(idx){const items=getTrophyItems(),t=items[idx],src=(window.foodwellTrophyArt||[])[idx];let art=null;try{if(src)art=await load(src)}catch(e){}
+  const done=t.v>=t.max;
+  return detailCard({art,emoji:t.i,kicker:`${t.i} ${L('ถ้วยรางวัลที่ปลดล็อกแล้ว','Unlocked trophy')}`,title:T(t.n),desc:T(t.d),progress:t.v/t.max,count:done?L('ปลดล็อกแล้ว ✨','Unlocked ✨'):`${t.v}/${t.max}`,
+   status:L('✅ ปลดล็อกแล้ว ✨','✅ Unlocked ✨'),statusSub:L('บันทึกความสำเร็จของคุณไว้แล้ว','Your achievement has been saved'),quote:L(`“ก้าวเล็ก ๆ ในวันนี้ คือจุดเริ่มต้นของสุขภาพที่ดีในอนาคต” ${t.i}`,`“A small step today is the start of better health tomorrow” ${t.i}`)})}
+ async function shareTrophyIdx(idx){const t=getTrophyItems()[idx];if(!t)return;if(t.v<t.max){toast(L('ปลดล็อกถ้วยนี้ก่อนเพื่อแชร์ 🏆','Unlock this trophy first to share it 🏆'));return}
+  busy();const image=await trophyImage(idx);
+  FWShare.open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 FoodWell — ${T(t.n)}\n${T(t.d)}\n${L('ปลดล็อกแล้ว 💗','Unlocked 💗')}`,image})}
+ // trophy detail: both buttons share the trophy card
+ window.shareTrophy=function(name,desc,done){const items=getTrophyItems();let i=items.findIndex(x=>x.n===name||T(x.n)===name);if(i<0)i=window.foodwellOpenTrophyIndex??-1;
+  if(i>=0)return shareTrophyIdx(i);FWShare.open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 FoodWell — ${name}\n${desc}`,card:{emoji:'🏆',title:name,lines:[desc]}})};
+ window.openTrophyShareCard=idx=>shareTrophyIdx(idx);
+ window.shareTrophyCollection=async function(){const items=getTrophyItems(),u=items.map((x,i)=>[x,i]).filter(([x])=>x.v>=x.max);
+  if(!u.length){toast(L('ปลดล็อกถ้วยแรกก่อนเพื่อแชร์คอลเลกชัน 🏆','Unlock your first trophy to share the collection 🏆'));return}
+  busy();let art=null;try{const src=(window.foodwellTrophyArt||[])[u[u.length-1][1]];if(src)art=await load(src)}catch(e){}
+  const names=u.map(([x])=>T(x.n));
+  const image=await detailCard({art,emoji:'🏆',kicker:`🏆 ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}`,title:L(`ปลดล็อก ${u.length} ถ้วย`,`${u.length} trophies unlocked`),desc:names.join(' · '),progress:u.length/items.length,
+   count:`${u.length}/${items.length}`,status:L('✅ สะสมต่อไปนะ ✨','✅ Keep collecting ✨'),statusSub:L('บันทึกความสำเร็จของคุณไว้ใน FoodWell','Your achievements are saved in FoodWell'),quote:L('“ทุกก้าวเล็ก ๆ มีความหมาย” 🌱','“Every small step counts” 🌱')});
+  FWShare.open({title:L('แชร์คอลเลกชัน','Share collection'),text:`🏆 FoodWell — ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}\n${L('ปลดล็อกแล้ว','Unlocked')} ${u.length}/${items.length} ✨\n`+names.map(x=>'• '+x).join('\n'),image})};
+ // workout: the exercise figure as the artwork
+ async function figure(id){if(!window.FWRig||!FWRig.has(id))return null;const box=document.createElement('div');box.style.cssText='position:fixed;left:-9999px;top:0;width:600px;height:600px;color:#fff';
+  box.innerHTML=FWRig.svg(id);document.body.appendChild(box);const s=box.firstChild;s.setAttribute('width','600');s.setAttribute('height','600');s.style.color='#2B1820';s.__on=1;FWRig.render(s,id,FWRig.cycle(id)*.5);
+  const xml=new XMLSerializer().serializeToString(s);box.remove();try{return await load('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml))}catch(e){return null}}
+ window.FWShareWorkout=async function(title,stats,moveId){busy();const art=await figure(moveId||'jacks');
+  const [m,k,n]=[stats[0]||['',''],stats[1]||['',''],stats[2]||['','']];
+  const image=await detailCard({art,panel:['#FFE6EF','#E4F4FF'],emoji:'💪',kicker:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout complete')}`,title,desc:new Date().toLocaleDateString(EN?'en-GB':'th-TH',{weekday:'long',day:'numeric',month:'long'}),progress:1,
+   count:`${m[0]} ${m[1]} · ${k[0]} ${k[1]} · ${n[0]} ${n[1]}`,status:L('✅ ทำสำเร็จแล้ว ✨','✅ Done ✨'),statusSub:L('บันทึกลงการเคลื่อนไหวใน FoodWell แล้ว','Logged to movement in FoodWell'),quote:L('“ร่างกายแข็งแรง ใจก็แข็งแรงตาม” 💪','“A stronger body grows a stronger mind” 💪')});
+  FWShare.open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout done')}: ${title}\n${stats.map(([v,l])=>v+' '+l).join(' · ')}\n#FoodWell`,image})};
+ window.FWDetailCard=detailCard;
 })();
 </script>
