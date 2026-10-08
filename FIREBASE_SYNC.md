@@ -29,9 +29,20 @@ FoodWell ใช้ Firebase (แพ็กเกจ Spark ฟรี ไม่ต�
        match /users/{uid}/{document=**} {
          allow read, write: if request.auth != null && request.auth.uid == uid;
        }
+       // ชาเลนจ์กับเพื่อน: ใครที่เข้าสู่ระบบและรู้รหัสห้องอ่านได้ · เขียนได้เฉพาะของตัวเอง
+       match /rooms/{code} {
+         allow read: if request.auth != null;
+         allow create: if request.auth != null && request.resource.data.createdBy == request.auth.uid;
+         allow update, delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+         match /members/{uid} {
+           allow read: if request.auth != null;
+           allow write: if request.auth != null && request.auth.uid == uid;
+         }
+       }
      }
    }
    ```
+   > ถ้าเคยตั้งกฎไว้แล้ว ให้เพิ่มส่วน `rooms` นี้แล้วกด **Publish** อีกครั้ง (ใช้กับโหมดแข่งกับเพื่อน)
 6. เอาไฟล์ `google-services.json` ใส่ใน repo ที่ `FoodWell_v89_Android_UI_Polish/android/app/google-services.json`
    - บน GitHub: เปิดโฟลเดอร์นั้น → **Add file → Upload files** → เลือกไฟล์ → **Commit**
    - หรือส่งไฟล์ให้ Claude ใส่ให้
@@ -60,3 +71,13 @@ FoodWell ใช้ Firebase (แพ็กเกจ Spark ฟรี ไม่ต�
 - `Firestore ปฏิเสธการเข้าถึง` → ตรวจกฎในข้อ 5
 - `ยังไม่ได้สร้าง Firestore Database` → ทำข้อ 4
 - `ไม่พบบัญชี Google ในเครื่อง` → เพิ่มบัญชี Google ในการตั้งค่ามือถือก่อน
+
+## ชาเลนจ์กับเพื่อน (โหมดเพื่อน)
+| ที่เก็บ | เนื้อหา |
+|---|---|
+| `rooms/{code}` | ชาเลนจ์ของห้อง: รหัสชาเลนจ์ วันเริ่ม จำนวนวัน ผู้สร้าง |
+| `rooms/{code}/members/{uid}` | ชื่อที่เพื่อนเห็น อีโมจิ จำนวนวันที่ผ่าน สถานะ (ไม่มีข้อมูลอาหารหรือสุขภาพ) |
+
+- ลิงก์ชวนเพื่อนคือ `https://likewacom-web.github.io/foodwell/join.html?c=รหัส` → ต้องเปิด **GitHub Pages** ของ repo
+  (Settings → Pages → Branch: `main` (หรือ branch หลัก) โฟลเดอร์ `/docs`) ถ้ายังไม่เปิด เพื่อนยังใส่รหัสเองในแอปได้
+- ลบบัญชี (ตั้งค่า → ข้อมูลและซิงก์) จะออกจากทุกห้องที่เคยเข้าร่วมด้วย

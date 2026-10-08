@@ -35,6 +35,7 @@
 <ul>
  <li><b>วิเคราะห์รูปอาหารด้วย AI:</b> เมื่อคุณกด “วิเคราะห์รูป” รูปที่คุณเลือกจะถูกส่งไปยังบริการ AI ของแอป (ทำงานบน Cloudflare Workers และใช้ Google Gemini API) เพื่อคาดเดาชื่ออาหารและค่าโภชนาการ แอปไม่เก็บรูปนั้นไว้บนเซิร์ฟเวอร์</li>
  <li><b>สแกนบาร์โค้ด:</b> หมายเลขบาร์โค้ดถูกส่งไปค้นหาที่ Open Food Facts (ฐานข้อมูลอาหารแบบเปิด) ตัวสแกนเป็นของ Google (ML Kit) ทำงานในเครื่อง</li>
+ <li><b>ชาเลนจ์กับเพื่อน:</b> ถ้าคุณสร้างหรือเข้าร่วมห้องชาเลนจ์ (ต้องเข้าสู่ระบบ) แอปจะเก็บชื่อที่คุณตั้งให้เพื่อนเห็น อีโมจิ และจำนวนวันที่ทำสำเร็จ ไว้ใน Firestore ที่ <code>rooms/{รหัส}</code> คนที่มีรหัสห้องและเข้าสู่ระบบจะเห็นข้อมูลนี้ ไม่มีข้อมูลอาหารหรือสุขภาพ · กด "เลิก" เพื่อออกจากห้อง</li>
  <li><b>แชร์:</b> ข้อความและรูปการ์ดถูกส่งไปยังแอปที่คุณเลือก (เช่น LINE, Facebook) เฉพาะเมื่อคุณกดแชร์</li>
  <li><b>รายงาน PDF และการแจ้งเตือน:</b> สร้างและทำงานในเครื่องทั้งหมด</li>
 </ul>
@@ -51,7 +52,7 @@
 <h2>7. การลบข้อมูล</h2>
 <ul>
  <li><b>ข้อมูลในเครื่อง:</b> ตั้งค่า → เกี่ยวกับ → “ล้างข้อมูลในเครื่อง” หรือถอนการติดตั้งแอป</li>
- <li><b>บัญชีและข้อมูลบนคลาวด์:</b> ตั้งค่า → ข้อมูลและซิงก์ → “ลบบัญชีและข้อมูลบนคลาวด์” ข้อมูลที่ซิงก์และรูปบนคลาวด์ รวมถึงบัญชี จะถูกลบถาวรทันที</li>
+ <li><b>บัญชีและข้อมูลบนคลาวด์:</b> ตั้งค่า → ข้อมูลและซิงก์ → “ลบบัญชีและข้อมูลบนคลาวด์” ข้อมูลที่ซิงก์ รูปบนคลาวด์ ห้องชาเลนจ์ที่เข้าร่วม และบัญชี จะถูกลบถาวรทันที</li>
  <li>หรือส่งคำขอลบทางอีเมลด้านล่าง เราจะดำเนินการภายใน 30 วัน</li>
 </ul>
 
@@ -79,6 +80,7 @@
 <ul>
  <li><b>AI food photo analysis:</b> when you tap “Analyse photo”, the photo you chose is sent to the app's AI service (running on Cloudflare Workers using the Google Gemini API) to suggest a food name and nutrition. The photo is not stored on our servers.</li>
  <li><b>Barcode scanning:</b> the barcode number is looked up in Open Food Facts (an open food database). The scanner is Google ML Kit and runs on the device.</li>
+ <li><b>Friend challenges:</b> if you create or join a challenge room (sign-in required), the app stores the name you choose for friends, an emoji and how many days you've completed in Firestore at <code>rooms/{code}</code>. Signed-in people who have the room code can see this — never your food or health data. Tap "Quit" to leave a room.</li>
  <li><b>Sharing:</b> text and card images go to the app you choose (e.g. LINE, Facebook) only when you tap share.</li>
  <li><b>PDF reports and reminders:</b> created and run entirely on the device.</li>
 </ul>
@@ -95,7 +97,7 @@
 <h2>7. Deleting your data</h2>
 <ul>
  <li><b>On this phone:</b> Settings → About → “Clear data on this device”, or uninstall the app.</li>
- <li><b>Account and cloud data:</b> Settings → Data &amp; sync → “Delete account and cloud data”. Synced data, cloud photos and the account are permanently deleted right away.</li>
+ <li><b>Account and cloud data:</b> Settings → Data &amp; sync → “Delete account and cloud data”. Synced data, cloud photos, challenge-room entries and the account are permanently deleted right away.</li>
  <li>Or email a deletion request to the address below; we act on it within 30 days.</li>
 </ul>
 

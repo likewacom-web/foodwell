@@ -871,7 +871,7 @@ function renderProfileStats(){
 }
 
 
-const HOME_DEFAULT=['welcome','summary','twocards','workout','healthy','dashboard-entry','food-section'];
+const HOME_DEFAULT=['welcome','summary','twocards','workout','challenge','healthy','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
 function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
@@ -2203,6 +2203,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   ['#ppSheet.show',el=>el.classList.remove('show')],
   ['#woSheet.show,#hlSheet.show',el=>el.classList.remove('show')],
   ['#wlSheet.show',()=>window.FWWorkoutLib&&FWWorkoutLib.back()],
+  ['#chModal.show',el=>el.classList.remove('show')],
   ['#rwSheet.show',el=>el.classList.remove('show')],
   ['#trophyCelebrate.open',el=>el.classList.remove('open')],
   ['#foodModal.open',()=>window.closeFoodModal&&closeFoodModal()],
@@ -3923,5 +3924,287 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // the builder's "Try" plays the unsaved draft
  window.FWWorkoutLib={get:k=>k==='c:__draft'&&draft?myDef(draft):get(k),list,open,close,back,programs:PR};
  W.redraw();
+})();
+</script>
+<!-- v123 Come back every day: challenges with medals and share cards, a "this month" summary card to share,
+ and friend challenges (invite code / link, live leaderboard through Firebase: FoodWellCloud.room*) -->
+<style>
+.ch-tabs{display:flex;gap:6px;margin:0 0 12px}.ch-tabs button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 4px;font-family:inherit;font-weight:800;font-size:13px}
+.ch-tabs button.on{background:#e887aa;border-color:#e887aa;color:#2b1820}
+.ch-month{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;border:0;border-radius:20px;padding:14px 16px;font-family:inherit;text-align:left;background:linear-gradient(135deg,#bfe8d2,#8fd3b0);color:#163a28}
+.ch-month .ic{font-size:30px}.ch-month b{display:block;font-size:15px}.ch-month small{font-size:12px;opacity:.8}
+.ch-card{margin:0 0 12px;padding:14px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+.ch-top{display:flex;align-items:center;gap:10px}.ch-top .em{font-size:30px;width:40px;text-align:center}.ch-top .tx{flex:1;min-width:0}.ch-top b{display:block;font-size:15px}.ch-top small{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+.ch-bar{height:8px;border-radius:9px;background:var(--panel2);overflow:hidden;margin:10px 0 8px}.ch-bar i{display:block;height:100%;background:linear-gradient(90deg,#f7bfd0,#e887aa)}
+.ch-dots{display:flex;flex-wrap:wrap;gap:4px}.ch-dots i{width:18px;height:18px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);font-style:normal;font-size:10px;display:grid;place-items:center}
+.ch-dots i.ok{background:#2f9e6e;border-color:#2f9e6e;color:#fff}.ch-dots i.no{background:#e5737333;border-color:#e57373}.ch-dots i.now{box-shadow:0 0 0 2px #e887aa}
+.ch-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.ch-acts button{flex:1;min-width:30%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 6px;font-family:inherit;font-weight:700;font-size:13px}
+.ch-acts button.go{background:#e887aa;border-color:#e887aa;color:#2b1820;font-weight:800}.ch-acts button.done{background:#2f9e6e1f;border-color:#2f9e6e;color:#2f9e6e}
+.ch-sec{margin:16px 0 8px;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.ch-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ch-pick{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:16px;padding:12px;font-family:inherit;text-align:left;display:flex;flex-direction:column;gap:3px}
+.ch-pick .em{font-size:26px}.ch-pick b{font-size:13px;line-height:1.35}.ch-pick small{font-size:11px;color:var(--muted);line-height:1.4}
+.ch-pick .tag{align-self:flex-start;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;background:#2f9e6e1f;color:#2f9e6e;margin-top:2px}.ch-pick .tag.ck{background:#e887aa26;color:#c2477a}
+.ch-medals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ch-medal{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:16px;padding:10px 6px;font-family:inherit;text-align:center;font-size:11px;line-height:1.35}
+.ch-medal .m{width:58px;height:58px;margin:0 auto 4px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:radial-gradient(circle at 35% 30%,#fff3c4,#f2c14e 55%,#c9902a);box-shadow:0 0 0 3px #f6dc8a inset,0 3px 8px #0002}
+.ch-medal.off{opacity:.45}.ch-medal.off .m{background:var(--panel2);box-shadow:none;filter:grayscale(1)}
+.ch-medal .n{display:block;font-weight:800;color:#c9902a}
+.ch-board{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.ch-board div{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}
+.ch-board div b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ch-board div.me b{color:#c2477a}.ch-board .rk{width:22px;text-align:center}
+.ch-board .pb{width:70px;height:6px;border-radius:9px;background:var(--panel2);overflow:hidden}.ch-board .pb i{display:block;height:100%;background:#2f9e6e}
+.ch-in{display:flex;gap:8px;margin-top:8px}.ch-in input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.2em;font-weight:800;text-align:center;font-size:18px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px}
+.ch-in button{border:0;border-radius:12px;padding:0 16px;font-weight:800;font-family:inherit;background:#e887aa;color:#2b1820}
+.ch-note{font-size:12px;color:var(--muted);line-height:1.6}
+.ch-home{margin:0 0 12px;padding:14px 16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.ch-home .row{display:flex;align-items:center;gap:10px}.ch-home .row+.row{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.ch-home .em{font-size:26px}.ch-home .tx{flex:1;min-width:0}.ch-home b{display:block;font-size:14px}.ch-home small{display:block;color:var(--muted);font-size:12px}
+.ch-home button{border:0;border-radius:12px;padding:9px 11px;font-weight:800;font-family:inherit;background:#e887aa;color:#2b1820;white-space:nowrap;font-size:13px}.ch-home button.ok{background:var(--panel2);color:var(--muted)}
+.ch-modal{position:fixed;inset:0;z-index:6600;background:#000a;display:none;align-items:center;justify-content:center;padding:16px}.ch-modal.show{display:flex}
+.ch-modal .box{width:100%;max-width:440px;max-height:92vh;overflow-y:auto;background:var(--panel);color:var(--text);border-radius:24px;padding:16px;text-align:center}
+.ch-modal img{width:100%;border-radius:16px;display:block;margin:8px 0 12px;background:#0001}
+.ch-modal .hd{display:flex;align-items:center;gap:8px;text-align:left}.ch-modal .hd b{flex:1;font-size:17px}
+.ch-modal .x{border:0;background:var(--panel2);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:16px}
+.ch-modal .nav{display:flex;gap:8px;margin-bottom:8px}.ch-modal .nav button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px;font-family:inherit;font-weight:700}
+.ch-modal .big{border:0;width:100%;border-radius:14px;padding:13px;font-weight:800;font-size:15px;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,T=x=>window.fwT?fwT(x):x;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const main=document.querySelector('main');if(!main)return;
+ const addD=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ const today=()=>localDay();
+ const foodsOn=d=>(s.foods||[]).filter(f=>foodDay(f)===d);
+ const nameOf=f=>String(f.name||'')+' '+T(String(f.name||''));
+ const DRINK=/ชา|กาแฟ|นม|โกโก้|น้ำ(?!พริก|ซุป|แกง|ตก|ใส|มัน|ปลา|จิ้ม|ยา)|โซดา|ปั่น|สมูท|เครื่องดื่ม|ลาเต้|มอคค่า|คาปู|tea|coffee|latte|milk|cocoa|soda|juice|smoothie|drink|cola|frappe/i;
+ const FRIED=/ทอด|กรอบ|ฟรายส์|นักเก็ต|เทมปุระ|คาราอาเกะ|ทงคัตสึ|fried|crispy|fries|nugget|tempura|karaage|katsu/i;
+ const ALCO=/เบียร์|ไวน์|วิสกี้|เหล้า|สุรา|ค็อกเทล|โซจู|สาเก|beer|wine|whisk|cocktail|vodka|soju|sake/i;
+ const tgt=()=>{const T0=typeof bodyTargets==='function'?bodyTargets():null;return {kcal:(window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T0&&T0.kcal)||0,protein:(T0&&T0.protein)||0}};
+ const nut=d=>typeof nutrientsOn==='function'?nutrientsOn(d):{};
+ // ---- challenges: kind 'auto' = checked from what you log, 'check' = tick it yourself (some break automatically) ----
+ // test(d) -> true pass / false fail / null not decided yet; bad(d) -> a logged entry that breaks a 'check' day
+ const C=[
+  {id:'nosweet',e:'🧋',th:'7 วันงดน้ำหวาน',en:'7 days, no sweet drinks',days:7,kind:'check',rth:'ติ๊กทุกวันที่ไม่ดื่มน้ำหวาน · บันทึกเครื่องดื่มน้ำตาล ≥ 8 g จะนับว่าพลาด',ren:'Tick each day without sweet drinks · logging a drink with ≥ 8 g sugar counts as a miss',
+   bad:d=>foodsOn(d).some(f=>Number(f.sugar)>=8&&DRINK.test(nameOf(f)))},
+  {id:'water7',e:'💧',th:'ดื่มน้ำครบ 7 วัน',en:'Water goal, 7 days',days:7,kind:'auto',rth:'ดื่มน้ำถึงเป้าของคุณทุกวัน',ren:'Reach your water goal every day',test:d=>waterOn(d)>=waterGoal()},
+  {id:'water14',e:'🌊',th:'ดื่มน้ำครบ 14 วัน',en:'Water goal, 14 days',days:14,kind:'auto',rth:'ดื่มน้ำถึงเป้าทุกวัน 14 วัน',ren:'Reach your water goal for 14 days',test:d=>waterOn(d)>=waterGoal()},
+  {id:'log7',e:'📝',th:'บันทึกอาหาร 7 วันติด',en:'Log food 7 days in a row',days:7,kind:'auto',rth:'บันทึกอาหารอย่างน้อย 2 รายการต่อวัน',ren:'Log at least 2 foods a day',test:d=>foodsOn(d).length>=2},
+  {id:'log30',e:'📒',th:'บันทึกอาหาร 25 จาก 30 วัน',en:'Log food 25 of 30 days',days:30,need:25,kind:'auto',rth:'บันทึกอาหารอย่างน้อย 2 รายการ 25 วันใน 30 วัน',ren:'Log at least 2 foods on 25 of 30 days',test:d=>foodsOn(d).length>=2},
+  {id:'move10',e:'🏃',th:'ขยับ 30 นาที 10 วัน',en:'Move 30 min, 10 days',days:14,need:10,kind:'auto',rth:'การเคลื่อนไหวรวม 30 นาที 10 วันใน 14 วัน',ren:'30 minutes of movement on 10 of 14 days',test:d=>moveMinOn(d)>=30},
+  {id:'workout12',e:'🏋️',th:'ออกกำลังกาย 12 ครั้งใน 30 วัน',en:'12 workouts in 30 days',days:30,need:12,kind:'auto',rth:'วันที่ออกกำลังกาย 15 นาทีขึ้นไป นับเป็น 1 ครั้ง',ren:'A day with 15+ minutes of exercise counts once',test:d=>moveMinOn(d)>=15},
+  {id:'kcal7',e:'🎯',th:'กินตามเป้าแคลอรี่ 7 วัน',en:'On calorie target, 7 days',days:7,kind:'auto',rth:'บันทึกอาหารและไม่เกินเป้าแคลอรี่ (+5%)',ren:'Log food and stay within your calorie target (+5%)',test:d=>{const k=kcalOn(d),t=tgt().kcal||2000;return k>0&&k<=t*1.05}},
+  {id:'protein7',e:'💪',th:'โปรตีนถึงเป้า 7 วัน',en:'Protein goal, 7 days',days:7,kind:'auto',rth:'โปรตีนถึงเป้าจากข้อมูลร่างกาย (หรือ 60 g)',ren:'Reach your protein target (or 60 g)',test:d=>(nut(d).protein||0)>=(tgt().protein||60)},
+  {id:'sugar7',e:'🍬',th:'น้ำตาลไม่เกิน 24 g 7 วัน',en:'Sugar under 24 g, 7 days',days:7,kind:'auto',rth:'บันทึกอาหาร และน้ำตาลรวมไม่เกิน 24 กรัม (6 ช้อนชา)',ren:'Log food and keep total sugar at 24 g (6 tsp) or less',test:d=>foodsOn(d).length>0&&(nut(d).sugar||0)<=24},
+  {id:'fiber7',e:'🥦',th:'ใยอาหาร 20 g 7 วัน',en:'Fibre 20 g, 7 days',days:7,kind:'auto',rth:'ใยอาหารรวมอย่างน้อย 20 กรัมต่อวัน',ren:'At least 20 g of fibre a day',test:d=>(nut(d).fiber||0)>=20},
+  {id:'weigh14',e:'⚖️',th:'ชั่งน้ำหนักทุกวัน 14 วัน',en:'Weigh in daily, 14 days',days:14,kind:'auto',rth:'บันทึกน้ำหนักทุกวัน',ren:'Log your weight every day',test:d=>(s.weightLog||[]).some(x=>x.date===d)},
+  {id:'fast7',e:'⏱️',th:'IF ตามเวลา 7 วัน',en:'Fasting window, 7 days',days:7,kind:'auto',rth:'กินเฉพาะในช่วงเวลาที่ตั้งไว้ในการทำ IF',ren:'Eat only inside your fasting plan\'s window',test:d=>window.FWFast&&FWFast.kept?FWFast.kept(d)===true:false},
+  {id:'nofried',e:'🍳',th:'7 วันงดของทอด',en:'7 days, no fried food',days:7,kind:'check',rth:'ติ๊กทุกวันที่ไม่กินของทอด · บันทึกเมนูทอดจะนับว่าพลาด',ren:'Tick each day without fried food · logging a fried dish counts as a miss',bad:d=>foodsOn(d).some(f=>FRIED.test(nameOf(f)))},
+  {id:'noalcohol',e:'🚱',th:'14 วันงดแอลกอฮอล์',en:'14 days, no alcohol',days:14,kind:'check',rth:'ติ๊กทุกวันที่ไม่ดื่ม · บันทึกเบียร์/ไวน์จะนับว่าพลาด',ren:'Tick each alcohol-free day · logging beer or wine counts as a miss',bad:d=>foodsOn(d).some(f=>ALCO.test(nameOf(f)))},
+  {id:'nolate',e:'🌙',th:'งดกินหลัง 2 ทุ่ม 7 วัน',en:'No eating after 8 pm, 7 days',days:7,kind:'check',rth:'ติ๊กทุกวัน · อาหารที่บันทึกหลัง 20:00 จะนับว่าพลาด',ren:'Tick each day · food logged after 8 pm counts as a miss',bad:d=>foodsOn(d).some(f=>f.createdAt&&new Date(Number(f.createdAt)).getHours()>=20&&localDay(new Date(Number(f.createdAt)))===d)},
+  {id:'sleep7',e:'😴',th:'นอนก่อน 5 ทุ่ม 7 วัน',en:'In bed by 11 pm, 7 days',days:7,kind:'check',rth:'ติ๊กเองทุกเช้าว่าเมื่อคืนนอนก่อน 23:00',ren:'Tick each morning if you were in bed by 11 pm'},
+  {id:'steps10',e:'👟',th:'เดิน 8,000 ก้าว 10 วัน',en:'8,000 steps, 10 days',days:14,need:10,kind:'check',rth:'ดูก้าวจากนาฬิกา/มือถือ แล้วติ๊กวันที่ถึง 8,000 ก้าว (10 วันใน 14 วัน)',ren:'Check your watch or phone and tick days with 8,000+ steps (10 of 14 days)'},
+  {id:'veg7',e:'🥗',th:'กินผักทุกมื้อ 7 วัน',en:'Veggies every meal, 7 days',days:7,kind:'check',rth:'ติ๊กวันที่มีผักในทุกมื้อหลัก',ren:'Tick days with vegetables at every main meal'},
+  {id:'stretch7',e:'🧘',th:'ยืดเหยียดทุกวัน 7 วัน',en:'Stretch daily, 7 days',days:7,kind:'check',rth:'ยืดเหยียดอย่างน้อย 5 นาที (ใช้โปรแกรม "ก่อนนอน" ก็ได้)',ren:'Stretch for at least 5 minutes (the Wind-down program works)'},
+ ];
+ const def=id=>C.find(c=>c.id===id);
+ const need=c=>c.need||c.days;
+ const title=c=>L(c.th,c.en);
+ const st=()=>{s.challenges=s.challenges||{};s.challenges.active=s.challenges.active||[];s.challenges.done=s.challenges.done||[];return s.challenges};
+ // day result for an active challenge
+ function dayRes(a,c,d){const t=today();if(d>t)return 'future';
+  if(c.kind==='check'){if(c.bad&&c.bad(d))return 'no';if((a.checks||[]).includes(d))return 'ok';return d===t?'now':'no'}
+  let r=false;try{r=!!c.test(d)}catch(e){}return r?'ok':d===t?'now':'no'}
+ function evalA(a){const c=def(a.id);if(!c)return null;const days=[...Array(c.days)].map((_,i)=>addD(a.start,i)),res=days.map(d=>dayRes(a,c,d));
+  const ok=res.filter(x=>x==='ok').length,no=res.filter(x=>x==='no').length,end=days[days.length-1],n=need(c);
+  const state=ok>=n?'done':(no>c.days-n||today()>end)?'fail':'on';
+  const dayNo=Math.min(c.days,Math.max(1,Math.round((new Date(today()+'T12:00:00')-new Date(a.start+'T12:00:00'))/864e5)+1));
+  return {c,days,res,ok,no,n,state,dayNo,end,todayRes:res[days.indexOf(today())]}}
+ // ---- medal art (canvas) and share card ----
+ function medalArt(e){const W=700,cv=document.createElement('canvas');cv.width=W;cv.height=W;const x=cv.getContext('2d');
+  const g=x.createRadialGradient(350,330,40,350,330,420);g.addColorStop(0,'#3A1F33');g.addColorStop(1,'#0B0A10');x.fillStyle=g;x.fillRect(0,0,W,W);
+  for(let i=0;i<14;i++){x.save();x.translate(350,330);x.rotate(i*Math.PI/7);x.fillStyle='rgba(255,215,120,.07)';x.fillRect(-14,-330,28,330);x.restore()}
+  x.fillStyle='#e887aa';x.beginPath();x.moveTo(250,60);x.lineTo(330,60);x.lineTo(370,250);x.lineTo(290,250);x.fill();x.fillStyle='#7dd3a8';x.beginPath();x.moveTo(370,60);x.lineTo(450,60);x.lineTo(410,250);x.lineTo(330,250);x.fill();
+  const m=x.createRadialGradient(310,300,20,350,360,200);m.addColorStop(0,'#FFF6CF');m.addColorStop(.5,'#F2C14E');m.addColorStop(1,'#B9801F');
+  x.fillStyle=m;x.beginPath();x.arc(350,370,190,0,7);x.fill();x.lineWidth=14;x.strokeStyle='#F8DE8C';x.beginPath();x.arc(350,370,160,0,7);x.stroke();
+  x.textAlign='center';x.textBaseline='middle';x.font='180px "Noto Color Emoji",sans-serif';x.fillText(e,350,382);
+  return new Promise(ok=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=cv.toDataURL('image/png')})}
+ async function shareMedal(id){const c=def(id);if(!c)return;const n=st().done.filter(x=>x.id===id&&x.ok).length;if(!n){toast(L('ทำชาเลนจ์นี้ให้สำเร็จก่อนนะ 🏅','Finish this challenge first 🏅'));return}
+  toast(L('กำลังสร้างการ์ด…','Creating card…'));const art=await medalArt(c.e);
+  const image=window.FWDetailCard?await FWDetailCard({art,emoji:c.e,kicker:`🏅 ${L('ชาเลนจ์สำเร็จ','Challenge complete')}`,title:title(c),desc:L(`ทำได้ ${need(c)} จาก ${c.days} วัน`,`${need(c)} of ${c.days} days done`),progress:1,count:`${need(c)}/${c.days} ${L('วัน','days')}${n>1?` · ×${n}`:''}`,
+   status:L('✅ ได้เหรียญแล้ว ✨','✅ Medal earned ✨'),statusSub:L('ทำได้ครบตามเป้า บันทึกไว้ใน FoodWell','Goal reached — saved in FoodWell'),quote:L('“ทำทีละวัน แล้ววันหนึ่งจะกลายเป็นนิสัย” 🌱','“One day at a time becomes a habit” 🌱')}):'';
+  window.FWShare&&FWShare.open({title:L('แชร์เหรียญ','Share medal'),text:`🏅 ${L('ทำสำเร็จ','I finished')} "${title(c)}" ${L('ใน FoodWell','in FoodWell')} ${c.e}\n${L('มาลองด้วยกันไหม?','Want to try it too?')} #FoodWell`,image})}
+ // ---- modal (celebration / month card) ----
+ const modal=document.createElement('div');modal.className='ch-modal';modal.id='chModal';modal.setAttribute('role','dialog');modal.innerHTML='<div class="box"></div>';document.body.appendChild(modal);
+ modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};
+ const mbox=modal.querySelector('.box');
+ const closeBtn=`<button type="button" class="x" id="chX" aria-label="${L('ปิด','Close')}">✕</button>`;
+ function celebrate(id){const c=def(id);mbox.innerHTML=`<div class="hd"><b>🎉 ${L('สำเร็จแล้ว!','You did it!')}</b>${closeBtn}</div><div style="font-size:80px;margin:10px 0">🏅</div>
+  <h2 style="margin:0 0 6px">${c.e} ${esc(title(c))}</h2><p class="ch-note">${L('ได้เหรียญใหม่ ดูได้ในแท็บ "เหรียญ"','A new medal — see it under "Medals"')}</p>
+  <button type="button" class="big" id="chShareM">📤 ${L('แชร์เหรียญนี้','Share this medal')}</button>`;
+  mbox.querySelector('#chX').onclick=()=>modal.classList.remove('show');mbox.querySelector('#chShareM').onclick=()=>{modal.classList.remove('show');shareMedal(id)};modal.classList.add('show');
+  try{navigator.vibrate&&navigator.vibrate([60,40,120])}catch(e){}}
+ // ---- page ----
+ const page=document.createElement('section');page.id='challenges';page.className='page';
+ page.innerHTML=`<div class="page-title"><div><p>${L('CHALLENGES','CHALLENGES')}</p><h1>🏅 ${L('ชาเลนจ์','Challenges')}</h1></div><button class="secondary-btn" type="button" id="chBack">${L('กลับ','Back')}</button></div><div id="chBody"></div>`;
+ main.appendChild(page);
+ let tab='mine',prevPage='home';
+ const og=window.go;if(og)window.go=function(p){const cur=document.querySelector('.page.active')?.id;if(p==='challenges'&&cur&&cur!=='challenges')prevPage=cur;og(p);if(p==='challenges'){window.fwParent&&(fwParent.challenges=prevPage);draw();window.scrollTo({top:0})}};
+ page.querySelector('#chBack').onclick=()=>go(prevPage);
+ const body=page.querySelector('#chBody');
+ const dots=E=>`<div class="ch-dots">${E.res.map((r,i)=>`<i class="${r==='ok'?'ok':r==='no'?'no':''}${r==='now'?' now':''}" title="${E.days[i]}">${r==='ok'?'✓':r==='no'?'·':i+1}</i>`).join('')}</div>`;
+ function activeCard(a,i){const E=evalA(a);if(!E)return '';const c=E.c,yd=addD(today(),-1),canY=c.kind==='check'&&yd>=a.start&&!(a.checks||[]).includes(yd)&&!(c.bad&&c.bad(yd))&&E.state==='on';
+  const tStat=E.todayRes==='ok'?`✅ ${L('วันนี้ผ่านแล้ว','Today: done')}`:E.todayRes==='no'?`❌ ${L('วันนี้พลาด','Today: missed')}`:c.kind==='check'?'':`⏳ ${L('วันนี้ยังไม่ถึงเป้า','Today: not there yet')}`;
+  let acts='';
+  if(E.state==='on'){if(c.kind==='check'&&E.todayRes==='now')acts+=`<button type="button" class="go" data-ck="${i}">✓ ${L('วันนี้ทำได้','Done today')}</button>`;
+   if(canY)acts+=`<button type="button" data-cky="${i}">✓ ${L('เมื่อวานทำได้','Done yesterday')}</button>`;
+   acts+=`<button type="button" data-inv="${i}">👥 ${a.room?L('ชวนเพิ่ม','Invite more'):L('ชวนเพื่อนแข่ง','Race friends')}</button><button type="button" data-quit="${i}">${L('เลิก','Quit')}</button>`}
+  else acts+=`<button type="button" class="go" data-again="${i}">↻ ${L('เริ่มใหม่','Start again')}</button><button type="button" data-quit="${i}">${L('ลบ','Remove')}</button>`;
+  const board=a.room?roomBoard(a):'';
+  return `<div class="ch-card"><div class="ch-top"><span class="em">${c.e}</span><span class="tx"><b>${esc(title(c))}</b><small>${E.state==='fail'?`😕 ${L('ไม่สำเร็จครั้งนี้ ลองใหม่ได้เสมอ','Not this time — try again anytime')}`:`${L('วันที่','Day')} ${E.dayNo}/${c.days} · ${L('ผ่าน','passed')} ${E.ok}/${E.n}${tStat?' · '+tStat:''}`}</small></span></div>
+   <div class="ch-bar"><i style="width:${Math.min(100,E.ok/E.n*100).toFixed(0)}%"></i></div>${dots(E)}
+   <div class="ch-note" style="margin-top:6px">${esc(L(c.rth,c.ren))}</div>${board}<div class="ch-acts">${acts}</div></div>`}
+ function pickList(){const act=new Set(st().active.map(a=>a.id));
+  return `<div class="ch-list">${C.filter(c=>!act.has(c.id)).map(c=>`<button type="button" class="ch-pick" data-start="${c.id}"><span class="em">${c.e}</span><b>${esc(title(c))}</b><small>${esc(L(c.rth,c.ren))}</small><span class="tag${c.kind==='check'?' ck':''}">${c.kind==='check'?L('ติ๊กเอง','Tick it'):L('นับอัตโนมัติ','Automatic')}</span></button>`).join('')}</div>`}
+ function medals(){const done=st().done.filter(x=>x.ok),cnt=id=>done.filter(x=>x.id===id).length,got=C.filter(c=>cnt(c.id)).length;
+  return `<div class="ch-note" style="margin-bottom:10px">${L(`ได้แล้ว ${got} จาก ${C.length} เหรียญ · แตะเหรียญเพื่อแชร์`,`${got} of ${C.length} medals · tap one to share`)}</div>
+   <div class="ch-medals">${C.map(c=>{const n=cnt(c.id);return `<button type="button" class="ch-medal${n?'':' off'}" data-medal="${c.id}"><div class="m">${c.e}</div>${esc(title(c))}${n?`<span class="n">×${n}</span>`:''}</button>`}).join('')}</div>`}
+ // ---- friends ----
+ const cloud=()=>window.FoodWellCloud;
+ function me(){try{const x=JSON.parse(cloud().status());return x.configured&&x.user?x.user:null}catch(e){return null}}
+ const roomData={};
+ const myName=()=>s.friendName||((me()||{}).name||'').split(' ')[0]||L('ฉัน','Me');
+ function member(a){const E=evalA(a);return JSON.stringify({name:myName(),e:(s.profile&&s.profile.emoji)||'🌿',passed:E?E.ok:0,need:E?E.n:0,state:E?E.state:'on',last:E?E.days.filter((d,i)=>E.res[i]==='ok').pop()||'':''})}
+ function roomBoard(a){const list=(roomData[a.room]||[]).slice().sort((x,y)=>(y.passed||0)-(x.passed||0)||(x.updatedAt||0)-(y.updatedAt||0));
+  return `<div class="ch-board"><div style="font-weight:800;font-size:12px;color:var(--muted)">👥 ${L('ห้อง','Room')} <span translate="no" style="letter-spacing:.15em">${esc(a.room)}</span> · ${list.length} ${L('คน','people')}</div>
+   ${list.length?list.map((m,i)=>`<div class="${m.me?'me':''}"><span class="rk">${['🥇','🥈','🥉'][i]||i+1}</span><span>${esc(m.e||'🌿')}</span><b>${esc(m.name||'?')}${m.me?' ('+L('คุณ','you')+')':''}</b><span class="pb"><i style="width:${Math.min(100,(m.passed||0)/(m.need||1)*100)}%"></i></span><span style="width:44px;text-align:right">${m.passed||0}/${m.need||'?'}${m.state==='done'?' 🏅':''}</span></div>`).join('')
+    :`<div class="ch-note">${me()?L('กำลังโหลด…','Loading…'):L('เข้าสู่ระบบเพื่อดูอันดับ','Sign in to see the leaderboard')}</div>`}</div>`}
+ const LINK=c=>`https://likewacom-web.github.io/foodwell/join.html?c=${c}`;
+ function shareInvite(a){const c=def(a.id);window.FWShare&&FWShare.open({title:L('ชวนเพื่อนแข่ง','Invite friends'),
+  text:`${c.e} ${L(`มาแข่ง "${title(c)}" กับฉันใน FoodWell!`,`Join my "${title(c)}" challenge in FoodWell!`)}\n${L('รหัสห้อง','Room code')}: ${a.room}\n${L('แตะลิงก์เพื่อเข้าร่วม','Tap to join')}: ${LINK(a.room)}`,
+  card:{emoji:c.e,title:title(c),lines:[L('มาแข่งกัน!','Race me!'),`${L('รหัส','Code')} ${a.room}`]}})}
+ const waiting={};
+ function needCloud(){if(!cloud()){toast(L('ใช้ได้ในแอป Android ที่เชื่อม Firebase','Available in the Android app with Firebase'));return false}
+  if(!me()){if(confirm(L('ต้องเข้าสู่ระบบด้วย Google ก่อน ไปที่หน้าซิงก์ไหม?','Sign in with Google first — open sync settings?')))go('settings');return false}return true}
+ function askName(){if(s.friendName)return true;const n=prompt(L('ชื่อที่เพื่อนจะเห็นในอันดับ','Name your friends will see'),myName());if(n===null)return false;s.friendName=n.trim().slice(0,24)||myName();save();return true}
+ function invite(i){const a=st().active[i];if(!a)return;if(a.room){shareInvite(a);return}if(!needCloud()||!askName())return;const c=def(a.id);
+  toast(L('กำลังสร้างห้อง…','Creating a room…'));waiting.create=a;
+  cloud().roomCreate(JSON.stringify({cid:a.id,title:c.th,start:a.start,days:c.days,need:need(c)}),member(a))}
+ function joinCode(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){toast(L('ใส่รหัส 6 ตัว','Enter the 6-character code'));return}
+  if(st().active.some(a=>a.room===code)){tab='mine';go('challenges');toast(L('อยู่ในห้องนี้แล้ว','Already in this room'));return}
+  if(!needCloud()||!askName())return;toast(L('กำลังเข้าร่วม…','Joining…'));
+  cloud().roomJoin(code,JSON.stringify({name:myName(),e:(s.profile&&s.profile.emoji)||'🌿',passed:0,need:0,state:'on',last:''}))}
+ window.onRoom=function(action,ok,code,data){
+  if(!ok){toast((action==='join'?L('เข้าร่วมไม่สำเร็จ: ','Couldn\'t join: '):action==='create'?L('สร้างห้องไม่สำเร็จ: ','Couldn\'t create the room: '):'')+data);return}
+  if(action==='create'&&waiting.create){const a=waiting.create;waiting.create=null;a.room=data;save();cloud().roomWatch(data);draw();shareInvite(a)}
+  if(action==='join'){let r={};try{r=JSON.parse(data)}catch(e){}const c=def(r.cid);if(!c){toast(L('แอปเวอร์ชันนี้ยังไม่มีชาเลนจ์นี้ อัปเดตแอปก่อน','This app version doesn\'t have that challenge yet — update the app'));cloud().roomLeave(code);return}
+   const S=st();let a=S.active.find(x=>x.id===r.cid);if(a){if(a.room&&a.room!==code)cloud().roomLeave(a.room);a.room=code;a.start=r.start||a.start}else{a={id:r.cid,start:r.start||today(),checks:[],room:code};S.active.unshift(a)}
+   save();cloud().roomWatch(code);push(a,true);tab='mine';go('challenges');toast(L(`เข้าร่วม "${title(c)}" แล้ว 💪`,`Joined "${title(c)}" 💪`))}};
+ window.onRoomData=function(code,json){try{roomData[code]=JSON.parse(json)}catch(e){}if(page.classList.contains('active'))draw()};
+ window.onRoomError=function(code,msg){console.warn('room',code,msg)};
+ window.onJoinLink=function(code){if(confirm(L(`เข้าร่วมชาเลนจ์กับเพื่อน (รหัส ${code})?`,`Join your friend's challenge (code ${code})?`)))joinCode(code)};
+ function push(a,force){if(!a.room||!cloud()||!me())return;const m=member(a);if(!force&&a.pushed===m)return;a.pushed=m;cloud().roomUpdate(a.room,m)}
+ function friends(){const u=me();
+  return `<div class="ch-card"><div class="ch-top"><span class="em">👥</span><span class="tx"><b>${L('แข่งกับเพื่อน','Race your friends')}</b><small>${L('เริ่มชาเลนจ์ แล้วกด "ชวนเพื่อนแข่ง" ส่งลิงก์หรือรหัสให้เพื่อน ทุกคนเริ่มวันเดียวกัน เห็นอันดับกันแบบสด ๆ','Start a challenge, tap "Race friends" and send the link or code — everyone starts the same day and sees a live leaderboard')}</small></span></div>
+   <div class="ch-note" style="margin-top:8px">${u?`✅ ${L('เข้าสู่ระบบแล้ว','Signed in')}: ${esc(u.email)} · ${L('ชื่อที่เพื่อนเห็น','Shown as')}: <b>${esc(myName())}</b> <a href="#" id="chName">${L('เปลี่ยน','change')}</a>`:`🔒 ${L('ต้องเข้าสู่ระบบด้วย Google (ตั้งค่า → ข้อมูลและซิงก์)','Needs Google sign-in (Settings → Data & sync)')}`}</div>
+   <div class="ch-sec" style="margin-top:12px">${L('มีรหัสจากเพื่อน?','Got a code from a friend?')}</div>
+   <div class="ch-in"><input id="chCode" maxlength="8" placeholder="ABC123" autocomplete="off" translate="no"><button type="button" id="chJoin">${L('เข้าร่วม','Join')}</button></div>
+   <div class="ch-note" style="margin-top:10px">${L('เพื่อนในห้องเห็นเฉพาะชื่อ และจำนวนวันที่ทำสำเร็จ ไม่เห็นอาหารหรือข้อมูลสุขภาพของคุณ','People in a room only see your name and how many days you\'ve completed — never your food or health data')}</div></div>
+   ${st().active.filter(a=>a.room).map(a=>{const i=st().active.indexOf(a);return activeCard(a,i)}).join('')}`}
+ function draw(){const S=st();
+  const tabs=[['mine','🔥 '+L('ชาเลนจ์','Challenges')],['medals','🏅 '+L('เหรียญ','Medals')],['friends','👥 '+L('เพื่อน','Friends')]];
+  let html=`<button type="button" class="ch-month" id="chMonth"><span class="ic">📅</span><span style="flex:1"><b>${L('สรุปเดือนนี้','This month')}</b><small>${L('การ์ดสรุปสวย ๆ แชร์ลงโซเชียลได้','A pretty summary card to share')}</small></span><span>›</span></button>
+   <div class="ch-tabs">${tabs.map(t=>`<button type="button" data-tab="${t[0]}" class="${tab===t[0]?'on':''}">${t[1]}</button>`).join('')}</div>`;
+  if(tab==='mine')html+=(S.active.length?S.active.map(activeCard).join(''):`<div class="ch-note" style="text-align:center;padding:10px 0 4px">${L('ยังไม่มีชาเลนจ์ เลือกอันแรกด้านล่างเลย 👇','No challenge yet — pick your first one below 👇')}</div>`)+`<div class="ch-sec">${L('เริ่มชาเลนจ์ใหม่','Start a challenge')}</div>`+pickList();
+  else if(tab==='medals')html+=medals();else html+=friends();
+  body.innerHTML=html;bind()}
+ function bind(){const q=sel=>body.querySelectorAll(sel),S=st();
+  body.querySelector('#chMonth').onclick=()=>monthCard();
+  q('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;draw()});
+  q('[data-start]').forEach(b=>b.onclick=()=>{const c=def(b.dataset.start);S.active.unshift({id:c.id,start:today(),checks:[]});save();toast(L(`เริ่ม "${title(c)}" แล้ว สู้ ๆ 💪`,`Started "${title(c)}" — you've got this 💪`));draw();homeCard();window.scrollTo({top:0,behavior:'smooth'})});
+  q('[data-ck]').forEach(b=>b.onclick=()=>check(+b.dataset.ck,today()));
+  q('[data-cky]').forEach(b=>b.onclick=()=>check(+b.dataset.cky,addD(today(),-1)));
+  q('[data-inv]').forEach(b=>b.onclick=()=>invite(+b.dataset.inv));
+  q('[data-quit]').forEach(b=>b.onclick=()=>{const a=S.active[+b.dataset.quit];if(!a)return;if(evalA(a)?.state==='on'&&!confirm(L('เลิกชาเลนจ์นี้?','Quit this challenge?')))return;if(a.room&&cloud())cloud().roomLeave(a.room);S.active.splice(+b.dataset.quit,1);save();draw();homeCard()});
+  q('[data-again]').forEach(b=>b.onclick=()=>{const a=S.active[+b.dataset.again];if(!a)return;if(a.room&&cloud())cloud().roomLeave(a.room);S.active[+b.dataset.again]={id:a.id,start:today(),checks:[]};save();draw();homeCard()});
+  q('[data-medal]').forEach(b=>b.onclick=()=>shareMedal(b.dataset.medal));
+  const j=body.querySelector('#chJoin');if(j)j.onclick=()=>joinCode(body.querySelector('#chCode').value);
+  const n=body.querySelector('#chName');if(n)n.onclick=e=>{e.preventDefault();const v=prompt(L('ชื่อที่เพื่อนจะเห็น','Name your friends will see'),myName());if(v!==null){s.friendName=v.trim().slice(0,24);save();S.active.forEach(a=>push(a,true));draw()}}}
+ function check(i,d){const a=st().active[i];if(!a)return;a.checks=a.checks||[];if(!a.checks.includes(d))a.checks.push(d);save();toast(L('เก่งมาก! ✓','Nice! ✓'));tick();draw();homeCard()}
+ // completions -> medals; progress -> friend rooms
+ function tick(){const S=st();let changed=false;
+  S.active.forEach(a=>{const E=evalA(a);if(!E)return;
+   if(E.state==='done'&&!a.won){a.won=true;S.done.push({id:a.id,start:a.start,end:today(),ok:true});changed=true;setTimeout(()=>celebrate(a.id),300)}
+   push(a)});
+  if(changed){save();if(page.classList.contains('active'))draw()}}
+ // ---- home card ----
+ function homeCard(){let box=document.getElementById('chHome');
+  if(!box){const after=document.getElementById('woHome')||document.querySelector('#home .twocards');if(!after)return;box=document.createElement('div');box.className='ch-home home-sortable';box.id='chHome';box.dataset.homeKey='challenge';after.after(box);if(typeof applyHomePrefs==='function')applyHomePrefs()}
+  const S=st(),act=S.active.map(a=>[a,evalA(a)]).filter(x=>x[1]&&x[1].state==='on').slice(0,2);
+  if(!act.length){box.innerHTML=`<div class="row"><span class="em">🏅</span><span class="tx"><b>${L('ชาเลนจ์','Challenges')}</b><small>${L('7 วันงดน้ำหวาน · ดื่มน้ำครบ 14 วัน · แข่งกับเพื่อน','No sweet drinks for 7 days · water for 14 days · race friends')}</small></span><button type="button" id="chGo">${L('เริ่มเลย','Start')}</button></div>`;box.querySelector('#chGo').onclick=()=>go('challenges');return}
+  box.innerHTML=act.map(([a,E])=>{const i=S.active.indexOf(a),c=E.c,btn=c.kind==='check'&&E.todayRes==='now'?`<button type="button" data-hck="${i}">✓ ${L('วันนี้','Today')}</button>`:`<button type="button" class="ok" data-hgo="1">${E.todayRes==='ok'?'✅':'›'}</button>`;
+   return `<div class="row"><span class="em">${c.e}</span><span class="tx"><b>${esc(title(c))}</b><small>${L('วันที่','Day')} ${E.dayNo}/${c.days} · ${L('ผ่าน','passed')} ${E.ok}/${E.n}${a.room?' · 👥':''}</small></span>${btn}</div>`}).join('');
+  box.querySelectorAll('[data-hck]').forEach(b=>b.onclick=()=>check(+b.dataset.hck,today()));
+  box.querySelectorAll('[data-hgo]').forEach(b=>b.onclick=()=>go('challenges'))}
+ // entry on More
+ const moreTitle=document.querySelector('#more .page-title');
+ if(moreTitle&&!document.getElementById('chEntry')){const b=document.createElement('button');b.type='button';b.id='chEntry';b.className='set-entry';b.style.background='linear-gradient(135deg,#ffe3a3,#f2c14e)';
+  b.innerHTML=`<span class="ic">🏅</span><span style="flex:1"><b>${L('ชาเลนจ์ & เหรียญ','Challenges & medals')}</b><small>${L('ชาเลนจ์ แข่งกับเพื่อน และสรุปเดือนนี้','Challenges, friends and this month\'s summary')}</small></span><span>›</span>`;
+  b.onclick=()=>go('challenges');(document.getElementById('setEntry')||moreTitle).after(b)}
+ // ---- month summary card ----
+ const MONTHS=EN?['January','February','March','April','May','June','July','August','September','October','November','December']:['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+ function monthStats(y,m){const first=localDay(new Date(y,m,1,12)),n=new Date(y,m+1,0).getDate(),t=today();
+  const days=[...Array(n)].map((_,i)=>localDay(new Date(y,m,i+1,12))),past=days.filter(d=>d<=t);
+  const logged=past.filter(d=>foodsOn(d).length||waterOn(d)>0||moveMinOn(d)>0),fdays=past.filter(d=>foodsOn(d).length),wg=waterGoal();
+  const avg=fdays.length?Math.round(fdays.reduce((a,d)=>a+kcalOn(d),0)/fdays.length):0,waterDays=past.filter(d=>waterOn(d)>=wg).length,water=past.reduce((a,d)=>a+waterOn(d),0);
+  const moveMin=past.reduce((a,d)=>a+moveMinOn(d),0),workouts=(s.moves||[]).filter(x=>x.wo&&days.includes(entryDay(x))).length,moveDays=past.filter(d=>moveMinOn(d)>=15).length;
+  const wl=(s.weightLog||[]).filter(x=>x.date>=first&&x.date<=days[n-1]).sort((a,b)=>a.date.localeCompare(b.date)),prev=(s.weightLog||[]).filter(x=>x.date<first).sort((a,b)=>a.date.localeCompare(b.date)).pop();
+  const w0=prev||wl[0],w1=wl[wl.length-1],wch=w0&&w1&&w0!==w1?Math.round((w1.kg-w0.kg)*10)/10:null;
+  const cnt={};past.forEach(d=>foodsOn(d).forEach(f=>{const k=T(String(f.name||'').trim());if(k)cnt[k]=(cnt[k]||0)+1}));const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  let run=0,best=0;days.forEach(d=>{if(logged.includes(d)){run++;best=Math.max(best,run)}else run=0});
+  const medals=st().done.filter(x=>x.ok&&x.end>=first&&x.end<=days[n-1]).length;
+  const score=d=>d>t?-1:(foodsOn(d).length?1:0)+(waterOn(d)>=wg?1:0)+(moveMinOn(d)>=15?1:0);
+  return {y,m,days,past,logged:logged.length,avg,waterDays,water,moveMin,workouts,moveDays,wch,top,best,medals,score,foods:past.reduce((a,d)=>a+foodsOn(d).length,0)}}
+ function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+ function monthImage(M){const W=1080,H=1500,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),F='"Noto Sans Thai","Noto Sans",sans-serif';
+  const bg=x.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#FFF0F5');bg.addColorStop(.55,'#F3FBF6');bg.addColorStop(1,'#E8F6EE');x.fillStyle=bg;x.fillRect(0,0,W,H);
+  x.fillStyle='#F7BFD055';x.beginPath();x.arc(980,90,220,0,7);x.fill();x.fillStyle='#8FD3B044';x.beginPath();x.arc(60,1420,260,0,7);x.fill();
+  x.textAlign='left';x.fillStyle='#C2477A';x.font=`800 38px ${F}`;x.fillText(`🌿 FoodWell · ${L('สรุปประจำเดือน','Monthly recap')}`,80,120);
+  x.fillStyle='#1B1B22';x.font=`900 92px ${F}`;x.fillText(`${MONTHS[M.m]} ${EN?M.y:M.y+543}`,80,230);
+  x.fillStyle='#5A5D66';x.font=`500 38px ${F}`;x.fillText(L(`บันทึก ${M.logged} วัน · ต่อเนื่องสูงสุด ${M.best} วัน 🔥`,`${M.logged} days logged · best streak ${M.best} days 🔥`),80,295);
+  const tiles=[['🍽️',M.foods.toLocaleString(),L('รายการอาหาร','foods logged')],['🔥',M.avg?M.avg.toLocaleString():'–',L('kcal เฉลี่ย/วัน','avg kcal/day')],['💧',`${M.waterDays}`,L('วันดื่มน้ำครบ','water-goal days')],
+   ['🏃',M.moveMin.toLocaleString(),L('นาทีที่ขยับ','active minutes')],['🏋️',`${M.workouts}`,L('ครั้งออกกำลังกาย','workouts')],M.wch!=null?['⚖️',`${M.wch>0?'+':''}${M.wch}`,L('กก. เปลี่ยนแปลง','kg change')]:['🏅',`${M.medals}`,L('เหรียญชาเลนจ์','challenge medals')]];
+  tiles.forEach((t,i)=>{const c=i%3,r=Math.floor(i/3),X=80+c*313,Y=330+r*200;x.save();x.shadowColor='rgba(0,0,0,.08)';x.shadowBlur=24;x.shadowOffsetY=8;x.fillStyle='#FFFFFF';rr(x,X,Y,290,180,32);x.fill();x.restore();
+   x.textAlign='left';x.font=`52px ${F}`;x.fillText(t[0],X+26,Y+64);x.fillStyle='#1B1B22';x.font=`900 62px ${F}`;x.fillText(t[1],X+26,Y+134);x.fillStyle='#6B6E77';x.font=`600 26px ${F}`;x.fillText(t[2],X+26,Y+166)});
+  // calendar heat map
+  const cy=770;x.fillStyle='#1B1B22';x.font=`800 34px ${F}`;x.fillText(L('ทุกวันของเดือนนี้','Every day this month'),80,cy);
+  const wd=EN?['M','T','W','T','F','S','S']:['จ','อ','พ','พฤ','ศ','ส','อา'],off=(new Date(M.y,M.m,1).getDay()+6)%7,cs=112,gx=80+(920-7*cs)/2;
+  x.textAlign='center';x.fillStyle='#8A8D96';x.font=`700 24px ${F}`;wd.forEach((d,i)=>x.fillText(d,gx+i*cs+cs/2,cy+50));
+  const col=['#ECEEF2','#CDEFD9','#8FD3B0','#2F9E6E'];
+  M.days.forEach((d,i)=>{const k=i+off,c=k%7,r=Math.floor(k/7),X=gx+c*cs+6,Y=cy+66+r*74,sc=M.score(d);x.fillStyle=sc<0?'#F6F7F9':col[sc];rr(x,X,Y,cs-12,62,16);x.fill();
+   x.fillStyle=sc>=3?'#FFFFFF':sc<0?'#C5C8CF':'#3A3D45';x.font=`700 28px ${F}`;x.fillText(String(i+1),X+(cs-12)/2,Y+42)});
+  const rows=Math.ceil((M.days.length+off)/7),ly=cy+66+rows*74+28;x.textAlign='left';x.font=`500 24px ${F}`;x.fillStyle='#6B6E77';
+  x.fillText(L('สีเข้ม = ครบทั้ง บันทึกอาหาร · ดื่มน้ำ · ขยับร่างกาย','Darker = food logged · water goal · moved'),80,ly);
+  if(M.top.length){x.fillStyle='#1B1B22';x.font=`800 30px ${F}`;let names=M.top.map(t=>t[0]),line=()=>`${L('เมนูโปรด','Favourites')}: `+names.join(' · ');while(names.length>1&&x.measureText(line()).width>920)names.pop();let tx=line();while(x.measureText(tx).width>920&&tx.length>8)tx=tx.slice(0,-2);if(tx!==line())tx+='…';x.fillText(tx,80,ly+56)}
+  x.fillStyle='#C2477A';rr(x,80,H-112,920,80,40);x.fill();x.fillStyle='#FFFFFF';x.textAlign='center';x.font=`800 34px ${F}`;x.fillText(L('ดูแลสุขภาพไปด้วยกันกับ FoodWell 🌿','Look after yourself with FoodWell 🌿'),540,H-60);
+  return cv.toDataURL('image/png')}
+ let mOff=0;
+ function monthCard(){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+mOff);const M=monthStats(d.getFullYear(),d.getMonth()),img=monthImage(M);
+  mbox.innerHTML=`<div class="hd"><b>📅 ${L('สรุปประจำเดือน','Monthly recap')}</b>${closeBtn}</div>
+   <div class="nav" style="margin-top:10px"><button type="button" id="mPrev">‹ ${L('เดือนก่อน','Previous')}</button><button type="button" id="mNext" ${mOff>=0?'disabled style="opacity:.4"':''}>${L('เดือนถัดไป','Next')} ›</button></div>
+   <img src="${img}" alt=""><button type="button" class="big" id="mShare">📤 ${L('แชร์การ์ดนี้','Share this card')}</button>`;
+  mbox.querySelector('#chX').onclick=()=>modal.classList.remove('show');
+  mbox.querySelector('#mPrev').onclick=()=>{mOff--;monthCard()};mbox.querySelector('#mNext').onclick=()=>{if(mOff<0){mOff++;monthCard()}};
+  mbox.querySelector('#mShare').onclick=()=>window.FWShare&&FWShare.open({title:L('แชร์สรุปเดือน','Share monthly recap'),
+   text:`📅 ${L(`สรุปเดือน${MONTHS[M.m]}ของฉันใน FoodWell`,`My ${MONTHS[M.m]} in FoodWell`)} 🌿\n${L(`บันทึก ${M.logged} วัน · ดื่มน้ำครบ ${M.waterDays} วัน · ขยับ ${M.moveMin} นาที`,`${M.logged} days logged · water goal ${M.waterDays} days · ${M.moveMin} active minutes`)}\n#FoodWell`,image:img});
+  modal.classList.add('show')}
+ // also from the Dashboard
+ const dashTitle=document.querySelector('#dashboard .page-title');
+ if(dashTitle&&!document.getElementById('chDashMonth')){const b=document.createElement('button');b.type='button';b.id='chDashMonth';b.className='ch-month';b.innerHTML=`<span class="ic">📅</span><span style="flex:1"><b>${L('สรุปเดือนนี้','This month')}</b><small>${L('การ์ดสรุปสวย ๆ แชร์ลงโซเชียลได้','A pretty summary card to share')}</small></span><span>›</span>`;b.onclick=()=>{mOff=0;monthCard()};dashTitle.after(b)}
+ // keep everything current
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{tick();homeCard();if(page.classList.contains('active'))draw()}catch(e){console.error(e)}return o};
+ st().active.forEach(a=>{if(a.room&&cloud()&&me())cloud().roomWatch(a.room)});
+ window.FWChallenges={list:C,evalA,open:()=>go('challenges'),month:()=>{mOff=0;monthCard()},join:joinCode};
+ tick();homeCard();
 })();
 </script>

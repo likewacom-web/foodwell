@@ -44,9 +44,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cloud: CloudSync
+    private lateinit var rooms: FriendRooms
     private lateinit var pro: Monetization
     private lateinit var notifyPermission: ActivityResultLauncher<String>
     private var pendingPage: String? = null
+    private var pendingJoin: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,10 +66,12 @@ class MainActivity : ComponentActivity() {
             filePathCallback = null
         }
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
+        rooms = FriendRooms(this) { fn, arg -> callJs(fn, arg) }
         notifyPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
             callJs("onNotifyPermission", JSONObject.quote(if (ok) "granted" else "denied"))
         }
         pendingPage = intent?.getStringExtra("page")
+        pendingJoin = joinCode(intent)
 
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
@@ -82,6 +86,8 @@ class MainActivity : ComponentActivity() {
                 override fun onPageFinished(view: WebView, url: String?) {
                     // Opened from a reminder: jump to its page once the app has loaded.
                     pendingPage?.let { p -> pendingPage = null; view.postDelayed({ callJs("go", JSONObject.quote(p)) }, 400) }
+                    // Opened from a friend's invite link (foodwell://join?c=CODE).
+                    pendingJoin?.let { c -> pendingJoin = null; view.postDelayed({ callJs("onJoinLink", JSONObject.quote(c)) }, 900) }
                 }
             }
             // Without a WebChromeClient file chooser, <input type=file> (food photos, backup import) does nothing.
@@ -268,6 +274,14 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.getStringExtra("page")?.let { callJs("go", JSONObject.quote(it)) }
+        joinCode(intent)?.let { callJs("onJoinLink", JSONObject.quote(it)) }
+    }
+
+    /** Invite code from foodwell://join?c=CODE (or …/join/CODE). */
+    private fun joinCode(i: Intent?): String? {
+        val u = i?.data ?: return null
+        if (u.scheme != "foodwell" || u.host != "join") return null
+        return (u.getQueryParameter("c") ?: u.lastPathSegment)?.uppercase()?.filter { it.isLetterOrDigit() }?.take(8)?.ifEmpty { null }
     }
 
     override fun onPause() {
@@ -329,6 +343,7 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface fun deleteAccount() = runOnUiThread {
             lifecycleScope.launch {
                 try {
+                    runCatching { rooms.leaveAll() }
                     cloud.deleteAccount()
                     callJs("onCloudUser", "null")
                     callJs("onCloudDeleted", "true,\"\"")
@@ -340,6 +355,26 @@ class MainActivity : ComponentActivity() {
         }
 
         @JavascriptInterface fun start() = runOnUiThread { cloud.start() }
+
+        // ---- friend challenges (FriendRooms) — every call answers onRoom(action, ok, code, data) ----
+        private fun roomCall(action: String, code: String, block: suspend () -> String) = runOnUiThread {
+            lifecycleScope.launch {
+                try {
+                    if (!cloud.configured) throw IllegalStateException(cloud.notReadyReason ?: CloudSync.NOT_CONFIGURED)
+                    val data = block()
+                    callJs("onRoom", JSONObject.quote(action) + ",true," + JSONObject.quote(code) + "," + JSONObject.quote(data))
+                } catch (e: Exception) {
+                    Log.w(TAG, "room $action failed", e)
+                    callJs("onRoom", JSONObject.quote(action) + ",false," + JSONObject.quote(code) + "," + JSONObject.quote(e.message ?: ""))
+                }
+            }
+        }
+        @JavascriptInterface fun roomCreate(room: String, member: String) = roomCall("create", "") { rooms.create(room, member) }
+        @JavascriptInterface fun roomJoin(code: String, member: String) = roomCall("join", code) { rooms.join(code, member) }
+        @JavascriptInterface fun roomUpdate(code: String, member: String) = roomCall("update", code) { rooms.update(code, member); "" }
+        @JavascriptInterface fun roomLeave(code: String) = roomCall("leave", code) { rooms.leave(code); "" }
+        @JavascriptInterface fun roomWatch(code: String) = runOnUiThread { if (cloud.configured) rooms.watch(code) }
+        @JavascriptInterface fun roomUnwatch(code: String) = runOnUiThread { rooms.unwatch(code) }
 
         @JavascriptInterface fun pushImage(hash: String, data: String) = runOnUiThread {
             lifecycleScope.launch {

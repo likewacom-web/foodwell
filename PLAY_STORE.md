@@ -155,6 +155,7 @@ Nutrition values are estimates, not medical advice.
 | ประเภทข้อมูล | เก็บ (Collected) | แชร์ (Shared) | จำเป็น? | วัตถุประสงค์ |
 |---|---|---|---|---|
 | Personal info → Name, Email address, User IDs | ✅ (เมื่อเข้าสู่ระบบ Google) | ❌ | Optional | App functionality, Account management |
+| Personal info → Name (ชื่อที่ตั้งให้เพื่อนเห็นในห้องชาเลนจ์) + App activity (จำนวนวันที่ทำชาเลนจ์สำเร็จ) | ✅ (เมื่อเข้าร่วมห้องชาเลนจ์) | ❌ (ผู้ใช้เลือกแสดงให้เพื่อนในห้องเอง ไม่ใช่บุคคลที่สาม) | Optional | App functionality |
 | Health and fitness → Health info, Fitness info | ✅ (เมื่อเปิดซิงก์) | ❌ | Optional | App functionality |
 | Photos and videos → Photos | ✅ (รูปอาหาร เมื่อเปิดซิงก์ / ส่งวิเคราะห์ AI) | ❌ | Optional | App functionality |
 | App activity → Other user-generated content (บันทึกอาหาร โน้ต แผน) | ✅ (เมื่อเปิดซิงก์) | ❌ | Optional | App functionality |
@@ -169,7 +170,7 @@ Nutrition values are estimates, not medical advice.
 - **Privacy policy:** URL จากข้อ 6
 - **Ads:** ตอบ Yes ถ้า build เปิดโฆษณา
 - **App access:** ทุกฟีเจอร์ใช้ได้โดยไม่ต้องล็อกอิน (ล็อกอินเฉพาะซิงก์)
-- **Content rating (IARC):** หมวด Health/Reference — ไม่มีความรุนแรง ไม่มีเนื้อหาผู้ใหญ่ · มีการซื้อในแอป · ผู้ใช้ไม่ได้สื่อสารกัน
+- **Content rating (IARC):** หมวด Health/Reference — ไม่มีความรุนแรง ไม่มีเนื้อหาผู้ใหญ่ · มีการซื้อในแอป · ผู้ใช้ไม่ได้แชทกัน (ห้องชาเลนจ์แสดงเฉพาะชื่อและคะแนน) → ตอบเรื่อง "users can interact" ว่า **ไม่มีการแชท** แต่มีการแชร์ชื่อ/คะแนนกับคนที่มีรหัส
 - **Target audience:** 18+ (หรือ 13+) — **อย่าเลือกกลุ่มเด็ก** (จะติดนโยบาย Families)
 - **Health apps declaration:** เลือก *Nutrition and weight management*, *Activity and fitness* · ไม่ใช่อุปกรณ์การแพทย์
 - **Account deletion:** ใส่ URL นโยบาย (หัวข้อ 7 “การลบข้อมูล”) และบอกว่าลบได้ในแอป
