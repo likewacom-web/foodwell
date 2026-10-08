@@ -12,6 +12,7 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -99,6 +100,35 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
         if (!configured) return
         auth.signOut()
         runCatching { CredentialManager.create(activity).clearCredentialState(ClearCredentialStateRequest()) }
+    }
+
+    /**
+     * Deletes everything this account stored in the cloud (synced data and photos) and the
+     * Firebase account itself, then signs out. Data on this phone is left alone. Firebase asks for
+     * a fresh sign-in before deleting an account, so a stale session signs in once more first.
+     */
+    suspend fun deleteAccount() {
+        if (!configured) return
+        stop()
+        val user = auth.currentUser ?: return
+        val uid = user.uid
+        for (col in listOf(kv(uid), img(uid))) {
+            while (true) {
+                val docs = col.limit(400).get().await().documents
+                if (docs.isEmpty()) break
+                val batch = db.batch()
+                docs.forEach { batch.delete(it.reference) }
+                batch.commit().await()
+            }
+        }
+        runCatching { db.collection("users").document(uid).delete().await() }
+        try {
+            user.delete().await()
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            signIn()
+            auth.currentUser?.delete()?.await()
+        }
+        signOut()
     }
 
     private fun kv(uid: String) = db.collection("users").document(uid).collection("kv")

@@ -2196,6 +2196,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const OVERLAYS=[
   ['#fwOnb.show',()=>{const b=document.getElementById('onbBack');if(b&&!b.hidden)b.click()}], // first-run setup: step back, never skip it by accident
   ['#shSheet.show',el=>el.classList.remove('show')],
+  ['#ppSheet.show',el=>el.classList.remove('show')],
   ['#woSheet.show,#hlSheet.show',el=>el.classList.remove('show')],
   ['#rwSheet.show',el=>el.classList.remove('show')],
   ['#trophyCelebrate.open',el=>el.classList.remove('open')],
@@ -2856,6 +2857,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  };
  window.onCloudPushed=()=>{lastSync=Date.now();state='ok';lastError='';render()};
  window.onCloudError=msg=>{state='err';lastError=msg;render();say(msg)};
+ window.onCloudDeleted=(ok,msg)=>{setBusy(false);say(ok?'ลบบัญชีและข้อมูลบนคลาวด์แล้ว · ข้อมูลในเครื่องนี้ยังอยู่':'ลบบัญชีไม่สำเร็จ: '+(msg||'ลองใหม่อีกครั้ง'))};
  window.onCloudUser=raw=>{const was=user;user=raw?JSON.parse(raw):null;setBusy(false);loadImgs();
   if(user){firstSnapshot=true;C().start();if(!was)say('เข้าสู่ระบบแล้ว: '+user.email)}else{state='idle';if(was)say('ออกจากระบบแล้ว · ข้อมูลในเครื่องยังอยู่')}
   render()};
@@ -2874,9 +2876,16 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   box.innerHTML=head+`<div class="fw96-user">${pic}<div style="min-width:0"><b>${esc(user.name||'บัญชี Google')}</b><small>${esc(user.email)}</small></div></div>
    <div class="fw96-status"><span class="fw96-dot ${state==='busy'?'busy':state==='err'?'err':''}"></span><span>${txt}</span></div>
    <div class="fw96-small">ซิงก์ทุกอย่าง: อาหาร (รวมรูป) น้ำ กิจกรรม น้ำหนัก แผน และการตั้งค่า · บันทึกพร้อมกันหลายเครื่องได้ ไม่ทับกัน · ออฟไลน์ได้ จะซิงก์เมื่อมีเน็ต</div>
-   <div class="fw96-row"><button class="fw96-btn" id="fw96-now">↻ ซิงก์ตอนนี้</button><button class="fw96-btn" id="fw96-out" style="background:transparent;color:#e88ea9">ออกจากระบบ</button></div>`;
+   <div class="fw96-row"><button class="fw96-btn" id="fw96-now">↻ ซิงก์ตอนนี้</button><button class="fw96-btn" id="fw96-out" style="background:transparent;color:#e88ea9">ออกจากระบบ</button></div>
+    <button type="button" id="fw96-del" style="display:block;margin:10px auto 0;border:0;background:none;color:#c0505a;font-size:12px;text-decoration:underline;font-family:inherit">ลบบัญชีและข้อมูลบนคลาวด์</button>`;
   box.querySelector('#fw96-now').onclick=()=>{firstSnapshot=true;state='busy';render();C().start()};
   box.querySelector('#fw96-out').onclick=()=>{if(confirm('ออกจากระบบ? ข้อมูลในเครื่องนี้ยังอยู่ แต่จะหยุดซิงก์')){setBusy(true);C().signOut()}};
+  // account deletion (Google Play requirement): removes synced data, photos and the account; this phone keeps its data
+  box.querySelector('#fw96-del').onclick=()=>{
+   if(!confirm('ลบบัญชีและข้อมูลทั้งหมดบนคลาวด์?\n\nข้อมูลที่ซิงก์ไว้และรูปอาหารบนคลาวด์จะถูกลบถาวร กู้คืนไม่ได้ · ข้อมูลในเครื่องนี้ยังอยู่'))return;
+   if(!confirm('ยืนยันอีกครั้ง: ลบบัญชีถาวร'))return;
+   if(!C().deleteAccount){toast('อัปเดตแอปเป็นเวอร์ชันล่าสุดก่อน');return}
+   setBusy(true);C().deleteAccount()};
  }
  function init(){
   if(document.getElementById('fw96'))return;
@@ -3648,5 +3657,29 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    count:`${m[0]} ${m[1]} · ${k[0]} ${k[1]} · ${n[0]} ${n[1]}`,status:L('✅ ทำสำเร็จแล้ว ✨','✅ Done ✨'),statusSub:L('บันทึกลงการเคลื่อนไหวใน FoodWell แล้ว','Logged to movement in FoodWell'),quote:L('“ร่างกายแข็งแรง ใจก็แข็งแรงตาม” 💪','“A stronger body grows a stronger mind” 💪')});
   FWShare.open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout done')}: ${title}\n${stats.map(([v,l])=>v+' '+l).join(' · ')}\n#FoodWell`,image})};
  window.FWDetailCard=detailCard;
+})();
+</script>
+<!-- v121 Privacy policy (assets/privacy.html, Thai + English) from Settings → About -->
+<style>
+.pp-sheet{position:fixed;inset:0;z-index:8500;background:#0008;display:none;flex-direction:column;justify-content:flex-end}
+.pp-sheet.show{display:flex}
+.pp-box{height:92vh;background:var(--panel);border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.pp-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);color:var(--text)}.pp-top b{flex:1}
+.pp-top button{border:0;background:var(--panel2);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:16px}
+.pp-box iframe{flex:1;border:0;width:100%;background:#fff}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th;
+ const sh=document.createElement('div');sh.className='pp-sheet';sh.id='ppSheet';sh.setAttribute('role','dialog');
+ sh.innerHTML=`<div class="pp-box"><div class="pp-top"><b>🔒 ${L('นโยบายความเป็นส่วนตัว','Privacy policy')}</b><button type="button" class="pp-x" aria-label="${L('ปิด','Close')}">✕</button></div><iframe title="privacy"></iframe></div>`;
+ document.body.appendChild(sh);
+ const close=()=>sh.classList.remove('show');sh.querySelector('.pp-x').onclick=close;sh.onclick=e=>{if(e.target===sh)close()};
+ window.fwPrivacy=()=>{const f=sh.querySelector('iframe');f.src='privacy.html'+(EN?'#en':'#th');sh.classList.add('show')};
+ function addRow(){const g=document.getElementById('setg-about');if(!g||document.getElementById('ppRow'))return;
+  const b=document.createElement('button');b.type='button';b.className='set-row';b.id='ppRow';
+  b.innerHTML=`<span class="ic">🔒</span><span class="tx"><b>${L('นโยบายความเป็นส่วนตัว','Privacy policy')}</b><small>${L('อ่านว่าแอปเก็บและใช้ข้อมูลอะไรบ้าง','What the app stores and how it is used')}</small></span><span class="go">›</span>`;
+  b.onclick=window.fwPrivacy;g.querySelector('h3').after(b)}
+ addRow();setTimeout(addRow,1500);
 })();
 </script>

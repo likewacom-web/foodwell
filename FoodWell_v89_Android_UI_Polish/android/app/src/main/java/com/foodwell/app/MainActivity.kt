@@ -325,6 +325,20 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        /** Deletes the cloud copy and the account (Play's account-deletion requirement); answers onCloudDeleted(ok, message). */
+        @JavascriptInterface fun deleteAccount() = runOnUiThread {
+            lifecycleScope.launch {
+                try {
+                    cloud.deleteAccount()
+                    callJs("onCloudUser", "null")
+                    callJs("onCloudDeleted", "true,\"\"")
+                } catch (e: Exception) {
+                    Log.w(TAG, "delete account failed", e)
+                    callJs("onCloudDeleted", "false," + JSONObject.quote(e.message ?: ""))
+                }
+            }
+        }
+
         @JavascriptInterface fun start() = runOnUiThread { cloud.start() }
 
         @JavascriptInterface fun pushImage(hash: String, data: String) = runOnUiThread {
