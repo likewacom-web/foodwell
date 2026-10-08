@@ -1686,4 +1686,7 @@ window.FW_I18N_EN={"วันนี้":"Today",
 "ลบบัญชีและข้อมูลบนคลาวด์แล้ว":"Account and cloud data deleted",
 "ลบบัญชีไม่สำเร็จ":"Couldn't delete the account",
 "นโยบายความเป็นส่วนตัว":"Privacy policy",
-"อ่านว่าแอปเก็บและใช้ข้อมูลอะไรบ้าง":"What the app stores and how it is used"};
+"อ่านว่าแอปเก็บและใช้ข้อมูลอะไรบ้าง":"What the app stores and how it is used",
+"ฐานข้อมูลอาหาร":"Food database"};
+// dish and category names from foods_more.js
+Object.assign(window.FW_I18N_EN,window.FW_FOODS_EN||{});

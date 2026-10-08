@@ -1459,6 +1459,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 </script>
 <!-- v102 Thai food database: type a name, pick a dish, nutrients fill in -->
 <script src="foods_th.js"></script>
+<script src="foods_more.js"></script>
 <style>
 .fw-name-wrap{position:relative}
 .fw-sugg{position:absolute;left:0;right:0;top:100%;z-index:60;margin-top:4px;background:#1f2128;border:1px solid #34363f;border-radius:16px;box-shadow:0 16px 40px #0008;overflow:hidden;display:none;max-height:340px;overflow-y:auto}
@@ -1486,8 +1487,11 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const FIELDS=['kcal','protein','carbs','fat','fiber','sodium','sugar'];
  let picked=null,mult=1,results=[];
  function score(keys,q){let best=0;for(const k of keys){if(k===q)return 100;if(k.startsWith(q))best=Math.max(best,70-Math.min(20,k.length-q.length));else if(k.includes(q))best=Math.max(best,40)}return best}
+ let enKeys=false;
  function search(q){
   const qn=norm(q);if(!qn)return [];
+  // English names (i18n_en.js loads later) are searchable too
+  if(!enKeys&&window.FW_I18N_EN){enKeys=true;DB.forEach(x=>{const e=FW_I18N_EN[x.name];if(e)x.keys.push(norm(e))})}
   const own=new Map();(s.recipes||[]).forEach(rc=>{const k=norm(rc.name);if(k&&window.FWRecipes&&!own.has(k))own.set(k,{name:rc.name,...FWRecipes.perServing(rc),meal:'เมนูทำเอง'})});[...(s.foods||[]).slice().sort((a,b)=>(b.createdAt||b.id||0)-(a.createdAt||a.id||0)),...(s.foodLibrary||[])].forEach(f=>{const k=norm(f.name);if(k&&!own.has(k))own.set(k,f)});
   const mine=[...own.values()].map(f=>({name:f.name,kcal:Number(f.kcal)||0,protein:f.protein,carbs:f.carbs,fat:f.fat,sugar:f.sugar,fiber:f.fiber,sodium:f.sodium,serving:f.meal||'',mine:true,sc:score([norm(f.name)],qn)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,3);
   const names=new Set(mine.map(x=>norm(x.name)));
@@ -1499,7 +1503,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   const q=input.value.trim();results=search(q);
   if(!results.length){box.classList.remove('show');return}
   let lastMine=null;
-  box.innerHTML=results.map((x,i)=>{let h='';if(x.mine!==lastMine){h=`<div class="head">${x.mine?'📚 จากคลังของคุณ':'🇹🇭 ฐานข้อมูลอาหารไทย (ค่าประมาณ)'}</div>`;lastMine=x.mine}
+  box.innerHTML=results.map((x,i)=>{let h='';if(x.mine!==lastMine){h=`<div class="head">${x.mine?'📚 จากคลังของคุณ':'🍽️ ฐานข้อมูลอาหาร (ค่าประมาณ)'}</div>`;lastMine=x.mine}
    return h+`<button type="button" data-i="${i}"><span class="n"><b>${esc(x.name)}</b><small>${esc(x.serving||'')}${x.protein!=null&&x.protein!==''?` · P ${Math.round(x.protein)} · C ${Math.round(x.carbs||0)} · F ${Math.round(x.fat||0)}`:''}</small></span><span class="k"><b>${Math.round(x.kcal)||'–'}</b><small>kcal</small></span></button>`}).join('');
   box.classList.add('show');
  }
