@@ -871,7 +871,7 @@ function renderProfileStats(){
 }
 
 
-const HOME_DEFAULT=['welcome','summary','twocards','workout','challenge','healthy','dashboard-entry','food-section'];
+const HOME_DEFAULT=['welcome','summary','twocards','steps','workout','challenge','healthy','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
 function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
@@ -4003,7 +4003,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   {id:'noalcohol',e:'🚱',th:'14 วันงดแอลกอฮอล์',en:'14 days, no alcohol',days:14,kind:'check',rth:'ติ๊กทุกวันที่ไม่ดื่ม · บันทึกเบียร์/ไวน์จะนับว่าพลาด',ren:'Tick each alcohol-free day · logging beer or wine counts as a miss',bad:d=>foodsOn(d).some(f=>ALCO.test(nameOf(f)))},
   {id:'nolate',e:'🌙',th:'งดกินหลัง 2 ทุ่ม 7 วัน',en:'No eating after 8 pm, 7 days',days:7,kind:'check',rth:'ติ๊กทุกวัน · อาหารที่บันทึกหลัง 20:00 จะนับว่าพลาด',ren:'Tick each day · food logged after 8 pm counts as a miss',bad:d=>foodsOn(d).some(f=>f.createdAt&&new Date(Number(f.createdAt)).getHours()>=20&&localDay(new Date(Number(f.createdAt)))===d)},
   {id:'sleep7',e:'😴',th:'นอนก่อน 5 ทุ่ม 7 วัน',en:'In bed by 11 pm, 7 days',days:7,kind:'check',rth:'ติ๊กเองทุกเช้าว่าเมื่อคืนนอนก่อน 23:00',ren:'Tick each morning if you were in bed by 11 pm'},
-  {id:'steps10',e:'👟',th:'เดิน 8,000 ก้าว 10 วัน',en:'8,000 steps, 10 days',days:14,need:10,kind:'check',rth:'ดูก้าวจากนาฬิกา/มือถือ แล้วติ๊กวันที่ถึง 8,000 ก้าว (10 วันใน 14 วัน)',ren:'Check your watch or phone and tick days with 8,000+ steps (10 of 14 days)'},
+  {id:'steps10',e:'👟',th:'เดิน 8,000 ก้าว 10 วัน',en:'8,000 steps, 10 days',days:14,need:10,kind:'check',rth:'ถึง 8,000 ก้าว 10 วันใน 14 วัน · นับเองจากตัวนับก้าว หรือติ๊กเองถ้าดูจากนาฬิกา',ren:'8,000+ steps on 10 of 14 days · counted from the step counter, or tick it if you use a watch',autoOk:d=>!!(window.FWSteps&&FWSteps.on(d)>=8000)},
   {id:'veg7',e:'🥗',th:'กินผักทุกมื้อ 7 วัน',en:'Veggies every meal, 7 days',days:7,kind:'check',rth:'ติ๊กวันที่มีผักในทุกมื้อหลัก',ren:'Tick days with vegetables at every main meal'},
   {id:'stretch7',e:'🧘',th:'ยืดเหยียดทุกวัน 7 วัน',en:'Stretch daily, 7 days',days:7,kind:'check',rth:'ยืดเหยียดอย่างน้อย 5 นาที (ใช้โปรแกรม "ก่อนนอน" ก็ได้)',ren:'Stretch for at least 5 minutes (the Wind-down program works)'},
  ];
@@ -4013,7 +4013,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const st=()=>{s.challenges=s.challenges||{};s.challenges.active=s.challenges.active||[];s.challenges.done=s.challenges.done||[];return s.challenges};
  // day result for an active challenge
  function dayRes(a,c,d){const t=today();if(d>t)return 'future';
-  if(c.kind==='check'){if(c.bad&&c.bad(d))return 'no';if((a.checks||[]).includes(d))return 'ok';return d===t?'now':'no'}
+  if(c.kind==='check'){if(c.bad&&c.bad(d))return 'no';if(c.autoOk&&c.autoOk(d))return 'ok';if((a.checks||[]).includes(d))return 'ok';return d===t?'now':'no'}
   let r=false;try{r=!!c.test(d)}catch(e){}return r?'ok':d===t?'now':'no'}
  function evalA(a){const c=def(a.id);if(!c)return null;const days=[...Array(c.days)].map((_,i)=>addD(a.start,i)),res=days.map(d=>dayRes(a,c,d));
   const ok=res.filter(x=>x==='ok').length,no=res.filter(x=>x==='no').length,end=days[days.length-1],n=need(c);
@@ -4236,5 +4236,104 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const box=document.getElementById('foodList');if(!box)return;
  new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
  trim();
+})();
+</script>
+<!-- v125 Steps (phone step sensor via FoodWellSteps, or typed in) and calories burned today:
+ resting (BMR, so far today) + digestion (10% of food) + steps + logged exercise, against what you ate -->
+<style>
+.st-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.st-head{display:flex;align-items:center;gap:8px}.st-head h3{margin:0;font-size:17px;flex:1}
+.st-ib{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;height:32px;min-width:32px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700}
+.st-main{display:flex;align-items:center;gap:16px;margin:12px 0 8px}
+.st-ring{width:118px;height:118px;flex:none;position:relative}.st-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.st-ring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.st-ring b{font-size:24px;font-variant-numeric:tabular-nums;line-height:1.1}.st-ring small{font-size:11px;color:var(--muted)}
+.st-facts{flex:1;display:grid;gap:8px}.st-facts div{display:flex;align-items:center;gap:8px;font-size:13px}.st-facts i{font-style:normal;font-size:18px;width:24px;text-align:center}.st-facts b{font-size:15px}
+.st-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:74px;margin-top:6px}
+.st-bars div{display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;font-size:10px;color:var(--muted)}
+.st-bars span{display:block;width:100%;max-width:26px;border-radius:7px 7px 3px 3px;background:#8fd3b0;min-height:3px}.st-bars span.hit{background:#2f9e6e}.st-bars div.now{color:var(--text);font-weight:800}
+.st-note{font-size:12px;color:var(--muted);line-height:1.55;margin-top:8px}
+.st-btn{width:100%;margin-top:10px;border:0;border-radius:14px;padding:12px;font-weight:800;font-size:14px;font-family:inherit;background:linear-gradient(135deg,#7dd3a8,#2f9e6e);color:#fff}
+.st-btn.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.en-sum{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;text-align:center;margin:12px 0}
+.en-sum div small{display:block;font-size:11px;color:var(--muted)}.en-sum div b{font-size:24px;font-variant-numeric:tabular-nums}.en-sum .op{font-size:20px;color:var(--muted)}
+.en-bal{border-radius:14px;padding:10px 12px;text-align:center;font-weight:800;font-size:14px;background:#2f9e6e1f;color:#2f9e6e}.en-bal.over{background:#e5737322;color:#d35454}
+.en-rows{margin-top:10px}.en-rows div{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}.en-rows div span{flex:1}.en-rows div b{font-variant-numeric:tabular-nums}
+.en-bar{height:10px;border-radius:9px;overflow:hidden;display:flex;margin-top:8px;background:var(--panel2)}.en-bar i{display:block;height:100%}
+.st-home{margin:0 0 12px;padding:12px 16px;border-radius:22px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;gap:12px;width:100%;font-family:inherit;color:var(--text);text-align:left}
+.st-home .em{font-size:28px}.st-home .tx{flex:1;min-width:0}.st-home b{display:block;font-size:15px}.st-home small{display:block;color:var(--muted);font-size:12px}
+.st-home .mini{width:46px;height:46px;flex:none}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th;
+ const N=()=>window.FoodWellSteps;
+ const fmt=n=>Math.round(n).toLocaleString();
+ const today=()=>localDay();
+ const addD=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ function nstat(){try{return N()?JSON.parse(N().status()):null}catch(e){return null}}
+ // native totals are merged into s.stepsLog (synced); a number typed in for a day wins
+ function merge(json){let d={};try{d=JSON.parse(json||'{}')}catch(e){}s.stepsLog=s.stepsLog||{};let ch=false;
+  for(const k in d){const v=Number(d[k])||0;if(v>(s.stepsLog[k]||0)){s.stepsLog[k]=v;ch=true}}return ch}
+ const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Number((s.stepsLog||{})[d]||0)};
+ const goal=()=>Number(s.stepGoal)||8000;
+ const stride=()=>{const h=Number(s.profile&&s.profile.height);return h>=100?h*0.415/100:0.7};
+ const stepKcal=n=>n*bodyWeight()*0.0005; // ~0.5 kcal per kg per 1,000 steps
+ const WALK=/เดิน|walk/i;
+ function energy(d){const T=typeof bodyTargets==='function'?bodyTargets():null;
+  const bmr=T&&T.bmr?T.bmr:Math.round(bodyWeight()*22),est=!(T&&T.bmr);
+  const frac=d===today()?(()=>{const n=new Date();return (n.getHours()*60+n.getMinutes())/1440})():1;
+  const eaten=kcalOn(d),st=stepsOn(d),rest=bmr*frac,tef=eaten*0.1,walk=stepKcal(st);
+  // walking logged by hand is already in the step count on days with steps
+  const ex=movesOn(d).filter(m=>!(st>0&&WALK.test(m.name||''))).reduce((a,m)=>a+Number(m.kcal||0),0);
+  return {bmr,est,frac,eaten,steps:st,rest,tef,walk,ex,burned:rest+tef+walk+ex}}
+ // ---- cards on the Move page ----
+ const move=document.getElementById('move');if(!move)return;
+ const stCard=document.createElement('div');stCard.className='st-card';stCard.id='stCard';
+ const enCard=document.createElement('div');enCard.className='st-card';enCard.id='enCard';
+ const title=move.querySelector('.page-title');title.after(stCard);stCard.after(enCard);
+ const ring=(v,max,size,stroke,color)=>{const r=(size-stroke)/2,c=2*Math.PI*r,p=Math.min(1,max?v/max:0);
+  return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--panel2)" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(c*p).toFixed(1)} ${c.toFixed(1)}"/></svg>`};
+ function drawSteps(){const d=today(),n=stepsOn(d),g=goal(),ns=nstat(),km=n*stride()/1000;
+  const days=[...Array(7)].map((_,i)=>addD(d,i-6)),vals=days.map(stepsOn),mx=Math.max(g,...vals);
+  const wd=EN?['Su','Mo','Tu','We','Th','Fr','Sa']:['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let src='';
+  if(ns&&ns.sensor){src=ns.on&&ns.permitted?`<div class="st-note">📱 ${L('นับก้าวอัตโนมัติจากเซนเซอร์มือถือ · พกมือถือติดตัวเพื่อให้นับได้ครบ','Counting automatically with your phone\'s sensor · keep the phone on you')}</div>`
+   :`<button type="button" class="st-btn" id="stOn">👟 ${L('เปิดนับก้าวอัตโนมัติ','Turn on step counting')}</button><div class="st-note">${L('แอปจะขออนุญาต "กิจกรรมการเคลื่อนไหว" ใช้เซนเซอร์นับก้าวในมือถือ ไม่ใช้ GPS ไม่ส่งข้อมูลออกนอกเครื่อง (ยกเว้นเปิดซิงก์)','The app asks for "Physical activity" to use the phone\'s step sensor — no GPS, nothing leaves the phone (unless you turn on sync)')}</div>`}
+  else src=`<div class="st-note">${N()?L('มือถือนี้ไม่มีเซนเซอร์นับก้าว ใส่ก้าวเองจากนาฬิกาหรือแอปอื่นได้','This phone has no step sensor — type in steps from your watch or another app'):L('ใส่ก้าวเองได้จากนาฬิกาหรือแอปอื่น','Type in steps from your watch or another app')}</div>`;
+  stCard.innerHTML=`<div class="st-head"><h3>👟 ${L('ก้าววันนี้','Steps today')}</h3><button type="button" class="st-ib" id="stEdit" aria-label="${L('ใส่ก้าวเอง','Enter steps')}">✏️</button><button type="button" class="st-ib" id="stGoal">🎯 ${fmt(g)}</button></div>
+   <div class="st-main"><div class="st-ring">${ring(n,g,120,12,'#2f9e6e')}<div class="in"><b>${fmt(n)}</b><small>/ ${fmt(g)} ${L('ก้าว','steps')}</small></div></div>
+    <div class="st-facts"><div><i>📏</i><span><b>${km.toFixed(km<10?2:1)}</b> ${L('กม.','km')}</span></div><div><i>🔥</i><span><b>${fmt(stepKcal(n))}</b> kcal</span></div><div><i>⏱️</i><span><b>${fmt(n/110)}</b> ${L('นาทีที่เดิน','min walking')}</span></div>
+    <div><i>${n>=g?'🏆':'💪'}</i><span>${n>=g?L('ถึงเป้าแล้ว!','Goal reached!'):L(`อีก ${fmt(g-n)} ก้าว`,`${fmt(g-n)} to go`)}</span></div></div></div>
+   <div class="st-bars">${days.map((x,i)=>`<div class="${x===d?'now':''}"><span class="${vals[i]>=g?'hit':''}" style="height:${(vals[i]/mx*58).toFixed(0)}px" title="${fmt(vals[i])}"></span>${wd[new Date(x+'T12:00:00').getDay()]}</div>`).join('')}</div>${src}`;
+  const on=stCard.querySelector('#stOn');if(on)on.onclick=()=>N().enable(true);
+  stCard.querySelector('#stGoal').onclick=()=>{const v=prompt(L('เป้าก้าวต่อวัน','Daily step goal'),g);if(v===null)return;const x=Math.round(Number(String(v).replace(/[^0-9]/g,'')));if(x>=1000&&x<=50000){s.stepGoal=x;save();drawAll()}else toast(L('ใส่ 1,000–50,000 ก้าว','Use 1,000–50,000 steps'))};
+  stCard.querySelector('#stEdit').onclick=()=>{const cur=stepsOn(d);const v=prompt(L('จำนวนก้าววันนี้ (เว้นว่าง = ใช้ค่าจากเซนเซอร์)','Steps today (leave empty to use the sensor)'),s.stepsManual&&s.stepsManual[d]!=null?cur:'');if(v===null)return;
+   s.stepsManual=s.stepsManual||{};const x=String(v).replace(/[^0-9]/g,'');if(x==='')delete s.stepsManual[d];else s.stepsManual[d]=Math.min(100000,Number(x));save();drawAll()}}
+ function drawEnergy(){const E=energy(today()),bal=E.eaten-E.burned,T=typeof bodyTargets==='function'?bodyTargets():null,plan=(window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||0;
+  const parts=[['😴',L('ร่างกายใช้ขณะพัก (BMR)','Resting (BMR)'),E.rest,'#b9c3d6'],['🍽️',L('ย่อยอาหาร','Digesting food'),E.tef,'#f2c14e'],['👟',L('เดิน (จากก้าว)','Walking (steps)'),E.walk,'#8fd3b0'],['🏋️',L('ออกกำลังกายที่บันทึก','Logged exercise'),E.ex,'#e887aa']];
+  enCard.innerHTML=`<div class="st-head"><h3>🔥 ${L('แคลอรี่ที่ใช้วันนี้','Calories burned today')}</h3></div>
+   <div class="en-sum"><div><small>${L('กินไป','Eaten')}</small><b>${fmt(E.eaten)}</b></div><div class="op">−</div><div><small>${L('ใช้ไปแล้ว','Burned so far')}</small><b>${fmt(E.burned)}</b></div></div>
+   <div class="en-bal${bal>0?' over':''}">${bal>0?L(`เกินที่ใช้ไป ${fmt(bal)} kcal`,`${fmt(bal)} kcal more than burned`):L(`ใช้มากกว่ากิน ${fmt(-bal)} kcal`,`Burned ${fmt(-bal)} kcal more than eaten`)}</div>
+   <div class="en-bar">${parts.map(p=>`<i style="width:${(p[2]/Math.max(1,E.burned)*100).toFixed(1)}%;background:${p[3]}"></i>`).join('')}</div>
+   <div class="en-rows">${parts.map(p=>`<div><i style="font-style:normal">${p[0]}</i><span>${p[1]}</span><b>${fmt(p[2])}</b></div>`).join('')}</div>
+   <div class="st-note">${L(`ทั้งวันคาดว่าจะใช้ ~${fmt(E.bmr+E.tef+E.walk+E.ex)} kcal (ถ้าไม่ขยับเพิ่ม)`,`Whole day, about ${fmt(E.bmr+E.tef+E.walk+E.ex)} kcal (if you don't move more)`)}${plan?L(` · เป้าการกิน ${fmt(plan)} kcal`,` · eating target ${fmt(plan)} kcal`):''}<br>
+   ${E.est?L('⚠️ ใส่เพศ อายุ ส่วนสูง น้ำหนัก ในข้อมูลร่างกาย เพื่อคำนวณ BMR ให้แม่นขึ้น · ','⚠️ Add sex, age, height and weight in body details for an accurate BMR · '):''}${L('ค่าประมาณ ไม่ใช่การวัดทางการแพทย์','Estimates, not a medical measurement')}</div>`}
+ // ---- home card ----
+ function drawHome(){let b=document.getElementById('stHome');
+  if(!b){const after=document.querySelector('#home .twocards');if(!after)return;b=document.createElement('button');b.type='button';b.className='st-home home-sortable';b.id='stHome';b.dataset.homeKey='steps';after.after(b);b.onclick=()=>go('move');if(typeof applyHomePrefs==='function')applyHomePrefs()}
+  const E=energy(today()),g=goal();
+  b.innerHTML=`<span class="mini">${ring(E.steps,g,46,6,'#2f9e6e')}</span><span class="tx"><b>👟 ${fmt(E.steps)} ${L('ก้าว','steps')}</b><small>🔥 ${L('ใช้ไป','burned')} ${fmt(E.burned)} · 🍽️ ${L('กิน','ate')} ${fmt(E.eaten)} kcal</small></span><span>›</span>`}
+ function drawAll(){try{drawSteps();drawEnergy();drawHome()}catch(e){console.error(e)}}
+ // ---- native events ----
+ let lastSave=0;
+ window.onSteps=function(json){if(merge(json)){const now=Date.now();if(now-lastSave>60000){lastSave=now;save()}}drawAll()};
+ window.onStepsPermission=function(ok){if(ok){toast(L('เปิดนับก้าวแล้ว 👟','Step counting is on 👟'));N().refresh()}else toast(L('ไม่ได้รับอนุญาต เปิดได้ที่ ตั้งค่ามือถือ → แอป → FoodWell → สิทธิ์','Permission denied — allow it in phone Settings → Apps → FoodWell → Permissions'));drawAll()};
+ window.FWSteps={on:stepsOn,energy,goal};
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);drawAll();return o};
+ if(N()){try{merge(N().days())}catch(e){}const ns=nstat();if(ns&&ns.on)N().refresh()}
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(N()&&nstat()?.on)N().refresh();drawAll()}});
+ setInterval(()=>{if(!document.hidden)drawEnergy()},60000);
+ drawAll();
 })();
 </script>

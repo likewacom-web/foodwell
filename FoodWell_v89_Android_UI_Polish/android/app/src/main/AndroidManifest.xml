@@ -2,6 +2,7 @@
  <uses-permission android:name="android.permission.INTERNET" />
  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+ <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
  <!-- social apps offered as share buttons (Android 11+ package visibility) -->
  <queries>
   <package android:name="jp.naver.line.android"/><package android:name="com.facebook.katana"/><package android:name="com.instagram.android"/>

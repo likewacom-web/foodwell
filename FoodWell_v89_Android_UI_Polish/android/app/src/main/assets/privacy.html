@@ -34,6 +34,7 @@
 <h2>3. บริการที่ทำงานเมื่อคุณสั่งเท่านั้น</h2>
 <ul>
  <li><b>วิเคราะห์รูปอาหารด้วย AI:</b> เมื่อคุณกด “วิเคราะห์รูป” รูปที่คุณเลือกจะถูกส่งไปยังบริการ AI ของแอป (ทำงานบน Cloudflare Workers และใช้ Google Gemini API) เพื่อคาดเดาชื่ออาหารและค่าโภชนาการ แอปไม่เก็บรูปนั้นไว้บนเซิร์ฟเวอร์</li>
+ <li><b>นับก้าว:</b> ถ้าคุณเปิด แอปจะขอสิทธิ์ "กิจกรรมการเคลื่อนไหว" (Physical activity) เพื่ออ่านเซนเซอร์นับก้าวของมือถือ เก็บจำนวนก้าวรายวันไว้ในเครื่อง (และซิงก์ถ้าเปิดซิงก์) ไม่ใช้ตำแหน่ง/GPS · ปิดได้ทุกเมื่อในการตั้งค่าสิทธิ์ของมือถือ</li>
  <li><b>สแกนบาร์โค้ด:</b> หมายเลขบาร์โค้ดถูกส่งไปค้นหาที่ Open Food Facts (ฐานข้อมูลอาหารแบบเปิด) ตัวสแกนเป็นของ Google (ML Kit) ทำงานในเครื่อง</li>
  <li><b>ชาเลนจ์กับเพื่อน:</b> ถ้าคุณสร้างหรือเข้าร่วมห้องชาเลนจ์ (ต้องเข้าสู่ระบบ) แอปจะเก็บชื่อที่คุณตั้งให้เพื่อนเห็น อีโมจิ และจำนวนวันที่ทำสำเร็จ ไว้ใน Firestore ที่ <code>rooms/{รหัส}</code> คนที่มีรหัสห้องและเข้าสู่ระบบจะเห็นข้อมูลนี้ ไม่มีข้อมูลอาหารหรือสุขภาพ · กด "เลิก" เพื่อออกจากห้อง</li>
  <li><b>แชร์:</b> ข้อความและรูปการ์ดถูกส่งไปยังแอปที่คุณเลือก (เช่น LINE, Facebook) เฉพาะเมื่อคุณกดแชร์</li>
@@ -79,6 +80,7 @@
 <h2>3. Services that run only when you ask</h2>
 <ul>
  <li><b>AI food photo analysis:</b> when you tap “Analyse photo”, the photo you chose is sent to the app's AI service (running on Cloudflare Workers using the Google Gemini API) to suggest a food name and nutrition. The photo is not stored on our servers.</li>
+ <li><b>Step counting:</b> if you turn it on, the app asks for the "Physical activity" permission to read the phone's step sensor. Daily step totals stay on the phone (and sync if you turn sync on). No location/GPS is used. You can turn it off any time in the phone's permission settings.</li>
  <li><b>Barcode scanning:</b> the barcode number is looked up in Open Food Facts (an open food database). The scanner is Google ML Kit and runs on the device.</li>
  <li><b>Friend challenges:</b> if you create or join a challenge room (sign-in required), the app stores the name you choose for friends, an emoji and how many days you've completed in Firestore at <code>rooms/{code}</code>. Signed-in people who have the room code can see this — never your food or health data. Tap "Quit" to leave a room.</li>
  <li><b>Sharing:</b> text and card images go to the app you choose (e.g. LINE, Facebook) only when you tap share.</li>

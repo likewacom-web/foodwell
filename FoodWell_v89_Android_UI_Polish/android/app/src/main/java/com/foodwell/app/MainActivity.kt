@@ -45,6 +45,8 @@ class MainActivity : ComponentActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cloud: CloudSync
     private lateinit var rooms: FriendRooms
+    private lateinit var stepsLive: StepCounter.Live
+    private lateinit var stepPermission: ActivityResultLauncher<String>
     private lateinit var pro: Monetization
     private lateinit var notifyPermission: ActivityResultLauncher<String>
     private var pendingPage: String? = null
@@ -67,6 +69,11 @@ class MainActivity : ComponentActivity() {
         }
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
         rooms = FriendRooms(this) { fn, arg -> callJs(fn, arg) }
+        stepsLive = StepCounter.Live(this) { callJs("onSteps", JSONObject.quote(StepCounter.days(this).toString())) }
+        stepPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+            if (ok) { StepCounter.setEnabled(this, true); stepsLive.start() }
+            callJs("onStepsPermission", if (ok) "true" else "false")
+        }
         notifyPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
             callJs("onNotifyPermission", JSONObject.quote(if (ok) "granted" else "denied"))
         }
@@ -147,6 +154,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(PrintApi(), "FoodWellPrint")
             addJavascriptInterface(LangApi(), "FoodWellLang")
             addJavascriptInterface(ShareApi(this@MainActivity), "FoodWellShare")
+            addJavascriptInterface(StepsApi(), "FoodWellSteps")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -285,12 +293,14 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onPause() {
+        stepsLive.stop()
         pro.onPause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        stepsLive.start()
         pro.onResume()
     }
 
@@ -309,6 +319,36 @@ class MainActivity : ComponentActivity() {
     // JavascriptInterface methods run on a background thread; hop to the UI thread for anything Android-side.
 
     // ---- Gmail sign-in + multi-device sync (Firebase) -----------------------------------------
+
+    // ---- step counter (phone sensor) -------------------------------------------------------------
+    inner class StepsApi {
+        /** {sensor, permitted, on} */
+        @JavascriptInterface fun status(): String = JSONObject()
+            .put("sensor", StepCounter.hasSensor(this@MainActivity))
+            .put("permitted", StepCounter.permitted(this@MainActivity))
+            .put("on", StepCounter.enabled(this@MainActivity)).toString()
+
+        /** {"yyyy-MM-dd": steps} for recent days. */
+        @JavascriptInterface fun days(): String = StepCounter.days(this@MainActivity).toString()
+
+        /** Turns counting on (asks for the physical-activity permission first) or off; answers onStepsPermission(ok). */
+        @JavascriptInterface fun enable(on: Boolean) = runOnUiThread {
+            if (!on) { StepCounter.setEnabled(this@MainActivity, false); stepsLive.stop(); return@runOnUiThread }
+            if (StepCounter.permitted(this@MainActivity)) {
+                StepCounter.setEnabled(this@MainActivity, true); stepsLive.start(); callJs("onStepsPermission", "true")
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                stepPermission.launch(android.Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+
+        /** Takes a fresh reading now and answers onSteps(days). */
+        @JavascriptInterface fun refresh() = runOnUiThread {
+            lifecycleScope.launch {
+                StepCounter.readOnce(this@MainActivity)?.let { StepCounter.record(this@MainActivity, it) }
+                callJs("onSteps", JSONObject.quote(StepCounter.days(this@MainActivity).toString()))
+            }
+        }
+    }
 
     inner class CloudApi {
         /** {configured, user|null} — called synchronously by the page on load. */
