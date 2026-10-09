@@ -4373,6 +4373,20 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   q('#hcSync')&&(q('#hcSync').onclick=()=>sync(true));
   q('#hcOff')&&(q('#hcOff').onclick=()=>{if(!confirm(L('เลิกเชื่อม Health Connect? (ข้อมูลที่ดึงมาแล้วยังอยู่)','Disconnect Health Connect? (data already imported stays)')))return;S.on=false;S.granted=[];save();H().disconnect();draw()})}
  function sync(manual){if(busy||!H()||H().sdk()!=='ok'||!st().on)return;busy=true;draw();H().sync(manual?30:7)}
+ // merge watch entries (old one-per-session ones too) into one per day + activity
+ function mergeWatch(units){s.moves=s.moves||[];const keep=[],groups=new Map();
+  const put=u=>{const k=u.date+'|'+u.label;let g=groups.get(k);
+   if(!g){g={id:u.start,createdAt:u.start,label:u.label,min:0,kcal:0,date:u.date,time:u.time,hcIds:[],count:0,type:'',met:0,src:u.src};groups.set(k,g)}
+   if(u.ids.some(i=>g.hcIds.includes(i)))return 0;
+   g.hcIds.push(...u.ids);g.min+=u.min;g.kcal+=u.kcal;g.count+=u.count;if(u.start<g.id)g.id=u.start;if(u.start>=g.createdAt){g.createdAt=u.start;g.time=u.time}return u.count};
+  s.moves.forEach(m=>{if(m.hcId||m.hcIds)put({start:Number(m.id),date:entryDay(m),label:m.label||String(m.name||'').replace(/^⌚\s*/,'').replace(/\s·\s\d+\s.*$/,''),min:Number(m.min)||0,kcal:Number(m.kcal)||0,count:m.count||1,ids:m.hcIds||[m.hcId],time:m.time,src:m.src});else keep.push(m)});
+  let added=0;units.forEach(u=>added+=put(u));
+  groups.forEach(g=>{g.name='⌚ '+g.label+(g.count>1?` · ${g.count} ${L('ครั้ง','times')}`:'');keep.push(g)});
+  s.moves=keep.sort((a,b)=>(b.createdAt||b.id)-(a.createdAt||a.id));return added}
+ // a watch entry you delete stays deleted (its sessions are not imported again)
+ const dm=window.delMove;if(typeof dm==='function')window.delMove=function(id){const m=(s.moves||[]).find(x=>x.id===id);if(m&&(m.hcIds||m.hcId)){s.hcIgnored=[...new Set([...(s.hcIgnored||[]),...(m.hcIds||[m.hcId])])].slice(-2000)}return dm.apply(this,arguments)};
+ // tidy entries imported before this change
+ if((s.moves||[]).some(m=>m.hcId)){mergeWatch([]);save()}
  const sessionKcal=(label,min)=>typeof moveKcal==='function'?moveKcal(label,'',min):Math.round(5*bodyWeight()*min/60);
  window.onHealth=function(kind,json){let d={};try{d=JSON.parse(json)}catch(e){d=json}const S=st();
   if(kind==='permission'){S.granted=d.granted||[];if(S.granted.length){S.on=true;save();toast(L('เชื่อม Health Connect แล้ว ⌚','Health Connect connected ⌚'));sync(true)}else{toast(L('ยังไม่ได้อนุญาตข้อมูล','No data allowed yet'));save();draw()}return}
@@ -4381,12 +4395,12 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   if(kind!=='data')return;
   S.granted=d.granted||S.granted;S.last=Date.now();
   s.hcDays=s.hcDays||{};for(const k in (d.days||{}))s.hcDays[k]=d.days[k];
-  // workouts from the watch become movement entries once (keyed by their Health Connect id)
-  s.moves=s.moves||[];const have=new Set(s.moves.filter(m=>m.hcId).map(m=>m.hcId));let added=0;
-  (d.sessions||[]).forEach(x=>{if(have.has(x.id))return;const min=Math.max(1,Math.round((x.end-x.start)/60000));if(min>600)return;
-   const lab=LABEL[x.type]||LABEL.other,name=(x.title&&x.title.length<40?x.title:L(lab[0],lab[1])),t=new Date(x.start);
-   s.moves.push({id:x.start+(added++),hcId:x.id,createdAt:x.start,name:'⌚ '+name,type:'',min,kcal:sessionKcal(lab[0],min),met:0,date:localDay(t),time:t.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),src:x.src})});
-  if(added)s.moves.sort((a,b)=>(b.createdAt||b.id)-(a.createdAt||a.id));
+  // watch workouts: one movement entry per day and activity, each Health Connect session counted once
+  const ignored=new Set(s.hcIgnored||[]),units=[];
+  (d.sessions||[]).forEach(x=>{if(ignored.has(x.id))return;const min=Math.max(1,Math.round((x.end-x.start)/60000));if(min>600)return;
+   const lab=LABEL[x.type]||LABEL.other,label=(x.title&&x.title.length<40?x.title:L(lab[0],lab[1])),t=new Date(x.start);
+   units.push({start:x.start,date:localDay(t),label,min,kcal:sessionKcal(lab[0],min),count:1,ids:[x.id],time:t.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),src:x.src})});
+  const added=mergeWatch(units);
   save();if(added)toast(L(`นำเข้าการออกกำลังกาย ${added} รายการจากนาฬิกา ⌚`,`Imported ${added} workout${added>1?'s':''} from your watch ⌚`));
   if(typeof render==='function')render();else window.FWSteps&&FWSteps.redraw();draw()};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){}return o};
