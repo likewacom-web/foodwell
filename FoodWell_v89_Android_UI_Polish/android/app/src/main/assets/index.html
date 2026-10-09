@@ -4208,7 +4208,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  tick();homeCard();
 })();
 </script>
-<!-- v124 Compact food list: one-line names, smaller photos and buttons, first 8 items then "show more" -->
+<!-- v124 Compact food list: one-line names, smaller photos and buttons, first 5 items with a show more / show less toggle -->
 <style>
 #foodList{gap:6px}
 #foodList .item{padding:8px 10px;gap:10px;border-radius:16px;min-height:0}
@@ -4223,14 +4223,16 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 </style>
 <script>
 (function(){
- const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,STEP=8;
- let shown=STEP,lastKey='';
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,FEW=5;
+ let open=false,lastKey='';
  function trim(){const box=document.getElementById('foodList');if(!box)return;
   const items=[...box.querySelectorAll(':scope > .item.clickable')];box.querySelector('.fl-more')?.remove();
-  // a new search / meal filter starts from the top again
-  const key=(document.getElementById('search')?.value||'')+'|'+(document.querySelector('[data-meal].active,.meal-tab.active')?.textContent||'');if(key!==lastKey){lastKey=key;shown=STEP}
-  items.forEach((el,i)=>el.style.display=i<shown?'':'none');
-  if(items.length>shown){const b=document.createElement('button');b.type='button';b.className='fl-more';b.textContent=L(`แสดงเพิ่ม (${items.length-shown} รายการ)`,`Show more (${items.length-shown})`);b.onclick=()=>{shown+=STEP*2;trim()};box.appendChild(b)}}
+  // a new search / meal filter collapses the list again
+  const key=(document.getElementById('search')?.value||'')+'|'+(document.querySelector('[data-meal].active,.meal-tab.active')?.textContent||'');if(key!==lastKey){lastKey=key;open=false}
+  items.forEach((el,i)=>el.style.display=open||i<FEW?'':'none');
+  if(items.length>FEW){const b=document.createElement('button');b.type='button';b.className='fl-more';
+   b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);
+   b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};box.appendChild(b)}}
  const box=document.getElementById('foodList');if(!box)return;
  new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
  trim();
