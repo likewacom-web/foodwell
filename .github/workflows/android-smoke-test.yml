@@ -57,6 +57,9 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
+          # software GPU without Vulkan + more RAM: the emulator kept dying a few seconds after the WebView started drawing
+          emulator-options: -no-window -gpu swiftshader_indirect -feature -Vulkan -no-snapshot -noaudio -no-boot-anim
+          ram-size: 4096M
           working-directory: FoodWell_v89_Android_UI_Polish/android
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
