@@ -173,6 +173,7 @@ Nutrition values are estimates, not medical advice.
 - **Content rating (IARC):** หมวด Health/Reference — ไม่มีความรุนแรง ไม่มีเนื้อหาผู้ใหญ่ · มีการซื้อในแอป · ผู้ใช้ไม่ได้แชทกัน (ห้องชาเลนจ์แสดงเฉพาะชื่อและคะแนน) → ตอบเรื่อง "users can interact" ว่า **ไม่มีการแชท** แต่มีการแชร์ชื่อ/คะแนนกับคนที่มีรหัส
 - **Target audience:** 18+ (หรือ 13+) — **อย่าเลือกกลุ่มเด็ก** (จะติดนโยบาย Families)
 - **Health apps declaration:** เลือก *Nutrition and weight management*, *Activity and fitness* · ไม่ใช่อุปกรณ์การแพทย์
+- **Health Connect (สำคัญ):** Play Console → App content → **Health Connect** → ขอสิทธิ์อ่าน *Steps*, *Active calories burned*, *Exercise* · เหตุผล: "แสดงก้าว/แคลที่ใช้/การออกกำลังกายจากนาฬิกา เพื่อคำนวณสมดุลพลังงานกับอาหารที่บันทึก" · ใส่ URL นโยบาย (มีหัวข้อ Health Connect แล้ว) · Google จะตรวจก่อนอนุมัติ (ระหว่างนี้ build ทดสอบใช้ได้ปกติ)
 - **สิทธิ์ ACTIVITY_RECOGNITION (นับก้าว):** ใช้เซนเซอร์นับก้าวของเครื่อง ขอเฉพาะเมื่อผู้ใช้กด "เปิดนับก้าวอัตโนมัติ"
 - **Account deletion:** ใส่ URL นโยบาย (หัวข้อ 7 “การลบข้อมูล”) และบอกว่าลบได้ในแอป
 - **Government / Financial / News:** No

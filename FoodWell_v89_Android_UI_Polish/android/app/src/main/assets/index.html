@@ -4275,18 +4275,21 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // native totals are merged into s.stepsLog (synced); a number typed in for a day wins
  function merge(json){let d={};try{d=JSON.parse(json||'{}')}catch(e){}s.stepsLog=s.stepsLog||{};let ch=false;
   for(const k in d){const v=Number(d[k])||0;if(v>(s.stepsLog[k]||0)){s.stepsLog[k]=v;ch=true}}return ch}
- const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Number((s.stepsLog||{})[d]||0)};
+ const hcDay=d=>(s.hcDays||{})[d]||{};
+ const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Math.max(Number((s.stepsLog||{})[d]||0),Number(hcDay(d).steps||0))};
  const goal=()=>Number(s.stepGoal)||8000;
  const stride=()=>{const h=Number(s.profile&&s.profile.height);return h>=100?h*0.415/100:0.7};
  const stepKcal=n=>n*bodyWeight()*0.0005; // ~0.5 kcal per kg per 1,000 steps
- const WALK=/เดิน|walk/i;
+ const WALK=/เดิน|วิ่ง|walk|run|jog|hike/i; // on foot: already counted through the steps
  function energy(d){const T=typeof bodyTargets==='function'?bodyTargets():null;
   const bmr=T&&T.bmr?T.bmr:Math.round(bodyWeight()*22),est=!(T&&T.bmr);
   const frac=d===today()?(()=>{const n=new Date();return (n.getHours()*60+n.getMinutes())/1440})():1;
   const eaten=kcalOn(d),st=stepsOn(d),rest=bmr*frac,tef=eaten*0.1,walk=stepKcal(st);
-  // walking logged by hand is already in the step count on days with steps
+  // walks / runs (typed in or from a watch) are already in the step count on days with steps
   const ex=movesOn(d).filter(m=>!(st>0&&WALK.test(m.name||''))).reduce((a,m)=>a+Number(m.kcal||0),0);
-  return {bmr,est,frac,eaten,steps:st,rest,tef,walk,ex,burned:rest+tef+walk+ex}}
+  // a watch's active calories (Health Connect) already cover walking and workouts: use whichever is larger
+  const hc=Number(hcDay(d).kcal||0),useHc=hc>walk+ex;
+  return {bmr,est,frac,eaten,steps:st,rest,tef,walk,ex,hc,useHc,burned:rest+tef+(useHc?hc:walk+ex)}}
  // ---- cards on the Move page ----
  const move=document.getElementById('move');if(!move)return;
  const stCard=document.createElement('div');stCard.className='st-card';stCard.id='stCard';
@@ -4311,13 +4314,13 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   stCard.querySelector('#stEdit').onclick=()=>{const cur=stepsOn(d);const v=prompt(L('จำนวนก้าววันนี้ (เว้นว่าง = ใช้ค่าจากเซนเซอร์)','Steps today (leave empty to use the sensor)'),s.stepsManual&&s.stepsManual[d]!=null?cur:'');if(v===null)return;
    s.stepsManual=s.stepsManual||{};const x=String(v).replace(/[^0-9]/g,'');if(x==='')delete s.stepsManual[d];else s.stepsManual[d]=Math.min(100000,Number(x));save();drawAll()}}
  function drawEnergy(){const E=energy(today()),bal=E.eaten-E.burned,T=typeof bodyTargets==='function'?bodyTargets():null,plan=(window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||0;
-  const parts=[['😴',L('ร่างกายใช้ขณะพัก (BMR)','Resting (BMR)'),E.rest,'#b9c3d6'],['🍽️',L('ย่อยอาหาร','Digesting food'),E.tef,'#f2c14e'],['👟',L('เดิน (จากก้าว)','Walking (steps)'),E.walk,'#8fd3b0'],['🏋️',L('ออกกำลังกายที่บันทึก','Logged exercise'),E.ex,'#e887aa']];
+  const parts=[['😴',L('ร่างกายใช้ขณะพัก (BMR)','Resting (BMR)'),E.rest,'#b9c3d6'],['🍽️',L('ย่อยอาหาร','Digesting food'),E.tef,'#f2c14e'],...(E.useHc?[['⌚',L('เคลื่อนไหว (จากนาฬิกา / Health Connect)','Activity (watch / Health Connect)'),E.hc,'#7cc4f5']]:[['👟',L('เดิน (จากก้าว)','Walking (steps)'),E.walk,'#8fd3b0'],['🏋️',L('ออกกำลังกายที่บันทึก','Logged exercise'),E.ex,'#e887aa']])];
   enCard.innerHTML=`<div class="st-head"><h3>🔥 ${L('แคลอรี่ที่ใช้วันนี้','Calories burned today')}</h3></div>
    <div class="en-sum"><div><small>${L('กินไป','Eaten')}</small><b>${fmt(E.eaten)}</b></div><div class="op">−</div><div><small>${L('ใช้ไปแล้ว','Burned so far')}</small><b>${fmt(E.burned)}</b></div></div>
    <div class="en-bal${bal>0?' over':''}">${bal>0?L(`เกินที่ใช้ไป ${fmt(bal)} kcal`,`${fmt(bal)} kcal more than burned`):L(`ใช้มากกว่ากิน ${fmt(-bal)} kcal`,`Burned ${fmt(-bal)} kcal more than eaten`)}</div>
    <div class="en-bar">${parts.map(p=>`<i style="width:${(p[2]/Math.max(1,E.burned)*100).toFixed(1)}%;background:${p[3]}"></i>`).join('')}</div>
    <div class="en-rows">${parts.map(p=>`<div><i style="font-style:normal">${p[0]}</i><span>${p[1]}</span><b>${fmt(p[2])}</b></div>`).join('')}</div>
-   <div class="st-note">${L(`ทั้งวันคาดว่าจะใช้ ~${fmt(E.bmr+E.tef+E.walk+E.ex)} kcal (ถ้าไม่ขยับเพิ่ม)`,`Whole day, about ${fmt(E.bmr+E.tef+E.walk+E.ex)} kcal (if you don't move more)`)}${plan?L(` · เป้าการกิน ${fmt(plan)} kcal`,` · eating target ${fmt(plan)} kcal`):''}<br>
+   <div class="st-note">${L(`ทั้งวันคาดว่าจะใช้ ~${fmt(E.bmr+E.tef+(E.useHc?E.hc:E.walk+E.ex))} kcal (ถ้าไม่ขยับเพิ่ม)`,`Whole day, about ${fmt(E.bmr+E.tef+(E.useHc?E.hc:E.walk+E.ex))} kcal (if you don't move more)`)}${plan?L(` · เป้าการกิน ${fmt(plan)} kcal`,` · eating target ${fmt(plan)} kcal`):''}<br>
    ${E.est?L('⚠️ ใส่เพศ อายุ ส่วนสูง น้ำหนัก ในข้อมูลร่างกาย เพื่อคำนวณ BMR ให้แม่นขึ้น · ','⚠️ Add sex, age, height and weight in body details for an accurate BMR · '):''}${L('ค่าประมาณ ไม่ใช่การวัดทางการแพทย์','Estimates, not a medical measurement')}</div>`}
  // ---- home card ----
  function drawHome(){let b=document.getElementById('stHome');
@@ -4329,11 +4332,68 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  let lastSave=0;
  window.onSteps=function(json){if(merge(json)){const now=Date.now();if(now-lastSave>60000){lastSave=now;save()}}drawAll()};
  window.onStepsPermission=function(ok){if(ok){toast(L('เปิดนับก้าวแล้ว 👟','Step counting is on 👟'));N().refresh()}else toast(L('ไม่ได้รับอนุญาต เปิดได้ที่ ตั้งค่ามือถือ → แอป → FoodWell → สิทธิ์','Permission denied — allow it in phone Settings → Apps → FoodWell → Permissions'));drawAll()};
- window.FWSteps={on:stepsOn,energy,goal};
+ window.FWSteps={on:stepsOn,energy,goal,redraw:()=>drawAll()};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);drawAll();return o};
  if(N()){try{merge(N().days())}catch(e){}const ns=nstat();if(ns&&ns.on)N().refresh()}
  document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(N()&&nstat()?.on)N().refresh();drawAll()}});
  setInterval(()=>{if(!document.hidden)drawEnergy()},60000);
  drawAll();
+})();
+</script>
+<!-- v126 Health Connect: steps, active calories and workouts from watches / health apps (FoodWellHealth, read only) -->
+<style>
+.hc-card{margin:0 0 12px;padding:14px 16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.hc-top{display:flex;align-items:center;gap:10px}.hc-top .em{font-size:28px}.hc-top .tx{flex:1;min-width:0}.hc-top b{display:block;font-size:15px}.hc-top small{display:block;font-size:12px;color:var(--muted);line-height:1.45}
+.hc-top button{border:0;border-radius:12px;padding:9px 12px;font-weight:800;font-family:inherit;background:#7cc4f5;color:#10243a;white-space:nowrap}
+.hc-top button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.hc-links{display:flex;gap:6px;margin-top:10px}.hc-links button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px;font-family:inherit;font-size:12px;font-weight:700}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th;
+ const H=()=>window.FoodWellHealth;
+ const move=document.getElementById('move');if(!move||!H())return;
+ const LABEL={walk:['เดิน','Walk'],hike:['เดินป่า','Hike'],run:['วิ่ง','Run'],bike:['ปั่นจักรยาน','Cycling'],swim:['ว่ายน้ำ','Swim'],yoga:['โยคะ','Yoga'],stretch:['ยืดเหยียด','Stretching'],strength:['เวทเทรนนิ่ง','Strength training'],
+  hiit:['HIIT','HIIT'],elliptical:['เครื่องเดินวงรี','Elliptical'],row:['กรรเชียงบก','Rowing'],stairs:['ขึ้นบันได','Stairs'],dance:['เต้น','Dance'],badminton:['แบดมินตัน','Badminton'],tennis:['เทนนิส','Tennis'],
+  football:['ฟุตบอล','Football'],basketball:['บาสเกตบอล','Basketball'],other:['ออกกำลังกาย','Workout']};
+ const card=document.createElement('div');card.className='hc-card';card.id='hcCard';
+ (document.getElementById('enCard')||move.querySelector('.page-title')).after(card);
+ let busy=false;
+ const st=()=>s.health=s.health||{};
+ function draw(){const sdk=H().sdk(),S=st(),on=S.on&&(S.granted||[]).length;
+  if(sdk==='none'){card.style.display='none';return}card.style.display='';
+  const last=S.last?new Date(S.last).toLocaleTimeString(EN?'en-GB':'th-TH',{hour:'2-digit',minute:'2-digit'}):'';
+  card.innerHTML=`<div class="hc-top"><span class="em">⌚</span><span class="tx"><b>${on?L('เชื่อม Health Connect แล้ว','Connected to Health Connect'):L('เชื่อมนาฬิกา / แอปสุขภาพ','Connect a watch / health app')}</b>
+   <small>${on?L(`ดึงก้าว แคลที่ใช้ และการออกกำลังกายอัตโนมัติ${last?' · อัปเดต '+last:''}`,`Steps, active calories and workouts come in automatically${last?' · updated '+last:''}`)
+   :sdk==='update'?L('ต้องติดตั้ง/อัปเดต Health Connect จาก Play Store ก่อน','Install or update Health Connect from the Play Store first')
+   :L('ดึงก้าว แคล และการออกกำลังกายจาก Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness ฯลฯ ผ่าน Health Connect','Get steps, calories and workouts from Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness and more via Health Connect')}</small></span>
+   ${on?`<button type="button" class="ghost" id="hcSync">${busy?'…':'↻'}</button>`:`<button type="button" id="hcOn">${sdk==='update'?L('ติดตั้ง','Install'):L('เชื่อม','Connect')}</button>`}</div>
+   ${on?`<div class="hc-links"><button type="button" id="hcPerm">⚙️ ${L('เลือกข้อมูลที่แชร์','Choose data')}</button><button type="button" id="hcOff">${L('เลิกเชื่อม','Disconnect')}</button></div>`:''}`;
+  const q=id=>card.querySelector(id);
+  q('#hcOn')&&(q('#hcOn').onclick=()=>{S.on=true;save();H().connect()});
+  q('#hcPerm')&&(q('#hcPerm').onclick=()=>H().connect());
+  q('#hcSync')&&(q('#hcSync').onclick=()=>sync(true));
+  q('#hcOff')&&(q('#hcOff').onclick=()=>{if(!confirm(L('เลิกเชื่อม Health Connect? (ข้อมูลที่ดึงมาแล้วยังอยู่)','Disconnect Health Connect? (data already imported stays)')))return;S.on=false;S.granted=[];save();H().disconnect();draw()})}
+ function sync(manual){if(busy||!H()||H().sdk()!=='ok'||!st().on)return;busy=true;draw();H().sync(manual?30:7)}
+ const sessionKcal=(label,min)=>typeof moveKcal==='function'?moveKcal(label,'',min):Math.round(5*bodyWeight()*min/60);
+ window.onHealth=function(kind,json){let d={};try{d=JSON.parse(json)}catch(e){d=json}const S=st();
+  if(kind==='permission'){S.granted=d.granted||[];if(S.granted.length){S.on=true;save();toast(L('เชื่อม Health Connect แล้ว ⌚','Health Connect connected ⌚'));sync(true)}else{toast(L('ยังไม่ได้อนุญาตข้อมูล','No data allowed yet'));save();draw()}return}
+  busy=false;
+  if(kind==='error'){if(d!=='none')toast(L('ดึงข้อมูลไม่สำเร็จ: ','Couldn\'t read: ')+d);draw();return}
+  if(kind!=='data')return;
+  S.granted=d.granted||S.granted;S.last=Date.now();
+  s.hcDays=s.hcDays||{};for(const k in (d.days||{}))s.hcDays[k]=d.days[k];
+  // workouts from the watch become movement entries once (keyed by their Health Connect id)
+  s.moves=s.moves||[];const have=new Set(s.moves.filter(m=>m.hcId).map(m=>m.hcId));let added=0;
+  (d.sessions||[]).forEach(x=>{if(have.has(x.id))return;const min=Math.max(1,Math.round((x.end-x.start)/60000));if(min>600)return;
+   const lab=LABEL[x.type]||LABEL.other,name=(x.title&&x.title.length<40?x.title:L(lab[0],lab[1])),t=new Date(x.start);
+   s.moves.push({id:x.start+(added++),hcId:x.id,createdAt:x.start,name:'⌚ '+name,type:'',min,kcal:sessionKcal(lab[0],min),met:0,date:localDay(t),time:t.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),src:x.src})});
+  if(added)s.moves.sort((a,b)=>(b.createdAt||b.id)-(a.createdAt||a.id));
+  save();if(added)toast(L(`นำเข้าการออกกำลังกาย ${added} รายการจากนาฬิกา ⌚`,`Imported ${added} workout${added>1?'s':''} from your watch ⌚`));
+  if(typeof render==='function')render();else window.FWSteps&&FWSteps.redraw();draw()};
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){}return o};
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&st().on&&Date.now()-(st().last||0)>5*60000)sync(false)});
+ setInterval(()=>{if(!document.hidden&&st().on)sync(false)},15*60000);
+ draw();if(st().on)setTimeout(()=>sync(false),1200);
 })();
 </script>

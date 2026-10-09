@@ -46,6 +46,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var cloud: CloudSync
     private lateinit var rooms: FriendRooms
     private lateinit var stepsLive: StepCounter.Live
+    private lateinit var health: HealthSync
+    private var pendingPrivacy = false
     private lateinit var stepPermission: ActivityResultLauncher<String>
     private lateinit var pro: Monetization
     private lateinit var notifyPermission: ActivityResultLauncher<String>
@@ -70,6 +72,8 @@ class MainActivity : ComponentActivity() {
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
         rooms = FriendRooms(this) { fn, arg -> callJs(fn, arg) }
         stepsLive = StepCounter.Live(this) { callJs("onSteps", JSONObject.quote(StepCounter.days(this).toString())) }
+        health = HealthSync(this) { fn, arg -> callJs(fn, arg) }
+        pendingPrivacy = isPrivacyIntent(intent)
         stepPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
             if (ok) { StepCounter.setEnabled(this, true); stepsLive.start() }
             callJs("onStepsPermission", if (ok) "true" else "false")
@@ -95,6 +99,7 @@ class MainActivity : ComponentActivity() {
                     pendingPage?.let { p -> pendingPage = null; view.postDelayed({ callJs("go", JSONObject.quote(p)) }, 400) }
                     // Opened from a friend's invite link (foodwell://join?c=CODE).
                     pendingJoin?.let { c -> pendingJoin = null; view.postDelayed({ callJs("onJoinLink", JSONObject.quote(c)) }, 900) }
+                    if (pendingPrivacy) { pendingPrivacy = false; view.postDelayed({ callJs("fwPrivacy", "") }, 700) }
                 }
             }
             // Without a WebChromeClient file chooser, <input type=file> (food photos, backup import) does nothing.
@@ -155,6 +160,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(LangApi(), "FoodWellLang")
             addJavascriptInterface(ShareApi(this@MainActivity), "FoodWellShare")
             addJavascriptInterface(StepsApi(), "FoodWellSteps")
+            addJavascriptInterface(HealthApi(), "FoodWellHealth")
             loadUrl("file:///android_asset/index.html")
         }
 
@@ -283,7 +289,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         intent.getStringExtra("page")?.let { callJs("go", JSONObject.quote(it)) }
         joinCode(intent)?.let { callJs("onJoinLink", JSONObject.quote(it)) }
+        if (isPrivacyIntent(intent)) callJs("fwPrivacy", "")
     }
+
+    /** Health Connect asks the app to explain its data use. */
+    private fun isPrivacyIntent(i: Intent?) = i?.action == "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" ||
+        i?.action == "android.intent.action.VIEW_PERMISSION_USAGE"
 
     /** Invite code from foodwell://join?c=CODE (or …/join/CODE). */
     private fun joinCode(i: Intent?): String? {
@@ -346,6 +357,33 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch {
                 StepCounter.readOnce(this@MainActivity)?.let { StepCounter.record(this@MainActivity, it) }
                 callJs("onSteps", JSONObject.quote(StepCounter.days(this@MainActivity).toString()))
+            }
+        }
+    }
+
+    // ---- Health Connect (watches / health apps) — answers onHealth(kind, json) -----------------------
+    inner class HealthApi {
+        /** "ok" | "update" | "none" */
+        @JavascriptInterface fun sdk(): String = health.sdk()
+
+        @JavascriptInterface fun connect() = runOnUiThread { health.connect() }
+
+        /** Reads the last [days] days: onHealth("data", {days:{date:{steps,kcal}}, sessions:[…], granted:[…]}). */
+        @JavascriptInterface fun sync(days: Int) = runOnUiThread {
+            lifecycleScope.launch {
+                try {
+                    callJs("onHealth", JSONObject.quote("data") + "," + JSONObject.quote(health.read(days.coerceIn(1, 60))))
+                } catch (e: Exception) {
+                    Log.w(TAG, "health connect read failed", e)
+                    callJs("onHealth", JSONObject.quote("error") + "," + JSONObject.quote(e.message ?: ""))
+                }
+            }
+        }
+
+        @JavascriptInterface fun disconnect() = runOnUiThread {
+            lifecycleScope.launch {
+                runCatching { health.disconnect() }
+                callJs("onHealth", JSONObject.quote("permission") + "," + JSONObject.quote("{\"granted\":[]}"))
             }
         }
     }
