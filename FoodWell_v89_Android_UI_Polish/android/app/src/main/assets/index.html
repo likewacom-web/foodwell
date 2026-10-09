@@ -4457,3 +4457,38 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  trim();
 })();
 </script>
+<!-- v130 More page: first 5 cards with a show more / show less toggle; trophies show 4 (two rows) with their own toggle -->
+<style>
+#more .mr-hide{display:none!important}
+.mr-more{display:block;width:100%;margin:0 0 12px;border:1px dashed var(--line,#3a3c45);background:none;color:inherit;border-radius:14px;padding:11px;font-family:inherit;font-weight:700;font-size:13px;opacity:.85}
+#trophyGrid .mr-hide{display:none!important}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th;
+ const more=document.getElementById('more');if(!more)return;
+ const btnText=(open,n)=>open?L('▲ ย่อ','▲ Show less'):L(`▼ แสดงเพิ่ม (${n})`,`▼ Show more (${n})`);
+ // ---- cards on the page ----
+ const FEW=5;let open=false,busy=false;
+ const pb=document.createElement('button');pb.type='button';pb.className='mr-more';pb.id='mrMore';
+ pb.onclick=()=>{open=!open;trimPage();if(!open)more.scrollIntoView({block:'start',behavior:'smooth'})};
+ function trimPage(){if(busy)return;busy=true;
+  const cards=[...more.children].filter(e=>e!==pb&&!e.classList.contains('page-title'));
+  cards.forEach(e=>e.classList.remove('mr-hide'));
+  const shown=cards.filter(e=>getComputedStyle(e).display!=='none');
+  shown.forEach((e,i)=>e.classList.toggle('mr-hide',!open&&i>=FEW));
+  if(shown.length>FEW){pb.textContent=btnText(open,shown.length-FEW);if(more.lastElementChild!==pb)more.appendChild(pb)}else pb.remove();
+  busy=false}
+ new MutationObserver(()=>{if(!busy)setTimeout(trimPage,0)}).observe(more,{childList:true});
+ // ---- trophies ----
+ const SHOWN=4;let topen=false;
+ const tb=document.createElement('button');tb.type='button';tb.className='mr-more';tb.style.marginTop='10px';
+ tb.onclick=()=>{topen=!topen;trimTrophies()};
+ function trimTrophies(){const g=document.getElementById('trophyGrid');if(!g)return;const items=[...g.children];
+  items.forEach((e,i)=>e.classList.toggle('mr-hide',!topen&&i>=SHOWN));
+  if(items.length>SHOWN){tb.textContent=topen?L('▲ ย่อถ้วยรางวัล','▲ Fewer trophies'):L(`▼ ดูถ้วยรางวัลทั้งหมด (${items.length-SHOWN})`,`▼ All trophies (${items.length-SHOWN})`);if(g.nextElementSibling!==tb)g.after(tb)}else tb.remove()}
+ const g=document.getElementById('trophyGrid');if(g)new MutationObserver(trimTrophies).observe(g,{childList:true});
+ const og=window.go;if(og)window.go=function(p){og.apply(this,arguments);if(p==='more'){trimPage();trimTrophies()}};
+ trimPage();trimTrophies();[500,1600,4200].forEach(t=>setTimeout(()=>{trimPage();trimTrophies()},t));
+})();
+</script>
