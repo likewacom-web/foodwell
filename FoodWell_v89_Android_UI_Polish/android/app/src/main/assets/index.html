@@ -4226,13 +4226,11 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,FEW=5;
  let open=false,lastKey='';
  function trim(){const box=document.getElementById('foodList');if(!box)return;
-  const items=[...box.querySelectorAll(':scope > .item.clickable')];box.querySelector('.fl-more')?.remove();
+  const items=[...box.querySelectorAll(':scope > .item.clickable')];const b=box.__more||(box.__more=Object.assign(document.createElement('button'),{type:'button',className:'fl-more'}));
   // a new search / meal filter collapses the list again
   const key=(document.getElementById('search')?.value||'')+'|'+(document.querySelector('[data-meal].active,.meal-tab.active')?.textContent||'');if(key!==lastKey){lastKey=key;open=false}
   items.forEach((el,i)=>el.style.display=open||i<FEW?'':'none');
-  if(items.length>FEW){const b=document.createElement('button');b.type='button';b.className='fl-more';
-   b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);
-   b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};box.appendChild(b)}}
+  if(items.length>FEW){b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};if(box.nextElementSibling!==b)box.after(b)}else b.remove()}
  const box=document.getElementById('foodList');if(!box)return;
  new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
  trim();
@@ -4421,13 +4419,11 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,FEW=5;
  const box=document.getElementById('waterHistory');if(!box)return;
  let open=false,lastKey='';
- function trim(){const items=[...box.querySelectorAll(':scope > .item')];box.querySelector('.fl-more')?.remove();
+ function trim(){const items=[...box.querySelectorAll(':scope > .item')];const b=box.__more||(box.__more=Object.assign(document.createElement('button'),{type:'button',className:'fl-more'}));
   // switching today / all collapses the list again
   const key=document.getElementById('waterHistoryDay')?.value||'today';if(key!==lastKey){lastKey=key;open=false}
   items.forEach((el,i)=>el.style.display=open||i<FEW?'':'none');
-  if(items.length>FEW){const b=document.createElement('button');b.type='button';b.className='fl-more';
-   b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);
-   b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};box.appendChild(b)}}
+  if(items.length>FEW){b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};if(box.nextElementSibling!==b)box.after(b)}else b.remove()}
  new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
  trim();
 })();
@@ -4448,11 +4444,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,FEW=5;
  const box=document.getElementById('exList');if(!box)return;
  let open=false;
- function trim(){const items=[...box.querySelectorAll(':scope > .item')];box.querySelector('.fl-more')?.remove();
+ function trim(){const items=[...box.querySelectorAll(':scope > .item')];const b=box.__more||(box.__more=Object.assign(document.createElement('button'),{type:'button',className:'fl-more'}));
   items.forEach((el,i)=>el.style.display=open||i<FEW?'':'none');
-  if(items.length>FEW){const b=document.createElement('button');b.type='button';b.className='fl-more';
-   b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);
-   b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};box.appendChild(b)}}
+  if(items.length>FEW){b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};if(box.nextElementSibling!==b)box.after(b)}else b.remove()}
  new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
  trim();
 })();
@@ -4594,3 +4588,11 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  if(typeof renderTrophies==='function')try{renderTrophies()}catch(e){}
 })();
 </script>
+<!-- v132 'Show more / less' buttons: easier to hit (taller, solid, clear of the + button) -->
+<style>
+button.fl-more,.mr-more{min-height:48px;opacity:1!important;border:1px solid var(--line,#3a3c45)!important;background:var(--panel2,#24272e)!important;
+ font-weight:800!important;font-size:14px!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;margin-bottom:12px}
+button.fl-more:active,.mr-more:active{transform:scale(.98)}
+#trophyGrid + .mr-more{margin-bottom:0}
+</style>
+<style>button.fl-more{display:block;width:100%;margin-top:6px;border-radius:14px;padding:10px;font-family:inherit;color:inherit}</style>
