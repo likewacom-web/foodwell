@@ -4492,3 +4492,81 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  trimPage();trimTrophies();[500,1600,4200].forEach(t=>setTimeout(()=>{trimPage();trimTrophies()},t));
 })();
 </script>
+<!-- v131 24 more trophies (food, water, movement, steps, streaks, challenges, body) with generated art in four tiers -->
+<script>
+(function(){
+ if(typeof getTrophyItems!=='function')return;
+ const base=getTrophyItems,BASE_N=base().length;
+ const days=()=>{const d=new Set();(s.foods||[]).forEach(f=>d.add(foodDay(f)));(s.waterLog||[]).forEach(x=>d.add(entryDay(x)));(s.moves||[]).forEach(x=>d.add(entryDay(x)));d.delete('');return d};
+ const addD=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return localDay(x)};
+ function bestStreak(set){let b=0;set.forEach(d=>{if(set.has(addD(d,-1)))return;let n=0,x=d;while(set.has(x)&&n<4000){n++;x=addD(x,1)}b=Math.max(b,n)});return b}
+ const countDays=(set,fn)=>[...set].filter(fn).length;
+ const nut=d=>typeof nutrientsOn==='function'?nutrientsOn(d):{};
+ const T=()=>typeof bodyTargets==='function'?bodyTargets()||{}:{};
+ const steps=d=>window.FWSteps?FWSteps.on(d):0;
+ const stepDays=()=>Object.keys(Object.assign({},s.stepsLog||{},s.hcDays||{},s.stepsManual||{}));
+ // [emoji, th name, th desc, en name, en desc, tier 0 bronze / 1 silver / 2 gold / 3 diamond, max, value()]
+ const EXTRA=[
+  ['🥗','สายบันทึกตัวจริง','บันทึกอาหาร 50 รายการ','Dedicated logger','Log 50 foods',1,50,()=>s.foods.length],
+  ['🍽️','คลังอาหารส่วนตัว','บันทึกอาหาร 200 รายการ','Food archivist','Log 200 foods',2,200,()=>s.foods.length],
+  ['📸','ช่างภาพอาหาร','บันทึกอาหารพร้อมรูป 10 รายการ','Food photographer','Log 10 foods with a photo',0,10,()=>s.foods.filter(f=>f.photo).length],
+  ['🌅','มื้อเช้าไม่เคยขาด','บันทึกมื้อเช้า 7 วัน','Breakfast club','Log breakfast on 7 days',1,7,()=>new Set(s.foods.filter(f=>f.meal==='เช้า').map(foodDay)).size],
+  ['🎯','กินตรงเป้า','กินใกล้เป้าแคลอรี่ (±10%) 7 วัน','On target','Eat within ±10% of your calorie target on 7 days',2,7,()=>{const t=(window.fwWeightPlanKcal&&fwWeightPlanKcal())||T().kcal;if(!t)return 0;return countDays(days(),d=>{const k=kcalOn(d);return k>0&&Math.abs(k-t)<=t*.1})}],
+  ['💪','โปรตีนครบ','โปรตีนถึงเป้า 5 วัน','Protein pro','Reach your protein target on 5 days',1,5,()=>{const p=T().protein||60;return countDays(days(),d=>(nut(d).protein||0)>=p)}],
+  ['🥦','ใยอาหารดีเยี่ยม','ใยอาหาร 25 กรัมขึ้นไป 3 วัน','Fibre fan','25 g of fibre or more on 3 days',1,3,()=>countDays(days(),d=>(nut(d).fiber||0)>=25)],
+  ['🍳','เชฟประจำบ้าน','สร้างเมนูทำเอง 3 เมนู','Home chef','Create 3 home-made recipes',0,3,()=>(s.recipes||[]).length],
+  ['🚰','จิบน้ำสม่ำเสมอ','บันทึกน้ำ 100 ครั้ง','Steady sipper','Log water 100 times',1,100,()=>(s.waterLog||[]).length],
+  ['💧','ดื่มน้ำครบเป้า','ดื่มน้ำถึงเป้า 1 วัน','Hydrated','Reach your water goal on 1 day',0,1,()=>countDays(days(),d=>waterOn(d)>=waterGoal())],
+  ['🌊','ร่างกายชุ่มชื่น','ดื่มน้ำถึงเป้า 7 วัน','Well hydrated','Reach your water goal on 7 days',1,7,()=>countDays(days(),d=>waterOn(d)>=waterGoal())],
+  ['🐳','ราชาแห่งน้ำ','ดื่มน้ำถึงเป้า 30 วัน','Water royalty','Reach your water goal on 30 days',3,30,()=>countDays(days(),d=>waterOn(d)>=waterGoal())],
+  ['⏱️','ขยับครบพันนาที','เคลื่อนไหวรวม 1,000 นาที','Thousand minutes','1,000 active minutes in total',2,1000,()=>(s.moves||[]).reduce((a,m)=>a+Number(m.min||0),0)],
+  ['🔥','เผาผลาญ 5,000','เผาผลาญจากการออกกำลังกายรวม 5,000 kcal','5,000 burned','Burn 5,000 kcal through logged exercise',2,5000,()=>(s.moves||[]).reduce((a,m)=>a+Number(m.kcal||0),0)],
+  ['🏋️','ตามแผนเป๊ะ','ออกกำลังกายตามแผน 10 ครั้ง','Plan follower','Finish 10 workout-plan sessions',1,10,()=>(s.moves||[]).filter(m=>m.wo).length],
+  ['👟','หมื่นก้าว','เดิน 10,000 ก้าวใน 1 วัน','Ten thousand steps','Walk 10,000 steps in a day',1,1,()=>stepDays().some(d=>steps(d)>=10000)?1:0],
+  ['🚶','นักเดินทางไกล','เดินรวม 100,000 ก้าว','Long walker','Walk 100,000 steps in total',2,100000,()=>stepDays().reduce((a,d)=>a+steps(d),0)],
+  ['📆','สองสัปดาห์ต่อเนื่อง','บันทึกต่อเนื่อง 14 วัน','Two-week streak','Log something 14 days in a row',2,14,()=>bestStreak(days())],
+  ['🗓️','ครบเดือน','มีบันทึก 30 วัน','A month of logs','Log on 30 different days',2,30,()=>days().size],
+  ['💎','ร้อยวันไม่มีถอย','มีบันทึก 100 วัน','Hundred days','Log on 100 different days',3,100,()=>days().size],
+  ['🏅','เหรียญแรก','ทำชาเลนจ์สำเร็จ 1 ครั้ง','First medal','Complete a challenge',0,1,()=>((s.challenges||{}).done||[]).filter(x=>x.ok).length],
+  ['🎖️','นักล่าเหรียญ','ทำชาเลนจ์สำเร็จ 5 ครั้ง','Medal hunter','Complete 5 challenges',2,5,()=>((s.challenges||{}).done||[]).filter(x=>x.ok).length],
+  ['👥','มีเพื่อนร่วมทาง','แข่งชาเลนจ์กับเพื่อน','Better together','Race a challenge with friends',1,1,()=>((s.challenges||{}).active||[]).some(a=>a.room)?1:0],
+  ['⚖️','ชั่งสม่ำเสมอ','บันทึกน้ำหนัก 10 ครั้ง','Regular weigh-ins','Log your weight 10 times',0,10,()=>(s.weightLog||[]).length],
+ ];
+ // ---- art: an ornate cup in the tier's colours with the trophy's emoji, drawn once ----
+ const TIERS=[['#F3C9A0','#C47A3D','#7A4520'],['#F4F6FA','#AEB6C4','#6B7383'],['#FFF1B8','#F2C14E','#B07A16'],['#E8FBFF','#8EE3F5','#3C8FB8']];
+ function art(e,tier){const W=512,c=document.createElement('canvas');c.width=W;c.height=W;const x=c.getContext('2d'),[hi,mid,lo]=TIERS[tier];
+  const bg=x.createRadialGradient(256,230,30,256,256,360);bg.addColorStop(0,'#3a2a3a');bg.addColorStop(1,'#120f16');x.fillStyle=bg;x.fillRect(0,0,W,W);
+  for(let i=0;i<16;i++){x.save();x.translate(256,210);x.rotate(i*Math.PI/8);x.fillStyle='rgba(255,255,255,.035)';x.fillRect(-10,-300,20,300);x.restore()}
+  const metal=(y0,y1)=>{const g=x.createLinearGradient(130,y0,382,y1);g.addColorStop(0,lo);g.addColorStop(.35,hi);g.addColorStop(.6,mid);g.addColorStop(1,lo);return g};
+  x.lineJoin='round';x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=4;
+  // handles
+  x.lineWidth=22;x.strokeStyle=mid;x.beginPath();x.arc(140,175,48,Math.PI*.55,Math.PI*1.45,false);x.stroke();x.beginPath();x.arc(372,175,48,Math.PI*1.55,Math.PI*.45,false);x.stroke();
+  x.lineWidth=4;x.strokeStyle='rgba(0,0,0,.35)';
+  // cup
+  x.fillStyle=metal(110,330);x.beginPath();x.moveTo(126,112);x.lineTo(386,112);x.bezierCurveTo(386,250,330,318,256,322);x.bezierCurveTo(182,318,126,250,126,112);x.closePath();x.fill();x.stroke();
+  x.fillStyle=hi;x.beginPath();x.ellipse(256,112,130,18,0,0,7);x.fill();x.stroke();
+  x.fillStyle='rgba(255,255,255,.28)';x.beginPath();x.ellipse(196,190,16,58,-.25,0,7);x.fill();
+  // stem and base
+  x.fillStyle=metal(320,420);x.beginPath();x.moveTo(236,320);x.lineTo(276,320);x.lineTo(286,380);x.lineTo(226,380);x.closePath();x.fill();x.stroke();
+  x.fillStyle=metal(378,420);x.beginPath();x.roundRect?x.roundRect(176,378,160,26,8):x.rect(176,378,160,26);x.fill();x.stroke();
+  x.fillStyle='#2a2230';x.beginPath();x.roundRect?x.roundRect(156,404,200,52,10):x.rect(156,404,200,52);x.fill();
+  x.fillStyle=mid;x.fillRect(196,420,120,20);
+  // emoji medallion
+  x.fillStyle='rgba(255,255,255,.92)';x.beginPath();x.arc(256,205,62,0,7);x.fill();x.lineWidth=8;x.strokeStyle=mid;x.stroke();
+  x.textAlign='center';x.textBaseline='middle';x.font='76px "Noto Color Emoji",sans-serif';x.fillText(e,256,210);
+  if(tier===3){x.fillStyle='#fff';[[118,90],[396,96],[410,300],[100,280]].forEach(([a,b])=>{x.beginPath();x.moveTo(a,b-14);x.lineTo(a+5,b);x.lineTo(a,b+14);x.lineTo(a-5,b);x.fill()})}
+  return c.toDataURL('image/jpeg',.86)}
+ window.foodwellTrophyArt=(window.foodwellTrophyArt||[]).slice(0,BASE_N).concat(EXTRA.map(t=>art(t[0],t[5])));
+ // English names for the translated UI
+ if(window.FW_I18N_EN)EXTRA.forEach(t=>{FW_I18N_EN[t[1]]=t[3];FW_I18N_EN[t[2]]=t[4]});
+ const extra=()=>EXTRA.map(t=>{let v=0;try{v=Number(t[7]())||0}catch(e){}return {i:t[0],n:t[1],d:t[2],v:Math.min(v,t[6]),max:t[6]}});
+ window.getTrophyItems=getTrophyItems=function(){return base().concat(extra())};
+ // trophies already earned before this update: count them once quietly instead of a stack of pop-ups
+ try{const FLAG='foodwell_trophies_v131',key='foodwell_seen_trophies_v24';
+  if(!localStorage.getItem(FLAG)){const seen=JSON.parse(localStorage.getItem(key)||'[]'),items=getTrophyItems();let n=0;
+   items.forEach((x,i)=>{if(i>=BASE_N&&x.v>=x.max&&!seen.includes(i)){seen.push(i);n++}});
+   localStorage.setItem(key,JSON.stringify(seen));localStorage.setItem(FLAG,'1');
+   if(n)setTimeout(()=>toast((window.fwLang&&fwLang()==='en')?`🏆 ${n} new trophies unlocked from what you've logged`:`🏆 ปลดล็อกถ้วยใหม่ ${n} ถ้วยจากที่บันทึกไว้แล้ว`),1500)}}catch(e){}
+ if(typeof renderTrophies==='function')try{renderTrophies()}catch(e){}
+})();
+</script>
