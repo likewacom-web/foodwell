@@ -4432,3 +4432,28 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  trim();
 })();
 </script>
+<!-- v129 Movement list like the food and water lists: compact rows, first 5 with a show more / show less toggle -->
+<style>
+#exList{gap:6px}
+#exList .item{padding:8px 10px;gap:10px;border-radius:16px}
+#exList .item .thumb{width:40px;height:40px;border-radius:12px;font-size:20px}
+#exList .item .meta{min-width:0}
+#exList .item .meta b{display:block;font-size:14px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#exList .item .meta small{display:block;font-size:12px;line-height:1.35}
+#exList .delete{height:34px;padding:0 10px;border-radius:10px;font-size:12px;flex:none}
+#exList .fl-more{width:100%;border:1px dashed var(--line,#3a3c45);background:none;color:inherit;border-radius:14px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;opacity:.85}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,FEW=5;
+ const box=document.getElementById('exList');if(!box)return;
+ let open=false;
+ function trim(){const items=[...box.querySelectorAll(':scope > .item')];box.querySelector('.fl-more')?.remove();
+  items.forEach((el,i)=>el.style.display=open||i<FEW?'':'none');
+  if(items.length>FEW){const b=document.createElement('button');b.type='button';b.className='fl-more';
+   b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);
+   b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};box.appendChild(b)}}
+ new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
+ trim();
+})();
+</script>
