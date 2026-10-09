@@ -43,6 +43,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var web: WebView
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
+    private var cameraUri: Uri? = null
     private lateinit var cloud: CloudSync
     private lateinit var rooms: FriendRooms
     private lateinit var stepsLive: StepCounter.Live
@@ -68,6 +70,13 @@ class MainActivity : ComponentActivity() {
         fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
             filePathCallback?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(r.resultCode, r.data))
             filePathCallback = null
+        }
+        // "Take photo" (capture attribute): the camera writes into our cache, then the page gets that file
+        cameraLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+            val uri = cameraUri
+            filePathCallback?.onReceiveValue(if (r.resultCode == RESULT_OK && uri != null) arrayOf(uri) else null)
+            filePathCallback = null
+            cameraUri = null
         }
         cloud = CloudSync(this) { fn, arg -> callJs(fn, arg) }
         rooms = FriendRooms(this) { fn, arg -> callJs(fn, arg) }
@@ -109,6 +118,20 @@ class MainActivity : ComponentActivity() {
                 ): Boolean {
                     filePathCallback?.onReceiveValue(null)
                     filePathCallback = callback
+                    // WebView ignores capture="environment": open the camera ourselves for the camera button
+                    if (params.isCaptureEnabled && params.acceptTypes.any { it.startsWith("image") || it.isEmpty() }) {
+                        val shot = runCatching {
+                            val dir = File(cacheDir, "camera").apply { mkdirs(); listFiles()?.forEach { f -> f.delete() } }
+                            val uri = androidx.core.content.FileProvider.getUriForFile(
+                                this@MainActivity, "$packageName.share", File(dir, "food_${System.currentTimeMillis()}.jpg"))
+                            cameraUri = uri
+                            Intent(MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }.getOrNull()
+                        if (shot != null) {
+                            try { cameraLauncher.launch(shot); return true } catch (e: ActivityNotFoundException) { cameraUri = null }
+                        }
+                    }
                     return try {
                         fileChooserLauncher.launch(Intent.createChooser(params.createIntent(), null))
                         true
