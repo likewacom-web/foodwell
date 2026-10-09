@@ -4492,6 +4492,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  trimPage();trimTrophies();[500,1600,4200].forEach(t=>setTimeout(()=>{trimPage();trimTrophies()},t));
 })();
 </script>
+<script src="trophy_art_extra.js"></script>
 <!-- v131 24 more trophies (food, water, movement, steps, streaks, challenges, body) with generated art in four tiers -->
 <script>
 (function(){
@@ -4556,7 +4557,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   x.textAlign='center';x.textBaseline='middle';x.font='76px "Noto Color Emoji",sans-serif';x.fillText(e,256,210);
   if(tier===3){x.fillStyle='#fff';[[118,90],[396,96],[410,300],[100,280]].forEach(([a,b])=>{x.beginPath();x.moveTo(a,b-14);x.lineTo(a+5,b);x.lineTo(a,b+14);x.lineTo(a-5,b);x.fill()})}
   return c.toDataURL('image/jpeg',.86)}
- window.foodwellTrophyArt=(window.foodwellTrophyArt||[]).slice(0,BASE_N).concat(EXTRA.map(t=>art(t[0],t[5])));
+ // drawn art (trophy_art_extra.js); the canvas cup is only a fallback
+ const drawn=window.FW_TROPHY_ART_EXTRA||[];
+ window.foodwellTrophyArt=(window.foodwellTrophyArt||[]).slice(0,BASE_N).concat(EXTRA.map((t,i)=>drawn[i]||art(t[0],t[5])));
  // English names for the translated UI
  if(window.FW_I18N_EN)EXTRA.forEach(t=>{FW_I18N_EN[t[1]]=t[3];FW_I18N_EN[t[2]]=t[4]});
  const extra=()=>EXTRA.map(t=>{let v=0;try{v=Number(t[7]())||0}catch(e){}return {i:t[0],n:t[1],d:t[2],v:Math.min(v,t[6]),max:t[6]}});
