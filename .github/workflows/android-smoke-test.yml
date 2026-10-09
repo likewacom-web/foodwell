@@ -10,6 +10,8 @@ on:
 jobs:
   launch:
     runs-on: ubuntu-latest
+    # an emulator that drops off adb must fail the job, not hang it for hours
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -61,19 +63,21 @@ jobs:
             adb logcat -c
             adb shell am start -W -n com.foodwell.app/.MainActivity
             sleep 15
-            adb logcat -d > logcat.txt || true
-            adb exec-out screencap -p > screen.png || true
+            adb reconnect offline || true
+            timeout 90 adb wait-for-device || true
+            timeout 60 adb logcat -d > logcat.txt || true
+            timeout 30 adb exec-out screencap -p > screen.png || true
             echo "===== WebView bounds (should start below the status bar) ====="
-            adb shell dumpsys activity top | grep -E "WebView|FrameLayout|mStableInsets|statusBars|navigationBars" | head -20 || true
+            timeout 30 adb shell dumpsys activity top | grep -E "WebView|FrameLayout|mStableInsets|statusBars|navigationBars" | head -20 || true
             echo "===== Crash log (AndroidRuntime) ====="
             grep -A 40 -E "FATAL EXCEPTION|AndroidRuntime" logcat.txt | head -120 || true
             echo "===== FoodWell process ====="
-            adb shell pidof com.foodwell.app || (echo "::error::FoodWell is not running after launch (crashed)" && exit 1)
+            timeout 30 adb shell pidof com.foodwell.app || (echo "::error::FoodWell is not running after launch (crashed, or the emulator dropped off adb)" && exit 1)
             echo "===== JavaScript errors in the page (WebView console) ====="
             ! grep -E "CONSOLE.*Uncaught" logcat.txt || (echo "::error::The page threw a JavaScript error on start" && exit 1)
             echo "===== Home-screen widget ====="
-            adb shell dumpsys appwidget | grep -i foodwell | head -5 || true
-            adb shell dumpsys appwidget | grep -qE "com\.foodwell\.app/(com\.foodwell\.app)?\.TodayWidget" && echo "TodayWidget provider registered" || (echo "::error::TodayWidget is not registered" && exit 1)
+            timeout 30 adb shell dumpsys appwidget | grep -i foodwell | head -5 || true
+            timeout 30 adb shell dumpsys appwidget | grep -qE "com\.foodwell\.app/(com\.foodwell\.app)?\.TodayWidget" && echo "TodayWidget provider registered" || (echo "::error::TodayWidget is not registered" && exit 1)
 
       - name: Upload logcat
         if: always()
