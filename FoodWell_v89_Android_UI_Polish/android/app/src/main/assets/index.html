@@ -4208,3 +4208,31 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  tick();homeCard();
 })();
 </script>
+<!-- v124 Compact food list: one-line names, smaller photos and buttons, first 8 items then "show more" -->
+<style>
+#foodList{gap:6px}
+#foodList .item{padding:8px 10px;gap:10px;border-radius:16px;min-height:0}
+#foodList .item .thumb{width:44px;height:44px;border-radius:12px;font-size:22px}
+#foodList .item .meta{min-width:0}
+#foodList .item .meta b{display:block;font-size:14px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#foodList .item .meta small{display:block;font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#foodList .food-card-actions{display:flex;gap:6px;flex:none;align-items:center}
+#foodList .food-star{width:34px;height:34px;border-radius:10px;font-size:16px;padding:0}
+#foodList .delete{height:34px;padding:0 10px;border-radius:10px;font-size:12px}
+#foodList .fl-more{width:100%;border:1px dashed var(--line,#3a3c45);background:none;color:inherit;border-radius:14px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;opacity:.85}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,STEP=8;
+ let shown=STEP,lastKey='';
+ function trim(){const box=document.getElementById('foodList');if(!box)return;
+  const items=[...box.querySelectorAll(':scope > .item.clickable')];box.querySelector('.fl-more')?.remove();
+  // a new search / meal filter starts from the top again
+  const key=(document.getElementById('search')?.value||'')+'|'+(document.querySelector('[data-meal].active,.meal-tab.active')?.textContent||'');if(key!==lastKey){lastKey=key;shown=STEP}
+  items.forEach((el,i)=>el.style.display=i<shown?'':'none');
+  if(items.length>shown){const b=document.createElement('button');b.type='button';b.className='fl-more';b.textContent=L(`แสดงเพิ่ม (${items.length-shown} รายการ)`,`Show more (${items.length-shown})`);b.onclick=()=>{shown+=STEP*2;trim()};box.appendChild(b)}}
+ const box=document.getElementById('foodList');if(!box)return;
+ new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
+ trim();
+})();
+</script>
