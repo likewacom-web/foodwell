@@ -64,11 +64,15 @@ jobs:
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
+            # stream the log from the start so it survives if the emulator goes away
+            nohup sh -c 'adb logcat -v time > logcat_live.txt 2>&1' >/dev/null 2>&1 &
             adb shell am start -W -n com.foodwell.app/.MainActivity
             sleep 15
             adb reconnect offline || true
             timeout 90 adb wait-for-device || true
-            timeout 60 adb logcat -d > logcat.txt || true
+            timeout 60 adb logcat -d > logcat.txt || cp logcat_live.txt logcat.txt || true
+            echo "===== Last lines of the live log ====="
+            tail -n 60 logcat_live.txt || true
             timeout 30 adb exec-out screencap -p > screen.png || true
             echo "===== WebView bounds (should start below the status bar) ====="
             timeout 30 adb shell dumpsys activity top | grep -E "WebView|FrameLayout|mStableInsets|statusBars|navigationBars" | head -20 || true
@@ -90,4 +94,5 @@ jobs:
           path: |
             FoodWell_v89_Android_UI_Polish/android/logcat.txt
             FoodWell_v89_Android_UI_Polish/android/screen.png
+            FoodWell_v89_Android_UI_Polish/android/logcat_live.txt
           if-no-files-found: ignore
