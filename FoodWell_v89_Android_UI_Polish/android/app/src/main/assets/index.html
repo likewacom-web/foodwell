@@ -4407,3 +4407,28 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(transparent,rgba(0,0,0,.62));color:#fff!important;text-shadow:0 1px 2px #0008}
 #foodStrip .food:not(:has(img)) span{color:inherit!important;background:none;opacity:.85;text-shadow:none}
 </style>
+<!-- v128 Water list like the food list: compact rows, first 5 with a show more / show less toggle -->
+<style>
+#waterHistory{gap:6px}
+#waterHistory .item{padding:8px 10px;gap:10px;border-radius:16px}
+#waterHistory .item .thumb{width:40px;height:40px;border-radius:12px;font-size:20px}
+#waterHistory .item .meta b{font-size:14px;line-height:1.35}
+#waterHistory .item .meta small{font-size:12px;line-height:1.35}
+#waterHistory .fl-more{width:100%;border:1px dashed var(--line,#3a3c45);background:none;color:inherit;border-radius:14px;padding:10px;font-family:inherit;font-weight:700;font-size:13px;opacity:.85}
+</style>
+<script>
+(function(){
+ const EN=(window.fwLang&&fwLang())==='en',L=(th,en)=>EN?en:th,FEW=5;
+ const box=document.getElementById('waterHistory');if(!box)return;
+ let open=false,lastKey='';
+ function trim(){const items=[...box.querySelectorAll(':scope > .item')];box.querySelector('.fl-more')?.remove();
+  // switching today / all collapses the list again
+  const key=document.getElementById('waterHistoryDay')?.value||'today';if(key!==lastKey){lastKey=key;open=false}
+  items.forEach((el,i)=>el.style.display=open||i<FEW?'':'none');
+  if(items.length>FEW){const b=document.createElement('button');b.type='button';b.className='fl-more';
+   b.textContent=open?L('▲ ย่อรายการ','▲ Show less'):L(`▼ แสดงเพิ่ม (${items.length-FEW} รายการ)`,`▼ Show more (${items.length-FEW})`);
+   b.onclick=()=>{open=!open;trim();if(!open)box.scrollIntoView({block:'start',behavior:'smooth'})};box.appendChild(b)}}
+ new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
+ trim();
+})();
+</script>
