@@ -608,7 +608,7 @@ $("modalFav").onclick=()=>{if(modalId!=null)toggleFoodFavorite(modalId);openFood
 $("modalEdit").onclick=()=>{let id=modalId;closeFoodModal();startEdit(id)};
 $("modalDelete").onclick=()=>{if(modalId!=null){s.foods=s.foods.filter(x=>x.id!==modalId);closeFoodModal();save();toast("ลบรายการแล้ว")}};
 
-document.querySelectorAll("[data-water]").forEach(b=>b.onclick=()=>{let ml=Number(b.dataset.water);const now=new Date();s.water+=ml;s.waterLog.unshift({id:Date.now(),ml,date:now.toISOString().slice(0,10),time:now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});save();toast(`เพิ่มน้ำ ${ml} ml แล้ว`)});
+document.querySelectorAll("[data-water]").forEach(b=>b.onclick=()=>{let ml=Number(b.dataset.water);const now=new Date();s.water+=ml;s.waterLog.unshift({id:Date.now(),ml,date:localDay(now),time:now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});save();toast(`เพิ่มน้ำ ${ml} ml แล้ว`)});
 $("clearWater").onclick=()=>{const mode=$("waterHistoryDay")?.value||"today";if(mode==='all'){s.water=0;s.waterLog=[]}else{const today=localDay();s.waterLog=s.waterLog.filter(x=>entryDay(x)!==today);s.water=0}save();toast(mode==='all'?"ล้างรายการน้ำทั้งหมดแล้ว":"ล้างรายการน้ำวันนี้แล้ว")};
 $("waterHistoryDay")?.addEventListener('change',()=>renderWaterHistoryV54());
 // Calorie burn estimate: kcal = MET × body weight (kg) × hours (Compendium of Physical Activities values).
@@ -985,7 +985,7 @@ renderInsights();
 renderTrophies();
 setTimeout(()=>{getTrophyItems().forEach((x,i)=>{if(x.v>=x.max) celebrateTrophy(i);});},120);
 $("favList")&&($("favList").innerHTML=s.favorites.length?s.favorites.map((f,i)=>`<button class="quick-food" onclick="useFavorite(${i})"><b>↺ ${esc(f.name)}</b><small>${esc(f.meal)}${f.kcal?" · "+f.kcal+" kcal":""}</small></button>`).join(""):'<div class="history-pill">ยังไม่มีอาหารที่บันทึกบ่อย</div>');
-$("waterHistory").innerHTML=s.waterLog.length?s.waterLog.slice(0,10).map(x=>`<div class="item"><div class="thumb">💧</div><div class="meta"><b>+${x.ml} ml</b><small>${x.time}</small></div></div>`).join(""):'<div class="item"><div class="meta"><b>ยังไม่มีรายการน้ำ</b><small>กดปุ่มด้านบนเพื่อบันทึก</small></div></div>';
+renderWaterHistoryV54();
 $("exList").innerHTML=s.moves.length?s.moves.map(x=>`<div class="item"><div class="thumb">${moveIcon(x)}</div><div class="meta"><b>${esc(x.name)}</b><small>${x.type&&x.type!==x.name&&x.type!==EX_AUTO?esc(x.type)+" · ":""}${x.min} นาที · 🔥 ~${moveKcalOf(x)} kcal · ${entryDay(x)===localDay()?"":esc(fmtDay(entryDay(x)))+" · "}${esc(x.time||"")}</small></div><button class="delete" onclick="delMove(${x.id})">ลบ</button></div>`).join(""):'';$("burnToday")&&($("burnToday").textContent=movesOn(localDay()).reduce((a,x)=>a+moveKcalOf(x),0).toLocaleString());
 renderHistory();
 renderDashboard();
