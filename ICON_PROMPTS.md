@@ -52,3 +52,49 @@ Midjourney (`--ar 1:1 --style raw`), ChatGPT/DALL·E, Gemini, Ideogram, Leonardo
 ## ส่งมาให้ Claude
 ส่งไฟล์ PNG 1024×1024 มา (หรือชั้นหน้าแบบพื้นใส + สีพื้นหลัง) แล้ว Claude จะทำให้ครบ:
 ไอคอน Android ทุกขนาด (mipmap), adaptive icon, ไอคอนกลม, ไอคอน Play Store 512×512 และไอคอนในแอป/หน้าเว็บ
+
+---
+
+# แบบโมเดิร์น (เรียบ คม ไม่หวาน)
+
+ตัดความ kawaii ออก ใช้รูปทรงเรขาคณิต เส้นน้อย สีเข้มตัดกัน แมวเหลือแค่ "ใบ้" ด้วยหูหรือรูปทรง
+
+## [MODERN STYLE] — วางต่อท้ายทุกพรอมต์
+```
+modern minimalist app icon, flat geometric vector design, bold simple shapes, at most 2-3 colors, crisp edges, subtle soft gradient only, generous negative space, centered symbol about 55% of the canvas, premium tech brand look like a top health and fitness app, no cute cartoon, no face details, no text, no letters, no watermark, no border, square 1024x1024
+```
+
+**M1. หูแมว + ใบไม้ (negative space)** ⭐ แนะนำ — ยังมีแมว แต่ดูเป็นโลโก้
+```
+a single bold rounded shape that reads as both a leaf and a cat head, two small pointed cat ears on top, the leaf vein forms a subtle negative-space line, white symbol on a deep emerald green to teal gradient background, [MODERN STYLE]
+```
+
+**M2. จาน + วงแหวนแคลอรี่** — สื่อ "นับแคล" ตรง ๆ แบบแอปฟิตเนส
+```
+a minimal top-down plate drawn as a thick circle, an open progress ring around it filled about three quarters in a bright coral color, a tiny leaf accent at the end of the ring, on a near-black charcoal background, [MODERN STYLE]
+```
+
+**M3. อุ้งเท้าแมวเรขาคณิต** — โลโก้จำง่าย ใช้เป็นแบรนด์ได้
+```
+a geometric cat paw print made of one large rounded pad and four circles, the large pad shaped like a heart, solid white on a vivid coral to hot pink gradient background, [MODERN STYLE]
+```
+
+**M4. ตัวอักษรเส้นเดียว (monoline)** — มินิมอลสุด ดูพรีเมียม
+```
+a single continuous monoline stroke that draws a cat ear outline flowing into a fork, thick even line weight with rounded caps, white line on a deep indigo to violet gradient background, [MODERN STYLE]
+```
+
+**M5. ใบไม้ + หัวใจ ไม่มีแมว** — กลาง ๆ ใช้ได้กับทุกชื่อแอป
+```
+a fresh leaf whose outline also forms a heart shape, two-tone lime green and mint, on a dark forest green background, [MODERN STYLE]
+```
+
+## คู่สีที่เข้ากับแอป (เปลี่ยนในพรอมต์ได้)
+| โทน | คำในพรอมต์ |
+|---|---|
+| เขียวสุขภาพ | `deep emerald green to teal gradient background` |
+| ชมพูแบรนด์ (เข้ากับปุ่มในแอป) | `vivid coral to hot pink gradient background` |
+| ดาร์กพรีเมียม | `near-black charcoal background` + สัญลักษณ์สี coral หรือ lime |
+| ม่วงเทค | `deep indigo to violet gradient background` |
+
+เคล็ดลับ: ถ้าได้รูปที่ยังดูการ์ตูน เติม `--no cartoon, cute, chibi, kawaii` (Midjourney) หรือเขียนเพิ่มว่า `not cartoonish, not childish`
