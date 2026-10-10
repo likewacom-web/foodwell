@@ -166,6 +166,8 @@ Nutrition values are estimates, not medical advice.
 
 หมายเหตุ: ข้อมูลที่อยู่ในเครื่องอย่างเดียวและไม่ถูกส่งออก **ไม่นับเป็น “collected”** ตามนิยามของ Google · การส่งรูปไปวิเคราะห์ AI และบาร์โค้ดไป Open Food Facts เกิดเมื่อผู้ใช้กดเองเท่านั้น
 
+สำรองอัตโนมัติรายวัน (`files/backups/`) ไปกับ **Android Auto Backup** ในบัญชี Google ของผู้ใช้ — ผู้พัฒนาเข้าถึงไฟล์นี้ไม่ได้ จึงโดยทั่วไปไม่นับเป็น "collected" · ตอนกรอกฟอร์มให้อ่านคำอธิบายใน Play Console ยืนยันอีกครั้ง
+
 ## 9. แบบฟอร์มอื่น ๆ ใน App content
 - **Privacy policy:** URL จากข้อ 6
 - **Ads:** ตอบ Yes ถ้า build เปิดโฆษณา

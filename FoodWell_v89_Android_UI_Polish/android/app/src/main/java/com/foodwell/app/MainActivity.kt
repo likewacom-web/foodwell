@@ -184,6 +184,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(ShareApi(this@MainActivity), "FoodWellShare")
             addJavascriptInterface(StepsApi(), "FoodWellSteps")
             addJavascriptInterface(HealthApi(), "FoodWellHealth")
+            addJavascriptInterface(LocalBackup(this@MainActivity), "FoodWellBackup")
             loadUrl("file:///android_asset/index.html")
         }
 
