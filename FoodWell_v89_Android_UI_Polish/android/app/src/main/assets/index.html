@@ -2242,6 +2242,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 </script>
 <!-- v114 Healthy Thai recipes: suggestions from what's left today, eat / cook / shopping list in one tap -->
 <script src="healthy_th.js"></script>
+<script src="healthy_more.js"></script>
 <style>
 .hl-home{margin:0 0 12px;padding:16px;border-radius:22px;background:linear-gradient(135deg,#e9f9ef,#f3fbe8);border:1px solid #cfe9d6;color:#1d3a27}
 .hl-home h3{margin:0 0 2px;font-size:17px}.hl-home .sub{font-size:12px;color:#4f6f5a;margin-bottom:10px}
@@ -2312,6 +2313,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   r.i.forEach(([n,u,q])=>{const v=ING.get(n+'|'+u);if(v)K.forEach(k=>t[k]+=Number(v[k]||0)*factor(u,q))});
   const o={};K.forEach(k=>o[k]=k==='kcal'||k==='sodium'?Math.round(t[k]/r.sv):r1(t[k]/r.sv));return o}
  const R=FW_HEALTHY.map((r,id)=>({...r,id,p:nutrition(r),key:norm(r.n+r.i.map(x=>x[0]).join(''))}));
+ const ekey=r=>{if(r.ekey==null){const D=window.FW_I18N_EN||{};r.ekey=norm([r.n,...r.i.map(x=>x[0])].map(x=>D[x]||'').join(' '))}return r.ekey};
  const TAGS={protein:'💪 โปรตีนสูง',lowsugar:'🍬 น้ำตาลต่ำ',lowsodium:'🧂 โซเดียมต่ำ',quick:'⏱️ ≤15 นาที',veg:'🥗 มังสวิรัติ'};
  const MEAL_ICON={'เช้า':'🌅','กลางวัน':'☀️','เย็น':'🌙','ของว่าง':'🍓'};
  const unitText=(u,q)=>u==='g'?`${r1(q)} กรัม`:`${r1(q)} ${u}`;
@@ -2397,7 +2399,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   let html=`<div class="hl-card"><h3>✨ แนะนำสำหรับคุณตอนนี้</h3><div class="hl-sub">${esc(sg.head)}</div><div class="hl-top">${sg.top.map(x=>itemHtml(x.r,x.why[0])).join('')}</div></div>
    <div class="hl-tabs"><button type="button" data-tab="menu" class="${tab==='menu'?'on':''}">📖 เมนู (${R.length})</button><button type="button" data-tab="plan" class="${tab==='plan'?'on':''}">📅 แผนสัปดาห์</button><button type="button" data-tab="shop" class="${tab==='shop'?'on':''}">🛒 ซื้อของ${left?` (${left})`:''}</button></div>`;
   if(tab==='menu'){
-   const qn=norm(query),list=R.filter(r=>(filter==='all'||r.t.includes(filter))&&(!qn||r.key.includes(qn)));
+   const qn=norm(query),list=R.filter(r=>(filter==='all'||r.t.includes(filter))&&(!qn||r.key.includes(qn)||ekey(r).includes(qn)));
    html+=`<div class="hl-card"><input class="hl-find" id="hlFind" placeholder="🔎 ค้นหาเมนูหรือวัตถุดิบ เช่น อกไก่ เต้าหู้" value="${esc(query)}" autocomplete="off">
     <div class="hl-chips">${[['all','ทั้งหมด'],...Object.entries(TAGS)].map(([k,l])=>`<button type="button" data-f="${k}" class="${filter===k?'on':''}">${l}</button>`).join('')}</div>
     <div class="hl-list">${list.map(r=>itemHtml(r)).join('')||'<div class="hl-empty">ไม่พบเมนู</div>'}</div>
@@ -2993,6 +2995,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    if(out==null){const parts=run.split(/[  ]+/);out=parts.map(p=>D[p]!=null?D[p]:(pieces(p)||p)).join(' ')}
    if(cache.size>5000)cache.clear();cache.set(run,out);return out}
   const T=s=>{if(!s||!/[฀-๿]/.test(s))return s;
+   const w=s.trim();if(w!==s||/[ (+]/.test(w)){const x=D[w];if(x!=null)return s.replace(w,x)} // whole phrase first, e.g. "เมนู (ไม่ใส่น้ำตาล)"
    return s.replace(RUN,(m,off,all)=>{let o=tr(m);if(o===m)return m;const b=all[off-1],a=all[off+m.length];
     if(b&&/[A-Za-z0-9%)\]]/.test(b))o=' '+o;if(a&&/[A-Za-z0-9(\[]/.test(a))o+=' ';return o})};
   window.fwT=T;

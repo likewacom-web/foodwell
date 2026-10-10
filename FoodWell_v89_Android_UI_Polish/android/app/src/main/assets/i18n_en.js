@@ -1690,3 +1690,5 @@ window.FW_I18N_EN={"วันนี้":"Today",
 "ฐานข้อมูลอาหาร":"Food database"};
 // dish and category names from foods_more.js
 Object.assign(window.FW_I18N_EN,window.FW_FOODS_EN||{});
+// recipe names, steps and ingredients from healthy_more.js
+Object.assign(window.FW_I18N_EN,window.FW_HEALTHY_EN||{});
