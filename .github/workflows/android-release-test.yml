@@ -1,0 +1,173 @@
+name: FoodWell release bundle test
+
+# Builds the Play Store bundle (.aab) the same way android-release.yml does, but signed with a
+# throwaway key made here (no secrets needed), then checks it the way Play would:
+#   - bundle contents, manifest (not debuggable, SDK levels, permissions, backup rules)
+#   - native libraries aligned for 16 KB memory pages (required by Play for Android 15+ targets)
+#   - turns the bundle into an APK with bundletool, installs it on an emulator and launches it
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'FoodWell_v89_Android_UI_Polish/android/**'
+      - '.github/workflows/android-release-test.yml'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        ads: [false, true]
+    defaults:
+      run:
+        working-directory: FoodWell_v89_Android_UI_Polish/android
+    env:
+      BUNDLETOOL: 1.17.2
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK 35
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Throwaway upload key (test only, never uploaded)
+        run: |
+          keytool -genkeypair -keystore "$RUNNER_TEMP/test.jks" -storepass testpass -keypass testpass \
+            -alias test -keyalg RSA -keysize 2048 -validity 2 -dname "CN=FoodWell CI test" -noprompt
+          echo "FW_KEYSTORE=$RUNNER_TEMP/test.jks" >> "$GITHUB_ENV"
+
+      - name: Build release bundle
+        env:
+          FW_KEYSTORE_PASSWORD: testpass
+          FW_KEY_ALIAS: test
+          ADS: ${{ matrix.ads }}
+        run: |
+          ARGS="-PversionCode=1000 -PversionName=1.0.1000-test"
+          [ "$ADS" = "true" ] && ARGS="$ARGS -Pads=true"   # Google's test ad IDs
+          gradle --no-daemon bundleRelease $ARGS
+          ls -la app/build/outputs/bundle/release/
+          echo "### Bundle (ads=$ADS): $(du -h app/build/outputs/bundle/release/app-release.aab | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Bundle checks (signature, manifest, contents)
+        run: |
+          set -e
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          curl -sSL -o "$RUNNER_TEMP/bundletool.jar" "https://github.com/google/bundletool/releases/download/$BUNDLETOOL/bundletool-all-$BUNDLETOOL.jar"
+          BT="java -jar $RUNNER_TEMP/bundletool.jar"
+          jarsigner -verify "$AAB" | tail -1
+          $BT validate --bundle="$AAB" > /dev/null && echo "bundletool validate: OK"
+          $BT dump manifest --bundle="$AAB" > manifest.xml
+          echo "===== manifest (head) ====="; head -c 3000 manifest.xml; echo
+          fail(){ echo "::error::$1"; exit 1; }
+          grep -q 'android:debuggable="true"' manifest.xml && fail "release bundle is debuggable" || echo "not debuggable: OK"
+          grep -q 'android:versionCode="1000"' manifest.xml || fail "versionCode from -PversionCode not applied"
+          grep -q 'android:targetSdkVersion="35"' manifest.xml || fail "targetSdk is not 35 (Play requires 35+)"
+          grep -q 'android:dataExtractionRules' manifest.xml || fail "backup rules missing"
+          echo "===== permissions ====="; grep -o 'uses-permission[^>]*android:name="[^"]*"' manifest.xml | sed 's/.*name="//;s/"$//' | sort | tee perms.txt
+          grep -qE 'READ_CONTACTS|ACCESS_FINE_LOCATION|READ_SMS|READ_EXTERNAL_STORAGE|READ_MEDIA_IMAGES' perms.txt && fail "unexpected sensitive permission (would need a Play declaration)" || echo "no unexpected sensitive permissions"
+          unzip -l "$AAB" > contents.txt
+          for f in index.html i18n_en.js healthy_more.js privacy.html; do grep -q "base/assets/$f" contents.txt || fail "asset $f missing from the bundle"; done
+          echo "assets present: OK"
+          grep -q 'google-services' contents.txt && echo "Firebase config: included" || echo "Firebase config: not in this build (sync card explains setup)"
+          {
+            echo "- signed, valid, not debuggable, targetSdk 35, versionCode applied"
+            echo "- permissions: $(tr '\n' ' ' < perms.txt)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 16 KB page alignment of native libraries
+        run: |
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          mkdir -p so && unzip -qo "$AAB" 'base/lib/*' -d so 2>/dev/null || true
+          n=0; bad=0
+          for f in $(find so -name '*.so' 2>/dev/null); do
+            case "$f" in *x86_64*|*arm64-v8a*) ;; *) continue;; esac   # Play checks 64-bit ABIs
+            n=$((n+1))
+            # every LOAD segment must be aligned to at least 2**14
+            ok=1
+            for a in $(readelf -lW "$f" | awk '$1=="LOAD"{print $NF}'); do [ $((a)) -ge 16384 ] || ok=0; done
+            if [ "$ok" = 1 ]; then
+              echo "16KB OK   $f"
+            else
+              echo "::warning::not 16 KB aligned: $f"; bad=$((bad+1))
+            fi
+          done
+          echo "native libraries checked: $n, not aligned: $bad"
+          echo "- 64-bit native libraries: $n, not 16 KB aligned: $bad" >> "$GITHUB_STEP_SUMMARY"
+          [ "$bad" -eq 0 ] || { echo "::error::$bad native libraries are not 16 KB aligned (Play rejects these for targetSdk 35+)"; exit 1; }
+
+      - name: APK from the bundle (what Play installs)
+        run: |
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          java -jar "$RUNNER_TEMP/bundletool.jar" build-apks --bundle="$AAB" --output=app.apks --mode=universal \
+            --ks="$FW_KEYSTORE" --ks-pass=pass:testpass --ks-key-alias=test --key-pass=pass:testpass
+          unzip -o app.apks universal.apk
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 -v 4 universal.apk > zipalign.txt && echo "zipalign 16 KB: OK" || { tail -20 zipalign.txt; echo "::error::APK is not zip-aligned for 16 KB pages"; exit 1; }
+          echo "- universal APK: $(du -h universal.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enable KVM
+        working-directory: .
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install the release build on an emulator and launch it
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -feature -Vulkan -no-snapshot -noaudio -no-boot-anim
+          ram-size: 4096M
+          working-directory: FoodWell_v89_Android_UI_Polish/android
+          script: |
+            adb install -r universal.apk
+            adb shell dumpsys package com.foodwell.app | grep -E "versionCode|versionName|flags=" | head -5
+            adb logcat -c
+            nohup sh -c 'adb logcat -v time > logcat_live.txt 2>&1' >/dev/null 2>&1 &
+            adb shell am start -W -n com.foodwell.app/.MainActivity
+            sleep 20
+            adb reconnect offline || true
+            timeout 90 adb wait-for-device || true
+            timeout 60 adb logcat -d > logcat.txt || cp logcat_live.txt logcat.txt || true
+            timeout 30 adb exec-out screencap -p > screen.png || true
+            echo "===== Crash log (AndroidRuntime) ====="
+            grep -A 40 -E "FATAL EXCEPTION|AndroidRuntime" logcat.txt | head -120 || true
+            echo "===== FoodWell process ====="
+            timeout 30 adb shell pidof com.foodwell.app || (echo "::error::the release build is not running after launch" && exit 1)
+            echo "===== JavaScript errors in the page ====="
+            ! grep -E "CONSOLE.*Uncaught" logcat.txt || (echo "::error::the page threw a JavaScript error on start" && exit 1)
+            echo "===== Android backup rules (should list files/backups only) ====="
+            timeout 30 adb shell bmgr enabled || true
+            echo "===== Send to background and back (backup snapshot + resume) ====="
+            adb shell input keyevent KEYCODE_HOME; sleep 3
+            adb shell am start -n com.foodwell.app/.MainActivity; sleep 6
+            timeout 30 adb shell pidof com.foodwell.app || (echo "::error::the release build died after resume" && exit 1)
+            timeout 60 adb logcat -d > logcat.txt || true
+            ! grep -E "FATAL EXCEPTION" logcat.txt || (echo "::error::crash after resume" && grep -A 30 "FATAL EXCEPTION" logcat.txt && exit 1)
+            echo "release build launched and resumed OK"
+
+      - name: Upload logs and screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-test-ads-${{ matrix.ads }}
+          path: |
+            FoodWell_v89_Android_UI_Polish/android/manifest.xml
+            FoodWell_v89_Android_UI_Polish/android/logcat.txt
+            FoodWell_v89_Android_UI_Polish/android/screen.png
+          if-no-files-found: ignore
