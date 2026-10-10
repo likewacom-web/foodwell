@@ -5,7 +5,7 @@
 
 **id** ใช้อ้างอิงในโค้ด และควรใช้เป็นชื่อไฟล์อนิเมชัน เช่น `anim/squat.webp`
 
-**ภาพที่ใส่แล้ว (แมว MeowFit 2 เฟรม):** `armc` · `box` · `bridge` · `calf` · `catcow` · `climb` · `hip` · `jacks` · `knees` · `lunge` · `march` · `neck` · `plank` · `push` · `row` · `skater` · `squat` · `superman` · `walk` · `wallsit` — ไฟล์ `assets/anim/<id>_1.webp` (ท่าเริ่ม) และ `<id>_2.webp` (ท่าสุด) ขนาด 600×600 แล้วเพิ่ม `<id>:2` ใน `const ANIM={...}` (index.html) ท่าที่ยังไม่มีภาพจะใช้ตัวการ์ตูนเวกเตอร์ (workout_rig.js)
+**ภาพที่ใส่แล้ว (แมว MeowFit 2 เฟรม):** `armc` · `box` · `bridge` · `calf` · `catcow` · `climb` · `hip` · `jacks` · `knees` · `lunge` · `march` · `neck` · `plank` · `push` · `row` · `skater` · `squat` · `superman` · `walk` · `wallsit` — ไฟล์ `assets/anim/<id>_1.webp` (ท่าเริ่ม), `<id>_2.webp` (ท่าสุด) และ `<id>_3.webp` (ท่ากลาง) ขนาด 600×600 เล่นวนแบบ 1→3→2→3 แล้วเพิ่ม `<id>:F4` ใน `const ANIM={...}` (index.html) ท่าที่ยังไม่มีภาพจะใช้ตัวการ์ตูนเวกเตอร์ (workout_rig.js)
 
 ## วอร์มอัพ
 

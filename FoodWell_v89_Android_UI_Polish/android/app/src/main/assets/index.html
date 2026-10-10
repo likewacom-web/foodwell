@@ -3205,7 +3205,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // shown in turn), or the built-in vector figure (workout_rig.js). See EXERCISES.md.
  // ANIM value: a number n = frames 1…n in turn, or a list = the order to show frame numbers in
  // (e.g. [1,3,2,3]: start, in-between, end, in-between). Each frame fades in over the one before.
- const ANIM={armc:2,box:2,bridge:2,calf:2,catcow:2,climb:2,hip:2,jacks:2,knees:2,lunge:2,march:2,neck:2,plank:2,push:2,row:2,skater:2,squat:2,superman:2,walk:2,wallsit:2};
+ const F4=[1,3,2,3];
+ const ANIM={armc:F4,box:F4,bridge:F4,calf:F4,catcow:F4,climb:F4,hip:F4,jacks:F4,knees:F4,lunge:F4,march:F4,neck:F4,plank:F4,push:F4,row:F4,skater:F4,squat:F4,superman:F4,walk:F4,wallsit:F4};
  const art=(id,cls)=>{const a=ANIM[id],seq=Array.isArray(a)?a:a>1?[...Array(a)].map((_,i)=>i+1):null;
   if(a==='v')return `<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`;
   if(seq)return `<span class="wo-frames ${cls}" data-fr="${id}" data-seq="${seq}">${[...Array(Math.max(...seq))].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i+1===seq[0]?'on':''}">`).join('')}</span>`;
