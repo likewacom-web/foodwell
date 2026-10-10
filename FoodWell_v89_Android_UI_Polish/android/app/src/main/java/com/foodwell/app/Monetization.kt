@@ -107,14 +107,14 @@ class Monetization(
         ).build()
         val r = billing.queryProductDetails(params)
         product = r.productDetailsList?.firstOrNull()
-        if (product == null) message = "ยังไม่พบสินค้า \"$PRODUCT_ID\" ใน Google Play Console"
+        if (product == null) message = Lang.t(activity, "ยังไม่พบสินค้า \"$PRODUCT_ID\" ใน Google Play Console", "Product \"$PRODUCT_ID\" not found in Google Play Console yet")
         emitStatus()
     }
 
     fun buy() = activity.runOnUiThread {
         val pd = product
         if (!billingReady || pd == null) {
-            message = message.ifEmpty { "ซื้อได้เมื่อติดตั้งแอปจาก Google Play" }
+            message = message.ifEmpty { Lang.t(activity, "ซื้อได้เมื่อติดตั้งแอปจาก Google Play", "Purchases work when the app is installed from Google Play") }
             connect()
             emitStatus()
             return@runOnUiThread
@@ -132,7 +132,7 @@ class Monetization(
     fun restore(quiet: Boolean = false) {
         if (!billingReady) {
             if (!quiet) {
-                message = "เชื่อมต่อ Google Play ไม่ได้ · ลองใหม่อีกครั้ง"
+                message = Lang.t(activity, "เชื่อมต่อ Google Play ไม่ได้ · ลองใหม่อีกครั้ง", "Couldn't reach Google Play · try again")
                 emitStatus()
             }
             connect()
@@ -143,7 +143,7 @@ class Monetization(
                 QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
             )
             r.purchasesList.forEach { handle(it) }
-            if (!quiet && !adFree && !pending) message = "ไม่พบการซื้อในบัญชี Google Play นี้"
+            if (!quiet && !adFree && !pending) message = Lang.t(activity, "ไม่พบการซื้อในบัญชี Google Play นี้", "No purchase found on this Google Play account")
             emitStatus()
         }
     }
@@ -177,7 +177,7 @@ class Monetization(
             }
             Purchase.PurchaseState.PENDING -> {
                 pending = true
-                message = "รอการชำระเงิน · โฆษณาจะหายไปเมื่อชำระเสร็จ"
+                message = Lang.t(activity, "รอการชำระเงิน · โฆษณาจะหายไปเมื่อชำระเสร็จ", "Payment pending · ads go away once it completes")
             }
             else -> Unit
         }
@@ -261,11 +261,11 @@ class Monetization(
     }
 
     private fun billingText(r: BillingResult) = when (r.responseCode) {
-        BillingClient.BillingResponseCode.BILLING_UNAVAILABLE -> "ซื้อได้เมื่อติดตั้งแอปจาก Google Play"
+        BillingClient.BillingResponseCode.BILLING_UNAVAILABLE -> Lang.t(activity, "ซื้อได้เมื่อติดตั้งแอปจาก Google Play", "Purchases work when the app is installed from Google Play")
         BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
-        BillingClient.BillingResponseCode.NETWORK_ERROR -> "ไม่มีอินเทอร์เน็ต · ลองใหม่อีกครั้ง"
-        BillingClient.BillingResponseCode.ITEM_UNAVAILABLE -> "สินค้านี้ยังไม่เปิดขาย"
-        else -> "Google Play ตอบกลับ ${r.responseCode} ${r.debugMessage}".trim()
+        BillingClient.BillingResponseCode.NETWORK_ERROR -> Lang.t(activity, "ไม่มีอินเทอร์เน็ต · ลองใหม่อีกครั้ง", "No internet · try again")
+        BillingClient.BillingResponseCode.ITEM_UNAVAILABLE -> Lang.t(activity, "สินค้านี้ยังไม่เปิดขาย", "This item isn't on sale yet")
+        else -> (Lang.t(activity, "Google Play ตอบกลับ", "Google Play replied") + " ${r.responseCode} ${r.debugMessage}").trim()
     }
 
     companion object {

@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <script>
+// fwL(th,en): pick the message for the chosen language (for text built from variables, which word lookup can't translate well)
+window.fwL=(th,en)=>{try{return localStorage.getItem('fw_lang')==='en'?en:th}catch(e){return th}};
+</script>
+<script>
 // v116: English dates from the first render (the rest of the language switch is at the end of the page)
 (function(){try{if(localStorage.getItem('fw_lang')!=='en')return}catch(e){return}
  const loc=l=>(l==null||/^th\b/i.test(String(l)))?'en-GB':l;
@@ -572,10 +576,10 @@ function normalizeAiResult(data){const name=String(data?.name||data?.foodName||d
 // Shrink photos before upload/storage: faster, uses less AI quota, and keeps localStorage small.
 function shrinkImage(src,max,quality){return new Promise(res=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',quality))};img.onerror=()=>res(src);img.src=src})}
 function saveAiAnalysis(x){}
-async function analyzeFoodWithAI(){const file=$("photo")?.files?.[0];const endpoint=String(s.settings.aiEndpoint||$("aiEndpoint")?.value||"").trim();if(!file){toast("เลือกรูปอาหารก่อน");return}if(!endpoint){toast("ตั้งค่า AI Endpoint ในหน้า More ก่อน");go("more");return}setAiStatus("กำลังส่งรูปไปวิเคราะห์…");$("v40AnalyzeBtn").disabled=true;try{const original=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const image=await shrinkImage(original,1024,.82);const resp=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image})});if(!resp.ok){let msg="HTTP "+resp.status;try{const j=await resp.json();if(j&&j.error)msg=j.error}catch(_){}throw new Error(msg)}const data=await resp.json();const out=normalizeAiResult(data);if(!out.name)throw new Error("ไม่พบชื่ออาหารในผลลัพธ์");$("foodName").value=out.name;const filled=[];Object.entries(out.nutrition||{}).forEach(([k,v])=>{const el=$(k);if(el&&!el.value){el.value=v;filled.push(k)}});const box=$("v40AiResult");const conf=out.confidence==null?"":" · ความมั่นใจ "+Math.round(out.confidence*100)+"%";box.innerHTML=`<div class="ai-result-box"><b>✨ ${esc(out.name)}</b><div style="font-size:10px;color:#999;margin-top:4px">AI แนะนำชื่อจากรูป${filled.length?" และค่าโภชนาการโดยประมาณ":""} — ตรวจสอบก่อนบันทึก${conf}</div><div class="v40-ai-candidates">${out.candidates.map(x=>`<button type="button" data-ai-name="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;box.classList.add("show");box.querySelectorAll("[data-ai-name]").forEach(b=>b.onclick=()=>{$("foodName").value=b.dataset.aiName;toast("เลือกชื่อแล้ว ✨")});saveAiAnalysis({name:out.name,candidates:out.candidates,confidence:out.confidence,image:await shrinkImage(image,160,.7)});setAiStatus("วิเคราะห์เสร็จแล้ว — กรุณาตรวจสอบชื่อก่อนบันทึก");toast("วิเคราะห์รูปเสร็จแล้ว ✨")}catch(e){setAiStatus("เชื่อมต่อ AI ไม่สำเร็จ: "+e.message+" · ใช้ผู้ช่วยแบบเลือกประเภทอาหารได้");toast("วิเคราะห์รูปไม่สำเร็จ")}finally{$("v40AnalyzeBtn").disabled=false}}
+async function analyzeFoodWithAI(){const file=$("photo")?.files?.[0];const endpoint=String(s.settings.aiEndpoint||$("aiEndpoint")?.value||"").trim();if(!file){toast("เลือกรูปอาหารก่อน");return}if(!endpoint){toast(fwL("ตั้งค่า AI Endpoint ในหน้า More ก่อน","Set the AI endpoint in Settings first"));go("more");return}setAiStatus("กำลังส่งรูปไปวิเคราะห์…");$("v40AnalyzeBtn").disabled=true;try{const original=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const image=await shrinkImage(original,1024,.82);const resp=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image})});if(!resp.ok){let msg="HTTP "+resp.status;try{const j=await resp.json();if(j&&j.error)msg=j.error}catch(_){}throw new Error(msg)}const data=await resp.json();const out=normalizeAiResult(data);if(!out.name)throw new Error("ไม่พบชื่ออาหารในผลลัพธ์");$("foodName").value=out.name;const filled=[];Object.entries(out.nutrition||{}).forEach(([k,v])=>{const el=$(k);if(el&&!el.value){el.value=v;filled.push(k)}});const box=$("v40AiResult");const conf=out.confidence==null?"":" · ความมั่นใจ "+Math.round(out.confidence*100)+"%";box.innerHTML=`<div class="ai-result-box"><b>✨ ${esc(out.name)}</b><div style="font-size:10px;color:#999;margin-top:4px">AI แนะนำชื่อจากรูป${filled.length?" และค่าโภชนาการโดยประมาณ":""} — ตรวจสอบก่อนบันทึก${conf}</div><div class="v40-ai-candidates">${out.candidates.map(x=>`<button type="button" data-ai-name="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;box.classList.add("show");box.querySelectorAll("[data-ai-name]").forEach(b=>b.onclick=()=>{$("foodName").value=b.dataset.aiName;toast("เลือกชื่อแล้ว ✨")});saveAiAnalysis({name:out.name,candidates:out.candidates,confidence:out.confidence,image:await shrinkImage(image,160,.7)});setAiStatus("วิเคราะห์เสร็จแล้ว — กรุณาตรวจสอบชื่อก่อนบันทึก");toast("วิเคราะห์รูปเสร็จแล้ว ✨")}catch(e){setAiStatus("เชื่อมต่อ AI ไม่สำเร็จ: "+e.message+" · ใช้ผู้ช่วยแบบเลือกประเภทอาหารได้");toast("วิเคราะห์รูปไม่สำเร็จ")}finally{$("v40AnalyzeBtn").disabled=false}}
 $("v40AnalyzeBtn").onclick=analyzeFoodWithAI;$("v40UseManualBtn").onclick=()=>{$("foodName").focus();toast("กรอกข้อมูลเองได้เลย")};
-$("saveAiEndpoint").onclick=()=>{s.settings.aiEndpoint=$("aiEndpoint").value.trim();save();toast(s.settings.aiEndpoint?"บันทึก AI Endpoint แล้ว":"ล้าง AI Endpoint แล้ว")};
-$("testAiEndpoint").onclick=async()=>{const endpoint=String($("aiEndpoint").value.trim()||s.settings.aiEndpoint||"");if(!endpoint){toast("ใส่ AI Endpoint ก่อน");return}try{const r=await fetch(endpoint,{method:"OPTIONS"});toast(r.ok?"เชื่อมต่อ endpoint ได้":"endpoint ตอบกลับแล้ว แต่ต้องตรวจสอบรูปแบบ API")}catch(e){toast("ยังเชื่อมต่อ endpoint ไม่ได้")}};
+$("saveAiEndpoint").onclick=()=>{s.settings.aiEndpoint=$("aiEndpoint").value.trim();save();toast(s.settings.aiEndpoint?fwL("บันทึก AI Endpoint แล้ว","AI endpoint saved"):fwL("ล้าง AI Endpoint แล้ว","AI endpoint cleared"))};
+$("testAiEndpoint").onclick=async()=>{const endpoint=String($("aiEndpoint").value.trim()||s.settings.aiEndpoint||"");if(!endpoint){toast("ใส่ AI Endpoint ก่อน");return}try{const r=await fetch(endpoint,{method:"OPTIONS"});toast(r.ok?fwL("เชื่อมต่อ endpoint ได้","Endpoint connected"):fwL("endpoint ตอบกลับแล้ว แต่ต้องตรวจสอบรูปแบบ API","The endpoint answered, but check its API format"))}catch(e){toast(fwL("ยังเชื่อมต่อ endpoint ไม่ได้","Can't reach the endpoint yet"))}};
 if($("aiEndpoint"))$("aiEndpoint").value=s.settings.aiEndpoint||"";
 
 const v40OldPreview=previewPhotoFile;previewPhotoFile=function(file){v40OldPreview(file);showAiCard(!!file)};
@@ -608,7 +612,7 @@ $("modalFav").onclick=()=>{if(modalId!=null)toggleFoodFavorite(modalId);openFood
 $("modalEdit").onclick=()=>{let id=modalId;closeFoodModal();startEdit(id)};
 $("modalDelete").onclick=()=>{if(modalId!=null){s.foods=s.foods.filter(x=>x.id!==modalId);closeFoodModal();save();toast("ลบรายการแล้ว")}};
 
-document.querySelectorAll("[data-water]").forEach(b=>b.onclick=()=>{let ml=Number(b.dataset.water);const now=new Date();s.water+=ml;s.waterLog.unshift({id:Date.now(),ml,date:localDay(now),time:now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});save();toast(`เพิ่มน้ำ ${ml} ml แล้ว`)});
+document.querySelectorAll("[data-water]").forEach(b=>b.onclick=()=>{let ml=Number(b.dataset.water);const now=new Date();s.water+=ml;s.waterLog.unshift({id:Date.now(),ml,date:localDay(now),time:now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});save();toast(fwL(`เพิ่มน้ำ ${ml} ml แล้ว`,`Added ${ml} ml of water`))});
 $("clearWater").onclick=()=>{const mode=$("waterHistoryDay")?.value||"today";if(mode==='all'){s.water=0;s.waterLog=[]}else{const today=localDay();s.waterLog=s.waterLog.filter(x=>entryDay(x)!==today);s.water=0}save();toast(mode==='all'?"ล้างรายการน้ำทั้งหมดแล้ว":"ล้างรายการน้ำวันนี้แล้ว")};
 $("waterHistoryDay")?.addEventListener('change',()=>renderWaterHistoryV54());
 // Calorie burn estimate: kcal = MET × body weight (kg) × hours (Compendium of Physical Activities values).
@@ -875,7 +879,7 @@ const HOME_DEFAULT=['welcome','summary','twocards','steps','workout','challenge'
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
 function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
-function setupHomeCustomizer(){applyHomePrefs();const btn=document.getElementById('customizeHome'),menu=document.getElementById('homeWidgetMenu'),home=document.getElementById('home');if(!btn||btn.dataset.ready)return;btn.dataset.ready='1';btn.onclick=()=>{home.classList.toggle('home-editing');menu.classList.toggle('open');if(home.classList.contains('home-editing')){document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=true);toast('โหมดปรับแต่ง Home เปิดแล้ว')}else{saveHomePrefs();document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=false);toast('บันทึกเลย์เอาต์แล้ว')}};document.getElementById('resetHomeLayout').onclick=()=>{localStorage.removeItem('foodwell_home_layout_v36');location.reload()};document.querySelectorAll('[data-widget-toggle]').forEach(b=>b.onclick=()=>{const n=home.querySelector(`[data-home-key="${b.dataset.widgetToggle}"]`);if(n){n.classList.toggle('home-card-hidden');saveHomePrefs();}});let drag=null;home.addEventListener('dragstart',e=>{const n=e.target.closest('[data-home-key]');if(!home.classList.contains('home-editing')||!n)return;drag=n;n.classList.add('dragging')});home.addEventListener('dragend',e=>{if(drag){drag.classList.remove('dragging');saveHomePrefs();drag=null}});home.addEventListener('dragover',e=>{if(!drag||!home.classList.contains('home-editing'))return;e.preventDefault();const target=e.target.closest('[data-home-key]');if(!target||target===drag)return;const r=target.getBoundingClientRect();const before=e.clientY<r.top+r.height/2;if(before)target.before(drag);else target.after(drag)});}
+function setupHomeCustomizer(){applyHomePrefs();const btn=document.getElementById('customizeHome'),menu=document.getElementById('homeWidgetMenu'),home=document.getElementById('home');if(!btn||btn.dataset.ready)return;btn.dataset.ready='1';btn.onclick=()=>{home.classList.toggle('home-editing');menu.classList.toggle('open');if(home.classList.contains('home-editing')){document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=true);toast(fwL('โหมดปรับแต่ง Home เปิดแล้ว','Home customize mode on'))}else{saveHomePrefs();document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=false);toast('บันทึกเลย์เอาต์แล้ว')}};document.getElementById('resetHomeLayout').onclick=()=>{localStorage.removeItem('foodwell_home_layout_v36');location.reload()};document.querySelectorAll('[data-widget-toggle]').forEach(b=>b.onclick=()=>{const n=home.querySelector(`[data-home-key="${b.dataset.widgetToggle}"]`);if(n){n.classList.toggle('home-card-hidden');saveHomePrefs();}});let drag=null;home.addEventListener('dragstart',e=>{const n=e.target.closest('[data-home-key]');if(!home.classList.contains('home-editing')||!n)return;drag=n;n.classList.add('dragging')});home.addEventListener('dragend',e=>{if(drag){drag.classList.remove('dragging');saveHomePrefs();drag=null}});home.addEventListener('dragover',e=>{if(!drag||!home.classList.contains('home-editing'))return;e.preventDefault();const target=e.target.closest('[data-home-key]');if(!target||target===drag)return;const r=target.getBoundingClientRect();const before=e.clientY<r.top+r.height/2;if(before)target.before(drag);else target.after(drag)});}
 function renderWaterHistoryV54(){
  const logs=(s.waterLog||[]).slice(); const today=localDay(); const mode=$("waterHistoryDay")?.value||"today";
  const shown=mode==='today'?logs.filter(x=>entryDay(x)===today):logs;
@@ -1863,7 +1867,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   const chips=[];if(m.serving)chips.push([m.serving,`1 หน่วยบริโภค (${m.serving} ${u})`]);
   (u==='ml'?[100,200,250,330,500]:[30,50,100,150,200]).forEach(v=>{if(!chips.some(c=>c[0]===v))chips.push([v,`${v} ${u}`])});
   if(m.pack&&!chips.some(c=>c[0]===m.pack))chips.push([m.pack,`ทั้ง${u==='ml'?'ขวด':'ห่อ'} (${m.packLabel||m.pack+' '+u})`]);
-  say(`<div class="bc-prod">${m.image?`<img src="${esc(m.image)}" alt="">`:''}<div><b>${esc(m.name)}</b><br>${m.packLabel?esc(m.packLabel)+' · ':''}${Math.round(m.per.kcal)} kcal ต่อ 100 ${u}<br><small>${esc(src)}</small></div></div>
+  say(`<div class="bc-prod">${m.image?`<img src="${esc(m.image)}" alt="">`:''}<div><b>${esc(m.name)}</b><br>${m.packLabel?esc(m.packLabel)+' · ':''}${Math.round(m.per.kcal)} ${fwL('kcal ต่อ','kcal per')} 100 ${u}<br><small>${esc(src)}</small></div></div>
    <div class="bc-amt"><div class="bc-amt-row">ปริมาณที่กิน <input id="bcAmount" type="number" inputmode="decimal" min="1" max="5000" value="${amount}"> ${u}</div>
    <div class="bc-chips">${chips.map(([v,l])=>`<button type="button" data-amt="${v}">${esc(l)}</button>`).join('')}</div><div class="bc-total"></div></div>`);
   info.querySelector('#bcAmount').oninput=e=>{const v=Number(e.target.value);if(v>0){amount=v;apply()}};
@@ -1888,7 +1892,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  btn.onclick=()=>{if(!S())return;say('');S().scan()};
  window.onBarcode=code=>{code=String(code||'').replace(/\D/g,'');if(code)lookup(code)};
  window.onBarcodeCancel=()=>{};
- window.onBarcodeError=m=>say('⚠️ เปิดตัวสแกนไม่ได้'+(/download|module/i.test(m||'')?' · กำลังดาวน์โหลดตัวสแกนจาก Google Play ลองใหม่อีกครั้งในอีกสักครู่':''));
+ window.onBarcodeError=m=>say(fwL('⚠️ เปิดตัวสแกนไม่ได้','⚠️ Couldn\'t open the scanner')+(/download|module/i.test(m||'')?fwL(' · กำลังดาวน์โหลดตัวสแกนจาก Google Play ลองใหม่อีกครั้งในอีกสักครู่',' · Downloading the scanner from Google Play, try again in a moment'):''));
  // remember the barcode with what was actually saved (runs before the form is cleared)
  document.addEventListener('click',e=>{if(!e.target.closest('#addFood'))return;
   if(pending){const name=input.value.trim();if(name){const rec={name};FIELDS.forEach(k=>{const v=document.getElementById(k)?.value;if(v!==''&&v!=null)rec[k]=Number(v)});
@@ -1938,7 +1942,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function yday(){const d=new Date();d.setDate(d.getDate()-1);return localDay(d)}
  function addItems(items,meal){let t=Date.now();const now=new Date();
   items.forEach((it,i)=>{const id=t+i;s.foods.unshift({...pick(it),meal:meal||it.meal,id,createdAt:id,date:localDay(now),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),favorite:false})});
-  save();toast(`เพิ่ม ${items.length} รายการ · ${sum(items).toLocaleString()} kcal ✨`)}
+  save();toast(fwL(`เพิ่ม ${items.length} รายการ · ${sum(items).toLocaleString()} kcal ✨`,`Added ${items.length} items · ${sum(items).toLocaleString()} kcal ✨`))}
  function draw(){
   const box=document.getElementById('rpCard');if(!box)return;
   const y=yday(),today=localDay(),yFoods=s.foods.filter(f=>foodDay(f)===y),tFoods=s.foods.filter(f=>foodDay(f)===today);
@@ -2045,7 +2049,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   drop.addEventListener('mousedown',e=>e.preventDefault());
   drop.onclick=e=>{const b=e.target.closest('[data-i]');if(!b)return;const x=res[Number(b.dataset.i)];rc.lines.push({name:x.name,unit:x.unit,qty:isG(x.unit)?100:1,v:x.v});later();setTimeout(()=>page.querySelector('#rcFind')?.focus(),30)};
   q('#rcCancel').onclick=()=>{editing=null;list()};
-  q('#rcSave').onclick=()=>{rc.name=rc.name.trim();if(!rc.name){toast('ตั้งชื่อเมนูก่อน');return}if(!rc.lines.length){toast('เพิ่มวัตถุดิบอย่างน้อย 1 อย่าง');return}
+  q('#rcSave').onclick=()=>{rc.name=rc.name.trim();if(!rc.name){toast('ตั้งชื่อเมนูก่อน');return}if(!rc.lines.length){toast(fwL('เพิ่มวัตถุดิบอย่างน้อย 1 อย่าง','Add at least 1 ingredient'));return}
    s.recipes=[rc,...(s.recipes||[]).filter(x=>x.id!==rc.id)];save();editing=null;list();toast('บันทึกเมนูแล้ว 🍳')};
   const del=q('#rcDel');if(del)del.onclick=()=>{if(!confirm(`ลบเมนู "${rc.name}"?`))return;s.recipes=(s.recipes||[]).filter(x=>x.id!==rc.id);save();editing=null;list()};
  }
@@ -2105,7 +2109,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    <div class="if-row"><span style="flex:1;font-size:14px">🔔 เตือนตอนเริ่มกิน และก่อนหมดช่วงกิน 30 นาที</span><input class="switch" type="checkbox" id="ifNotify" ${c.notify?'checked':''}></div>
    <div class="if-sub" style="margin-top:8px">ไม่แนะนำสำหรับผู้ที่ตั้งครรภ์ ให้นมบุตร เป็นเบาหวานที่ใช้ยา หรือมีประวัติความผิดปกติด้านการกิน ควรปรึกษาแพทย์ก่อน</div>`;
   const set=patch=>{s.settings=s.settings||{};s.settings.fasting=Object.assign(conf(),patch);save();window.fwNotifyPush&&fwNotifyPush();draw()};
-  box.querySelector('#ifOn').onchange=e=>{set({on:e.target.checked});if(e.target.checked){toast(`เริ่มแผน IF ${conf().fast}:${24-conf().fast} แล้ว ⏱️`);if(conf().notify&&window.FoodWellNotify&&FoodWellNotify.permission()!=='granted')FoodWellNotify.request()}};
+  box.querySelector('#ifOn').onchange=e=>{set({on:e.target.checked});if(e.target.checked){toast(fwL(`เริ่มแผน IF ${conf().fast}:${24-conf().fast} แล้ว ⏱️`,`IF ${conf().fast}:${24-conf().fast} plan started ⏱️`));if(conf().notify&&window.FoodWellNotify&&FoodWellNotify.permission()!=='granted')FoodWellNotify.request()}};
   box.querySelectorAll('[data-fast]').forEach(b=>b.onclick=()=>set({fast:Number(b.dataset.fast)}));
   box.querySelector('#ifStart').onchange=e=>{if(e.target.value)set({start:e.target.value})};
   box.querySelector('#ifNotify').onchange=e=>set({notify:e.target.checked})}
@@ -2382,14 +2386,14 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   save();toast(`บันทึก ${r.n} · ${p.kcal} kcal ✅`)}
  function cook(r){
   s.recipes=s.recipes||[];let rc=s.recipes.find(x=>x.name===r.n);
-  if(!rc){rc={id:Date.now(),name:r.n,servings:r.sv,lines:r.i.map(([n,u,q])=>({name:n,unit:u,qty:q,v:ING.get(n+'|'+u)||{}}))};s.recipes.unshift(rc);save();toast('เพิ่มใน “เมนูทำเอง” แล้ว · ปรับวัตถุดิบได้ 🍳')}
-  else toast('มีเมนูนี้ใน “เมนูทำเอง” แล้ว');
+  if(!rc){rc={id:Date.now(),name:r.n,servings:r.sv,lines:r.i.map(([n,u,q])=>({name:n,unit:u,qty:q,v:ING.get(n+'|'+u)||{}}))};s.recipes.unshift(rc);save();toast(fwL('เพิ่มใน “เมนูทำเอง” แล้ว · ปรับวัตถุดิบได้ 🍳','Added to “My recipes” · you can adjust the ingredients 🍳'))}
+  else toast(fwL('มีเมนูนี้ใน “เมนูทำเอง” แล้ว','This recipe is already in “My recipes”'));
   close();go('recipes')}
  function addShopping(r,servings,quiet){const k=servings/r.sv;s.shopping=s.shopping||[];
   r.i.forEach(([n,u,q])=>{let it=s.shopping.find(x=>x.name===n&&x.unit===u&&!x.done);
    if(!it){it={id:Date.now()+Math.random(),name:n,unit:u,qty:0,from:[],done:false};s.shopping.push(it)}
    it.qty=r1(it.qty+q*k);if(!it.from.includes(r.n))it.from.push(r.n)});
-  if(quiet)return;save();toast(`เพิ่ม ${r.i.length} วัตถุดิบในรายการซื้อของ 🛒`)}
+  if(quiet)return;save();toast(fwL(`เพิ่ม ${r.i.length} วัตถุดิบในรายการซื้อของ 🛒`,`Added ${r.i.length} ingredients to the shopping list 🛒`))}
  // ---- page ----
  const page=document.getElementById('healthy');if(!page)return;
  let tab='menu',filter='all',query='',open=null,servings=1,ctx=null,pickCtx=null,weekOff=0;
@@ -2439,10 +2443,10 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   q('[data-pp]').forEach(b=>b.onclick=()=>{s.settings=s.settings||{};s.settings.planPeople=Math.max(1,Math.min(10,people()+Number(b.dataset.pp)));save();draw()});
   q('[data-add]').forEach(b=>b.onclick=()=>{const [d,m]=b.dataset.add.split('|');pick(d,m)});
   q('[data-pi]').forEach(b=>b.onclick=()=>{const [d,id]=b.dataset.pi.split('|');const x=planOn(d).find(y=>String(y.id)===id);if(x)show(x.r,{d,id})});
-  const au=page.querySelector('#hlAuto');if(au)au.onclick=()=>{const n=autoPlan(weekStart());toast(n?`จัดให้ ${n} มื้อแล้ว ✨ แตะเมนูเพื่อเปลี่ยนได้`:'ทุกมื้อมีแผนแล้ว');draw()};
+  const au=page.querySelector('#hlAuto');if(au)au.onclick=()=>{const n=autoPlan(weekStart());toast(n?fwL(`จัดให้ ${n} มื้อแล้ว ✨ แตะเมนูเพื่อเปลี่ยนได้`,`Planned ${n} meals ✨ tap a dish to change it`):fwL('ทุกมื้อมีแผนแล้ว','Every meal is already planned'));draw()};
   const ps=page.querySelector('#hlPlanShop');if(ps)ps.onclick=()=>{const today=localDay(),ws=weekStart(),its=[...Array(7)].map((_,i)=>addDay(ws,i)).filter(d=>d>=today).flatMap(planOn);
    if(!its.length){toast('ยังไม่มีเมนูในแผน');return}
-   if(!confirm(`เพิ่มวัตถุดิบของ ${its.length} เมนู (สำหรับ ${people()} คน) ลงรายการซื้อของ?`))return;
+   if(!confirm(fwL(`เพิ่มวัตถุดิบของ ${its.length} เมนู (สำหรับ ${people()} คน) ลงรายการซื้อของ?`,`Add the ingredients of ${its.length} dishes (for ${people()} people) to the shopping list?`)))return;
    its.forEach(x=>addShopping(x.r,people(),true));save();tab='shop';draw();window.scrollTo({top:0});toast('เพิ่มลงรายการซื้อของแล้ว 🛒')};
   const pc=page.querySelector('#hlPlanClear');if(pc)pc.onclick=()=>{if(!confirm('ล้างแผนเมนูของสัปดาห์นี้?'))return;const ws=weekStart();for(let i=0;i<7;i++)delete plan()[addDay(ws,i)];planSave();draw()};
  }
@@ -2482,7 +2486,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    <div class="hl-list">${list.map((r,i)=>`<button type="button" class="hl-item" data-pk="${i}"><span class="em">${r.e}</span><span class="tx"><b>${esc(r.n)}</b><small>${r.mine?'เมนูทำเองของฉัน':`⏱️ ${r.min} นาที · โปรตีน ${r.p.protein} g`}</small></span><span class="kc">${r.p.kcal}<small>kcal</small></span></button>`).join('')||'<div class="hl-empty">ไม่พบเมนู</div>'}</div>`;
   b.querySelector('#hlClose').onclick=close;
   const f=b.querySelector('#hlPickFind');f.oninput=()=>{pickCtx.q=f.value;const pos=f.selectionStart;pickDraw();const g=b.querySelector('#hlPickFind');g.focus();g.setSelectionRange(pos,pos)};
-  b.querySelectorAll('[data-pk]').forEach(x=>x.onclick=()=>{const r=list[Number(x.dataset.pk)];planPush(d,meal,r);planSave();close();toast(`เพิ่ม ${r.n} ในแผนแล้ว 📅`);draw()});
+  b.querySelectorAll('[data-pk]').forEach(x=>x.onclick=()=>{const r=list[Number(x.dataset.pk)];planPush(d,meal,r);planSave();close();toast(fwL(`เพิ่ม ${r.n} ในแผนแล้ว 📅`,`Added ${window.fwT?fwT(r.n):r.n} to the plan 📅`));draw()});
  }
  // ---- home card + food page entry ----
  function homeCard(){const box=document.getElementById('hlHome');if(!box)return;const sg=suggest(),today=localDay(),m=mealAt(new Date());

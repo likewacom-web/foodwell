@@ -420,7 +420,7 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface fun signIn() = runOnUiThread {
             if (!cloud.configured) {
-                callJs("onCloudError", JSONObject.quote(cloud.notReadyReason ?: CloudSync.NOT_CONFIGURED))
+                callJs("onCloudError", JSONObject.quote(cloud.notReadyReason ?: CloudSync.notConfigured(this@MainActivity)))
                 return@runOnUiThread
             }
             lifecycleScope.launch {
@@ -429,7 +429,7 @@ class MainActivity : ComponentActivity() {
                     callJs("onCloudUser", JSONObject.quote(user.toString()))
                 } catch (e: Exception) {
                     Log.w(TAG, "sign-in failed", e)
-                    callJs("onCloudError", JSONObject.quote(e.message ?: "เข้าสู่ระบบไม่สำเร็จ"))
+                    callJs("onCloudError", JSONObject.quote(e.message ?: Lang.t(this@MainActivity, "เข้าสู่ระบบไม่สำเร็จ", "Sign-in failed")))
                 }
             }
         }
@@ -462,7 +462,7 @@ class MainActivity : ComponentActivity() {
         private fun roomCall(action: String, code: String, block: suspend () -> String) = runOnUiThread {
             lifecycleScope.launch {
                 try {
-                    if (!cloud.configured) throw IllegalStateException(cloud.notReadyReason ?: CloudSync.NOT_CONFIGURED)
+                    if (!cloud.configured) throw IllegalStateException(cloud.notReadyReason ?: CloudSync.notConfigured(this@MainActivity))
                     val data = block()
                     callJs("onRoom", JSONObject.quote(action) + ",true," + JSONObject.quote(code) + "," + JSONObject.quote(data))
                 } catch (e: Exception) {
@@ -566,15 +566,15 @@ class MainActivity : ComponentActivity() {
                 val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
                     ?: error("insert failed")
                 contentResolver.openOutputStream(uri)!!.use { it.write(text.toByteArray()) }
-                "บันทึกไฟล์สำรองไว้ในโฟลเดอร์ Download แล้ว: $safe"
+                Lang.t(this@MainActivity, "บันทึกไฟล์สำรองไว้ในโฟลเดอร์ Download แล้ว: $safe", "Backup saved to the Download folder: $safe")
             } else {
                 val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: filesDir
                 val f = File(dir, safe).apply { writeText(text) }
-                "บันทึกไฟล์สำรองแล้ว: ${f.absolutePath}"
+                Lang.t(this@MainActivity, "บันทึกไฟล์สำรองแล้ว: ${f.absolutePath}", "Backup saved: ${f.absolutePath}")
             }
         } catch (e: Exception) {
             Log.w(TAG, "saveText failed", e)
-            "บันทึกไฟล์ไม่สำเร็จ: ${e.message}"
+            Lang.t(this@MainActivity, "บันทึกไฟล์ไม่สำเร็จ: ${e.message}", "Couldn't save the file: ${e.message}")
         }
     }
 

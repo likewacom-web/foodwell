@@ -1,5 +1,6 @@
 package com.foodwell.app
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
@@ -40,10 +41,10 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
     /** Why sign-in can't work yet, in Thai for the page; null when ready. */
     val notReadyReason: String?
         get() = when {
-            app == null -> NOT_CONFIGURED
+            app == null -> notConfigured(activity)
             // google-services.json only carries the web OAuth client after Google sign-in is
             // enabled in Firebase Authentication (and SHA-1 added); without it there's no ID token.
-            webClientId == null -> NO_WEB_CLIENT
+            webClientId == null -> noWebClient(activity)
             else -> null
         }
 
@@ -69,30 +70,30 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
     }
 
     suspend fun signIn(): JSONObject {
-        val clientId = webClientId ?: throw IllegalStateException(notReadyReason ?: NO_WEB_CLIENT)
+        val clientId = webClientId ?: throw IllegalStateException(notReadyReason ?: noWebClient(activity))
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(GetSignInWithGoogleOption.Builder(clientId).build())
             .build()
         val cred = try {
             CredentialManager.create(activity).getCredential(activity, request).credential
         } catch (e: GetCredentialCancellationException) {
-            throw IllegalStateException("ยกเลิกการเข้าสู่ระบบ")
+            throw IllegalStateException(Lang.t(activity, "ยกเลิกการเข้าสู่ระบบ", "Sign-in cancelled"))
         } catch (e: NoCredentialException) {
-            throw IllegalStateException("ไม่พบบัญชี Google ในเครื่อง · เพิ่มบัญชีในการตั้งค่ามือถือก่อน")
+            throw IllegalStateException(Lang.t(activity, "ไม่พบบัญชี Google ในเครื่อง · เพิ่มบัญชีในการตั้งค่ามือถือก่อน", "No Google account on this phone · add one in the phone settings first"))
         } catch (e: GetCredentialException) {
             val m = e.message ?: ""
             throw IllegalStateException(
                 if ("28444" in m || "Developer console" in m || "10:" in m)
-                    "ตั้งค่า Firebase ยังไม่ครบ (SHA-1 / เปิด Google sign-in) · ดู FIREBASE_SYNC.md"
-                else "เข้าสู่ระบบไม่สำเร็จ: $m"
+                    Lang.t(activity, "ตั้งค่า Firebase ยังไม่ครบ (SHA-1 / เปิด Google sign-in) · ดู FIREBASE_SYNC.md", "Firebase setup is incomplete (SHA-1 / Google sign-in) · see FIREBASE_SYNC.md")
+                else Lang.t(activity, "เข้าสู่ระบบไม่สำเร็จ: $m", "Sign-in failed: $m")
             )
         }
         if (cred !is CustomCredential || cred.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-            throw IllegalStateException("ได้ข้อมูลบัญชีที่ไม่รองรับ")
+            throw IllegalStateException(Lang.t(activity, "ได้ข้อมูลบัญชีที่ไม่รองรับ", "Unsupported account type"))
         }
         val idToken = GoogleIdTokenCredential.createFrom(cred.data).idToken
         auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null)).await()
-        return userJson() ?: throw IllegalStateException("เข้าสู่ระบบไม่สำเร็จ")
+        return userJson() ?: throw IllegalStateException(Lang.t(activity, "เข้าสู่ระบบไม่สำเร็จ", "Sign-in failed"))
     }
 
     suspend fun signOut() {
@@ -212,17 +213,19 @@ class CloudSync(private val activity: ComponentActivity, private val emit: (fn: 
     fun errorText(e: Exception): String {
         val m = e.message ?: ""
         return when {
-            "PERMISSION_DENIED" in m -> "Firestore ปฏิเสธการเข้าถึง · ตรวจกฎ (Rules) ตาม FIREBASE_SYNC.md"
-            "NOT_FOUND" in m || "database" in m && "does not exist" in m -> "ยังไม่ได้สร้าง Firestore Database"
-            "UNAVAILABLE" in m -> "ไม่มีอินเทอร์เน็ต · จะซิงก์เมื่อออนไลน์"
-            else -> "ซิงก์ไม่สำเร็จ: $m"
+            "PERMISSION_DENIED" in m -> Lang.t(activity, "Firestore ปฏิเสธการเข้าถึง · ตรวจกฎ (Rules) ตาม FIREBASE_SYNC.md", "Firestore denied access · check the Rules in FIREBASE_SYNC.md")
+            "NOT_FOUND" in m || "database" in m && "does not exist" in m -> Lang.t(activity, "ยังไม่ได้สร้าง Firestore Database", "The Firestore database hasn't been created yet")
+            "UNAVAILABLE" in m -> Lang.t(activity, "ไม่มีอินเทอร์เน็ต · จะซิงก์เมื่อออนไลน์", "No internet · will sync when back online")
+            else -> Lang.t(activity, "ซิงก์ไม่สำเร็จ: $m", "Sync failed: $m")
         }
     }
 
     companion object {
         // Characters per document part: Thai text is up to 3 bytes/char in UTF-8, keep well under 1 MiB.
         private const val CHUNK = 250_000
-        const val NOT_CONFIGURED = "แอปนี้ยังไม่ได้เชื่อม Firebase (ต้องมีไฟล์ google-services.json) · ดู FIREBASE_SYNC.md"
-        const val NO_WEB_CLIENT = "Firebase ยังไม่ได้เปิด Google sign-in · เปิดที่ Authentication → Sign-in method → Google และใส่ SHA-1 แล้วดาวน์โหลด google-services.json ใหม่"
+        fun notConfigured(c: Context) = Lang.t(c, "แอปนี้ยังไม่ได้เชื่อม Firebase (ต้องมีไฟล์ google-services.json) · ดู FIREBASE_SYNC.md",
+            "This build isn't connected to Firebase (needs google-services.json) · see FIREBASE_SYNC.md")
+        fun noWebClient(c: Context) = Lang.t(c, "Firebase ยังไม่ได้เปิด Google sign-in · เปิดที่ Authentication → Sign-in method → Google และใส่ SHA-1 แล้วดาวน์โหลด google-services.json ใหม่",
+            "Google sign-in isn't enabled in Firebase · turn it on in Authentication → Sign-in method → Google, add the SHA-1 and download google-services.json again")
     }
 }

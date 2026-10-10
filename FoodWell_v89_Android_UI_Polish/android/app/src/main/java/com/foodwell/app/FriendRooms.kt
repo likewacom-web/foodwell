@@ -16,14 +16,14 @@ import org.json.JSONObject
  * Members only hold a display name and challenge progress — never food or health records.
  * Codes this phone joined are remembered so deleting the account can remove its member entries.
  */
-class FriendRooms(context: Context, private val emit: (fn: String, arg: String) -> Unit) {
+class FriendRooms(private val context: Context, private val emit: (fn: String, arg: String) -> Unit) {
     private val prefs = context.getSharedPreferences("foodwell_rooms", Context.MODE_PRIVATE)
     private val db get() = FirebaseFirestore.getInstance()
     private val auth get() = FirebaseAuth.getInstance()
     private val watchers = mutableMapOf<String, ListenerRegistration>()
 
     private fun room(code: String) = db.collection("rooms").document(code)
-    private fun uid() = auth.currentUser?.uid ?: throw IllegalStateException(NEED_SIGN_IN)
+    private fun uid() = auth.currentUser?.uid ?: throw IllegalStateException(Lang.t(context, "เข้าสู่ระบบด้วย Google ก่อน (ตั้งค่า → ข้อมูลและซิงก์)", "Sign in with Google first (Settings → Data & sync)"))
     private fun joined() = prefs.getStringSet("codes", emptySet())!!.toMutableSet()
     private fun remember(code: String, on: Boolean) =
         prefs.edit().putStringSet("codes", joined().apply { if (on) add(code) else remove(code) }).apply()
@@ -50,14 +50,14 @@ class FriendRooms(context: Context, private val emit: (fn: String, arg: String) 
                 return code
             }
         }
-        throw IllegalStateException("สร้างห้องไม่สำเร็จ ลองอีกครั้ง")
+        throw IllegalStateException(Lang.t(context, "สร้างห้องไม่สำเร็จ ลองอีกครั้ง", "Couldn't create the room, try again"))
     }
 
     /** Joins with a code; returns the room (challenge, start date …) as JSON. */
     suspend fun join(code: String, memberJson: String): String {
         uid()
         val snap = room(code).get().await()
-        if (!snap.exists()) throw IllegalStateException("ไม่พบรหัสห้องนี้ · ตรวจรหัสอีกครั้ง")
+        if (!snap.exists()) throw IllegalStateException(Lang.t(context, "ไม่พบรหัสห้องนี้ · ตรวจรหัสอีกครั้ง", "No room with this code · check the code"))
         update(code, memberJson)
         return JSONObject(snap.data ?: emptyMap<String, Any>()).put("code", code).toString()
     }
@@ -102,6 +102,5 @@ class FriendRooms(context: Context, private val emit: (fn: String, arg: String) 
 
     companion object {
         private const val ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        const val NEED_SIGN_IN = "เข้าสู่ระบบด้วย Google ก่อน (ตั้งค่า → ข้อมูลและซิงก์)"
     }
 }
