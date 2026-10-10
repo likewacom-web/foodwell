@@ -132,7 +132,7 @@ object Reminders {
             "weigh" -> {
                 val last = st.optString("lastWeigh")
                 val recent = runCatching { !LocalDate.parse(last).isBefore(LocalDate.now().minusDays(5)) }.getOrDefault(false)
-                if (recent) null else Triple(Lang.t(c, "⚖️ ชั่งน้ำหนักประจำสัปดาห์", "⚖️ Weekly weigh-in"), Lang.t(c, "บันทึกน้ำหนักเพื่อดูความคืบหน้าของแผน", "Log your weight to see your plan's progress"), "weightPlan")
+                if (recent) null else Triple(Lang.t(c, "⚖️ ชั่งน้ำหนักประจำสัปดาห์", "⚖️ Weekly weigh-in"), Lang.t(c, "บันทึกน้ำหนักเพื่อดูความคืบหน้าของแผน", "Log your weight to see your plan's progress"), "weigh")
             }
             "if_open", "if_close" -> {
                 val cfg = runCatching { JSONObject(prefs(c).getString("config", "{}")!!) }.getOrElse { JSONObject() }
