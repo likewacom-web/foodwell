@@ -522,7 +522,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 const $=id=>document.getElementById(id), KEY="foodwell_mimo_style";
 let s=JSON.parse(localStorage.getItem(KEY)||'{"foods":[],"water":0,"waterLog":[],"moves":[],"favorites":[],"foodLibrary":[],"dayNote":"","history":[]}');
 s.foodLibrary=Array.isArray(s.foodLibrary)?s.foodLibrary:[];
-s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🌿"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
+s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🐾"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
 s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);
 s.foods=s.foods.map(f=>({...f,favorite:!!f.favorite}));
 function snapshotDay(){
@@ -539,9 +539,9 @@ function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle(
 document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
-function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🌿";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
-$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🌿"};
-$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"FoodWell";s.profile.emoji=$("profileEmoji").value.trim()||"🌿";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
+function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🐾";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
+$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🐾"};
+$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"FoodWell";s.profile.emoji=$("profileEmoji").value.trim()||"🐾";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
 $("softTheme")&&($("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()});
 let reminderTimer=null;
 function reminderMessage(){const msgs=["พักสายตาสักครู่ และดูแลตัวเองตามที่รู้สึกเหมาะสมนะ ♡","ถึงเวลาเช็กอินกับตัวเองสักนิดนะ 🌿","ถ้ารู้สึกกระหาย ลองจิบน้ำสักหน่อยก็ได้ 💧","พักจากหน้าจอสักครู่เมื่อสะดวกนะ ✨"];return msgs[Math.floor(Math.random()*msgs.length)]}
@@ -640,7 +640,7 @@ function updateBurnEst(){const el=$("burnEst");if(!el)return;const m=Number($("e
 ["exName","exType","exMin"].forEach(id=>{const e=$(id);if(e){e.addEventListener("input",updateBurnEst);e.addEventListener("change",updateBurnEst)}});
 (()=>{const w=$("exWeight");if(!w)return;if(s.profile&&s.profile.weight)w.value=s.profile.weight;w.addEventListener("change",()=>{const v=Number(w.value);s.profile=s.profile||{};if(v>=20&&v<=300){s.profile.weight=v;save()}else{delete s.profile.weight;w.value="";save()}if($("bodyWeight"))$("bodyWeight").value=s.profile.weight||"";updateBurnEst()})})();
 $("addEx").onclick=()=>{let t=$("exType").value,n=$("exName").value.trim()||(t!==EX_AUTO?t:""),m=Number($("exMin").value||0);if(!n||!m){toast(n?"กรอกเวลา (นาที)":"เลือกประเภทหรือพิมพ์ชื่อกิจกรรม");return}s.moves.unshift({id:Date.now(),name:n,type:$("exType").value,min:m,kcal:moveKcal(n,$("exType").value,m),met:moveMet(n,$("exType").value),time:new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});$("exName").value="";$("exMin").value="";$("exType").value=EX_AUTO;save();updateBurnEst();toast("บันทึกแล้ว")};
-$("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้งหมดในเครื่องนี้?")){s={foods:[],water:0,moves:[],waterLog:[],favorites:[],history:[],dayNote:"",profile:{name:"FoodWell",emoji:"🌿"},settings:{softTheme:false,gentleReminder:false,reminderMinutes:180}};save();toast("ล้างข้อมูลแล้ว")}};
+$("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้งหมดในเครื่องนี้?")){s={foods:[],water:0,moves:[],waterLog:[],favorites:[],history:[],dayNote:"",profile:{name:"FoodWell",emoji:"🐾"},settings:{softTheme:false,gentleReminder:false,reminderMinutes:180}};save();toast("ล้างข้อมูลแล้ว")}};
 let meal="ทั้งหมด";
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");meal=b.dataset.meal;renderFood()});
 $("search").oninput=renderFood;
@@ -869,7 +869,7 @@ function renderProfileStats(){
  $("profileStatMove").textContent=(allMove+s.moves.reduce((a,x)=>a+Number(x.min||0),0)).toLocaleString();
  $("profileStatDays").textContent=activeDays.toLocaleString();
  $("profileHeroName").textContent=s.profile.name||"FoodWell";
- $("profileAvatarLarge").textContent=s.profile.emoji||"🌿";
+ $("profileAvatarLarge").textContent=s.profile.emoji||"🐾";
  const total=(allFoodCount+todayFoods)+(allWater+Number(s.water||0))+(allMove+s.moves.length);
  $("profileInsight").textContent=total?`บันทึกของคุณกำลังค่อย ๆ สร้างภาพรวมของวันต่าง ๆ — วันนี้มีอาหาร ${todayFoods} รายการ น้ำ ${(s.water||0).toLocaleString()} ml และการเคลื่อนไหว ${s.moves.reduce((a,x)=>a+Number(x.min||0),0)} นาที`:`เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨`;
 }
@@ -1003,7 +1003,7 @@ $("exportData")&&($("exportData").onclick=exportData);
 $("importData")&&($("importData").onchange=e=>{
  const file=e.target.files[0]; if(!file)return;
  const r=new FileReader();
- r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.foods))throw 0;s=d;s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🌿"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.foods))throw 0;s=d;s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🐾"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
 s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);save();toast("นำเข้าข้อมูลแล้ว")}catch(_){toast("ไฟล์ข้อมูลไม่ถูกต้อง")}};
  r.readAsText(file)
 });
@@ -1232,7 +1232,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 .onb-step.back{animation-name:onbBack}@keyframes onbBack{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
 .onb-kicker{font-size:12px;letter-spacing:.14em;color:#f3a0bb;font-weight:800}
 .onb-h{font-size:28px;line-height:1.25;font-weight:800;margin:6px 0 6px}.onb-p{color:#a9abb5;font-size:15px;line-height:1.6;margin:0 0 22px}
-.onb-hero{display:grid;place-items:center;margin:26px 0 22px}.onb-logo{width:116px;height:116px;border-radius:36px;display:grid;place-items:center;font-size:58px;background:linear-gradient(145deg,#f7bfd0,#e887aa);box-shadow:0 20px 50px #e887aa40,inset 0 2px 0 #ffffff60}
+.onb-hero{display:grid;place-items:center;margin:26px 0 22px}.onb-logo{width:116px;height:116px;border-radius:36px;display:grid;place-items:center;font-size:58px;background:linear-gradient(135deg,#FC8361,#FB6E5B 25%,#FB0D8F 75%,#FB03A3);box-shadow:0 20px 50px #fb0d8f40,inset 0 2px 0 #ffffff60}
 .onb-feats{display:grid;gap:10px;margin-top:8px}.onb-feat{display:flex;gap:12px;align-items:center;padding:13px 14px;border-radius:18px;background:#ffffff0a;border:1px solid #ffffff10}.onb-feat span{font-size:24px}.onb-feat b{display:block;font-size:15px}.onb-feat small{color:#9ea0aa;font-size:13px}
 .onb-choices{display:grid;gap:10px}.onb-choices.two{grid-template-columns:1fr 1fr}
 .onb-choice{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:16px;border-radius:20px;border:1.5px solid #ffffff14;background:#ffffff0a;color:#f5f3f5;font:inherit;transition:border-color .2s,background .2s,transform .12s}
@@ -1284,7 +1284,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function bmiHtml(){const T=previewTargets();if(!T)return '<div class="onb-bmi"><div style="color:#9ea0aa;font-size:14px">ใส่ส่วนสูงและน้ำหนักเพื่อดู BMI</div></div>';
   return `<div class="onb-bmi"><div class="num">${T.bmi}<small>BMI</small></div><div><span class="onb-pill" style="background:${T.bmiColor}">${T.bmiLabel}</span><div style="font-size:13px;color:#a9abb5;margin-top:5px">น้ำหนักที่เหมาะสม ${T.healthy[0]}–${T.healthy[1]} กก.</div></div></div>`}
  const STEPS=[
-  {btn:'เริ่มต้น',ok:()=>true,html:()=>`<div class="onb-hero"><div class="onb-logo">🌿</div></div><div class="onb-kicker">WELCOME TO FOODWELL</div><div class="onb-h">ยินดีต้อนรับ 👋</div><p class="onb-p">ตอบคำถามสั้น ๆ 4 ข้อ แล้ว FoodWell จะคำนวณพลังงานและสารอาหารที่เหมาะกับคุณในแต่ละวัน</p>
+  {btn:'เริ่มต้น',ok:()=>true,html:()=>`<div class="onb-hero"><div class="onb-logo"><svg viewBox="0 0 24 24" width="66" height="66" aria-hidden="true"><path fill="#fff" d="M1.98,11.03a2.33,2.33 0,1 0,4.66,0a2.33,2.33 0,1 0,-4.66,0ZM5.92,7.00a2.75,2.75 0,1 0,5.50,0a2.75,2.75 0,1 0,-5.50,0ZM12.51,7.00a2.75,2.75 0,1 0,5.50,0a2.75,2.75 0,1 0,-5.50,0ZM17.31,11.03a2.33,2.33 0,1 0,4.66,0a2.33,2.33 0,1 0,-4.66,0ZM5.31,15.53a4.20,4.20 0,1 0,8.39,0a4.20,4.20 0,1 0,-8.39,0ZM10.21,15.53a4.20,4.20 0,1 0,8.39,0a4.20,4.20 0,1 0,-8.39,0Z"/></svg></div></div><div class="onb-kicker">WELCOME TO FOODWELL</div><div class="onb-h">ยินดีต้อนรับ 👋</div><p class="onb-p">ตอบคำถามสั้น ๆ 4 ข้อ แล้ว FoodWell จะคำนวณพลังงานและสารอาหารที่เหมาะกับคุณในแต่ละวัน</p>
    <div class="onb-feats"><div class="onb-feat"><span>🎯</span><div><b>เป้าหมายเฉพาะตัว</b><small>แคลอรี่ โปรตีน คาร์บ ไขมัน ต่อวัน</small></div></div><div class="onb-feat"><span>⚖️</span><div><b>BMI และน้ำหนักที่เหมาะสม</b><small>ประเมินตามเกณฑ์คนเอเชีย</small></div></div><div class="onb-feat"><span>🔒</span><div><b>ข้อมูลอยู่ในเครื่องคุณ</b><small>แก้ไขได้ทุกเมื่อในหน้า “เพิ่มเติม”</small></div></div></div>`},
   {btn:'ถัดไป',ok:()=>d.sex&&d.age>=12,html:()=>`<div class="onb-kicker">ขั้นที่ 1 จาก 4</div><div class="onb-h">เกี่ยวกับคุณ</div><p class="onb-p">ใช้คำนวณอัตราการเผาผลาญพื้นฐาน (BMR)</p>${choice(SEX,'sex',true)}${field('age','อายุ','ปี',...LIM.age)}`},
   {btn:'ถัดไป',ok:()=>d.height>=120&&d.weight>=30,html:()=>`<div class="onb-kicker">ขั้นที่ 2 จาก 4</div><div class="onb-h">ส่วนสูงและน้ำหนัก</div><p class="onb-p">ลากแถบหรือแตะตัวเลขเพื่อพิมพ์</p>${field('height','ส่วนสูง','ซม.',...LIM.height)}${field('weight','น้ำหนัก','กก.',...LIM.weight)}<div id="onbBmi">${bmiHtml()}</div>`},
@@ -3605,7 +3605,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   x.font=`900 86px ${F}`;let y=wrap(x,title,540,550,800,98,2);
   x.font=`500 48px ${F}`;x.fillStyle='#6B4A57';y+=76;for(const l of lines.slice(0,3)){y=wrap(x,l,540,y,800,60,2)+64}
   if(stats.length){const w=800/stats.length;stats.slice(0,3).forEach(([v,l],i)=>{const cx=140+w*i+w/2;x.fillStyle='#E887AA';x.font=`900 88px ${F}`;x.fillText(v,cx,y+60);x.fillStyle='#8A6B77';x.font=`500 36px ${F}`;x.fillText(l,cx,y+112)});}
-  x.fillStyle='#C2477A';x.font=`800 44px ${F}`;x.fillText('🌿 FoodWell',540,1015);
+  x.fillStyle='#C2477A';x.font=`800 44px ${F}`;x.fillText('🐾 FoodWell',540,1015);
   if(sub){x.fillStyle='#8A6B77';x.font=`600 34px ${F}`;x.fillText(sub,540,895)}
   return c.toDataURL('image/png')}
  // ---- share sheet ----
@@ -3693,7 +3693,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   x.fillStyle='#FAFAFB';x.strokeStyle='#E3E5EA';x.lineWidth=3;rr(x,110,1205,860,150,40);x.fill();x.stroke();
   x.fillStyle=accent;x.font=`900 48px ${F}`;x.fillText(status,540,1272);x.fillStyle='#6B6E77';x.font=`500 34px ${F}`;x.fillText(statusSub,540,1324);
   x.fillStyle=accent;x.font=`500 32px ${F}`;wrap(x,quote,540,1408,900,42,2);
-  x.fillStyle='#B0B3BC';x.font=`800 30px ${F}`;x.fillText('🌿 FoodWell',540,1475);
+  x.fillStyle='#B0B3BC';x.font=`800 30px ${F}`;x.fillText('🐾 FoodWell',540,1475);
   return c.toDataURL('image/png')}
  const busy=()=>toast(L('กำลังสร้างการ์ด…','Creating card…'));
  async function trophyImage(idx){const items=getTrophyItems(),t=items[idx],src=(window.foodwellTrophyArt||[])[idx];let art=null;try{if(src)art=await load(src)}catch(e){}
@@ -4081,10 +4081,10 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function me(){try{const x=JSON.parse(cloud().status());return x.configured&&x.user?x.user:null}catch(e){return null}}
  const roomData={};
  const myName=()=>s.friendName||((me()||{}).name||'').split(' ')[0]||L('ฉัน','Me');
- function member(a){const E=evalA(a);return JSON.stringify({name:myName(),e:(s.profile&&s.profile.emoji)||'🌿',passed:E?E.ok:0,need:E?E.n:0,state:E?E.state:'on',last:E?E.days.filter((d,i)=>E.res[i]==='ok').pop()||'':''})}
+ function member(a){const E=evalA(a);return JSON.stringify({name:myName(),e:(s.profile&&s.profile.emoji)||'🐾',passed:E?E.ok:0,need:E?E.n:0,state:E?E.state:'on',last:E?E.days.filter((d,i)=>E.res[i]==='ok').pop()||'':''})}
  function roomBoard(a){const list=(roomData[a.room]||[]).slice().sort((x,y)=>(y.passed||0)-(x.passed||0)||(x.updatedAt||0)-(y.updatedAt||0));
   return `<div class="ch-board"><div style="font-weight:800;font-size:12px;color:var(--muted)">👥 ${L('ห้อง','Room')} <span translate="no" style="letter-spacing:.15em">${esc(a.room)}</span> · ${list.length} ${L('คน','people')}</div>
-   ${list.length?list.map((m,i)=>`<div class="${m.me?'me':''}"><span class="rk">${['🥇','🥈','🥉'][i]||i+1}</span><span>${esc(m.e||'🌿')}</span><b>${esc(m.name||'?')}${m.me?' ('+L('คุณ','you')+')':''}</b><span class="pb"><i style="width:${Math.min(100,(m.passed||0)/(m.need||1)*100)}%"></i></span><span style="width:44px;text-align:right">${m.passed||0}/${m.need||'?'}${m.state==='done'?' 🏅':''}</span></div>`).join('')
+   ${list.length?list.map((m,i)=>`<div class="${m.me?'me':''}"><span class="rk">${['🥇','🥈','🥉'][i]||i+1}</span><span>${esc(m.e||'🐾')}</span><b>${esc(m.name||'?')}${m.me?' ('+L('คุณ','you')+')':''}</b><span class="pb"><i style="width:${Math.min(100,(m.passed||0)/(m.need||1)*100)}%"></i></span><span style="width:44px;text-align:right">${m.passed||0}/${m.need||'?'}${m.state==='done'?' 🏅':''}</span></div>`).join('')
     :`<div class="ch-note">${me()?L('กำลังโหลด…','Loading…'):L('เข้าสู่ระบบเพื่อดูอันดับ','Sign in to see the leaderboard')}</div>`}</div>`}
  const LINK=c=>`https://likewacom-web.github.io/foodwell/join.html?c=${c}`;
  function shareInvite(a){const c=def(a.id);window.FWShare&&FWShare.open({title:L('ชวนเพื่อนแข่ง','Invite friends'),
@@ -4100,7 +4100,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function joinCode(code){code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4){toast(L('ใส่รหัส 6 ตัว','Enter the 6-character code'));return}
   if(st().active.some(a=>a.room===code)){tab='mine';go('challenges');toast(L('อยู่ในห้องนี้แล้ว','Already in this room'));return}
   if(!needCloud()||!askName())return;toast(L('กำลังเข้าร่วม…','Joining…'));
-  cloud().roomJoin(code,JSON.stringify({name:myName(),e:(s.profile&&s.profile.emoji)||'🌿',passed:0,need:0,state:'on',last:''}))}
+  cloud().roomJoin(code,JSON.stringify({name:myName(),e:(s.profile&&s.profile.emoji)||'🐾',passed:0,need:0,state:'on',last:''}))}
  window.onRoom=function(action,ok,code,data){
   if(!ok){toast((action==='join'?L('เข้าร่วมไม่สำเร็จ: ','Couldn\'t join: '):action==='create'?L('สร้างห้องไม่สำเร็จ: ','Couldn\'t create the room: '):'')+data);return}
   if(action==='create'&&waiting.create){const a=waiting.create;waiting.create=null;a.room=data;save();cloud().roomWatch(data);draw();shareInvite(a)}
@@ -4176,7 +4176,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function monthImage(M){const W=1080,H=1500,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),F='"Noto Sans Thai","Noto Sans",sans-serif';
   const bg=x.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#FFF0F5');bg.addColorStop(.55,'#F3FBF6');bg.addColorStop(1,'#E8F6EE');x.fillStyle=bg;x.fillRect(0,0,W,H);
   x.fillStyle='#F7BFD055';x.beginPath();x.arc(980,90,220,0,7);x.fill();x.fillStyle='#8FD3B044';x.beginPath();x.arc(60,1420,260,0,7);x.fill();
-  x.textAlign='left';x.fillStyle='#C2477A';x.font=`800 38px ${F}`;x.fillText(`🌿 FoodWell · ${L('สรุปประจำเดือน','Monthly recap')}`,80,120);
+  x.textAlign='left';x.fillStyle='#C2477A';x.font=`800 38px ${F}`;x.fillText(`🐾 FoodWell · ${L('สรุปประจำเดือน','Monthly recap')}`,80,120);
   x.fillStyle='#1B1B22';x.font=`900 92px ${F}`;x.fillText(`${MONTHS[M.m]} ${EN?M.y:M.y+543}`,80,230);
   x.fillStyle='#5A5D66';x.font=`500 38px ${F}`;x.fillText(L(`บันทึก ${M.logged} วัน · ต่อเนื่องสูงสุด ${M.best} วัน 🔥`,`${M.logged} days logged · best streak ${M.best} days 🔥`),80,295);
   const tiles=[['🍽️',M.foods.toLocaleString(),L('รายการอาหาร','foods logged')],['🔥',M.avg?M.avg.toLocaleString():'–',L('kcal เฉลี่ย/วัน','avg kcal/day')],['💧',`${M.waterDays}`,L('วันดื่มน้ำครบ','water-goal days')],
@@ -4193,7 +4193,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const rows=Math.ceil((M.days.length+off)/7),ly=cy+66+rows*74+28;x.textAlign='left';x.font=`500 24px ${F}`;x.fillStyle='#6B6E77';
   x.fillText(L('สีเข้ม = ครบทั้ง บันทึกอาหาร · ดื่มน้ำ · ขยับร่างกาย','Darker = food logged · water goal · moved'),80,ly);
   if(M.top.length){x.fillStyle='#1B1B22';x.font=`800 30px ${F}`;let names=M.top.map(t=>t[0]),line=()=>`${L('เมนูโปรด','Favourites')}: `+names.join(' · ');while(names.length>1&&x.measureText(line()).width>920)names.pop();let tx=line();while(x.measureText(tx).width>920&&tx.length>8)tx=tx.slice(0,-2);if(tx!==line())tx+='…';x.fillText(tx,80,ly+56)}
-  x.fillStyle='#C2477A';rr(x,80,H-112,920,80,40);x.fill();x.fillStyle='#FFFFFF';x.textAlign='center';x.font=`800 34px ${F}`;x.fillText(L('ดูแลสุขภาพไปด้วยกันกับ FoodWell 🌿','Look after yourself with FoodWell 🌿'),540,H-60);
+  x.fillStyle='#C2477A';rr(x,80,H-112,920,80,40);x.fill();x.fillStyle='#FFFFFF';x.textAlign='center';x.font=`800 34px ${F}`;x.fillText(L('ดูแลสุขภาพไปด้วยกันกับ FoodWell 🐾','Look after yourself with FoodWell 🌿'),540,H-60);
   return cv.toDataURL('image/png')}
  let mOff=0;
  function monthCard(){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+mOff);const M=monthStats(d.getFullYear(),d.getMonth()),img=monthImage(M);
@@ -4203,7 +4203,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   mbox.querySelector('#chX').onclick=()=>modal.classList.remove('show');
   mbox.querySelector('#mPrev').onclick=()=>{mOff--;monthCard()};mbox.querySelector('#mNext').onclick=()=>{if(mOff<0){mOff++;monthCard()}};
   mbox.querySelector('#mShare').onclick=()=>window.FWShare&&FWShare.open({title:L('แชร์สรุปเดือน','Share monthly recap'),
-   text:`📅 ${L(`สรุปเดือน${MONTHS[M.m]}ของฉันใน FoodWell`,`My ${MONTHS[M.m]} in FoodWell`)} 🌿\n${L(`บันทึก ${M.logged} วัน · ดื่มน้ำครบ ${M.waterDays} วัน · ขยับ ${M.moveMin} นาที`,`${M.logged} days logged · water goal ${M.waterDays} days · ${M.moveMin} active minutes`)}\n#FoodWell`,image:img});
+   text:`📅 ${L(`สรุปเดือน${MONTHS[M.m]}ของฉันใน FoodWell`,`My ${MONTHS[M.m]} in FoodWell`)} 🐾\n${L(`บันทึก ${M.logged} วัน · ดื่มน้ำครบ ${M.waterDays} วัน · ขยับ ${M.moveMin} นาที`,`${M.logged} days logged · water goal ${M.waterDays} days · ${M.moveMin} active minutes`)}\n#FoodWell`,image:img});
   modal.classList.add('show')}
  // also from the Dashboard
  const dashTitle=document.querySelector('#dashboard .page-title');
@@ -4845,4 +4845,10 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{card()}catch(e){console.error(e)}return o};
  card();
 })();
+</script>
+<!-- v135 Paw branding: profiles still on the old default leaf avatar switch to the paw once -->
+<script>
+(function(){try{if(typeof s==='undefined'||localStorage.getItem('fw_paw_v135'))return;
+ if(s.profile&&s.profile.emoji==='🌿'){s.profile.emoji='🐾';save();if(typeof render==='function')render()}
+ localStorage.setItem('fw_paw_v135','1')}catch(e){}})();
 </script>
