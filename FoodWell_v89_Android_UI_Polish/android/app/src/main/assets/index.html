@@ -3110,7 +3110,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .wo-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
 .wo-main .ph{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:800}
 .wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto}svg.wo-anim{height:min(64vw,280px)}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain;display:block}
-.wo-frames{position:relative;display:block}.wo-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .25s}.wo-frames img.on{opacity:1}.wo-frames.wo-anim{aspect-ratio:1}.wo-main h2{margin:0;font-size:26px}
+.wo-frames{position:relative;display:block}.wo-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}.wo-frames img.on{opacity:1}.wo-frames.wo-anim{aspect-ratio:1;border-radius:22px;overflow:hidden}.wo-main h2{margin:0;font-size:26px}
 .wo-main .amt{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
 .wo-main .cue{font-size:14px;opacity:.85;max-width:420px;line-height:1.6}.wo-main .nx{font-size:13px;opacity:.7;margin-top:8px}
 .wo-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px}
@@ -3203,7 +3203,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const nm=id=>L(X[id][0],X[id][1]),cue=id=>L(X[id][5],X[id][6]);
  // Pictures for each move, best first: a looping clip (anim/<id>.webp), drawn key frames (anim/<id>_1.webp …
  // shown in turn), or the built-in vector figure (workout_rig.js). See EXERCISES.md.
- const ANIM={march:'v'};
+ const ANIM={armc:2,box:2,bridge:2,calf:2,catcow:2,climb:2,hip:2,jacks:2,knees:2,lunge:2,march:2,neck:2,plank:2,push:2,row:2,skater:2,squat:2,superman:2,walk:2,wallsit:2};
  const art=(id,cls)=>{const a=ANIM[id];
   if(a==='v')return `<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`;
   if(a>1)return `<span class="wo-frames ${cls}" data-fr="${id}" data-n="${a}">${[...Array(a)].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i?'':'on'}">`).join('')}</span>`;
