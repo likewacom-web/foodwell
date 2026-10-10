@@ -37,7 +37,7 @@ Repo → Settings → Secrets and variables → Actions → **New repository sec
 | `ADMOB_APP_ID`, `ADMOB_BANNER_ID`, `ADMOB_REWARDED_ID` | (เฉพาะถ้าจะเปิดโฆษณา — ดู `MONETIZATION.md`) |
 
 ## 4. Build ไฟล์ .aab
-GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (เลือก ads ถ้าต้องการ) → รอ ~3 นาที → ดาวน์โหลด artifact **MeowFit-release-aab** (แตก zip ได้ `app-release.aab`)
+GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (เลือก ads ถ้าต้องการ) → รอ ~3 นาที → ดาวน์โหลด artifact **FoodWell-release-aab** (แตก zip ได้ `app-release.aab`)
 - versionCode เพิ่มเองทุกครั้งที่ build (100 + เลขรอบ) จึงอัปโหลดทับเวอร์ชันเดิมได้เสมอ
 
 ## 5. สร้างแอปใน Play Console
