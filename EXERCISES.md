@@ -5,7 +5,7 @@
 
 **id** ใช้อ้างอิงในโค้ด และควรใช้เป็นชื่อไฟล์อนิเมชัน เช่น `anim/squat.webp`
 
-**ภาพที่ใส่แล้ว (แมว MeowFit 2 เฟรม):** `armc` · `box` · `bridge` · `calf` · `catcow` · `climb` · `hip` · `jacks` · `knees` · `lunge` · `march` · `neck` · `plank` · `push` · `row` · `skater` · `squat` · `superman` · `walk` · `wallsit` — ไฟล์ `assets/anim/<id>_1.webp` (ท่าเริ่ม), `<id>_2.webp` (ท่าสุด) และ `<id>_3.webp` (ท่ากลาง) ขนาด 600×600 เล่นวนแบบ 1→3→2→3 แล้วเพิ่ม `<id>:F4` ใน `const ANIM={...}` (index.html) ท่าที่ยังไม่มีภาพจะใช้ตัวการ์ตูนเวกเตอร์ (workout_rig.js)
+**ภาพที่ใส่แล้ว (แมว MeowFit 2 เฟรม):** `armc` · `box` · `bridge` · `calf` · `catcow` · `climb` · `hip` · `jacks` · `knees` · `lunge` · `march` · `neck` · `plank` · `push` · `row` · `skater` · `squat` · `superman` · `walk` · `wallsit` — ไฟล์ `assets/anim/<id>_1.webp` (ท่าเริ่ม), `<id>_2.webp` (ท่าสุด) และ `<id>_3.webp` (ท่ากลาง) ขนาด 600×600 เล่นวนแบบ 1→3→2→3 (`F4`) · ท่าส่วนใหญ่มี `<id>_4.webp` (ระหว่างท่าเริ่มกับท่ากลาง) และ `<id>_5.webp` (ระหว่างท่ากลางกับท่าสุด) เพิ่ม เล่น 8 จังหวะ 1→4→3→5→2→5→3→4 (`F8`) · ตั้งลำดับต่อท่าได้ใน `const ANIM={...}` (index.html) ท่าที่ยังไม่มีภาพจะใช้ตัวการ์ตูนเวกเตอร์ (workout_rig.js)
 
 ## วอร์มอัพ
 
