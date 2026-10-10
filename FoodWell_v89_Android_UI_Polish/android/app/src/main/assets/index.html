@@ -3109,7 +3109,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .wo-pbar{height:6px;border-radius:9px;background:#ffffff26;margin:10px 0 0;overflow:hidden}.wo-pbar i{display:block;height:100%;background:#7dd3a8}
 .wo-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
 .wo-main .ph{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:800}
-.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto}svg.wo-anim{height:min(64vw,280px)}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain;display:block}
+.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto;border-radius:22px}svg.wo-anim{height:min(64vw,280px)}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain;display:block}
 .wo-frames{position:relative;display:block}.wo-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}.wo-frames img.prev{opacity:1;z-index:1}.wo-frames img.on{opacity:1;z-index:2}.wo-frames.wo-anim{aspect-ratio:1;border-radius:22px;overflow:hidden}.wo-main h2{margin:0;font-size:26px}
 .wo-main .amt{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
 .wo-main .cue{font-size:14px;opacity:.85;max-width:420px;line-height:1.6}.wo-main .nx{font-size:13px;opacity:.7;margin-top:8px}
@@ -3205,8 +3205,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // shown in turn), or the built-in vector figure (workout_rig.js). See EXERCISES.md.
  // ANIM value: a number n = frames 1…n in turn, or a list = the order to show frame numbers in
  // (e.g. [1,3,2,3]: start, in-between, end, in-between). Each frame fades in over the one before.
- const F4=[1,3,2,3],F8=[1,4,3,5,2,5,3,4]; // frames: 1 start, 2 end, 3 middle, 4 start–middle, 5 middle–end
- const ANIM={armc:F8,box:F8,bridge:F8,calf:F8,catcow:F8,climb:F8,hip:F8,jacks:F8,knees:F8,lunge:F8,march:F8,push:F8,row:F8,skater:F8,superman:F8,squat:[1,3,5,2,5,3],walk:[1,4,3,2,3,4],neck:F4,plank:F4,wallsit:F4};
+ // smooth 30-frame clips built from the drawn key frames in art/exercise_keyframes (see EXERCISES.md)
+ const ANIM={armc:'v',box:'v',bridge:'v',calf:'v',catcow:'v',climb:'v',hip:'v',jacks:'v',knees:'v',lunge:'v',march:'v',neck:'v',plank:'v',push:'v',row:'v',skater:'v',squat:'v',superman:'v',walk:'v',wallsit:'v'};
  const art=(id,cls)=>{const a=ANIM[id],seq=Array.isArray(a)?a:a>1?[...Array(a)].map((_,i)=>i+1):null;
   if(a==='v')return `<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`;
   if(seq)return `<span class="wo-frames ${cls}" data-fr="${id}" data-seq="${seq}">${[...Array(Math.max(...seq))].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i+1===seq[0]?'on':''}">`).join('')}</span>`;
