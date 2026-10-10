@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MeowFit — นโยบายความเป็นส่วนตัว / Privacy Policy</title>
+<style>
+ :root{--bg:#f6f7f9;--card:#fff;--text:#22242a;--muted:#62666f;--line:#e4e6eb;--accent:#c2477a}
+ @media (prefers-color-scheme:dark){:root{--bg:#15161a;--card:#1e2026;--text:#eceef2;--muted:#a3a7b0;--line:#30333b;--accent:#f0a3c1}}
+ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.7 "Noto Sans Thai",system-ui,sans-serif}
+ main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+ h1{font-size:24px;margin:8px 0 4px}h2{font-size:18px;margin:26px 0 6px;color:var(--accent)}
+ .meta{color:var(--muted);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:4px 18px 14px;margin-top:16px}
+ nav{display:flex;gap:8px;margin-top:12px}nav a{flex:1;text-align:center;padding:9px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);text-decoration:none;font-weight:700}
+ ul{padding-left:20px}li{margin:4px 0}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>🐾 MeowFit</h1>
+<div class="meta">มีผลตั้งแต่ / Effective: 8 ตุลาคม 2026 (8 October 2026)</div>
+<nav><a href="#th">ภาษาไทย</a><a href="#en">English</a></nav>
+
+<section class="card" id="th">
+<h2>นโยบายความเป็นส่วนตัว</h2>
+<p>MeowFit (“แอป”) เป็นแอปบันทึกอาหาร น้ำ การเคลื่อนไหว น้ำหนัก และแผนสุขภาพ เอกสารนี้อธิบายว่าแอปเก็บข้อมูลอะไร ใช้อย่างไร และคุณควบคุมข้อมูลได้อย่างไร</p>
+
+<h2>1. ข้อมูลที่เก็บไว้ในเครื่องของคุณ</h2>
+<p>ข้อมูลที่คุณบันทึก ได้แก่ รายการอาหารและรูปอาหาร ค่าโภชนาการ น้ำ การเคลื่อนไหว น้ำหนัก ข้อมูลร่างกาย (เพศ อายุ ส่วนสูง น้ำหนัก ระดับกิจกรรม เป้าหมาย) แผนอาหาร แผนออกกำลังกาย โน้ต และการตั้งค่า <b>ถูกเก็บไว้ในเครื่องของคุณเท่านั้น</b> เว้นแต่คุณเลือกเปิดใช้การซิงก์ (ข้อ 2) · แอปทำสำเนาสำรองอัตโนมัติวันละ 1 ไฟล์ (เก็บ 7 วัน ไม่รวมรูปอาหาร) ไว้ในพื้นที่ของแอปในเครื่อง และระบบสำรองข้อมูลของ Android อาจนำไฟล์นี้ไปเก็บในบัญชี Google ของเครื่องคุณตามการตั้งค่าของมือถือ เพื่อกู้คืนเมื่อติดตั้งแอปใหม่หรือเปลี่ยนเครื่อง (เราไม่สามารถเข้าถึงไฟล์นี้ได้)</p>
+
+<h2>2. การซิงก์ข้อมูลหลายเครื่อง (ไม่บังคับ)</h2>
+<p>ถ้าคุณเข้าสู่ระบบด้วยบัญชี Google แอปจะใช้ Firebase Authentication ของ Google เพื่อยืนยันตัวตน (ได้รับชื่อ อีเมล และรหัสบัญชี) และเก็บสำเนาข้อมูลในข้อ 1 รวมถึงรูปอาหาร ไว้ใน Google Cloud Firestore ภายใต้บัญชีของคุณ เพื่อซิงก์ระหว่างอุปกรณ์ ข้อมูลส่งผ่านการเชื่อมต่อที่เข้ารหัส (HTTPS) และเข้าถึงได้เฉพาะบัญชีของคุณ</p>
+
+<h2>3. บริการที่ทำงานเมื่อคุณสั่งเท่านั้น</h2>
+<ul>
+ <li><b>วิเคราะห์รูปอาหารด้วย AI:</b> เมื่อคุณกด “วิเคราะห์รูป” รูปที่คุณเลือกจะถูกส่งไปยังบริการ AI ของแอป (ทำงานบน Cloudflare Workers และใช้ Google Gemini API) เพื่อคาดเดาชื่ออาหารและค่าโภชนาการ แอปไม่เก็บรูปนั้นไว้บนเซิร์ฟเวอร์</li>
+ <li><b>นับก้าว:</b> ถ้าคุณเปิด แอปจะขอสิทธิ์ "กิจกรรมการเคลื่อนไหว" (Physical activity) เพื่ออ่านเซนเซอร์นับก้าวของมือถือ เก็บจำนวนก้าวรายวันไว้ในเครื่อง (และซิงก์ถ้าเปิดซิงก์) ไม่ใช้ตำแหน่ง/GPS · ปิดได้ทุกเมื่อในการตั้งค่าสิทธิ์ของมือถือ</li>
+ <li><b>Health Connect:</b> ถ้าคุณกดเชื่อม แอปจะ<b>อ่านอย่างเดียว</b> จำนวนก้าว แคลอรี่ที่ใช้ขณะเคลื่อนไหว และการออกกำลังกาย ที่นาฬิกาหรือแอปสุขภาพของคุณบันทึกไว้ใน Health Connect เพื่อแสดงในแอปและคำนวณแคลอรี่ที่ใช้ แอปไม่เขียนข้อมูลกลับ ไม่ขาย ไม่ใช้เพื่อโฆษณา และไม่ส่งให้บุคคลอื่น (ซิงก์ไปบัญชีของคุณเองเฉพาะเมื่อเปิดซิงก์) · เลิกเชื่อมได้ในแอปหรือในการตั้งค่า Health Connect</li>
+ <li><b>สแกนบาร์โค้ด:</b> หมายเลขบาร์โค้ดถูกส่งไปค้นหาที่ Open Food Facts (ฐานข้อมูลอาหารแบบเปิด) ตัวสแกนเป็นของ Google (ML Kit) ทำงานในเครื่อง</li>
+ <li><b>ชาเลนจ์กับเพื่อน:</b> ถ้าคุณสร้างหรือเข้าร่วมห้องชาเลนจ์ (ต้องเข้าสู่ระบบ) แอปจะเก็บชื่อที่คุณตั้งให้เพื่อนเห็น อีโมจิ และจำนวนวันที่ทำสำเร็จ ไว้ใน Firestore ที่ <code>rooms/{รหัส}</code> คนที่มีรหัสห้องและเข้าสู่ระบบจะเห็นข้อมูลนี้ ไม่มีข้อมูลอาหารหรือสุขภาพ · กด "เลิก" เพื่อออกจากห้อง</li>
+ <li><b>แชร์:</b> ข้อความและรูปการ์ดถูกส่งไปยังแอปที่คุณเลือก (เช่น LINE, Facebook) เฉพาะเมื่อคุณกดแชร์</li>
+ <li><b>รายงาน PDF และการแจ้งเตือน:</b> สร้างและทำงานในเครื่องทั้งหมด</li>
+</ul>
+
+<h2>4. โฆษณาและการซื้อในแอป</h2>
+<p>เวอร์ชันที่แสดงโฆษณาใช้ Google AdMob ซึ่งอาจเก็บตัวระบุอุปกรณ์ (เช่น Advertising ID) ที่อยู่ IP และข้อมูลการใช้งาน เพื่อแสดงและวัดผลโฆษณา ตาม <a href="https://policies.google.com/technologies/ads">นโยบายของ Google</a> ผู้ใช้ในเขตเศรษฐกิจยุโรป/สหราชอาณาจักรจะเห็นหน้าขอความยินยอมก่อน คุณปิดโฆษณาได้ด้วยการซื้อครั้งเดียวผ่าน Google Play ซึ่ง Google เป็นผู้ประมวลผลการชำระเงิน แอปได้รับเพียงสถานะการซื้อ</p>
+
+<h2>5. ฟอนต์</h2>
+<p>แอปอาจโหลดฟอนต์จาก Google Fonts เมื่อมีอินเทอร์เน็ต ซึ่ง Google จะเห็นที่อยู่ IP ของคุณ</p>
+
+<h2>6. สิ่งที่เราไม่ทำ</h2>
+<ul><li>ไม่ขายข้อมูลของคุณ</li><li>ไม่ใช้ข้อมูลสุขภาพของคุณเพื่อโฆษณา</li><li>ไม่เข้าถึงรายชื่อติดต่อ ตำแหน่ง หรือไฟล์อื่นในเครื่อง</li></ul>
+
+<h2>7. การลบข้อมูล</h2>
+<ul>
+ <li><b>ข้อมูลในเครื่อง:</b> ตั้งค่า → เกี่ยวกับ → “ล้างข้อมูลในเครื่อง” (ลบสำเนาสำรองอัตโนมัติด้วย) หรือถอนการติดตั้งแอป · สำเนาที่อยู่ในบัญชี Google จัดการได้ที่ การตั้งค่ามือถือ → Google → สำรองข้อมูล</li>
+ <li><b>บัญชีและข้อมูลบนคลาวด์:</b> ตั้งค่า → ข้อมูลและซิงก์ → “ลบบัญชีและข้อมูลบนคลาวด์” ข้อมูลที่ซิงก์ รูปบนคลาวด์ ห้องชาเลนจ์ที่เข้าร่วม และบัญชี จะถูกลบถาวรทันที</li>
+ <li>หรือส่งคำขอลบทางอีเมลด้านล่าง เราจะดำเนินการภายใน 30 วัน</li>
+</ul>
+
+<h2>8. เด็ก</h2>
+<p>แอปนี้ไม่ได้ออกแบบสำหรับเด็กอายุต่ำกว่า 13 ปี และไม่ได้ตั้งใจเก็บข้อมูลของเด็ก</p>
+
+<h2>9. ข้อมูลสุขภาพ</h2>
+<p>ค่าพลังงาน สารอาหาร และคำแนะนำในแอปเป็นค่าประมาณเพื่อการดูแลตัวเอง ไม่ใช่คำแนะนำหรือการวินิจฉัยทางการแพทย์</p>
+
+<h2>10. การเปลี่ยนแปลงและการติดต่อ</h2>
+<p>หากนโยบายนี้เปลี่ยน เราจะแก้วันที่ด้านบนและแจ้งในแอป ติดต่อผู้พัฒนา: <b>[อีเมลติดต่อ / CONTACT EMAIL]</b></p>
+</section>
+
+<section class="card" id="en">
+<h2>Privacy Policy</h2>
+<p>MeowFit (“the app”) helps you log food, water, movement, weight and health plans. This policy explains what the app stores, how it is used and how you control it.</p>
+
+<h2>1. Data stored on your phone</h2>
+<p>What you log — food entries and food photos, nutrition values, water, movement, weight, body details (sex, age, height, weight, activity level, goal), meal plans, workout plans, notes and settings — <b>is stored only on your phone</b> unless you turn on sync (section 2). The app keeps an automatic daily backup copy (7 days, without food photos) in its own storage on the phone; Android's backup may store it in your phone's Google account, depending on your phone settings, so it can be restored after a reinstall or on a new phone. We cannot access it.</p>
+
+<h2>2. Multi-device sync (optional)</h2>
+<p>If you sign in with Google, the app uses Google's Firebase Authentication to identify you (it receives your name, email and account ID) and stores a copy of the data in section 1, including food photos, in Google Cloud Firestore under your account so it can sync between devices. Data travels over encrypted connections (HTTPS) and is accessible only to your account.</p>
+
+<h2>3. Services that run only when you ask</h2>
+<ul>
+ <li><b>AI food photo analysis:</b> when you tap “Analyse photo”, the photo you chose is sent to the app's AI service (running on Cloudflare Workers using the Google Gemini API) to suggest a food name and nutrition. The photo is not stored on our servers.</li>
+ <li><b>Step counting:</b> if you turn it on, the app asks for the "Physical activity" permission to read the phone's step sensor. Daily step totals stay on the phone (and sync if you turn sync on). No location/GPS is used. You can turn it off any time in the phone's permission settings.</li>
+ <li><b>Health Connect:</b> if you connect it, the app <b>only reads</b> steps, active calories burned and workouts that your watch or health apps store in Health Connect, to show them and estimate calories burned. The app never writes to Health Connect, never sells this data, never uses it for ads and never shares it with anyone (it syncs to your own account only if you turn sync on). Disconnect any time in the app or in Health Connect settings.</li>
+ <li><b>Barcode scanning:</b> the barcode number is looked up in Open Food Facts (an open food database). The scanner is Google ML Kit and runs on the device.</li>
+ <li><b>Friend challenges:</b> if you create or join a challenge room (sign-in required), the app stores the name you choose for friends, an emoji and how many days you've completed in Firestore at <code>rooms/{code}</code>. Signed-in people who have the room code can see this — never your food or health data. Tap "Quit" to leave a room.</li>
+ <li><b>Sharing:</b> text and card images go to the app you choose (e.g. LINE, Facebook) only when you tap share.</li>
+ <li><b>PDF reports and reminders:</b> created and run entirely on the device.</li>
+</ul>
+
+<h2>4. Ads and in-app purchase</h2>
+<p>Versions that show ads use Google AdMob, which may collect device identifiers (such as the Advertising ID), IP address and usage data to show and measure ads, under <a href="https://policies.google.com/technologies/ads">Google's policies</a>. Users in the EEA/UK see a consent form first. You can remove ads with a one-time Google Play purchase; Google processes the payment and the app only receives the purchase status.</p>
+
+<h2>5. Fonts</h2>
+<p>When online, the app may load fonts from Google Fonts, which lets Google see your IP address.</p>
+
+<h2>6. What we don't do</h2>
+<ul><li>We don't sell your data.</li><li>We don't use your health data for advertising.</li><li>The app doesn't access your contacts, location or other files.</li></ul>
+
+<h2>7. Deleting your data</h2>
+<ul>
+ <li><b>On this phone:</b> Settings → About → “Clear data on this device” (this also deletes the automatic backups), or uninstall the app. Copies in your Google account backup are managed in the phone's Settings → Google → Backup.</li>
+ <li><b>Account and cloud data:</b> Settings → Data &amp; sync → “Delete account and cloud data”. Synced data, cloud photos, challenge-room entries and the account are permanently deleted right away.</li>
+ <li>Or email a deletion request to the address below; we act on it within 30 days.</li>
+</ul>
+
+<h2>8. Children</h2>
+<p>The app is not designed for children under 13 and does not knowingly collect their data.</p>
+
+<h2>9. Health information</h2>
+<p>Energy, nutrient values and suggestions in the app are estimates for self-care, not medical advice or diagnosis.</p>
+
+<h2>10. Changes and contact</h2>
+<p>If this policy changes we update the date above and tell you in the app. Developer contact: <b>[CONTACT EMAIL]</b></p>
+</section>
+</main>
+</body>
+</html>

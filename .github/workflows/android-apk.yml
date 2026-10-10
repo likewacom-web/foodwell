@@ -7,19 +7,22 @@ on:
       - 'FoodWell_v89_Android_UI_Polish/android/**'
       - '.github/workflows/android-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: FoodWell_v89_Android_UI_Polish/android
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
@@ -32,16 +35,48 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
         with:
+          cache-provider: basic
           gradle-version: '8.9'
 
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: FoodWell-debug-apk
           path: FoodWell_v89_Android_UI_Polish/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # A plain .apk download link (no zip, no GitHub login):
+      # https://github.com/<owner>/<repo>/releases/download/latest-debug/FoodWell.apk
+      - name: Publish APK to the 'latest-debug' release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp FoodWell_v89_Android_UI_Polish/android/app/build/outputs/apk/debug/app-debug.apk FoodWell.apk
+          if gh release view latest-debug >/dev/null 2>&1; then
+            gh release upload latest-debug FoodWell.apk --clobber
+            gh release edit latest-debug --notes "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7} · $(date -u +'%Y-%m-%d %H:%M UTC')"
+          else
+            gh release create latest-debug FoodWell.apk --prerelease --target "$GITHUB_SHA" \
+              --title "FoodWell (debug ล่าสุด)" --notes "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}"
+          fi
+
+      # Same APK at a URL with no expiring redirect (phone download managers often fail on the
+      # signed release-asset link): https://raw.githubusercontent.com/<owner>/<repo>/apk/FoodWell.apk
+      # The 'apk' branch is a single orphan commit, force-pushed each build, so history stays small.
+      - name: Publish APK to the 'apk' branch
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir apk-branch && cp FoodWell.apk apk-branch/ && cd apk-branch
+          git init -q -b apk
+          git add FoodWell.apk
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -qm "FoodWell debug APK · ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" apk
