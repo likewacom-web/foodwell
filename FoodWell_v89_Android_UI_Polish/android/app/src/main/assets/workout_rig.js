@@ -1,4 +1,4 @@
-// FoodWell workout figure: a small vector character posed by joint angles and animated between keyframes.
+// MeowFit workout figure: a small vector character posed by joint angles and animated between keyframes.
 // Used for every exercise that has no drawn/AI animation yet (see EXERCISES.md).
 //
 // Pose: x,y = hip position (y is re-grounded automatically unless the move anchors a joint),

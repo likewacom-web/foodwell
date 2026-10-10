@@ -15,7 +15,7 @@ window.fwL=(th,en)=>{try{return localStorage.getItem('fw_lang')==='en'?en:th}cat
 </script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101116">
-<title>FoodWell</title>
+<title>MeowFit</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box}
@@ -56,7 +56,7 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 
 .trend-card{background:#191b21;border:1px solid #2b2e36;border-radius:20px;padding:14px;margin-bottom:12px}.trend-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.trend-head h2{margin:0;font-size:16px}.trend-head small{color:#8f929b;font-size:9px}.trend-row{display:grid;grid-template-columns:44px 1fr 38px;gap:8px;align-items:end;margin:10px 0}.trend-label{font-size:9px;color:#999ba4}.trend-bars{height:72px;display:flex;align-items:flex-end;gap:5px;border-bottom:1px solid #30333b}.trend-bar{flex:1;min-width:8px;border-radius:7px 7px 2px 2px;background:linear-gradient(180deg,#ef8eae,#b85f83);position:relative}.trend-bar.waterbar{background:linear-gradient(180deg,#78bdf5,#4f83bd)}.trend-bar.movebar{background:linear-gradient(180deg,#8fd8a8,#4b9a6b)}.trend-day{font-size:8px;color:#777b85;text-align:center;position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);white-space:nowrap}.trend-value{font-size:9px;color:#bbb}.date-picker{display:flex;gap:8px;align-items:center;margin-bottom:10px}.date-picker input{flex:1}.selected-day{background:#24272e;border-radius:14px;padding:12px;margin-top:8px}.selected-day b{font-size:13px}.selected-day p{margin:4px 0 0;color:#a4a6ae;font-size:11px;line-height:1.6}
 
-/* FoodWell v9 motion polish */
+/* MeowFit v9 motion polish */
 @keyframes floatCat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
 @keyframes bubbleIn{0%{opacity:0;transform:translateY(8px) scale(.97)}100%{opacity:1;transform:none}}
 @keyframes cardIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
@@ -82,14 +82,14 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 @media(prefers-reduced-motion:no-preference){.insight-item{animation:rise .35s both}.insight-item:nth-child(2){animation-delay:.05s}.insight-item:nth-child(3){animation-delay:.1s}}
 
 .trophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.trophy{background:#1f2127;border:1px solid #2d3038;border-radius:20px;padding:10px;display:grid;grid-template-columns:78px minmax(0,1fr);gap:9px;align-items:center;min-height:138px;transition:.18s;overflow:hidden}.trophy.locked{opacity:.5;filter:saturate(.45)}.trophy.unlocked{border-color:#e98eae;box-shadow:0 8px 24px rgba(233,142,174,.12),inset 0 0 24px rgba(233,142,174,.035)}.trophy-art{width:78px;height:104px;border-radius:16px;overflow:hidden;background:#17181d;border:1px solid #343640;display:grid;place-items:center}.trophy-art img{width:100%;height:100%;object-fit:contain;display:block}.trophy.locked .trophy-art{filter:grayscale(1) brightness(.55)}.trophy-body{min-width:0}.trophy-icon{width:42px;height:42px;border-radius:14px;background:#292b33;display:grid;place-items:center;font-size:22px;flex:none;margin-bottom:7px}.trophy b{display:block;font-size:12px;line-height:1.25}.trophy small{display:block;color:#92949e;font-size:9px;margin-top:4px;line-height:1.35}.trophy-progress{height:5px;background:#30333b;border-radius:99px;overflow:hidden;margin-top:7px}.trophy-progress i{display:block;height:100%;background:#e98eae;border-radius:99px}.trophy-count{font-size:11px;color:#e997ae;font-weight:800}.trophy-filter{display:flex;gap:7px;margin:12px 0 4px;overflow:auto;padding-bottom:2px}.trophy-filter button{flex:0 0 auto;border:1px solid #343640;background:#24262d;color:#aaaeba;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:800;cursor:pointer}.trophy-filter button.active{background:#efa0bc;color:#35252c;border-color:#efa0bc;box-shadow:0 5px 14px rgba(239,160,188,.14)} .trophy-tools{display:flex;gap:7px;align-items:center;margin:10px 0 2px}.trophy-tools select{margin:0;flex:1;padding:8px 10px;font-size:10px}.trophy-fav{position:absolute;top:7px;right:7px;width:30px;height:30px;border:1px solid #3a333b;border-radius:10px;background:#202127;color:#8e9098;display:grid;place-items:center;font-size:15px;cursor:pointer;z-index:2}.trophy-fav.active{color:#ffd36b;border-color:#6b5260;background:#30262c}.trophy{position:relative}.trophy-star-note{font-size:9px;color:#9b9da5;margin-top:3px}.trophy-detail-fav{position:absolute;z-index:4;right:62px;top:14px;width:40px;height:40px;border:1px solid #3b343d;border-radius:13px;background:#25232a;color:#8e9098;font-size:19px;cursor:pointer}.trophy-detail-fav.active{color:#ffd36b;border-color:#6b5260}..trophy-summary{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:10px;padding:10px 12px;border:1px solid #34353d;border-radius:15px;background:#202127}.trophy-summary small{display:block;color:#90939d;font-size:9px}.trophy-summary b{display:block;color:#f2a0bb;font-size:12px;margin-bottom:5px}.trophy-summary-bar{height:6px;background:#30323a;border-radius:99px;overflow:hidden}.trophy-summary-bar i{display:block;height:100%;background:linear-gradient(90deg,#e98eae,#f7bfd0);border-radius:99px}.trophy-summary-pct{color:#f3a0bb;font-weight:900;font-size:13px}.trophy-share{border:1px solid #4a303b;background:#2a2026;color:#f2a1bd;border-radius:10px;padding:6px 8px;font-size:10px;font-weight:800;cursor:pointer;margin-top:7px}.trophy-share:active{transform:scale(.95)}.trophy-fallback{display:grid;place-items:center;min-height:180px;background:#24272e;border-radius:20px;color:#f39abc;font-size:42px}.trophy-fallback:after{content:"🏆"}@media(max-width:360px){.trophy{grid-template-columns:68px minmax(0,1fr);padding:8px;gap:7px}.trophy-art{width:68px;height:96px}.trophy b{font-size:11px}.trophy small{font-size:8px}}
-/* FoodWell v27 — Trophy showcase */
+/* MeowFit v27 — Trophy showcase */
 .trophy-showcase{margin-top:12px;padding:12px;border:1px solid #34353d;border-radius:18px;background:linear-gradient(145deg,#211d24,#1a1c22);box-shadow:inset 0 0 24px rgba(239,155,190,.025)}
 .trophy-showcase-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.trophy-showcase-head b{font-size:12px}.trophy-showcase-head small{color:#999ca6;font-size:9px}
 .trophy-showcase-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}.showcase-item{min-width:0;text-align:center;border:1px solid #353740;background:#1e2026;border-radius:15px;padding:7px;cursor:pointer;transition:.18s}.showcase-item:active{transform:scale(.97)}
 .showcase-item img{width:100%;height:72px;object-fit:contain;display:block;border-radius:11px;background:#12141a}.showcase-item b{display:block;font-size:9px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.showcase-item small{display:block;color:#e99ab5;font-size:8px;margin-top:2px}.showcase-empty{grid-column:1/-1;text-align:center;color:#8e919b;font-size:9px;padding:10px}
 .trophy-showcase-share{margin-top:9px;width:100%;border:1px solid #684253;background:#2b2027;color:#f0a0bb;border-radius:13px;padding:9px;font-size:10px;font-weight:900;cursor:pointer}.trophy-showcase-share:active{transform:scale(.98)}
 @media(max-width:360px){.showcase-item img{height:62px}}
-/* FoodWell v18 trophy detail */
+/* MeowFit v18 trophy detail */
 .trophy{cursor:pointer;position:relative}
 .trophy:active{transform:scale(.985)}
 .trophy.unlocked .trophy-art{box-shadow:0 0 0 1px rgba(240,169,192,.18),0 8px 20px rgba(240,169,192,.08)}
@@ -111,7 +111,7 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 .trophy-detail-share{background:#f0a9c0;color:#34242b}.trophy-detail-lock{background:#292b32;color:#9699a2}
 @keyframes trophyRise{from{opacity:0;transform:translate(-50%,100%)}to{opacity:1;transform:translate(-50%,0)}}
 
-/* FoodWell v21 — trophy detail visual match */
+/* MeowFit v21 — trophy detail visual match */
 .trophy-detail-sheet{width:min(430px,100%);padding:16px 18px 26px;background:linear-gradient(160deg,#211f25,#17181d);border:1px solid #3d3440;border-radius:30px 30px 0 0;max-height:90vh;box-sizing:border-box}
 .trophy-detail-art{width:min(310px,82vw);height:min(310px,82vw);margin:32px auto 16px;border-radius:28px;border:1px solid #513744;background:#111;box-shadow:0 0 0 1px rgba(255,130,180,.08),0 14px 36px rgba(0,0,0,.45);object-fit:cover}
 .trophy-detail-art img{width:100%;height:100%;object-fit:contain;image-rendering:auto;display:block}
@@ -128,7 +128,7 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 .trophy-detail-lock{background:#292b32;color:#a4a6af}
 @media(max-width:360px){.trophy-detail-art{width:270px;height:270px}.trophy-detail-sheet h2{font-size:27px}}
 
-/* FoodWell v24 — trophy unlock celebration */
+/* MeowFit v24 — trophy unlock celebration */
 .trophy-celebrate{position:fixed;inset:0;z-index:120;display:none;place-items:center;background:rgba(5,6,10,.78);backdrop-filter:blur(8px);padding:20px}
 .trophy-celebrate.open{display:grid}
 .trophy-celebrate-card{width:min(360px,92vw);background:linear-gradient(160deg,#251d26,#17191f);border:1px solid #ef9bbb;border-radius:28px;padding:24px 18px 20px;text-align:center;box-shadow:0 0 0 1px rgba(255,160,200,.08),0 20px 60px rgba(0,0,0,.55);animation:popTrophy .35s ease}
@@ -139,13 +139,13 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 @keyframes popTrophy{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:scale(1)}}
 @keyframes sparkFloat{50%{transform:translateY(-6px) scale(1.05)}}
 
-/* FoodWell v28 — trophy progress helper */
+/* MeowFit v28 — trophy progress helper */
 .trophy-next-card{margin-top:10px;padding:12px;border:1px solid #34353d;border-radius:18px;background:#1d1f25}
 .trophy-next-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.trophy-next-head b{font-size:11px}.trophy-next-head small{color:#92949e;font-size:8px}
 .trophy-next-list{display:grid;gap:7px;margin-top:9px}.trophy-next-item{display:grid;grid-template-columns:42px 1fr auto;gap:8px;align-items:center;padding:8px;border-radius:13px;background:#24262d;border:1px solid #30323a;cursor:pointer}.trophy-next-item:active{transform:scale(.985)}
 .trophy-next-art{width:42px;height:42px;border-radius:11px;background:#15171c;overflow:hidden;border:1px solid #383a43;display:grid;place-items:center}.trophy-next-art img{width:100%;height:100%;object-fit:contain}.trophy-next-name{font-size:10px;font-weight:900}.trophy-next-meta{color:#92949e;font-size:8px;margin-top:2px}.trophy-next-bar{height:4px;background:#343740;border-radius:99px;overflow:hidden;margin-top:5px}.trophy-next-bar i{display:block;height:100%;background:linear-gradient(90deg,#e98eae,#f6c2d3);border-radius:99px}.trophy-next-pct{font-size:9px;font-weight:900;color:#efa0bc}
 
-/* FoodWell v29 — Trophy Complete Layer 1 */
+/* MeowFit v29 — Trophy Complete Layer 1 */
 .trophy-confetti{position:fixed;inset:0;z-index:125;pointer-events:none;overflow:hidden}
 .trophy-confetti i{position:absolute;top:-18px;width:8px;height:13px;border-radius:3px;animation:trophyConfettiFall 1.5s cubic-bezier(.2,.7,.3,1) forwards;opacity:.95}
 @keyframes trophyConfettiFall{0%{transform:translate3d(0,-20px,0) rotate(0)}100%{transform:translate3d(var(--dx),110vh,0) rotate(620deg);opacity:0}}
@@ -164,14 +164,14 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 /* v31 food upgrade */
 .meal-shortcuts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}.meal-shortcut{border:1px solid #343640;background:#181a20;color:#eee;border-radius:18px;padding:11px 6px;text-align:center;font-weight:800;font-size:12px;cursor:pointer}.meal-shortcut span{display:block;font-size:24px;margin-bottom:4px}.meal-shortcut.active{background:linear-gradient(135deg,#f2b1c7,#d987aa);color:#30232a;border-color:transparent}.photo-preview{display:none;margin-top:8px;border-radius:18px;overflow:hidden;height:150px;background:#121318;border:1px solid #33353d;position:relative}.photo-preview img{width:100%;height:100%;object-fit:cover}.photo-preview button{position:absolute;right:8px;top:8px;border:0;background:#101116cc;color:#fff;border-radius:12px;padding:7px 10px}.food-empty-tip{padding:14px;border:1px dashed #3a3c45;border-radius:18px;color:#a0a2aa;text-align:center;font-size:12px}
 
-/* FoodWell v32 — Dashboard */
+/* MeowFit v32 — Dashboard */
 .dashboard-hero{background:linear-gradient(145deg,#2a1f2a,#1b1d25);border:1px solid #5a3a49;border-radius:24px;padding:18px;margin-bottom:12px;box-shadow:0 12px 28px rgba(0,0,0,.18)}
 .dashboard-kicker{color:#ee9bb7;font-size:10px;font-weight:900;letter-spacing:.12em}.dashboard-hero h2{margin:5px 0 3px;font-size:22px}.dashboard-hero p{margin:0;color:#9c9ea7;font-size:11px}.dashboard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.dashboard-stat{background:#20222a;border:1px solid #343640;border-radius:17px;padding:11px 8px;text-align:center}.dashboard-stat b{display:block;font-size:17px}.dashboard-stat small{display:block;color:#999ba5;font-size:9px;margin-top:3px}.dashboard-card{background:#191b22;border:1px solid #30323a;border-radius:22px;padding:15px;margin-bottom:12px}.dashboard-card h3{margin:0;font-size:14px}.dashboard-card p{color:#92949e;font-size:10px;margin:4px 0 12px}.dash-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:end;height:150px}.dash-col{height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:5px}.dash-bar{width:100%;max-width:28px;min-height:5px;border-radius:10px 10px 5px 5px;background:linear-gradient(180deg,#f4b2c9,#d87fa5);box-shadow:0 5px 16px rgba(239,160,188,.12)}.dash-col small{font-size:8px;color:#898b95}.dash-value{font-size:8px;color:#c8c9d0}.dashboard-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.dashboard-mini{background:#20222a;border:1px solid #343640;border-radius:18px;padding:13px}.dashboard-mini b{font-size:20px}.dashboard-mini small{display:block;color:#999ba5;font-size:9px;margin-top:3px}.dashboard-note{padding:12px;border-radius:16px;background:linear-gradient(90deg,#251e26,#20232c);border:1px solid #45323c;color:#d9a0b6;font-size:11px;line-height:1.55}
 @media(max-width:360px){.dashboard-stats{gap:5px}.dashboard-stat b{font-size:15px}}
 
 .profile-hero{background:linear-gradient(135deg,#25212a,#1b1d24);border:1px solid #3b3340;border-radius:24px;padding:18px;margin:10px 0 12px;position:relative;overflow:hidden}.profile-hero:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(239,160,188,.10);right:-45px;top:-55px}.profile-main{display:flex;align-items:center;gap:14px;position:relative;z-index:1}.profile-avatar-lg{width:76px;height:76px;border-radius:25px;display:grid;place-items:center;background:#302a34;border:1px solid #51404c;font-size:38px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.profile-hero h2{margin:0;font-size:22px}.profile-hero p{margin:4px 0 0;color:#a5a6ae;font-size:10px}.profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:15px;position:relative;z-index:1}.profile-stat{background:#20222a;border-radius:15px;padding:10px 6px;text-align:center}.profile-stat b{display:block;font-size:18px}.profile-stat small{color:#92949d;font-size:8px}.profile-insight{margin-top:10px;background:#20222a;border-radius:15px;padding:11px;color:#c8c9cf;font-size:10px;line-height:1.55}.profile-section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.profile-section-title h3{margin:0;font-size:14px}.profile-section-title small{color:#888b94;font-size:9px}.profile-chip-row{display:flex;gap:7px;flex-wrap:wrap}.profile-chip{background:#262932;border:1px solid #383b45;border-radius:999px;padding:7px 10px;color:#d6d7dc;font-size:9px}.profile-recent{display:grid;gap:7px}.profile-recent-item{display:flex;align-items:center;gap:9px;background:#20222a;border-radius:13px;padding:10px}.profile-recent-icon{width:34px;height:34px;border-radius:11px;background:#2c2f38;display:grid;place-items:center}.profile-recent-item b{font-size:10px}.profile-recent-item small{display:block;color:#858891;font-size:8px;margin-top:2px}.theme-soft .profile-hero{background:linear-gradient(135deg,#fff5f8,#f4eef2);border-color:#ead9df}.theme-soft .profile-avatar-lg,.theme-soft .profile-stat,.theme-soft .profile-insight,.theme-soft .profile-recent-item{background:#fff}.theme-soft .profile-chip{background:#f5eef2;border-color:#ead9df;color:#555}
 
-/* FoodWell v36 — Custom Home */
+/* MeowFit v36 — Custom Home */
 .home-custom-tools{display:flex;gap:7px;margin:10px 0}.home-custom-tools button{flex:1;border:1px solid #383a43;background:#20222a;color:#eee;border-radius:14px;padding:10px;font-weight:800;font-size:10px}.home-edit-hint{display:none;padding:9px 11px;border:1px dashed #80506a;background:#241d25;color:#dba1b8;border-radius:14px;font-size:9px;margin-bottom:9px}.home-editing .home-edit-hint{display:block}.home-editing .home-sortable{outline:1px dashed #e58bab;outline-offset:4px;cursor:grab}.home-sortable.dragging{opacity:.45;transform:scale(.99)}.home-card-hidden{display:none!important}.home-widget-menu{display:none;background:#191b22;border:1px solid #343640;border-radius:18px;padding:10px;margin-bottom:10px}.home-widget-menu.open{display:block}.home-widget-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px}.home-widget-row span{font-size:10px}.home-widget-row button{border:0;border-radius:10px;padding:7px 10px;background:#2b2d36;color:#eee;font-size:9px;font-weight:800}.theme-soft .home-widget-menu{background:#fff;border-color:#e6dbe0}.theme-soft .home-widget-row button{background:#f3edf0;color:#444}
 
 /* v37 Food Search & Filters */
@@ -259,7 +259,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 </head>
 <body>
 <div class="app">
-<header class="header" style="justify-content:center"><div class="title">FoodWell</div></header>
+<header class="header" style="justify-content:center"><div class="title">MeowFit</div></header>
 
 <style>
 .core-home{display:grid;gap:12px;margin:12px 0}.core-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.core-card{padding:14px;border-radius:18px;background:var(--card,#17171d);border:1px solid rgba(255,255,255,.08)}.core-card strong{display:block;margin-bottom:5px}.core-card small{opacity:.72}.core-pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:rgba(255,105,160,.14);font-size:12px}.core-sync{display:flex;justify-content:space-between;align-items:center;gap:10px}.core-primary{width:100%;margin-top:10px}</style>
@@ -327,7 +327,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 
 <section id="dashboard" class="page">
 <div class="page-title"><div><p>MY DASHBOARD</p><h1>ภาพรวม</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
-<div class="dashboard-hero"><div class="dashboard-kicker">FOODWELL · 7 DAYS</div><h2>ภาพรวมการบันทึกของคุณ</h2><p>ดูแนวโน้มจากสิ่งที่บันทึกไว้ โดยไม่ต้องเปรียบเทียบกับเป้าหมาย</p><div class="dashboard-stats"><div class="dashboard-stat"><b id="dashFoods">0</b><small>รายการอาหาร</small></div><div class="dashboard-stat"><b id="dashWater">0</b><small>ml น้ำ</small></div><div class="dashboard-stat"><b id="dashMove">0</b><small>นาทีเคลื่อนไหว</small></div></div></div>
+<div class="dashboard-hero"><div class="dashboard-kicker">MEOWFIT · 7 DAYS</div><h2>ภาพรวมการบันทึกของคุณ</h2><p>ดูแนวโน้มจากสิ่งที่บันทึกไว้ โดยไม่ต้องเปรียบเทียบกับเป้าหมาย</p><div class="dashboard-stats"><div class="dashboard-stat"><b id="dashFoods">0</b><small>รายการอาหาร</small></div><div class="dashboard-stat"><b id="dashWater">0</b><small>ml น้ำ</small></div><div class="dashboard-stat"><b id="dashMove">0</b><small>นาทีเคลื่อนไหว</small></div></div></div>
 <div class="card insight-card">
   <div class="trend-head"><h2>✨ วันนี้</h2><small>สรุปจากสิ่งที่บันทึกไว้</small></div>
   <div id="smartInsights" class="insight-list"></div>
@@ -386,7 +386,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="profile-hero">
   <div class="profile-main">
     <div class="profile-avatar-lg" id="profileAvatarLarge">🌿</div>
-    <div style="flex:1"><h2 id="profileHeroName">FoodWell</h2><p>โปรไฟล์และภาพรวมการบันทึกของคุณ</p></div>
+    <div style="flex:1"><h2 id="profileHeroName">MeowFit</h2><p>โปรไฟล์และภาพรวมการบันทึกของคุณ</p></div>
     <button class="secondary-btn" id="editProfileHero" type="button">แก้ไข</button>
   </div>
   <div class="profile-stats">
@@ -411,7 +411,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 </div>
 <div class="card" id="profileEditor" style="display:none">
   <h2>👤 โปรไฟล์</h2>
-  <label>ชื่อที่อยากให้แสดง<input id="profileName" placeholder="เช่น เพื่อนของ FoodWell"></label>
+  <label>ชื่อที่อยากให้แสดง<input id="profileName" placeholder="เช่น เพื่อนของ MeowFit"></label>
   <label>อีโมจิประจำตัว<input id="profileEmoji" maxlength="2" placeholder="🌿"></label>
   <button class="primary" id="saveProfile">บันทึกโปรไฟล์</button>
 </div>
@@ -429,10 +429,10 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
     <div class="setting-row"><div><b>ความถี่การเตือน</b><small>เมื่อเปิดการเตือนด้านบน</small></div><select id="reminderMinutes" style="background:#2a2d35;color:#fff;border:1px solid #3a3d45;border-radius:10px;padding:8px"><option value="30">30 นาที</option><option value="60">1 ชั่วโมง</option><option value="120">2 ชั่วโมง</option><option value="180">3 ชั่วโมง</option><option value="240">4 ชั่วโมง</option></select></div>
   </div>
 </div>
-<div class="card v40-ai-settings"><h2>🤖 AI Food Recognition</h2><p style="color:#999;font-size:11px;line-height:1.6">ใส่ URL ของ FoodWell AI proxy (Cloudflare Worker + Gemini ฟรี) เพื่อเปิดการวิเคราะห์รูปอาหาร · วิธีตั้งค่าอยู่ในไฟล์ ai-proxy/README.md ของโปรเจกต์ · อย่าใส่ API key ลงในแอปโดยตรง</p><label>AI Endpoint<input id="aiEndpoint" placeholder="https://foodwell-ai.xxxx.workers.dev/?k=รหัสของคุณ" autocomplete="off"></label><small>Endpoint รับ POST JSON: { "image": "data:image/..." } และตอบกลับอย่างน้อย { "name": "ชื่ออาหาร" }</small><div class="two" style="margin-top:9px"><button class="secondary-btn" id="saveAiEndpoint">บันทึก Endpoint</button><button class="secondary-btn" id="testAiEndpoint">ทดสอบการเชื่อมต่อ</button></div></div>
+<div class="card v40-ai-settings"><h2>🤖 AI Food Recognition</h2><p style="color:#999;font-size:11px;line-height:1.6">ใส่ URL ของ MeowFit AI proxy (Cloudflare Worker + Gemini ฟรี) เพื่อเปิดการวิเคราะห์รูปอาหาร · วิธีตั้งค่าอยู่ในไฟล์ ai-proxy/README.md ของโปรเจกต์ · อย่าใส่ API key ลงในแอปโดยตรง</p><label>AI Endpoint<input id="aiEndpoint" placeholder="https://foodwell-ai.xxxx.workers.dev/?k=รหัสของคุณ" autocomplete="off"></label><small>Endpoint รับ POST JSON: { "image": "data:image/..." } และตอบกลับอย่างน้อย { "name": "ชื่ออาหาร" }</small><div class="two" style="margin-top:9px"><button class="secondary-btn" id="saveAiEndpoint">บันทึก Endpoint</button><button class="secondary-btn" id="testAiEndpoint">ทดสอบการเชื่อมต่อ</button></div></div>
 
 <div class="card">
-  <h2>🌱 เกี่ยวกับ FoodWell</h2>
+  <h2>🌱 เกี่ยวกับ MeowFit</h2>
   <p style="color:#999;font-size:12px;line-height:1.6">ใช้บันทึกและสังเกตพฤติกรรมของตัวเองอย่างสบายใจ ค่าทางโภชนาการเป็นค่าประมาณ ไม่ใช่เป้าหมายจำกัดการกิน</p>
   <button class="primary" id="reset">ล้างข้อมูลในเครื่อง</button>
 </div>
@@ -510,7 +510,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div id="trophyShareModal" class="trophy-share-card-modal" aria-hidden="true">
   <div class="trophy-share-card-box">
     <button type="button" class="trophy-detail-close" onclick="closeTrophyShareCard()">×</button>
-    <img id="trophySharePreview" class="trophy-share-preview" alt="การ์ดถ้วยรางวัล FoodWell">
+    <img id="trophySharePreview" class="trophy-share-preview" alt="การ์ดถ้วยรางวัล MeowFit">
     <div class="trophy-share-actions">
       <button type="button" class="trophy-share-download" onclick="downloadTrophyShareCard()">บันทึกรูป 💾</button>
       <button type="button" class="trophy-share-native" onclick="nativeShareTrophyCard()">แชร์รูป 📤</button>
@@ -522,7 +522,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 const $=id=>document.getElementById(id), KEY="foodwell_mimo_style";
 let s=JSON.parse(localStorage.getItem(KEY)||'{"foods":[],"water":0,"waterLog":[],"moves":[],"favorites":[],"foodLibrary":[],"dayNote":"","history":[]}');
 s.foodLibrary=Array.isArray(s.foodLibrary)?s.foodLibrary:[];
-s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🐾"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
+s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"MeowFit",emoji:"🐾"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
 s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);
 s.foods=s.foods.map(f=>({...f,favorite:!!f.favorite}));
 function snapshotDay(){
@@ -539,9 +539,9 @@ function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle(
 document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
-function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🐾";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"FoodWell"}
+function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🐾";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"MeowFit"}
 $("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🐾"};
-$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"FoodWell";s.profile.emoji=$("profileEmoji").value.trim()||"🐾";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
+$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"MeowFit";s.profile.emoji=$("profileEmoji").value.trim()||"🐾";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
 $("softTheme")&&($("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()});
 let reminderTimer=null;
 function reminderMessage(){const msgs=["พักสายตาสักครู่ และดูแลตัวเองตามที่รู้สึกเหมาะสมนะ ♡","ถึงเวลาเช็กอินกับตัวเองสักนิดนะ 🌿","ถ้ารู้สึกกระหาย ลองจิบน้ำสักหน่อยก็ได้ 💧","พักจากหน้าจอสักครู่เมื่อสะดวกนะ ✨"];return msgs[Math.floor(Math.random()*msgs.length)]}
@@ -640,7 +640,7 @@ function updateBurnEst(){const el=$("burnEst");if(!el)return;const m=Number($("e
 ["exName","exType","exMin"].forEach(id=>{const e=$(id);if(e){e.addEventListener("input",updateBurnEst);e.addEventListener("change",updateBurnEst)}});
 (()=>{const w=$("exWeight");if(!w)return;if(s.profile&&s.profile.weight)w.value=s.profile.weight;w.addEventListener("change",()=>{const v=Number(w.value);s.profile=s.profile||{};if(v>=20&&v<=300){s.profile.weight=v;save()}else{delete s.profile.weight;w.value="";save()}if($("bodyWeight"))$("bodyWeight").value=s.profile.weight||"";updateBurnEst()})})();
 $("addEx").onclick=()=>{let t=$("exType").value,n=$("exName").value.trim()||(t!==EX_AUTO?t:""),m=Number($("exMin").value||0);if(!n||!m){toast(n?"กรอกเวลา (นาที)":"เลือกประเภทหรือพิมพ์ชื่อกิจกรรม");return}s.moves.unshift({id:Date.now(),name:n,type:$("exType").value,min:m,kcal:moveKcal(n,$("exType").value,m),met:moveMet(n,$("exType").value),time:new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})});$("exName").value="";$("exMin").value="";$("exType").value=EX_AUTO;save();updateBurnEst();toast("บันทึกแล้ว")};
-$("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้งหมดในเครื่องนี้?")){s={foods:[],water:0,moves:[],waterLog:[],favorites:[],history:[],dayNote:"",profile:{name:"FoodWell",emoji:"🐾"},settings:{softTheme:false,gentleReminder:false,reminderMinutes:180}};save();toast("ล้างข้อมูลแล้ว")}};
+$("reset").onclick=()=>{if(confirm("ล้างข้อมูลทั้งหมดในเครื่องนี้?")){s={foods:[],water:0,moves:[],waterLog:[],favorites:[],history:[],dayNote:"",profile:{name:"MeowFit",emoji:"🐾"},settings:{softTheme:false,gentleReminder:false,reminderMinutes:180}};save();toast("ล้างข้อมูลแล้ว")}};
 let meal="ทั้งหมด";
 document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");meal=b.dataset.meal;renderFood()});
 $("search").oninput=renderFood;
@@ -713,7 +713,7 @@ function renderInsights(){
  $("smartInsights").innerHTML=items.map(x=>`<div class="insight-item"><span class="insight-icon">${x.i}</span><div><b>${x.t}</b><small>${x.d}</small></div></div>`).join("");
 }
 function todayWaterLogCount(){const today=new Date().toISOString().slice(0,10);return (s.waterLog||[]).filter(x=>String(x.date||'').slice(0,10)===today).length}
-async function shareTrophy(name,desc,done){ if(!done){showToast("ปลดล็อกถ้วยนี้ก่อนเพื่อแชร์ 🏆");return} const text="🏆 FoodWell — "+name+"\n"+desc+"\nปลดล็อกแล้ว 💗"; try{if(navigator.share){await navigator.share({title:"FoodWell — "+name,text:text});showToast("แชร์ถ้วยรางวัลแล้ว ✨");return}}catch(e){if(e&&e.name==="AbortError")return} try{await navigator.clipboard.writeText(text);showToast("คัดลอกข้อความถ้วยรางวัลแล้ว 📋")}catch(e){window.prompt("คัดลอกข้อความนี้เพื่อแชร์",text)} }
+async function shareTrophy(name,desc,done){ if(!done){showToast("ปลดล็อกถ้วยนี้ก่อนเพื่อแชร์ 🏆");return} const text="🏆 MeowFit — "+name+"\n"+desc+"\nปลดล็อกแล้ว 💗"; try{if(navigator.share){await navigator.share({title:"MeowFit — "+name,text:text});showToast("แชร์ถ้วยรางวัลแล้ว ✨");return}}catch(e){if(e&&e.name==="AbortError")return} try{await navigator.clipboard.writeText(text);showToast("คัดลอกข้อความถ้วยรางวัลแล้ว 📋")}catch(e){window.prompt("คัดลอกข้อความนี้เพื่อแชร์",text)} }
 function getTrophyFavorites(){try{return JSON.parse(localStorage.getItem("foodwell_fav_trophies_v26")||"[]")}catch(e){return[]}}
 function setTrophyFavorites(a){try{localStorage.setItem("foodwell_fav_trophies_v26",JSON.stringify(a))}catch(e){}}
 function isTrophyFavorite(idx){return getTrophyFavorites().includes(idx)}
@@ -722,8 +722,8 @@ function updateTrophyDetailFavorite(idx){const b=$("trophyDetailFav");if(!b)retu
 function shareTrophyCollection(){
  const items=getTrophyItems(); const unlocked=items.filter(x=>x.v>=x.max);
  if(!unlocked.length){showToast("ปลดล็อกถ้วยแรกก่อนเพื่อแชร์คอลเลกชัน 🏆");return}
- const text="🏆 FoodWell — คอลเลกชันถ้วยรางวัล\nปลดล็อกแล้ว "+unlocked.length+"/"+items.length+" ถ้วย ✨\n"+unlocked.map(x=>"• "+x.n).join("\n");
- if(navigator.share){navigator.share({title:"FoodWell — คอลเลกชันถ้วยรางวัล",text}).then(()=>showToast("แชร์คอลเลกชันแล้ว ✨")).catch(e=>{if(!e||e.name!=="AbortError")copyCollection(text)})}else copyCollection(text);
+ const text="🏆 MeowFit — คอลเลกชันถ้วยรางวัล\nปลดล็อกแล้ว "+unlocked.length+"/"+items.length+" ถ้วย ✨\n"+unlocked.map(x=>"• "+x.n).join("\n");
+ if(navigator.share){navigator.share({title:"MeowFit — คอลเลกชันถ้วยรางวัล",text}).then(()=>showToast("แชร์คอลเลกชันแล้ว ✨")).catch(e=>{if(!e||e.name!=="AbortError")copyCollection(text)})}else copyCollection(text);
 }
 function copyCollection(text){navigator.clipboard?.writeText(text).then(()=>showToast("คัดลอกคอลเลกชันแล้ว 📋")).catch(()=>window.prompt("คัดลอกข้อความนี้เพื่อแชร์",text))}
 function renderTrophyNext(items){
@@ -812,20 +812,20 @@ function makeTrophyShareCard(idx){
  return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=1080;c.height=1350;const ctx=c.getContext('2d');
  const g=ctx.createLinearGradient(0,0,1080,1350);g.addColorStop(0,'#171923');g.addColorStop(.55,'#251d28');g.addColorStop(1,'#12151d');ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
  ctx.fillStyle='rgba(239,160,188,.10)';ctx.beginPath();ctx.arc(540,330,360,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#efa0bc';ctx.font='900 42px sans-serif';ctx.textAlign='center';ctx.fillText('FOODWELL',540,95);
+ ctx.fillStyle='#efa0bc';ctx.font='900 42px sans-serif';ctx.textAlign='center';ctx.fillText('MEOWFIT',540,95);
  ctx.fillStyle='#ffffff';ctx.font='900 68px sans-serif';ctx.fillText('🏆 ถ้วยรางวัล',540,180);
  const pad=110;ctx.fillStyle='#20232d';ctx.strokeStyle='#6a4052';ctx.lineWidth=4;roundRect(ctx,pad,230,c.width-pad*2,650,42);ctx.fill();ctx.stroke();
  const size=500;const ratio=Math.min(size/img.width,size/img.height);const w=img.width*ratio,h=img.height*ratio;ctx.drawImage(img,540-w/2,300+(500-h)/2,w,h);
  ctx.fillStyle='#ffffff';ctx.font='900 58px sans-serif';ctx.fillText(x.n,540,990);ctx.fillStyle='#b6b7c0';ctx.font='34px sans-serif';wrapCanvasText(ctx,x.d,540,1055,800,48);
  ctx.fillStyle='#efa0bc';ctx.font='900 38px sans-serif';ctx.fillText(x.v>=x.max?'ปลดล็อกแล้ว ✨':`${x.v}/${x.max}`,540,1180);
- ctx.fillStyle='#8f919b';ctx.font='26px sans-serif';ctx.fillText('บันทึกความสำเร็จของคุณไว้ใน FoodWell',540,1250);c.toBlob(b=>{foodwellShareCardBlob=b;resolve(c.toDataURL('image/png'))},'image/png',.95);};img.onerror=reject;img.src=src;});
+ ctx.fillStyle='#8f919b';ctx.font='26px sans-serif';ctx.fillText('บันทึกความสำเร็จของคุณไว้ใน MeowFit',540,1250);c.toBlob(b=>{foodwellShareCardBlob=b;resolve(c.toDataURL('image/png'))},'image/png',.95);};img.onerror=reject;img.src=src;});
 }
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight){const words=text.split(/\s+/);let line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight}else line=test}if(line)ctx.fillText(line,x,y)}
 async function openTrophyShareCard(idx){try{const data=await makeTrophyShareCard(idx);$("trophySharePreview").src=data;$("trophyShareModal").classList.add('open');$("trophyShareModal").setAttribute('aria-hidden','false');trophyHaptic(20)}catch(e){showToast('สร้างการ์ดแชร์ไม่สำเร็จ ลองอีกครั้ง')} }
 function closeTrophyShareCard(){$("trophyShareModal").classList.remove('open');$("trophyShareModal").setAttribute('aria-hidden','true');}
 function downloadTrophyShareCard(){if(!foodwellShareCardBlob)return;const a=document.createElement('a');a.href=URL.createObjectURL(foodwellShareCardBlob);a.download='foodwell-trophy.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showToast('บันทึกการ์ดถ้วยแล้ว 💾')}
-async function nativeShareTrophyCard(){if(!foodwellShareCardBlob){showToast('กำลังสร้างการ์ด…');return}const file=new File([foodwellShareCardBlob],'foodwell-trophy.png',{type:'image/png'});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title:'FoodWell — ถ้วยรางวัล',text:'🏆 ฉันปลดล็อกถ้วยรางวัลใน FoodWell แล้ว',files:[file]});showToast('แชร์การ์ดแล้ว ✨')}else downloadTrophyShareCard()}catch(e){if(!e||e.name!=='AbortError')downloadTrophyShareCard()}}
+async function nativeShareTrophyCard(){if(!foodwellShareCardBlob){showToast('กำลังสร้างการ์ด…');return}const file=new File([foodwellShareCardBlob],'foodwell-trophy.png',{type:'image/png'});try{if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title:'MeowFit — ถ้วยรางวัล',text:'🏆 ฉันปลดล็อกถ้วยรางวัลใน MeowFit แล้ว',files:[file]});showToast('แชร์การ์ดแล้ว ✨')}else downloadTrophyShareCard()}catch(e){if(!e||e.name!=='AbortError')downloadTrophyShareCard()}}
 
 
 document.addEventListener("click",function(e){
@@ -868,7 +868,7 @@ function renderProfileStats(){
  $("profileStatWater").textContent=(allWater+Number(s.water||0)).toLocaleString();
  $("profileStatMove").textContent=(allMove+s.moves.reduce((a,x)=>a+Number(x.min||0),0)).toLocaleString();
  $("profileStatDays").textContent=activeDays.toLocaleString();
- $("profileHeroName").textContent=s.profile.name||"FoodWell";
+ $("profileHeroName").textContent=s.profile.name||"MeowFit";
  $("profileAvatarLarge").textContent=s.profile.emoji||"🐾";
  const total=(allFoodCount+todayFoods)+(allWater+Number(s.water||0))+(allMove+s.moves.length);
  $("profileInsight").textContent=total?`บันทึกของคุณกำลังค่อย ๆ สร้างภาพรวมของวันต่าง ๆ — วันนี้มีอาหาร ${todayFoods} รายการ น้ำ ${(s.water||0).toLocaleString()} ml และการเคลื่อนไหว ${s.moves.reduce((a,x)=>a+Number(x.min||0),0)} นาที`:`เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨`;
@@ -1003,7 +1003,7 @@ $("exportData")&&($("exportData").onclick=exportData);
 $("importData")&&($("importData").onchange=e=>{
  const file=e.target.files[0]; if(!file)return;
  const r=new FileReader();
- r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.foods))throw 0;s=d;s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"FoodWell",emoji:"🐾"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.foods))throw 0;s=d;s.waterLog=s.waterLog||[];s.favorites=s.favorites||[];s.history=s.history||[];s.aiHistory=[];s.dayNote=s.dayNote||"";s.profile=s.profile||{name:"MeowFit",emoji:"🐾"};s.settings=s.settings||{softTheme:false,gentleReminder:false,reminderMinutes:180,aiEndpoint:""};s.settings.aiEndpoint=s.settings.aiEndpoint||"";
 s.settings.reminderMinutes=Number(s.settings.reminderMinutes||180);save();toast("นำเข้าข้อมูลแล้ว")}catch(_){toast("ไฟล์ข้อมูลไม่ถูกต้อง")}};
  r.readAsText(file)
 });
@@ -1038,7 +1038,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 
 
 
-<!-- FoodWell v70 Share & Backup -->
+<!-- MeowFit v70 Share & Backup -->
 <style>
 .fw70-card{margin:12px 0;padding:14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
 .fw70-row{display:flex;gap:8px;flex-wrap:wrap}.fw70-btn{border:0;border-radius:12px;padding:10px 13px;font-weight:700;background:#ff7eb6;color:#241521}.fw70-btn.alt{background:rgba(255,255,255,.1);color:inherit}.fw70-small{font-size:12px;opacity:.7}
@@ -1050,11 +1050,11 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function saveData(d){localStorage.setItem(KEY,JSON.stringify(d));}
  function exportBackup(){
    const d=getData(); const payload={app:'FoodWell',version:70,exportedAt:new Date().toISOString(),data:d};
-   const fname='FoodWell_backup_'+new Date().toISOString().slice(0,10)+'.json';
+   const fname='MeowFit_backup_'+new Date().toISOString().slice(0,10)+'.json';
    // In the APK, WebView can't download blob: links; the native bridge writes the file to Downloads.
    if(window.FoodWellFiles){const msg=window.FoodWellFiles.saveText(fname,JSON.stringify(payload,null,2));if(typeof toast==='function')toast(msg);else alert(msg);return}
    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='FoodWell_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MeowFit_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
  }
  function importBackup(){
    const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
@@ -1063,7 +1063,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function merge(a,b){const o={...a,...b}; for(const k of Object.keys(b)){if(Array.isArray(a[k])&&Array.isArray(b[k])) o[k]=a[k].concat(b[k]);} return o}
  function addUI(){
    if(document.getElementById('fw70Backup'))return; const box=document.createElement('section');box.className='fw70-card';box.id='fw70Backup';
-   box.innerHTML='<div style="font-weight:800;font-size:17px">💾 สำรองข้อมูล FoodWell</div><div class="fw70-small">เก็บไฟล์สำรองไว้ในเครื่อง และนำกลับมาใช้ภายหลังได้</div><div class="fw70-row" style="margin-top:10px"><button class="fw70-btn" id="fw70Export">📤 ส่งออก</button><button class="fw70-btn alt" id="fw70Import">📥 นำเข้า</button></div>';
+   box.innerHTML='<div style="font-weight:800;font-size:17px">💾 สำรองข้อมูล MeowFit</div><div class="fw70-small">เก็บไฟล์สำรองไว้ในเครื่อง และนำกลับมาใช้ภายหลังได้</div><div class="fw70-row" style="margin-top:10px"><button class="fw70-btn" id="fw70Export">📤 ส่งออก</button><button class="fw70-btn alt" id="fw70Import">📥 นำเข้า</button></div>';
    const anchor=document.getElementById('fw70BackupSlot'); if(anchor)anchor.replaceWith(box); else (document.getElementById('more')||document.querySelector('main')||document.body).appendChild(box);document.getElementById('fw70Export').onclick=exportBackup;document.getElementById('fw70Import').onclick=importBackup;
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addUI);else addUI();
@@ -1091,7 +1091,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 
 
 <script>
-/* FoodWell v88 Error Recovery */
+/* MeowFit v88 Error Recovery */
 (function(){
   const KEY='foodwell_error_recovery_v88';
   const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}};
@@ -1109,7 +1109,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 </body>
 </html>
 <script>
-// FoodWell Food Library — one list built from what you log: search, meal filter, sort, use count, rename, remove.
+// MeowFit Food Library — one list built from what you log: search, meal filter, sort, use count, rename, remove.
 // (Merges the old v62 library and the v63 "คลังอาหาร 2.0" panel; keeps their storage keys.)
 (function(){
   const META='foodwell_library_meta_v63';
@@ -1203,7 +1203,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 
 
 <script>
-/* FoodWell v88 Error Recovery */
+/* MeowFit v88 Error Recovery */
 (function(){
   const KEY='foodwell_error_recovery_v88';
   const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}};
@@ -1284,13 +1284,13 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function bmiHtml(){const T=previewTargets();if(!T)return '<div class="onb-bmi"><div style="color:#9ea0aa;font-size:14px">ใส่ส่วนสูงและน้ำหนักเพื่อดู BMI</div></div>';
   return `<div class="onb-bmi"><div class="num">${T.bmi}<small>BMI</small></div><div><span class="onb-pill" style="background:${T.bmiColor}">${T.bmiLabel}</span><div style="font-size:13px;color:#a9abb5;margin-top:5px">น้ำหนักที่เหมาะสม ${T.healthy[0]}–${T.healthy[1]} กก.</div></div></div>`}
  const STEPS=[
-  {btn:'เริ่มต้น',ok:()=>true,html:()=>`<div class="onb-hero"><div class="onb-logo"><svg viewBox="0 0 24 24" width="66" height="66" aria-hidden="true"><path fill="#fff" d="M1.98,11.03a2.33,2.33 0,1 0,4.66,0a2.33,2.33 0,1 0,-4.66,0ZM5.92,7.00a2.75,2.75 0,1 0,5.50,0a2.75,2.75 0,1 0,-5.50,0ZM12.51,7.00a2.75,2.75 0,1 0,5.50,0a2.75,2.75 0,1 0,-5.50,0ZM17.31,11.03a2.33,2.33 0,1 0,4.66,0a2.33,2.33 0,1 0,-4.66,0ZM5.31,15.53a4.20,4.20 0,1 0,8.39,0a4.20,4.20 0,1 0,-8.39,0ZM10.21,15.53a4.20,4.20 0,1 0,8.39,0a4.20,4.20 0,1 0,-8.39,0Z"/></svg></div></div><div class="onb-kicker">WELCOME TO FOODWELL</div><div class="onb-h">ยินดีต้อนรับ 👋</div><p class="onb-p">ตอบคำถามสั้น ๆ 4 ข้อ แล้ว FoodWell จะคำนวณพลังงานและสารอาหารที่เหมาะกับคุณในแต่ละวัน</p>
+  {btn:'เริ่มต้น',ok:()=>true,html:()=>`<div class="onb-hero"><div class="onb-logo"><svg viewBox="0 0 24 24" width="66" height="66" aria-hidden="true"><path fill="#fff" d="M1.98,11.03a2.33,2.33 0,1 0,4.66,0a2.33,2.33 0,1 0,-4.66,0ZM5.92,7.00a2.75,2.75 0,1 0,5.50,0a2.75,2.75 0,1 0,-5.50,0ZM12.51,7.00a2.75,2.75 0,1 0,5.50,0a2.75,2.75 0,1 0,-5.50,0ZM17.31,11.03a2.33,2.33 0,1 0,4.66,0a2.33,2.33 0,1 0,-4.66,0ZM5.31,15.53a4.20,4.20 0,1 0,8.39,0a4.20,4.20 0,1 0,-8.39,0ZM10.21,15.53a4.20,4.20 0,1 0,8.39,0a4.20,4.20 0,1 0,-8.39,0Z"/></svg></div></div><div class="onb-kicker">WELCOME TO MEOWFIT</div><div class="onb-h">ยินดีต้อนรับ 👋</div><p class="onb-p">ตอบคำถามสั้น ๆ 4 ข้อ แล้ว MeowFit จะคำนวณพลังงานและสารอาหารที่เหมาะกับคุณในแต่ละวัน</p>
    <div class="onb-feats"><div class="onb-feat"><span>🎯</span><div><b>เป้าหมายเฉพาะตัว</b><small>แคลอรี่ โปรตีน คาร์บ ไขมัน ต่อวัน</small></div></div><div class="onb-feat"><span>⚖️</span><div><b>BMI และน้ำหนักที่เหมาะสม</b><small>ประเมินตามเกณฑ์คนเอเชีย</small></div></div><div class="onb-feat"><span>🔒</span><div><b>ข้อมูลอยู่ในเครื่องคุณ</b><small>แก้ไขได้ทุกเมื่อในหน้า “เพิ่มเติม”</small></div></div></div>`},
   {btn:'ถัดไป',ok:()=>d.sex&&d.age>=12,html:()=>`<div class="onb-kicker">ขั้นที่ 1 จาก 4</div><div class="onb-h">เกี่ยวกับคุณ</div><p class="onb-p">ใช้คำนวณอัตราการเผาผลาญพื้นฐาน (BMR)</p>${choice(SEX,'sex',true)}${field('age','อายุ','ปี',...LIM.age)}`},
   {btn:'ถัดไป',ok:()=>d.height>=120&&d.weight>=30,html:()=>`<div class="onb-kicker">ขั้นที่ 2 จาก 4</div><div class="onb-h">ส่วนสูงและน้ำหนัก</div><p class="onb-p">ลากแถบหรือแตะตัวเลขเพื่อพิมพ์</p>${field('height','ส่วนสูง','ซม.',...LIM.height)}${field('weight','น้ำหนัก','กก.',...LIM.weight)}<div id="onbBmi">${bmiHtml()}</div>`},
   {btn:'ถัดไป',ok:()=>!!d.activity,html:()=>`<div class="onb-kicker">ขั้นที่ 3 จาก 4</div><div class="onb-h">ปกติคุณขยับตัวแค่ไหน?</div><p class="onb-p">เลือกที่ใกล้เคียงชีวิตประจำวันที่สุด</p>${choice(ACT,'activity')}`},
   {btn:'ดูแผนของฉัน ✨',ok:()=>!!d.goal,html:()=>`<div class="onb-kicker">ขั้นที่ 4 จาก 4</div><div class="onb-h">เป้าหมายของคุณ</div><p class="onb-p">เปลี่ยนได้ภายหลังเสมอ</p>${choice(GOAL,'goal')}`},
-  {btn:'เริ่มใช้ FoodWell',ok:()=>true,html:()=>{const T=previewTargets()||{};return `<div class="onb-kicker" style="text-align:center">แผนของคุณพร้อมแล้ว</div><div class="onb-h" style="text-align:center">พลังงานที่ควรได้ต่อวัน</div>
+  {btn:'เริ่มใช้ MeowFit',ok:()=>true,html:()=>{const T=previewTargets()||{};return `<div class="onb-kicker" style="text-align:center">แผนของคุณพร้อมแล้ว</div><div class="onb-h" style="text-align:center">พลังงานที่ควรได้ต่อวัน</div>
    <div class="onb-sum"><div class="onb-ring"><div><b>${(T.kcal||0).toLocaleString()}</b><small>kcal / วัน</small></div></div></div>
    <div class="onb-macros"><div class="onb-macro"><i style="background:#f3a0bb"></i><b>${T.protein||0} g</b><small>โปรตีน</small></div><div class="onb-macro"><i style="background:#f4c76b"></i><b>${T.carbs||0} g</b><small>คาร์บ</small></div><div class="onb-macro"><i style="background:#7cc4f5"></i><b>≤ ${T.fat||0} g</b><small>ไขมัน</small></div></div>
    <div class="onb-stats"><div><small>BMI</small><b>${T.bmi??'–'}</b><span class="onb-pill" style="background:${T.bmiColor||'#ccc'};margin-top:6px">${esc(T.bmiLabel||'')}</span></div><div><small>น้ำหนักที่เหมาะสม</small><b>${T.healthy?T.healthy[0]+'–'+T.healthy[1]:'–'}</b><small>กิโลกรัม</small></div></div>
@@ -1559,7 +1559,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function draw(){
   const box=document.getElementById('fwNotify');if(!box)return;const c=cfg();
   const head='<h2>🔔 การแจ้งเตือน</h2>';
-  if(!N()){box.innerHTML=head+'<p class="body-note" style="font-size:12px;color:#8f929b">ใช้ได้ในแอป FoodWell บน Android · เตือนได้แม้ปิดแอปอยู่</p>';return}
+  if(!N()){box.innerHTML=head+'<p class="body-note" style="font-size:12px;color:#8f929b">ใช้ได้ในแอป MeowFit บน Android · เตือนได้แม้ปิดแอปอยู่</p>';return}
   const permHtml=perm==='granted'?(anyOn(c)?'<div class="nt-perm ok">✅ เปิดการแจ้งเตือนแล้ว · บันทึกแล้วจะไม่เตือนซ้ำ</div>':'')
    :`<div class="nt-perm">⚠️ ${perm==='denied'?'การแจ้งเตือนถูกปิดในเครื่อง':'ยังไม่ได้อนุญาตการแจ้งเตือน'}<button type="button" id="ntAllow">${perm==='denied'?'เปิดการตั้งค่า':'อนุญาต'}</button></div>`;
   const sw=(k,on)=>`<input class="switch" type="checkbox" data-k="${k}" ${on?'checked':''}>`;
@@ -2161,8 +2161,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    table{width:100%;border-collapse:collapse;font-size:10.5px}th,td{padding:4px 5px;border-bottom:1px solid #eee;text-align:right}th:first-child,td:first-child{text-align:left}th{background:#fdf1f5}tr.empty td{color:#bbb}.over{color:#d9480f;font-weight:700}
    .note{margin-top:16px;font-size:10px;color:#888}.prof{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px}`;
   const sexT=p.sex==='m'?'ชาย':p.sex==='f'?'หญิง':'–';
-  return `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>FoodWell report</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet"><style>${css}</style></head><body>
-   <div class="head"><div><h1>🌿 รายงานสุขภาพ FoodWell</h1><div class="muted">${esc(p.name&&p.name!=='FoodWell'?p.name+' · ':'')}${fmtD(list[0])} – ${fmtD(list[list.length-1])} (${days} วัน)</div></div><div class="muted">สร้างเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</div></div>
+  return `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>MeowFit report</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet"><style>${css}</style></head><body>
+   <div class="head"><div><h1>🌿 รายงานสุขภาพ MeowFit</h1><div class="muted">${esc(p.name&&p.name!=='MeowFit'?p.name+' · ':'')}${fmtD(list[0])} – ${fmtD(list[list.length-1])} (${days} วัน)</div></div><div class="muted">สร้างเมื่อ ${new Date().toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</div></div>
    <h2>ข้อมูลร่างกาย</h2><div class="prof"><div>เพศ: <b>${sexT}</b></div><div>อายุ: <b>${p.age||'–'}</b> ปี</div><div>ส่วนสูง: <b>${p.height||'–'}</b> ซม.</div><div>น้ำหนัก: <b>${p.weight||'–'}</b> กก.</div>
     <div>BMI: <b>${T?T.bmi:'–'}</b> ${T?esc(T.bmiLabel):''}</div><div>เป้าพลังงาน: <b>${target?n0(target):'–'}</b> kcal/วัน</div><div>${s.weightPlan?`แผนลดน้ำหนัก: <b>${s.weightPlan.start}→${s.weightPlan.target}</b> กก.`:''}</div><div>${s.settings&&s.settings.fasting&&s.settings.fasting.on?`IF: <b>${s.settings.fasting.fast}:${24-s.settings.fasting.fast}</b>`:''}</div></div>
    <h2>สรุปภาพรวม</h2><div class="grid">${tile('วันที่บันทึกอาหาร',`${logged.length}/${days}`,'วัน')}${tile('พลังงานเฉลี่ย',n0(avg('kcal')),'kcal/วัน')}${tile('โปรตีนเฉลี่ย',n1(avg('protein')),'g/วัน')}${tile('น้ำตาลเฉลี่ย',n1(avg('sugar')),'g/วัน')}
@@ -2182,7 +2182,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    <div class="rpt-periods">${[7,30,90].map(d=>`<button type="button" data-d="${d}" class="${d===period?'on':''}">${d} วัน</button>`).join('')}</div>
    <button class="rpt-go" id="rptGo" type="button">📄 สร้างรายงาน PDF</button><div class="rpt-sub" style="margin-top:8px">ในหน้าพิมพ์ เลือกเครื่องพิมพ์เป็น “บันทึกเป็น PDF” แล้วกดปุ่มดาวน์โหลด</div>`;
   box.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{period=Number(b.dataset.d);card()});
-  box.querySelector('#rptGo').onclick=()=>{const html=build(period),title=`FoodWell-report-${localDay()}`;
+  box.querySelector('#rptGo').onclick=()=>{const html=build(period),title=`MeowFit-report-${localDay()}`;
    if(window.FoodWellPrint){FoodWellPrint.print(html,title);toast('กำลังเปิดหน้าพิมพ์ / บันทึก PDF…')}
    else{const w=window.open('','_blank');if(!w){toast('เบราว์เซอร์บล็อกหน้าต่างใหม่');return}w.document.write(html);w.document.close();setTimeout(()=>w.print(),600)}}}
  const dash=document.querySelector('#dashboard #weekDash')||document.querySelector('#dashboard .dashboard-hero');
@@ -2634,7 +2634,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .fw67-sheet{max-height:92vh;overflow:auto}.fw67-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.fw67-head>button{border:0;background:transparent;color:inherit;font-size:20px}.fw67-nav{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0}.fw67-nav button{border:0;border-radius:10px;padding:7px 10px;background:rgba(255,255,255,.08);color:inherit}.fw67-nav b{min-width:145px;text-align:center}.fw67-weeknames,.fw67-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.fw67-weeknames span{text-align:center;font-size:10px;opacity:.55}.fw67-cell,.fw67-emptycell{min-height:76px;border-radius:12px}.fw67-cell{padding:6px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);cursor:pointer}.fw67-cell.selected{outline:2px solid #f0a9c0}.fw67-cell.today .fw67-date{font-weight:900;color:#f0a9c0}.fw67-cell.over{background:rgba(240,169,192,.16)}.fw67-date{font-size:12px;margin-bottom:4px}.fw67-card{font-size:9px;padding:4px 5px;margin-top:3px;border-radius:7px;background:rgba(240,169,192,.16);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:grab}.fw67-cards small{font-size:8px;opacity:.55}.fw67-selected{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}.fw67-selected-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.fw67-selected-head button{border:0;border-radius:10px;padding:8px 10px;background:#f0a9c0;color:#24151d;font-weight:800}.fw67-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}.fw67-row small{display:block;opacity:.55;font-size:10px}.fw67-row button{border:0;border-radius:8px;padding:5px 8px;background:rgba(255,100,130,.15);color:inherit}.fw67-noitems,.fw67-note{font-size:11px;opacity:.55;padding:10px 0}.fw67-note{margin-top:8px}@media(max-width:380px){.fw67-cell{min-height:68px;padding:4px}.fw67-card{font-size:8px;padding:3px}.fw67-nav b{min-width:120px}}
 </style>
 
-<!-- FoodWell v71 Meal Planner Insights -->
+<!-- MeowFit v71 Meal Planner Insights -->
 <style>
 .fw71-btn{position:fixed;right:16px;bottom:204px;z-index:5000;border:0;border-radius:999px;padding:12px 16px;background:#ff6fae;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .fw71-modal{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:6000;display:flex;align-items:flex-end;justify-content:center}.fw71-sheet{width:min(430px,100%);max-height:88vh;overflow:auto;background:#17131a;color:#fff;border-radius:24px 24px 0 0;padding:18px}.fw71-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.fw71-head button{border:0;background:transparent;color:inherit;font-size:20px}.fw71-statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.fw71-stat{padding:14px;border-radius:16px;background:rgba(255,255,255,.06)}.fw71-stat b{display:block;font-size:22px}.fw71-bar{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:7px}.fw71-fill{height:100%;background:#ff6fae;border-radius:99px}.fw71-day{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}.fw71-row{display:flex;justify-content:space-between;gap:8px}.fw71-muted{opacity:.62;font-size:12px}.fw71-chip{display:inline-block;padding:5px 8px;border-radius:999px;background:rgba(199,125,255,.15);font-size:11px;margin:3px}.fw71-actions{display:flex;gap:8px;margin-top:14px}.fw71-actions button{flex:1;border:0;border-radius:12px;padding:11px;font-weight:800;background:#ff7eb6}.fw71-actions .alt{background:rgba(255,255,255,.1);color:#fff}
@@ -2878,7 +2878,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function render(){
   const box=document.getElementById('fw96');if(!box)return;
   const head='<div class="fw96-head"><span style="font-size:24px">☁️</span><h3>ซิงก์ข้อมูลหลายเครื่อง</h3></div>';
-  if(!C()){box.innerHTML=head+'<div class="fw96-small">เข้าสู่ระบบด้วย Gmail เพื่อซิงก์ข้อมูลระหว่างมือถือ/แท็บเล็ตได้ เมื่อเปิดผ่านแอป FoodWell บน Android</div>';return}
+  if(!C()){box.innerHTML=head+'<div class="fw96-small">เข้าสู่ระบบด้วย Gmail เพื่อซิงก์ข้อมูลระหว่างมือถือ/แท็บเล็ตได้ เมื่อเปิดผ่านแอป MeowFit บน Android</div>';return}
   if(!configured){box.innerHTML=head+'<div class="fw96-small">'+esc(notReady||'ยังไม่ได้เชื่อม Firebase ในแอปเวอร์ชันนี้')+'</div>';return}
   if(!user){box.innerHTML=head+`<div class="fw96-small">เข้าสู่ระบบด้วย Gmail แล้วข้อมูลอาหาร น้ำ กิจกรรม แผนอาหาร และการตั้งค่า จะซิงก์ไปทุกเครื่องที่ใช้บัญชีเดียวกันโดยอัตโนมัติ<br>เครื่องที่เข้าสู่ระบบทีหลังจะใช้ข้อมูลล่าสุดจากคลาวด์</div>
    <div class="fw96-row"><button class="fw96-btn google" id="fw96-in"><b style="color:#4285f4">G</b> เข้าสู่ระบบด้วย Google</button></div>`;
@@ -2932,12 +2932,12 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const box=document.getElementById('fw98');if(!box)return;
   box.className='fw98-card'+(st.adFree?' done':'');
   if(st.adFree){
-   box.innerHTML='<div class="fw96-head"><span style="font-size:24px">⭐</span><h3>FoodWell ไม่มีโฆษณา</h3></div><div class="fw96-small">ขอบคุณที่สนับสนุนครับ 💖 สิทธิ์นี้ผูกกับบัญชี Google Play ของคุณ ลงแอปใหม่หรือเปลี่ยนเครื่องก็ยังไม่มีโฆษณา</div>';
+   box.innerHTML='<div class="fw96-head"><span style="font-size:24px">⭐</span><h3>MeowFit ไม่มีโฆษณา</h3></div><div class="fw96-small">ขอบคุณที่สนับสนุนครับ 💖 สิทธิ์นี้ผูกกับบัญชี Google Play ของคุณ ลงแอปใหม่หรือเปลี่ยนเครื่องก็ยังไม่มีโฆษณา</div>';
    return;
   }
   const price=st.price?' '+esc(st.price):'';
   box.innerHTML='<div class="fw96-head"><span style="font-size:24px">🚫</span><h3>ปิดโฆษณาถาวร</h3></div>'
-   +'<ul class="fw98-list"><li>ซื้อครั้งเดียว ใช้ได้ตลอด ไม่ใช่รายเดือน</li><li>วิเคราะห์รูปอาหารด้วย AI ได้ไม่จำกัด</li><li>ใช้ได้ทุกเครื่องที่ใช้บัญชี Google Play เดียวกัน</li><li>ช่วยสนับสนุนการพัฒนา FoodWell</li></ul>'
+   +'<ul class="fw98-list"><li>ซื้อครั้งเดียว ใช้ได้ตลอด ไม่ใช่รายเดือน</li><li>วิเคราะห์รูปอาหารด้วย AI ได้ไม่จำกัด</li><li>ใช้ได้ทุกเครื่องที่ใช้บัญชี Google Play เดียวกัน</li><li>ช่วยสนับสนุนการพัฒนา MeowFit</li></ul>'
    +(st.adsEnabled?'':'<div class="fw96-small">เวอร์ชันนี้ยังไม่แสดงโฆษณา</div>')
    +'<button class="fw98-buy" id="fw98Buy"'+(st.billingReady?'':' disabled')+'>'+(st.pending?'⏳ รอการชำระเงิน':'ซื้อเพื่อปิดโฆษณา'+price)+'</button>'
    +(st.message?'<div class="fw98-msg">'+esc(st.message)+'</div>':'')
@@ -3030,7 +3030,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   ['ai','🤖','AI'],
   ['about','🌱',L('เกี่ยวกับ','About')]];
  const body=page.querySelector('#setBody');
- body.innerHTML=GROUPS.map(([id,ic,t])=>`<div class="set-group" id="setg-${id}"><h3>${ic} ${t}</h3></div>`).join('')+`<div class="set-ver">FoodWell · ${L('ภาษา','Language')}: ${lang==='en'?'English':'ไทย'}</div>`;
+ body.innerHTML=GROUPS.map(([id,ic,t])=>`<div class="set-group" id="setg-${id}"><h3>${ic} ${t}</h3></div>`).join('')+`<div class="set-ver">MeowFit · ${L('ภาษา','Language')}: ${lang==='en'?'English':'ไทย'}</div>`;
  page.querySelector('#setNav').innerHTML=GROUPS.map(([id,ic,t])=>`<button type="button" data-sg="${id}">${ic} ${t}</button>`).join('');
  page.querySelectorAll('[data-sg]').forEach(b=>b.onclick=()=>document.getElementById('setg-'+b.dataset.sg)?.scrollIntoView({behavior:'smooth',block:'start'}));
  const g=id=>document.getElementById('setg-'+id);
@@ -3605,7 +3605,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   x.font=`900 86px ${F}`;let y=wrap(x,title,540,550,800,98,2);
   x.font=`500 48px ${F}`;x.fillStyle='#6B4A57';y+=76;for(const l of lines.slice(0,3)){y=wrap(x,l,540,y,800,60,2)+64}
   if(stats.length){const w=800/stats.length;stats.slice(0,3).forEach(([v,l],i)=>{const cx=140+w*i+w/2;x.fillStyle='#E887AA';x.font=`900 88px ${F}`;x.fillText(v,cx,y+60);x.fillStyle='#8A6B77';x.font=`500 36px ${F}`;x.fillText(l,cx,y+112)});}
-  x.fillStyle='#C2477A';x.font=`800 44px ${F}`;x.fillText('🐾 FoodWell',540,1015);
+  x.fillStyle='#C2477A';x.font=`800 44px ${F}`;x.fillText('🐾 MeowFit',540,1015);
   if(sub){x.fillStyle='#8A6B77';x.font=`600 34px ${F}`;x.fillText(sub,540,895)}
   return c.toDataURL('image/png')}
  // ---- share sheet ----
@@ -3642,14 +3642,14 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const T=s=>window.fwT?fwT(s):s;
  window.shareTrophy=async function(name,desc,done){if(!done){toast(L('ปลดล็อกถ้วยนี้ก่อนเพื่อแชร์ 🏆','Unlock this trophy first to share it 🏆'));return}
   const n=T(name),d=T(desc);
-  open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 FoodWell — ${n}\n${d}\n${L('ปลดล็อกแล้ว 💗','Unlocked 💗')}`,card:{emoji:'🏆',title:n,lines:[d],sub:L('ปลดล็อกแล้ว ✨','Unlocked ✨')}})};
+  open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 MeowFit — ${n}\n${d}\n${L('ปลดล็อกแล้ว 💗','Unlocked 💗')}`,card:{emoji:'🏆',title:n,lines:[d],sub:L('ปลดล็อกแล้ว ✨','Unlocked ✨')}})};
  window.shareTrophyCollection=function(){const items=getTrophyItems(),u=items.filter(x=>x.v>=x.max);
   if(!u.length){toast(L('ปลดล็อกถ้วยแรกก่อนเพื่อแชร์คอลเลกชัน 🏆','Unlock your first trophy to share the collection 🏆'));return}
   const names=u.map(x=>T(x.n));
-  open({title:L('แชร์คอลเลกชัน','Share collection'),text:`🏆 FoodWell — ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}\n${L('ปลดล็อกแล้ว','Unlocked')} ${u.length}/${items.length} ✨\n`+names.map(x=>'• '+x).join('\n'),
+  open({title:L('แชร์คอลเลกชัน','Share collection'),text:`🏆 MeowFit — ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}\n${L('ปลดล็อกแล้ว','Unlocked')} ${u.length}/${items.length} ✨\n`+names.map(x=>'• '+x).join('\n'),
    card:{emoji:'🏆',title:L('คอลเลกชันถ้วยรางวัล','Trophy collection'),lines:[names.slice(0,4).join(' · ')],stats:[[`${u.length}/${items.length}`,L('ถ้วยที่ปลดล็อก','unlocked')]]}})};
  window.nativeShareTrophyCard=function(){const img=document.getElementById('trophySharePreview')?.src;if(!img||!img.startsWith('data:')){toast(L('กำลังสร้างการ์ด…','Creating card…'));return}
-  open({title:L('แชร์การ์ดถ้วยรางวัล','Share trophy card'),text:L('🏆 ฉันปลดล็อกถ้วยรางวัลใน FoodWell แล้ว','🏆 I unlocked a trophy in FoodWell'),image:img})};
+  open({title:L('แชร์การ์ดถ้วยรางวัล','Share trophy card'),text:L('🏆 ฉันปลดล็อกถ้วยรางวัลใน MeowFit แล้ว','🏆 I unlocked a trophy in MeowFit'),image:img})};
  window.downloadTrophyShareCard=function(){const img=document.getElementById('trophySharePreview')?.src;if(!img)return;if(N())N().saveImage(img);else download(img)};
  // ---- workout finished: a share button under the summary ----
  new MutationObserver(()=>{const fin=document.getElementById('woFin');if(!fin||document.getElementById('woShare'))return;
@@ -3693,7 +3693,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   x.fillStyle='#FAFAFB';x.strokeStyle='#E3E5EA';x.lineWidth=3;rr(x,110,1205,860,150,40);x.fill();x.stroke();
   x.fillStyle=accent;x.font=`900 48px ${F}`;x.fillText(status,540,1272);x.fillStyle='#6B6E77';x.font=`500 34px ${F}`;x.fillText(statusSub,540,1324);
   x.fillStyle=accent;x.font=`500 32px ${F}`;wrap(x,quote,540,1408,900,42,2);
-  x.fillStyle='#B0B3BC';x.font=`800 30px ${F}`;x.fillText('🐾 FoodWell',540,1475);
+  x.fillStyle='#B0B3BC';x.font=`800 30px ${F}`;x.fillText('🐾 MeowFit',540,1475);
   return c.toDataURL('image/png')}
  const busy=()=>toast(L('กำลังสร้างการ์ด…','Creating card…'));
  async function trophyImage(idx){const items=getTrophyItems(),t=items[idx],src=(window.foodwellTrophyArt||[])[idx];let art=null;try{if(src)art=await load(src)}catch(e){}
@@ -3702,18 +3702,18 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    status:L('✅ ปลดล็อกแล้ว ✨','✅ Unlocked ✨'),statusSub:L('บันทึกความสำเร็จของคุณไว้แล้ว','Your achievement has been saved'),quote:L(`“ก้าวเล็ก ๆ ในวันนี้ คือจุดเริ่มต้นของสุขภาพที่ดีในอนาคต” ${t.i}`,`“A small step today is the start of better health tomorrow” ${t.i}`)})}
  async function shareTrophyIdx(idx){const t=getTrophyItems()[idx];if(!t)return;if(t.v<t.max){toast(L('ปลดล็อกถ้วยนี้ก่อนเพื่อแชร์ 🏆','Unlock this trophy first to share it 🏆'));return}
   busy();const image=await trophyImage(idx);
-  FWShare.open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 FoodWell — ${T(t.n)}\n${T(t.d)}\n${L('ปลดล็อกแล้ว 💗','Unlocked 💗')}`,image})}
+  FWShare.open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 MeowFit — ${T(t.n)}\n${T(t.d)}\n${L('ปลดล็อกแล้ว 💗','Unlocked 💗')}`,image})}
  // trophy detail: both buttons share the trophy card
  window.shareTrophy=function(name,desc,done){const items=getTrophyItems();let i=items.findIndex(x=>x.n===name||T(x.n)===name);if(i<0)i=window.foodwellOpenTrophyIndex??-1;
-  if(i>=0)return shareTrophyIdx(i);FWShare.open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 FoodWell — ${name}\n${desc}`,card:{emoji:'🏆',title:name,lines:[desc]}})};
+  if(i>=0)return shareTrophyIdx(i);FWShare.open({title:L('แชร์ถ้วยรางวัล','Share trophy'),text:`🏆 MeowFit — ${name}\n${desc}`,card:{emoji:'🏆',title:name,lines:[desc]}})};
  window.openTrophyShareCard=idx=>shareTrophyIdx(idx);
  window.shareTrophyCollection=async function(){const items=getTrophyItems(),u=items.map((x,i)=>[x,i]).filter(([x])=>x.v>=x.max);
   if(!u.length){toast(L('ปลดล็อกถ้วยแรกก่อนเพื่อแชร์คอลเลกชัน 🏆','Unlock your first trophy to share the collection 🏆'));return}
   busy();let art=null;try{const src=(window.foodwellTrophyArt||[])[u[u.length-1][1]];if(src)art=await load(src)}catch(e){}
   const names=u.map(([x])=>T(x.n));
   const image=await detailCard({art,emoji:'🏆',kicker:`🏆 ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}`,title:L(`ปลดล็อก ${u.length} ถ้วย`,`${u.length} trophies unlocked`),desc:names.join(' · '),progress:u.length/items.length,
-   count:`${u.length}/${items.length}`,status:L('✅ สะสมต่อไปนะ ✨','✅ Keep collecting ✨'),statusSub:L('บันทึกความสำเร็จของคุณไว้ใน FoodWell','Your achievements are saved in FoodWell'),quote:L('“ทุกก้าวเล็ก ๆ มีความหมาย” 🌱','“Every small step counts” 🌱')});
-  FWShare.open({title:L('แชร์คอลเลกชัน','Share collection'),text:`🏆 FoodWell — ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}\n${L('ปลดล็อกแล้ว','Unlocked')} ${u.length}/${items.length} ✨\n`+names.map(x=>'• '+x).join('\n'),image})};
+   count:`${u.length}/${items.length}`,status:L('✅ สะสมต่อไปนะ ✨','✅ Keep collecting ✨'),statusSub:L('บันทึกความสำเร็จของคุณไว้ใน MeowFit','Your achievements are saved in MeowFit'),quote:L('“ทุกก้าวเล็ก ๆ มีความหมาย” 🌱','“Every small step counts” 🌱')});
+  FWShare.open({title:L('แชร์คอลเลกชัน','Share collection'),text:`🏆 MeowFit — ${L('คอลเลกชันถ้วยรางวัล','Trophy collection')}\n${L('ปลดล็อกแล้ว','Unlocked')} ${u.length}/${items.length} ✨\n`+names.map(x=>'• '+x).join('\n'),image})};
  // workout: the exercise figure as the artwork
  async function figure(id){if(!window.FWRig||!FWRig.has(id))return null;const box=document.createElement('div');box.style.cssText='position:fixed;left:-9999px;top:0;width:600px;height:600px;color:#fff';
   box.innerHTML=FWRig.svg(id);document.body.appendChild(box);const s=box.firstChild;s.setAttribute('width','600');s.setAttribute('height','600');s.style.color='#2B1820';s.__on=1;FWRig.render(s,id,FWRig.cycle(id)*.5);
@@ -3721,8 +3721,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  window.FWShareWorkout=async function(title,stats,moveId){busy();const art=await figure(moveId||'jacks');
   const [m,k,n]=[stats[0]||['',''],stats[1]||['',''],stats[2]||['','']];
   const image=await detailCard({art,panel:['#FFE6EF','#E4F4FF'],emoji:'💪',kicker:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout complete')}`,title,desc:new Date().toLocaleDateString(EN?'en-GB':'th-TH',{weekday:'long',day:'numeric',month:'long'}),progress:1,
-   count:`${m[0]} ${m[1]} · ${k[0]} ${k[1]} · ${n[0]} ${n[1]}`,status:L('✅ ทำสำเร็จแล้ว ✨','✅ Done ✨'),statusSub:L('บันทึกลงการเคลื่อนไหวใน FoodWell แล้ว','Logged to movement in FoodWell'),quote:L('“ร่างกายแข็งแรง ใจก็แข็งแรงตาม” 💪','“A stronger body grows a stronger mind” 💪')});
-  FWShare.open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout done')}: ${title}\n${stats.map(([v,l])=>v+' '+l).join(' · ')}\n#FoodWell`,image})};
+   count:`${m[0]} ${m[1]} · ${k[0]} ${k[1]} · ${n[0]} ${n[1]}`,status:L('✅ ทำสำเร็จแล้ว ✨','✅ Done ✨'),statusSub:L('บันทึกลงการเคลื่อนไหวใน MeowFit แล้ว','Logged to movement in MeowFit'),quote:L('“ร่างกายแข็งแรง ใจก็แข็งแรงตาม” 💪','“A stronger body grows a stronger mind” 💪')});
+  FWShare.open({title:L('แชร์การออกกำลังกาย','Share workout'),text:`💪 ${L('ออกกำลังกายเสร็จแล้ว','Workout done')}: ${title}\n${stats.map(([v,l])=>v+' '+l).join(' · ')}\n#MeowFit`,image})};
  window.FWDetailCard=detailCard;
 })();
 </script>
@@ -4039,8 +4039,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  async function shareMedal(id){const c=def(id);if(!c)return;const n=st().done.filter(x=>x.id===id&&x.ok).length;if(!n){toast(L('ทำชาเลนจ์นี้ให้สำเร็จก่อนนะ 🏅','Finish this challenge first 🏅'));return}
   toast(L('กำลังสร้างการ์ด…','Creating card…'));const art=await medalArt(c.e);
   const image=window.FWDetailCard?await FWDetailCard({art,emoji:c.e,kicker:`🏅 ${L('ชาเลนจ์สำเร็จ','Challenge complete')}`,title:title(c),desc:L(`ทำได้ ${need(c)} จาก ${c.days} วัน`,`${need(c)} of ${c.days} days done`),progress:1,count:`${need(c)}/${c.days} ${L('วัน','days')}${n>1?` · ×${n}`:''}`,
-   status:L('✅ ได้เหรียญแล้ว ✨','✅ Medal earned ✨'),statusSub:L('ทำได้ครบตามเป้า บันทึกไว้ใน FoodWell','Goal reached — saved in FoodWell'),quote:L('“ทำทีละวัน แล้ววันหนึ่งจะกลายเป็นนิสัย” 🌱','“One day at a time becomes a habit” 🌱')}):'';
-  window.FWShare&&FWShare.open({title:L('แชร์เหรียญ','Share medal'),text:`🏅 ${L('ทำสำเร็จ','I finished')} "${title(c)}" ${L('ใน FoodWell','in FoodWell')} ${c.e}\n${L('มาลองด้วยกันไหม?','Want to try it too?')} #FoodWell`,image})}
+   status:L('✅ ได้เหรียญแล้ว ✨','✅ Medal earned ✨'),statusSub:L('ทำได้ครบตามเป้า บันทึกไว้ใน MeowFit','Goal reached — saved in MeowFit'),quote:L('“ทำทีละวัน แล้ววันหนึ่งจะกลายเป็นนิสัย” 🌱','“One day at a time becomes a habit” 🌱')}):'';
+  window.FWShare&&FWShare.open({title:L('แชร์เหรียญ','Share medal'),text:`🏅 ${L('ทำสำเร็จ','I finished')} "${title(c)}" ${L('ใน MeowFit','in MeowFit')} ${c.e}\n${L('มาลองด้วยกันไหม?','Want to try it too?')} #MeowFit`,image})}
  // ---- modal (celebration / month card) ----
  const modal=document.createElement('div');modal.className='ch-modal';modal.id='chModal';modal.setAttribute('role','dialog');modal.innerHTML='<div class="box"></div>';document.body.appendChild(modal);
  modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};
@@ -4088,7 +4088,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
     :`<div class="ch-note">${me()?L('กำลังโหลด…','Loading…'):L('เข้าสู่ระบบเพื่อดูอันดับ','Sign in to see the leaderboard')}</div>`}</div>`}
  const LINK=c=>`https://likewacom-web.github.io/foodwell/join.html?c=${c}`;
  function shareInvite(a){const c=def(a.id);window.FWShare&&FWShare.open({title:L('ชวนเพื่อนแข่ง','Invite friends'),
-  text:`${c.e} ${L(`มาแข่ง "${title(c)}" กับฉันใน FoodWell!`,`Join my "${title(c)}" challenge in FoodWell!`)}\n${L('รหัสห้อง','Room code')}: ${a.room}\n${L('แตะลิงก์เพื่อเข้าร่วม','Tap to join')}: ${LINK(a.room)}`,
+  text:`${c.e} ${L(`มาแข่ง "${title(c)}" กับฉันใน MeowFit!`,`Join my "${title(c)}" challenge in MeowFit!`)}\n${L('รหัสห้อง','Room code')}: ${a.room}\n${L('แตะลิงก์เพื่อเข้าร่วม','Tap to join')}: ${LINK(a.room)}`,
   card:{emoji:c.e,title:title(c),lines:[L('มาแข่งกัน!','Race me!'),`${L('รหัส','Code')} ${a.room}`]}})}
  const waiting={};
  function needCloud(){if(!cloud()){toast(L('ใช้ได้ในแอป Android ที่เชื่อม Firebase','Available in the Android app with Firebase'));return false}
@@ -4176,7 +4176,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function monthImage(M){const W=1080,H=1500,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),F='"Noto Sans Thai","Noto Sans",sans-serif';
   const bg=x.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#FFF0F5');bg.addColorStop(.55,'#F3FBF6');bg.addColorStop(1,'#E8F6EE');x.fillStyle=bg;x.fillRect(0,0,W,H);
   x.fillStyle='#F7BFD055';x.beginPath();x.arc(980,90,220,0,7);x.fill();x.fillStyle='#8FD3B044';x.beginPath();x.arc(60,1420,260,0,7);x.fill();
-  x.textAlign='left';x.fillStyle='#C2477A';x.font=`800 38px ${F}`;x.fillText(`🐾 FoodWell · ${L('สรุปประจำเดือน','Monthly recap')}`,80,120);
+  x.textAlign='left';x.fillStyle='#C2477A';x.font=`800 38px ${F}`;x.fillText(`🐾 MeowFit · ${L('สรุปประจำเดือน','Monthly recap')}`,80,120);
   x.fillStyle='#1B1B22';x.font=`900 92px ${F}`;x.fillText(`${MONTHS[M.m]} ${EN?M.y:M.y+543}`,80,230);
   x.fillStyle='#5A5D66';x.font=`500 38px ${F}`;x.fillText(L(`บันทึก ${M.logged} วัน · ต่อเนื่องสูงสุด ${M.best} วัน 🔥`,`${M.logged} days logged · best streak ${M.best} days 🔥`),80,295);
   const tiles=[['🍽️',M.foods.toLocaleString(),L('รายการอาหาร','foods logged')],['🔥',M.avg?M.avg.toLocaleString():'–',L('kcal เฉลี่ย/วัน','avg kcal/day')],['💧',`${M.waterDays}`,L('วันดื่มน้ำครบ','water-goal days')],
@@ -4193,7 +4193,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   const rows=Math.ceil((M.days.length+off)/7),ly=cy+66+rows*74+28;x.textAlign='left';x.font=`500 24px ${F}`;x.fillStyle='#6B6E77';
   x.fillText(L('สีเข้ม = ครบทั้ง บันทึกอาหาร · ดื่มน้ำ · ขยับร่างกาย','Darker = food logged · water goal · moved'),80,ly);
   if(M.top.length){x.fillStyle='#1B1B22';x.font=`800 30px ${F}`;let names=M.top.map(t=>t[0]),line=()=>`${L('เมนูโปรด','Favourites')}: `+names.join(' · ');while(names.length>1&&x.measureText(line()).width>920)names.pop();let tx=line();while(x.measureText(tx).width>920&&tx.length>8)tx=tx.slice(0,-2);if(tx!==line())tx+='…';x.fillText(tx,80,ly+56)}
-  x.fillStyle='#C2477A';rr(x,80,H-112,920,80,40);x.fill();x.fillStyle='#FFFFFF';x.textAlign='center';x.font=`800 34px ${F}`;x.fillText(L('ดูแลสุขภาพไปด้วยกันกับ FoodWell 🐾','Look after yourself with FoodWell 🌿'),540,H-60);
+  x.fillStyle='#C2477A';rr(x,80,H-112,920,80,40);x.fill();x.fillStyle='#FFFFFF';x.textAlign='center';x.font=`800 34px ${F}`;x.fillText(L('ดูแลสุขภาพไปด้วยกันกับ MeowFit 🐾','Look after yourself with MeowFit 🌿'),540,H-60);
   return cv.toDataURL('image/png')}
  let mOff=0;
  function monthCard(){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+mOff);const M=monthStats(d.getFullYear(),d.getMonth()),img=monthImage(M);
@@ -4203,7 +4203,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   mbox.querySelector('#chX').onclick=()=>modal.classList.remove('show');
   mbox.querySelector('#mPrev').onclick=()=>{mOff--;monthCard()};mbox.querySelector('#mNext').onclick=()=>{if(mOff<0){mOff++;monthCard()}};
   mbox.querySelector('#mShare').onclick=()=>window.FWShare&&FWShare.open({title:L('แชร์สรุปเดือน','Share monthly recap'),
-   text:`📅 ${L(`สรุปเดือน${MONTHS[M.m]}ของฉันใน FoodWell`,`My ${MONTHS[M.m]} in FoodWell`)} 🐾\n${L(`บันทึก ${M.logged} วัน · ดื่มน้ำครบ ${M.waterDays} วัน · ขยับ ${M.moveMin} นาที`,`${M.logged} days logged · water goal ${M.waterDays} days · ${M.moveMin} active minutes`)}\n#FoodWell`,image:img});
+   text:`📅 ${L(`สรุปเดือน${MONTHS[M.m]}ของฉันใน MeowFit`,`My ${MONTHS[M.m]} in MeowFit`)} 🐾\n${L(`บันทึก ${M.logged} วัน · ดื่มน้ำครบ ${M.waterDays} วัน · ขยับ ${M.moveMin} นาที`,`${M.logged} days logged · water goal ${M.waterDays} days · ${M.moveMin} active minutes`)}\n#MeowFit`,image:img});
   modal.classList.add('show')}
  // also from the Dashboard
  const dashTitle=document.querySelector('#dashboard .page-title');
@@ -4336,7 +4336,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // ---- native events ----
  let lastSave=0;
  window.onSteps=function(json){if(merge(json)){const now=Date.now();if(now-lastSave>60000){lastSave=now;save()}}drawAll()};
- window.onStepsPermission=function(ok){if(ok){toast(L('เปิดนับก้าวแล้ว 👟','Step counting is on 👟'));N().refresh()}else toast(L('ไม่ได้รับอนุญาต เปิดได้ที่ ตั้งค่ามือถือ → แอป → FoodWell → สิทธิ์','Permission denied — allow it in phone Settings → Apps → FoodWell → Permissions'));drawAll()};
+ window.onStepsPermission=function(ok){if(ok){toast(L('เปิดนับก้าวแล้ว 👟','Step counting is on 👟'));N().refresh()}else toast(L('ไม่ได้รับอนุญาต เปิดได้ที่ ตั้งค่ามือถือ → แอป → MeowFit → สิทธิ์','Permission denied — allow it in phone Settings → Apps → MeowFit → Permissions'));drawAll()};
  window.FWSteps={on:stepsOn,energy,goal,redraw:()=>drawAll()};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);drawAll();return o};
  if(N()){try{merge(N().days())}catch(e){}const ns=nstat();if(ns&&ns.on)N().refresh()}
@@ -4851,4 +4851,10 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
 (function(){try{if(typeof s==='undefined'||localStorage.getItem('fw_paw_v135'))return;
  if(s.profile&&s.profile.emoji==='🌿'){s.profile.emoji='🐾';save();if(typeof render==='function')render()}
  localStorage.setItem('fw_paw_v135','1')}catch(e){}})();
+</script>
+<!-- v136 Renamed to MeowFit: profiles still on the old default name follow the new app name once -->
+<script>
+(function(){try{if(typeof s==='undefined'||localStorage.getItem('fw_name_v136'))return;
+ if(s.profile&&s.profile.name==='FoodWell'){s.profile.name='MeowFit';save();if(typeof render==='function')render()}
+ localStorage.setItem('fw_name_v136','1')}catch(e){}})();
 </script>

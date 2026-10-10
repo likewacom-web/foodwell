@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="/home/user/foodwell/FoodWell_v89_Android_UI_Polish/android/app/src/main/assets/workout_rig.js"></script>
+<style>body{margin:0}#icon,#feat{position:absolute;left:0;top:0}</style>
+<body>
+<div id="icon" style="width:512px;height:512px;background:#55B888">
+<svg viewBox="0 0 108 108" width="512" height="512"><path fill="#FFF" d="M54,30C40,36 34,50 38,66C52,66 66,58 70,40C66,34 60,31 54,30Z"/><path fill="#55B888" d="M41,65L63,41L64.5,42.5L42.5,66.5Z"/><path fill="#FFF" d="M32,64H76C76,74 66,80 54,80C42,80 32,74 32,64Z"/></svg></div>
+<div id="feat" style="display:none;width:1024px;height:500px;background:linear-gradient(120deg,#FFE3EC,#F7C6D7 55%,#E4F4FF);font-family:'Noto Sans Thai',sans-serif;overflow:hidden">
+ <div style="position:absolute;left:64px;top:96px;width:150px;height:150px;border-radius:34px;box-shadow:0 14px 34px #fb0d8f40;overflow:hidden"><img src="/home/user/foodwell/art/play_icon_512.png" style="width:100%;height:100%;display:block"></div>
+ <div style="position:absolute;left:64px;top:270px;font-size:72px;font-weight:900;color:#2B1820;line-height:1">MeowFit</div>
+ <div id="tag" style="position:absolute;left:64px;top:360px;font-size:30px;font-weight:700;color:#6B4A57;width:640px;line-height:1.35"></div>
+ <div style="position:absolute;right:250px;top:60px;width:300px;height:300px" id="f1"></div>
+ <div style="position:absolute;right:20px;top:130px;width:280px;height:280px" id="f2"></div>
+</div>
+<script>
+const q=new URLSearchParams(location.search);
+if(q.get('w')==='feat'){document.getElementById('icon').style.display='none';document.getElementById('feat').style.display='block';
+ document.getElementById('tag').textContent=q.get('lang')==='en'?'Log food, water and workouts — gently, every day':'บันทึกอาหาร ดื่มน้ำ ออกกำลังกาย ง่าย ๆ ทุกวัน';
+ for(const [el,id,t] of [['f1','jacks',.45],['f2','squat',.5]]){const d=document.getElementById(el);d.innerHTML=FWRig.svg(id);const s=d.firstChild;s.style.width='100%';s.style.height='100%';s.style.color='#2B1820';s.__on=1;FWRig.render(s,id,FWRig.cycle(id)*t)}}
+</script>

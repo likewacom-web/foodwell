@@ -56,7 +56,7 @@ class ShareApi(private val activity: ComponentActivity) {
         }
     }
 
-    /** Saves the image to the gallery (Pictures/FoodWell). */
+    /** Saves the image to the gallery (Pictures/MeowFit). */
     @JavascriptInterface
     fun saveImage(imageDataUrl: String) = activity.runOnUiThread {
         val png = decode(imageDataUrl) ?: return@runOnUiThread
@@ -66,18 +66,18 @@ class ShareApi(private val activity: ComponentActivity) {
                 val v = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, name)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/FoodWell")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/MeowFit")
                 }
                 val uri = activity.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v)
                 uri != null && activity.contentResolver.openOutputStream(uri)?.use { it.write(png); true } == true
             } else {
-                val dir = File(activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "FoodWell").apply { mkdirs() }
+                val dir = File(activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "MeowFit").apply { mkdirs() }
                 File(dir, name).writeBytes(png); true
             }
         } catch (e: Exception) { false }
         Toast.makeText(
             activity,
-            if (ok) Lang.t(activity, "บันทึกรูปลงแกลเลอรีแล้ว (Pictures/FoodWell)", "Saved to your gallery (Pictures/FoodWell)")
+            if (ok) Lang.t(activity, "บันทึกรูปลงแกลเลอรีแล้ว (Pictures/MeowFit)", "Saved to your gallery (Pictures/MeowFit)")
             else Lang.t(activity, "บันทึกรูปไม่สำเร็จ", "Couldn't save the image"),
             Toast.LENGTH_SHORT
         ).show()

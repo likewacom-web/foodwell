@@ -37,11 +37,11 @@ Repo → Settings → Secrets and variables → Actions → **New repository sec
 | `ADMOB_APP_ID`, `ADMOB_BANNER_ID`, `ADMOB_REWARDED_ID` | (เฉพาะถ้าจะเปิดโฆษณา — ดู `MONETIZATION.md`) |
 
 ## 4. Build ไฟล์ .aab
-GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (เลือก ads ถ้าต้องการ) → รอ ~3 นาที → ดาวน์โหลด artifact **FoodWell-release-aab** (แตก zip ได้ `app-release.aab`)
+GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (เลือก ads ถ้าต้องการ) → รอ ~3 นาที → ดาวน์โหลด artifact **MeowFit-release-aab** (แตก zip ได้ `app-release.aab`)
 - versionCode เพิ่มเองทุกครั้งที่ build (100 + เลขรอบ) จึงอัปโหลดทับเวอร์ชันเดิมได้เสมอ
 
 ## 5. สร้างแอปใน Play Console
-- ชื่อแอป: **FoodWell** (เปลี่ยนได้ภายหลัง) · ภาษาเริ่มต้น: ไทย · แอป · ฟรี
+- ชื่อแอป: **MeowFit - Calories Tracker** (เปลี่ยนได้ภายหลัง · package `com.foodwell.app` เปลี่ยนไม่ได้ ไม่เป็นไร ผู้ใช้ไม่เห็น) · ภาษาเริ่มต้น: ไทย · แอป · ฟรี
 - Testing → **Internal testing** → อัปโหลด `app-release.aab` → เพิ่มอีเมลผู้ทดสอบ (ทดสอบปุ่มซื้อปิดโฆษณาได้ที่นี่)
 - จากนั้น **Closed testing** (12 คน 14 วัน — ดูข้อ 1) → **Production**
 
@@ -57,13 +57,13 @@ GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (
 ## 7. ข้อความหน้าร้าน (Store listing)
 
 ### ภาษาไทย
-**ชื่อ (≤30):** FoodWell: บันทึกอาหาร แคลอรี่
+**ชื่อ (≤30):** MeowFit - นับแคล บันทึกอาหาร
 
 **คำอธิบายสั้น (≤80):** บันทึกอาหารไทย นับแคลอรี่ ดื่มน้ำ ออกกำลังกาย และวางแผนสุขภาพแบบใจดีกับตัวเอง
 
 **คำอธิบายเต็ม:**
 ```
-FoodWell ช่วยให้ดูแลการกินและสุขภาพได้ง่าย ๆ ทุกวัน แบบไม่กดดันตัวเอง
+MeowFit ช่วยให้ดูแลการกินและสุขภาพได้ง่าย ๆ ทุกวัน แบบไม่กดดันตัวเอง
 
 🍱 บันทึกอาหารง่าย
 • ฐานข้อมูลอาหารไทยกว่า 240 เมนู พิมพ์ชื่อแล้วเติมค่าโภชนาการให้
@@ -100,13 +100,13 @@ FoodWell ช่วยให้ดูแลการกินและสุข�
 ```
 
 ### English
-**Title (≤30):** FoodWell: Thai Food & Calories
+**Title (≤30):** MeowFit - Calories Tracker
 
 **Short description (≤80):** Log Thai food, count calories, drink water, work out — kindly, every day.
 
 **Full description:**
 ```
-FoodWell makes it easy to look after what you eat and how you feel — without the pressure.
+MeowFit makes it easy to look after what you eat and how you feel — without the pressure.
 
 🍱 Easy food logging
 • 240+ Thai dishes: type a name and the nutrition fills in

@@ -253,7 +253,7 @@ class MainActivity : ComponentActivity() {
 
     inner class PrintApi {
         @JavascriptInterface fun print(html: String, title: String) = runOnUiThread {
-            val name = title.ifBlank { "FoodWell" }
+            val name = title.ifBlank { "MeowFit" }
             var sent = false
             printWeb = WebView(this@MainActivity).apply {
                 webViewClient = object : WebViewClient() {

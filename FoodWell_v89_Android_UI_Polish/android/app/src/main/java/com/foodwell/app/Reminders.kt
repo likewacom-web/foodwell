@@ -122,7 +122,7 @@ object Reminders {
         fun logged(meal: String) = isToday && meal in meals
         return when (kind) {
             "breakfast" -> if (logged("เช้า")) null else Triple(Lang.t(c, "🌅 ได้เวลาอาหารเช้า", "🌅 Breakfast time"), Lang.t(c, "กินอะไรไปบ้าง? แตะเพื่อบันทึกมื้อเช้า", "What did you eat? Tap to log breakfast"), "food")
-            "lunch" -> if (logged("กลางวัน")) null else Triple(Lang.t(c, "☀️ มื้อกลางวันแล้ว", "☀️ Lunch time"), Lang.t(c, "อย่าลืมบันทึกมื้อกลางวันใน FoodWell นะ", "Don't forget to log lunch in FoodWell"), "food")
+            "lunch" -> if (logged("กลางวัน")) null else Triple(Lang.t(c, "☀️ มื้อกลางวันแล้ว", "☀️ Lunch time"), Lang.t(c, "อย่าลืมบันทึกมื้อกลางวันใน MeowFit นะ", "Don't forget to log lunch in MeowFit"), "food")
             "dinner" -> if (logged("เย็น")) null else Triple(Lang.t(c, "🌙 บันทึกมื้อเย็น", "🌙 Log dinner"), Lang.t(c, "บันทึกมื้อเย็น แล้วดูสรุปพลังงานของวันนี้", "Log dinner and see today's energy summary"), "food")
             "water" -> {
                 val ml = if (isToday) st.optInt("water") else 0
@@ -161,7 +161,7 @@ object Reminders {
     fun ensureChannel(c: Context) {
         if (Build.VERSION.SDK_INT >= 26) {
             c.getSystemService(NotificationManager::class.java).createNotificationChannel(
-                NotificationChannel(CHANNEL, Lang.t(c, "การแจ้งเตือน FoodWell", "FoodWell reminders"), NotificationManager.IMPORTANCE_DEFAULT)
+                NotificationChannel(CHANNEL, Lang.t(c, "การแจ้งเตือน MeowFit", "MeowFit reminders"), NotificationManager.IMPORTANCE_DEFAULT)
                     .apply { description = Lang.t(c, "เตือนบันทึกอาหาร ดื่มน้ำ และชั่งน้ำหนัก", "Reminders to log food, drink water and weigh in") }
             )
         }
