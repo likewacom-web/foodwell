@@ -102,7 +102,7 @@ class TodayWidget : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             v.setOnClickPendingIntent(R.id.widget_root, open("home", 2001))
-            v.setOnClickPendingIntent(R.id.w_add_food, open("food", 2002))
+            v.setOnClickPendingIntent(R.id.w_add_food, open("addfood", 2002))
             v.setOnClickPendingIntent(
                 R.id.w_add_water,
                 PendingIntent.getBroadcast(
