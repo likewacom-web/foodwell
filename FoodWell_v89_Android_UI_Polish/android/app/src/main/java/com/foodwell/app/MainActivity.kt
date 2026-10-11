@@ -334,11 +334,14 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         stepsLive.stop()
         pro.onPause()
+        // stop the page's animations (exercise clips etc.) while the app isn't on screen; JS still runs
+        if (::web.isInitialized) web.onPause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        if (::web.isInitialized) web.onResume()
         stepsLive.start()
         pro.onResume()
     }
