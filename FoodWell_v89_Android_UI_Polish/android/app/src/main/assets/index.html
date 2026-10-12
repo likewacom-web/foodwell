@@ -1453,7 +1453,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    <button class="wp-btn ghost" type="button" id="wpEdit">✏️ ปรับแผน</button><button class="wp-btn ghost" type="button" id="wpEnd" style="color:#ef718d">จบแผนนี้</button>
    <p class="body-note" style="font-size:11px;color:#7f828c;line-height:1.6;margin-top:12px">ค่าประมาณจาก 1 กก. ≈ 7,700 kcal · น้ำหนักขึ้นลงรายวันได้ 0.5–1 กก. ให้ดูแนวโน้มรายสัปดาห์ · ไม่ใช่คำแนะนำทางการแพทย์</p>`;
   document.getElementById('wpSaveW').onclick=()=>{const v=r1(Number(document.getElementById('wpWeigh').value));if(!(v>=30&&v<=300)){toast('ใส่น้ำหนักให้ถูกต้อง');return}
-   s.weightLog=(s.weightLog||[]).filter(x=>x.date!==today());s.weightLog.push({date:today(),kg:v});s.profile=s.profile||{};s.profile.weight=v;save();
+   s.weightLog=(s.weightLog||[]).filter(x=>x.date!==today());s.weightLog.push({date:today(),kg:v,at:Date.now()});s.profile=s.profile||{};s.profile.weight=v;save();
    toast(v<=P.target?'ถึงเป้าหมายแล้ว! เก่งมาก 🎉':'บันทึกแล้ว ✨');renderPlan()};
   view.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{s.weightLog=(s.weightLog||[]).filter(x=>x.date!==b.dataset.del);const l=log();if(l.length)s.profile.weight=l[l.length-1].kg;save();renderPlan()});
   document.getElementById('wpEdit').onclick=()=>{editing=true;draft={target:P.target,pace:P.pace};renderPlan()};
@@ -4369,6 +4369,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .hc-top{display:flex;align-items:center;gap:10px}.hc-top .em{font-size:28px}.hc-top .tx{flex:1;min-width:0}.hc-top b{display:block;font-size:15px}.hc-top small{display:block;font-size:12px;color:var(--muted);line-height:1.45}
 .hc-top button{border:0;border-radius:12px;padding:9px 12px;font-weight:800;font-family:inherit;background:#7cc4f5;color:#10243a;white-space:nowrap}
 .hc-top button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.hc-scale{margin-top:10px;padding:9px 12px;border-radius:12px;background:#FFF1F5;color:#7A3653;font-size:12px;line-height:1.5}
 .hc-links{display:flex;gap:6px;margin-top:10px}.hc-links button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px;font-family:inherit;font-size:12px;font-weight:700}
 </style>
 <script>
@@ -4387,10 +4388,11 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   if(sdk==='none'){card.style.display='none';return}card.style.display='';
   const last=S.last?new Date(S.last).toLocaleTimeString(EN?'en-GB':'th-TH',{hour:'2-digit',minute:'2-digit'}):'';
   card.innerHTML=`<div class="hc-top"><span class="em">⌚</span><span class="tx"><b>${on?L('เชื่อม Health Connect แล้ว','Connected to Health Connect'):L('เชื่อมนาฬิกา / แอปสุขภาพ','Connect a watch / health app')}</b>
-   <small>${on?L(`ดึงก้าว แคลที่ใช้ และการออกกำลังกายอัตโนมัติ${last?' · อัปเดต '+last:''}`,`Steps, active calories and workouts come in automatically${last?' · updated '+last:''}`)
+   <small>${on?L(`ดึงก้าว แคลที่ใช้ การออกกำลังกาย และน้ำหนักจากตาชั่งอัตโนมัติ${last?' · อัปเดต '+last:''}`,`Steps, active calories, workouts and scale weight come in automatically${last?' · updated '+last:''}`)
    :sdk==='update'?L('ต้องติดตั้ง/อัปเดต Health Connect จาก Play Store ก่อน','Install or update Health Connect from the Play Store first')
-   :L('ดึงก้าว แคล และการออกกำลังกายจาก Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness ฯลฯ ผ่าน Health Connect','Get steps, calories and workouts from Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness and more via Health Connect')}</small></span>
+   :L('ดึงก้าว แคล การออกกำลังกาย และน้ำหนักจากตาชั่งอัจฉริยะ (Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness, Zepp Life, Huawei Health ฯลฯ) ผ่าน Health Connect','Get steps, calories, workouts and smart-scale weight (Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness, Zepp Life, Huawei Health and more) via Health Connect')}</small></span>
    ${on?`<button type="button" class="ghost" id="hcSync">${busy?'…':'↻'}</button>`:`<button type="button" id="hcOn">${sdk==='update'?L('ติดตั้ง','Install'):L('เชื่อม','Connect')}</button>`}</div>
+   ${on&&!(S.granted||[]).includes('READ_WEIGHT')?`<div class="hc-scale">⚖️ ${L('มีตาชั่งอัจฉริยะ? แตะ “เลือกข้อมูลที่แชร์” แล้วเปิด <b>น้ำหนัก</b> น้ำหนักจะเข้าแอปเองทุกครั้งที่ชั่ง','Have a smart scale? Tap “Choose data” and turn on <b>Weight</b> — every weigh-in comes in by itself')}</div>`:''}
    ${on?`<div class="hc-links"><button type="button" id="hcPerm">⚙️ ${L('เลือกข้อมูลที่แชร์','Choose data')}</button><button type="button" id="hcOff">${L('เลิกเชื่อม','Disconnect')}</button></div>`:''}`;
   const q=id=>card.querySelector(id);
   q('#hcOn')&&(q('#hcOn').onclick=()=>{S.on=true;save();H().connect()});
@@ -4413,6 +4415,18 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // tidy entries imported before this change
  if((s.moves||[]).some(m=>m.hcId)){mergeWatch([]);save()}
  const sessionKcal=(label,min)=>typeof moveKcal==='function'?moveKcal(label,'',min):Math.round(5*bodyWeight()*min/60);
+ // smart-scale weigh-ins (via Health Connect) go into the weight log: one per day, the latest reading wins over
+ // older ones; a weight you typed yourself later that day stays, and so do entries typed before this feature.
+ // Each reading is imported once, so one you delete doesn't come back.
+ function importWeights(ws,fat){if(!ws||!ws.length)return 0;const seen=new Set(s.hcWeightSeen||[]);s.weightLog=s.weightLog||[];let n=0;
+  ws.slice().sort((a,b)=>a.t-b.t).forEach(w=>{if(seen.has(w.id))return;seen.add(w.id);if(!(w.kg>=20&&w.kg<=350))return;
+   const day=localDay(new Date(w.t)),ex=s.weightLog.find(x=>x.date===day);
+   if(ex&&(ex.scale?(ex.at||0)>w.t:(!ex.at||ex.at>w.t)))return;
+   const f=(fat||[]).filter(x=>localDay(new Date(x.t))===day&&Math.abs(x.t-w.t)<3*3600e3).sort((a,b)=>Math.abs(a.t-w.t)-Math.abs(b.t-w.t))[0];
+   s.weightLog=s.weightLog.filter(x=>x.date!==day);const e={date:day,kg:w.kg,at:w.t,scale:true};if(f&&f.pct>2&&f.pct<75)e.fat=f.pct;s.weightLog.push(e);n++});
+  s.hcWeightSeen=[...seen].slice(-1000);
+  if(n){const l=s.weightLog.slice().sort((a,b)=>a.date.localeCompare(b.date));s.profile=s.profile||{};s.profile.weight=l[l.length-1].kg}
+  return n}
  window.onHealth=function(kind,json){let d={};try{d=JSON.parse(json)}catch(e){d=json}const S=st();
   if(kind==='permission'){S.granted=d.granted||[];if(S.granted.length){S.on=true;save();toast(L('เชื่อม Health Connect แล้ว ⌚','Health Connect connected ⌚'));sync(true)}else{toast(L('ยังไม่ได้อนุญาตข้อมูล','No data allowed yet'));save();draw()}return}
   busy=false;
@@ -4425,8 +4439,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   (d.sessions||[]).forEach(x=>{if(ignored.has(x.id))return;const min=Math.max(1,Math.round((x.end-x.start)/60000));if(min>600)return;
    const lab=LABEL[x.type]||LABEL.other,label=(x.title&&x.title.length<40?x.title:L(lab[0],lab[1])),t=new Date(x.start);
    units.push({start:x.start,date:localDay(t),label,min,kcal:sessionKcal(lab[0],min),count:1,ids:[x.id],time:t.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),src:x.src})});
-  const added=mergeWatch(units);
+  const added=mergeWatch(units),wAdded=importWeights(d.weights,d.bodyFat);
   save();if(added)toast(L(`นำเข้าการออกกำลังกาย ${added} รายการจากนาฬิกา ⌚`,`Imported ${added} workout${added>1?'s':''} from your watch ⌚`));
+  if(wAdded){const l=s.weightLog.slice().sort((a,b)=>a.date.localeCompare(b.date)).pop();setTimeout(()=>toast(L(`⚖️ น้ำหนักจากตาชั่ง ${l.kg} กก.${wAdded>1?` (นำเข้า ${wAdded} วัน)`:''}`,`⚖️ Scale weight ${l.kg} kg${wAdded>1?` (${wAdded} days imported)`:''}`)),added?2600:0)}
   if(typeof render==='function')render();else window.FWSteps&&FWSteps.redraw();draw()};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){}return o};
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&st().on&&Date.now()-(st().last||0)>5*60000)sync(false)});
@@ -4775,6 +4790,7 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
 .wt-hint{text-align:center;font-size:12.5px;min-height:18px;opacity:.85}
 .wt-row{display:flex;gap:8px;margin-top:14px}.wt-row button{flex:1;border:0;border-radius:14px;padding:13px;font-weight:800;font-family:inherit;font-size:15px;min-height:48px}
 .wt-row .ok{background:#ff7eb6;color:#241521}.wt-row .no{background:rgba(127,127,127,.16);color:inherit}
+.wt-scale{display:block;width:100%;margin-top:12px;border:1px dashed rgba(255,126,182,.6);border-radius:14px;padding:11px;background:none;color:inherit;font-family:inherit;font-size:13px;font-weight:700;text-align:center}
 </style>
 <script>
 (function(){
@@ -4789,13 +4805,20 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  const ago=d=>{const n=Math.round((new Date(today()+'T12:00:00')-new Date(d+'T12:00:00'))/864e5);return n<=0?L('วันนี้','today'):n===1?L('เมื่อวาน','yesterday'):n<7?L(n+' วันก่อน',n+' days ago'):fmtDay(d)};
  // one entry per day; the profile weight (used for targets and calorie burn) follows the newest entry
  function saveWeight(kg,day){
-  s.weightLog=(s.weightLog||[]).filter(x=>x.date!==day);s.weightLog.push({date:day,kg});
+  s.weightLog=(s.weightLog||[]).filter(x=>x.date!==day);s.weightLog.push({date:day,kg,at:Date.now()});
   s.profile=s.profile||{};s.profile.weight=latest().kg;
   save();if(typeof render==='function')render();
   if(document.querySelector('#weightPlan.page.active')&&window.go)go('weightPlan');
  }
  window.FWWeight={saveWeight,current};
 
+ // smart scales: weigh-ins arrive through Health Connect (card on the Movement page)
+ function scaleLink(){const H=window.FoodWellHealth;let sdk='none';try{sdk=H?H.sdk():'none'}catch(e){}
+  if(sdk==='none')return '';const g=(s.health&&s.health.on&&s.health.granted)||[];
+  return g.includes('READ_WEIGHT')?`<div class="wt-scale">⚖️ ${L('เชื่อมตาชั่งแล้ว น้ำหนักจะเข้ามาเองทุกครั้งที่ชั่ง','Scale connected · weigh-ins come in by themselves')}</div>`
+   :`<button type="button" class="wt-scale" id="wtScale">⚖️ ${L('เชื่อมตาชั่งอัจฉริยะ ให้น้ำหนักเข้าแอปเอง','Connect a smart scale to log weight automatically')} ›</button>`}
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#wtScale')){document.getElementById('wtModal')?.remove();go('move');
+  setTimeout(()=>{const c=document.getElementById('hcCard');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});const b=c.querySelector('#hcOn,#hcPerm');b&&b.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],{duration:600,iterations:2})}},250)}});
  function sheet(){
   document.getElementById('wtModal')?.remove();
   const cur=current(),last=latest(),P=s.weightPlan;
@@ -4805,7 +4828,7 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
    <div class="wt-step"><button type="button" data-d="-0.1" aria-label="-0.1">−</button><input id="wtKg" type="number" inputmode="decimal" step="0.1" min="20" max="300" value="${cur||''}" placeholder="60.0"><em>${L('กก.','kg')}</em><button type="button" data-d="0.1" aria-label="+0.1">+</button></div>
    <div class="wt-date"><span>📅</span><input id="wtDay" type="date" value="${today()}" max="${today()}"></div>
    <div class="wt-hint" id="wtHint"></div>
-   <div class="wt-row"><button type="button" class="no" id="wtNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="wtOk">${L('บันทึก','Save')}</button></div></div>`;
+   <div class="wt-row"><button type="button" class="no" id="wtNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="wtOk">${L('บันทึก','Save')}</button></div>${scaleLink()}</div>`;
   document.body.appendChild(m);
   const inp=m.querySelector('#wtKg'),day=m.querySelector('#wtDay'),hint=m.querySelector('#wtHint');
   const val=()=>r1(Number(inp.value));
