@@ -157,8 +157,11 @@ jobs:
             echo "===== Send to background and back (backup snapshot + resume) ====="
             adb shell input keyevent KEYCODE_HOME; sleep 3
             adb shell am start -n com.foodwell.app/.MainActivity; sleep 6
-            timeout 30 adb shell pidof com.foodwell.app || (echo "::error::the release build died after resume" && exit 1)
+            # the emulator's adb can stall for a while after an app switch: wait for it before deciding the app is gone
+            rm -f alive.txt; for i in 1 2 3; do timeout 60 adb wait-for-device; if timeout 30 adb shell pidof com.foodwell.app; then touch alive.txt; break; fi; echo "try $i: adb busy or app not running"; sleep 15; done; true
             timeout 60 adb logcat -d > logcat.txt || true
+            echo "===== crashes / ANRs / kills since launch ====="; grep -E "FATAL EXCEPTION|ANR in|am_anr|lowmemorykiller|am_kill.*foodwell|Process com.foodwell.app.*(died|has died)|Killing [0-9]+:com.foodwell.app" logcat.txt | tail -40 || true
+            test -f alive.txt || (echo "::error::the release build died after resume" && exit 1)
             ! grep -E "FATAL EXCEPTION" logcat.txt || (echo "::error::crash after resume" && grep -A 30 "FATAL EXCEPTION" logcat.txt && exit 1)
             echo "release build launched and resumed OK"
 
