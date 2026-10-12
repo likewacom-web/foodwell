@@ -10,6 +10,10 @@
  <!-- weigh-ins from smart scales (their apps save to Health Connect) -->
  <uses-permission android:name="android.permission.health.READ_WEIGHT" />
  <uses-permission android:name="android.permission.health.READ_BODY_FAT" />
+ <!-- Bluetooth bathroom scales (Android 12+): scan for their broadcasts; never used to find location -->
+ <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+ <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+ <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
  <!-- social apps offered as share buttons (Android 11+ package visibility) -->
  <queries>
   <package android:name="jp.naver.line.android"/><package android:name="com.facebook.katana"/><package android:name="com.instagram.android"/>

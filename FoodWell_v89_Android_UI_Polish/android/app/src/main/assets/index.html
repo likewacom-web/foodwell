@@ -4813,6 +4813,10 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  window.FWWeight={saveWeight,current};
 
  // smart scales: weigh-ins arrive through Health Connect (card on the Movement page)
+ // Bluetooth scale read directly (block v137 below defines window.FWScale)
+ function bleBtn(){let st='none';try{st=window.FoodWellScale?FoodWellScale.status():'none'}catch(e){}if(st!=='ok')return '';
+  return `<button type="button" class="wt-scale" id="wtBle" style="border-style:solid">📡 ${s.bleScale?L('อ่านจากตาชั่งบลูทูธ','Read from the Bluetooth scale'):L('เชื่อมตาชั่งบลูทูธโดยตรง (Orsen ฯลฯ)','Connect a Bluetooth scale directly (Orsen etc.)')}</button>`}
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#wtBle')){document.getElementById('wtModal')?.remove();window.FWScale&&FWScale.open()}});
  function scaleLink(){const H=window.FoodWellHealth;let sdk='none';try{sdk=H?H.sdk():'none'}catch(e){}
   if(sdk==='none')return '';const g=(s.health&&s.health.on&&s.health.granted)||[];
   return g.includes('READ_WEIGHT')?`<div class="wt-scale">⚖️ ${L('เชื่อมตาชั่งแล้ว น้ำหนักจะเข้ามาเองทุกครั้งที่ชั่ง','Scale connected · weigh-ins come in by themselves')}</div>`
@@ -4828,7 +4832,7 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
    <div class="wt-step"><button type="button" data-d="-0.1" aria-label="-0.1">−</button><input id="wtKg" type="number" inputmode="decimal" step="0.1" min="20" max="300" value="${cur||''}" placeholder="60.0"><em>${L('กก.','kg')}</em><button type="button" data-d="0.1" aria-label="+0.1">+</button></div>
    <div class="wt-date"><span>📅</span><input id="wtDay" type="date" value="${today()}" max="${today()}"></div>
    <div class="wt-hint" id="wtHint"></div>
-   <div class="wt-row"><button type="button" class="no" id="wtNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="wtOk">${L('บันทึก','Save')}</button></div>${scaleLink()}</div>`;
+   <div class="wt-row"><button type="button" class="no" id="wtNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="wtOk">${L('บันทึก','Save')}</button></div>${bleBtn()}${scaleLink()}</div>`;
   document.body.appendChild(m);
   const inp=m.querySelector('#wtKg'),day=m.querySelector('#wtDay'),hint=m.querySelector('#wtHint');
   const val=()=>r1(Number(inp.value));
@@ -4885,6 +4889,97 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  const og=window.go;if(og)window.go=function(p){if(p==='weigh'){og('home');setTimeout(sheet,150);return}return og.apply(this,arguments)};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{card()}catch(e){console.error(e)}return o};
  card();
+})();
+</script>
+<!-- v137 Bluetooth bathroom scales (window.FoodWellScale, Android 12+). Most low-cost scales (Orsen and other
+     OEM scales) broadcast the reading in their Bluetooth advertisement in a format of their own. Pairing learns
+     it: step on the scale, type the number it shows, and we look for that number (×10/×100/×20/×200, 16/24-bit,
+     either byte order) in the bytes of a nearby device whose bytes at that spot were changing. After that the
+     weight is read straight from the broadcast. Standard Weight Scale service readings ("std") work as is. -->
+<style>
+.sc-live{text-align:center;font-size:54px;font-weight:900;margin:8px 0 2px;font-variant-numeric:tabular-nums}.sc-live small{font-size:18px;font-weight:700;opacity:.7;margin-left:4px}
+.sc-st{text-align:center;font-size:13px;opacity:.85;min-height:20px;line-height:1.5}.sc-st.ok{color:#4fc38a;opacity:1;font-weight:800}.sc-st.bad{color:#ef8a6b;opacity:1}
+.sc-steps{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.7;opacity:.85}
+.sc-kg{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0}.sc-kg input{width:130px;text-align:center;font-size:30px;font-weight:900;border:0;border-bottom:2px solid #ff7eb6;background:none;color:inherit;font-family:inherit}
+.sc-link{display:block;margin:12px auto 0;border:0;background:none;color:#ff7eb6;font-weight:800;font-family:inherit;font-size:13px}
+</style>
+<script>
+(function(){
+ const B=window.FoodWellScale;if(!B||typeof s==='undefined')return;
+ let ok='none';try{ok=B.status()}catch(e){}
+ const L=(th,en)=>(window.fwLang&&fwLang()==='en')?en:th;
+ const hist=new Map();let listener=null,dumpLog=[];
+ const bytes=h=>{const a=new Uint8Array(h.length>>1);for(let i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a};
+ const rd=(b,off,n,le)=>{let v=0;for(let i=0;i<n;i++){const x=b[le?off+n-1-i:off+i];if(x===undefined)return NaN;v=v*256+x}return v};
+ window.onScale=function(kind,json){let d=json;try{d=JSON.parse(json)}catch(e){}
+  if(kind==='adv'){const b=bytes(d.raw||'');let h=hist.get(d.addr);if(!h){h=[];hist.set(d.addr,h)}h.push({t:Date.now(),b,name:d.name||'',rssi:d.rssi});if(h.length>80)h.shift();
+   dumpLog.push(`${new Date().toISOString().slice(11,23)} ${d.addr} ${d.rssi} ${d.name||'-'} ${d.raw}`);if(dumpLog.length>400)dumpLog.shift()}
+  listener&&listener(kind,d)};
+ // where in the broadcast is the number the user read off the scale?
+ const ENC=[[10,2],[100,2],[20,2],[200,2],[1000,3],[10,3],[100,3]];
+ function learn(kg){const since=Date.now()-25000;let best=null;
+  hist.forEach((h,addr)=>{const rec=h.filter(x=>x.t>=since);if(!rec.length)return;const last=rec[rec.length-1].b;
+   ENC.forEach(([div,n])=>[false,true].forEach(le=>{const want=Math.round(kg*div),tol=Math.max(1,Math.round(div/10));
+    for(let off=0;off+n<=last.length;off++){const v=rd(last,off,n,le);if(Math.abs(v-want)>tol)continue;
+     const seen=new Set(rec.map(x=>rd(x.b,off,n,le)).filter(x=>!isNaN(x)));
+     const sc=(seen.size>1?100:0)+(rec[rec.length-1].name?5:0)+Math.max(0,100+(rec[rec.length-1].rssi||-100))/10-(n===3?3:0)-(div===10||div===100?0:2);
+     if(!best||sc>best.sc)best={sc,addr,name:rec[rec.length-1].name,off,n,le,div,varied:seen.size>1}}}))});
+  return best}
+ function decode(e){const c=s.bleScale;if(!c)return null;const v=rd(e.b,c.off,c.n,c.le);if(isNaN(v))return null;const kg=Math.round(v/c.div*10)/10;return kg>=15&&kg<=300?kg:null}
+ const mine=(addr,name)=>{const c=s.bleScale;return c&&(addr===c.addr||(c.name&&name===c.name))};
+ function modal(html){document.getElementById('scModal')?.remove();const m=document.createElement('div');m.className='wt-modal';m.id='scModal';m.setAttribute('translate','no');
+  m.innerHTML=`<div class="wt-sheet" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)close()});return m}
+ function close(){listener=null;try{B.stop()}catch(e){}document.getElementById('scModal')?.remove()}
+ const errMsg=c=>c==='perm'?L('ต้องอนุญาต “อุปกรณ์ใกล้เคียง” (บลูทูธ) ก่อนนะ','Allow “Nearby devices” (Bluetooth) first'):c==='off'?L('เปิดบลูทูธก่อน แล้วลองใหม่','Turn Bluetooth on and try again'):c==='old'?L('ต้องใช้ Android 12 ขึ้นไป','Needs Android 12 or newer'):L('มือถือนี้ไม่รองรับบลูทูธ LE','This phone has no Bluetooth LE');
+ // ---- pair: learn the scale's format
+ function pair(){hist.clear();dumpLog=[];
+  const m=modal(`<h3>📡 ${L('จับคู่ตาชั่งบลูทูธ','Pair a Bluetooth scale')}</h3>
+   <ol class="sc-steps"><li>${L('ขึ้นชั่งเท้าเปล่า รอจนตัวเลขบนตาชั่งนิ่ง','Step on the scale barefoot and wait until the number settles')}</li><li>${L('พิมพ์ตัวเลขที่ตาชั่งโชว์ (กก.) แล้วกด “จับคู่” ทันที','Type the number the scale shows (kg) and tap “Pair” right away')}</li></ol>
+   <div class="sc-kg"><input id="scKg" type="number" inputmode="decimal" step="0.1" placeholder="0.0"><b>${L('กก.','kg')}</b></div>
+   <div class="sc-st" id="scSt">${L('กำลังค้นหาตาชั่ง…','Looking for the scale…')}</div>
+   <div class="wt-row"><button type="button" class="no" id="scNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="scGo">${L('จับคู่','Pair')}</button></div>
+   <button type="button" class="sc-link" id="scDump" style="display:none">📋 ${L('ส่งข้อมูลบลูทูธให้ผู้พัฒนา','Send Bluetooth data to the developer')}</button>`);
+  const st=m.querySelector('#scSt'),set=(t,c)=>{st.textContent=t;st.className='sc-st'+(c?' '+c:'')};
+  listener=(k,d)=>{if(k==='adv')set(L(`กำลังค้นหา… พบอุปกรณ์บลูทูธ ${hist.size} เครื่อง`,`Looking… ${hist.size} Bluetooth device${hist.size>1?'s':''} nearby`));
+   else if(k==='std'){s.bleScale={std:true,addr:d.addr,name:d.name};save();close();toast(L('จับคู่ตาชั่งแล้ว ✓','Scale paired ✓'));window.FWWeight&&FWWeight.saveWeight(d.kg,localDay())}
+   else if(k==='error')set(errMsg(d),'bad');else if(k==='scan'&&d==='off'&&!m.dataset.done)set(L('หยุดค้นหาแล้ว · กด “จับคู่” เพื่อค้นหาใหม่','Stopped looking · tap “Pair” to look again'))};
+  m.querySelector('#scNo').onclick=close;
+  m.querySelector('#scGo').onclick=()=>{const kg=Number(m.querySelector('#scKg').value);
+   if(!(kg>=15&&kg<=300)){set(L('พิมพ์ตัวเลขที่ตาชั่งโชว์ก่อน','Type the number the scale shows first'),'bad');return}
+   const b=learn(kg);
+   if(b&&(b.varied||b.name)){m.dataset.done=1;s.bleScale={addr:b.addr,name:b.name||'',off:b.off,n:b.n,le:b.le,div:b.div};save();close();
+    toast(L('จับคู่ตาชั่งแล้ว ✓ ครั้งต่อไปแอปอ่านน้ำหนักให้เอง','Scale paired ✓ next time the app reads it for you'));
+    window.FWWeight&&FWWeight.saveWeight(kg,localDay());return}
+   set(L('ยังหาไม่เจอ ลองลงจากตาชั่ง ขึ้นใหม่ พอเลขนิ่งแล้วพิมพ์และกดจับคู่อีกครั้ง','Not found yet · step off, step on again, and when it settles type the number and tap Pair'),'bad');
+   m.querySelector('#scDump').style.display='block';try{B.start(90)}catch(e){}};
+  m.querySelector('#scDump').onclick=()=>{const kg=m.querySelector('#scKg').value;
+   const txt=`MeowFit scale data\nscale shows: ${kg} kg\nphone: ${navigator.userAgent}\n\n`+dumpLog.slice(-250).join('\n');
+   try{if(window.FoodWellShare&&FoodWellShare.share){FoodWellShare.share(txt,'','');return}}catch(e){}
+   try{navigator.clipboard.writeText(txt);toast(L('คัดลอกแล้ว วางส่งให้ผู้พัฒนาได้เลย','Copied · paste it to the developer'))}catch(e){}};
+  try{B.start(90)}catch(e){}}
+ // ---- read: weigh-in from a paired scale
+ function read(){
+  const c=s.bleScale;let vals=[],done=false;
+  const m=modal(`<h3>⚖️ ${L('ชั่งน้ำหนัก','Weigh in')}${c.name?` · <small style="opacity:.7">${c.name}</small>`:''}</h3>
+   <div class="sc-live" id="scLive">--.-<small>${L('กก.','kg')}</small></div>
+   <div class="sc-st" id="scSt">${L('ขึ้นชั่งได้เลย 🐾','Step on the scale 🐾')}</div>
+   <div class="wt-row"><button type="button" class="no" id="scNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="scOk" disabled style="opacity:.5">${L('บันทึก','Save')}</button></div>
+   <button type="button" class="sc-link" id="scRe">↻ ${L('จับคู่ตาชั่งใหม่','Pair the scale again')}</button>`);
+  const live=m.querySelector('#scLive'),st=m.querySelector('#scSt'),okb=m.querySelector('#scOk');let kg=null;
+  const show=v=>{live.innerHTML=`${v.toFixed(1)}<small>${L('กก.','kg')}</small>`};
+  const lock=v=>{done=true;kg=v;show(v);st.textContent=L('น้ำหนักนิ่งแล้ว ✓','Reading is steady ✓');st.className='sc-st ok';okb.disabled=false;okb.style.opacity=1;try{B.stop()}catch(e){}};
+  listener=(k,d)=>{if(done)return;
+   if(k==='std'&&mine(d.addr,d.name)){lock(d.kg);return}
+   if(k==='adv'&&mine(d.addr,d.name)&&!c.std){const h=hist.get(d.addr);const v=h&&decode(h[h.length-1]);if(!v)return;show(v);
+    vals.push({t:Date.now(),v});vals=vals.filter(x=>Date.now()-x.t<4000);
+    const same=vals.filter(x=>Math.abs(x.v-v)<0.05);if(same.length>=3&&same[same.length-1].t-same[0].t>=1200)lock(v)}
+   else if(k==='error'){st.textContent=errMsg(d);st.className='sc-st bad'}
+   else if(k==='scan'&&d==='off'){st.textContent=L('หมดเวลา · กดยกเลิกแล้วลองใหม่','Timed out · close and try again')}};
+  m.querySelector('#scNo').onclick=close;
+  m.querySelector('#scRe').onclick=()=>{close();pair()};
+  okb.onclick=()=>{if(kg){close();window.FWWeight&&FWWeight.saveWeight(kg,localDay());toast(L(`บันทึก ${kg} กก. จากตาชั่งแล้ว ⚖️`,`Saved ${kg} kg from the scale ⚖️`))}};
+  try{B.start(90)}catch(e){}}
+ window.FWScale={open:()=>s.bleScale?read():pair(),pair,status:()=>ok,forget:()=>{delete s.bleScale;save()}};
 })();
 </script>
 <!-- v135 Paw branding: profiles still on the old default leaf avatar switch to the paw once -->

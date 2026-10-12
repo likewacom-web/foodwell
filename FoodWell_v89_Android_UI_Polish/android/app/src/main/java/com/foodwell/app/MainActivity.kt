@@ -44,6 +44,7 @@ import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var web: WebView
+    private lateinit var scale: BleScale
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
@@ -86,6 +87,7 @@ class MainActivity : ComponentActivity() {
         rooms = FriendRooms(this) { fn, arg -> callJs(fn, arg) }
         stepsLive = StepCounter.Live(this) { callJs("onSteps", JSONObject.quote(StepCounter.days(this).toString())) }
         health = HealthSync(this) { fn, arg -> callJs(fn, arg) }
+        scale = BleScale(this) { fn, arg -> callJs(fn, arg) }
         pendingPrivacy = isPrivacyIntent(intent)
         stepPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
             if (ok) { StepCounter.setEnabled(this, true); stepsLive.start() }
@@ -188,6 +190,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(ShareApi(this@MainActivity), "FoodWellShare")
             addJavascriptInterface(StepsApi(), "FoodWellSteps")
             addJavascriptInterface(HealthApi(), "FoodWellHealth")
+            addJavascriptInterface(scale, "FoodWellScale")
             addJavascriptInterface(LocalBackup(this@MainActivity), "FoodWellBackup")
             loadUrl("file:///android_asset/index.html")
         }
@@ -334,6 +337,7 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         stepsLive.stop()
         pro.onPause()
+        if (::scale.isInitialized) scale.onPause()
         // stop the page's animations (exercise clips etc.) while the app isn't on screen; JS still runs
         if (::web.isInitialized) web.onPause()
         super.onPause()
