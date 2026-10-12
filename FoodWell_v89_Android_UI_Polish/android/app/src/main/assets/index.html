@@ -4908,12 +4908,17 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  const B=window.FoodWellScale;if(!B||typeof s==='undefined')return;
  let ok='none';try{ok=B.status()}catch(e){}
  const L=(th,en)=>(window.fwLang&&fwLang()==='en')?en:th;
- const hist=new Map();let listener=null,dumpLog=[];
+ const hist=new Map(),probed=new Set();let listener=null,dumpLog=[];
  const bytes=h=>{const a=new Uint8Array(h.length>>1);for(let i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a};
  const rd=(b,off,n,le)=>{let v=0;for(let i=0;i<n;i++){const x=b[le?off+n-1-i:off+i];if(x===undefined)return NaN;v=v*256+x}return v};
  window.onScale=function(kind,json){let d=json;try{d=JSON.parse(json)}catch(e){}
-  if(kind==='adv'){const b=bytes(d.raw||'');let h=hist.get(d.addr);if(!h){h=[];hist.set(d.addr,h)}h.push({t:Date.now(),b,name:d.name||'',rssi:d.rssi});if(h.length>80)h.shift();
-   dumpLog.push(`${new Date().toISOString().slice(11,23)} ${d.addr} ${d.rssi} ${d.name||'-'} ${d.raw}`);if(dumpLog.length>400)dumpLog.shift()}
+  const ts=new Date().toISOString().slice(11,23),put=(key,e)=>{let h=hist.get(key);if(!h){h=[];hist.set(key,h)}h.push(e);if(h.length>80)h.shift()};
+  if(kind==='adv'){put(d.addr,{t:Date.now(),b:bytes(d.raw||''),name:d.name||'',rssi:d.rssi,raw:d.raw});dumpLog.push(`${ts} A ${d.addr} ${d.rssi} ${d.name||'-'} ${d.raw}`)}
+  // notifications from a device we connected to: kept under "addr|characteristic"
+  else if(kind==='gatt'){const a=hist.get(d.addr),last=a&&a[a.length-1];put(d.addr+'|'+d.c,{t:Date.now(),b:bytes(d.hex||''),name:last?last.name:'',rssi:last?last.rssi:-60});dumpLog.push(`${ts} G ${d.addr} ${d.c} ${d.hex}`)}
+  else if(kind==='svcs'){dumpLog.push(`${ts} S ${d.addr} ${(d.list||[]).map(x=>x.s+'/'+x.c+':'+x.p).join(' ')}`)}
+  else if(kind==='gattoff'){probed.delete(d);dumpLog.push(`${ts} X ${d}`)}
+  if(dumpLog.length>600)dumpLog.shift();
   listener&&listener(kind,d)};
  // where in the broadcast is the number the user read off the scale?
  const ENC=[[10,2],[100,2],[20,2],[200,2],[1000,3],[10,3],[100,3]];
@@ -4923,10 +4928,15 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
     for(let off=0;off+n<=last.length;off++){const v=rd(last,off,n,le);if(Math.abs(v-want)>tol)continue;
      const seen=new Set(rec.map(x=>rd(x.b,off,n,le)).filter(x=>!isNaN(x)));
      const sc=(seen.size>1?100:0)+(rec[rec.length-1].name?5:0)+Math.max(0,100+(rec[rec.length-1].rssi||-100))/10-(n===3?3:0)-(div===10||div===100?0:2);
-     if(!best||sc>best.sc)best={sc,addr,name:rec[rec.length-1].name,off,n,le,div,varied:seen.size>1}}}))});
+     if(!best||sc>best.sc)best={sc,addr:addr.split('|')[0],ch:addr.split('|')[1]||'',name:rec[rec.length-1].name,off,n,le,div,varied:seen.size>1}}}))});
   return best}
  function decode(e){const c=s.bleScale;if(!c)return null;const v=rd(e.b,c.off,c.n,c.le);if(isNaN(v))return null;const kg=Math.round(v/c.div*10)/10;return kg>=15&&kg<=300?kg:null}
  const mine=(addr,name)=>{const c=s.bleScale;return c&&(addr===c.addr||(c.name&&name===c.name))};
+ // connect to the likeliest devices (strongest signal, not phones/laptops/earbuds by Apple or Microsoft) and listen
+ const company=b=>{for(let i=0;i<b.length;){const n=b[i];if(!n)break;if(b[i+1]===0xff&&n>=3)return b[i+2]|(b[i+3]<<8);i+=n+1}return -1};
+ function probeNearby(max){const now=Date.now(),c=[];
+  hist.forEach((h,k)=>{if(k.includes('|'))return;const e=h[h.length-1];if(now-e.t>8000||e.rssi<-82||probed.has(k))return;const co=company(e.b);if(co===0x004c||co===0x0006)return;c.push([k,e.rssi+(e.name?3:0)])});
+  c.sort((a,b)=>b[1]-a[1]).slice(0,max).forEach(([k])=>{probed.add(k);try{B.probe(k)}catch(e){}})}
  function modal(html){document.getElementById('scModal')?.remove();const m=document.createElement('div');m.className='wt-modal';m.id='scModal';m.setAttribute('translate','no');
   m.innerHTML=`<div class="wt-sheet" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)close()});return m}
  function close(){listener=null;try{B.stop()}catch(e){}document.getElementById('scModal')?.remove()}
@@ -4934,11 +4944,11 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  // ---- pair: learn the scale's format
  function pair(){hist.clear();dumpLog=[];
   const m=modal(`<h3>📡 ${L('จับคู่ตาชั่งบลูทูธ','Pair a Bluetooth scale')}</h3>
-   <ol class="sc-steps"><li>${L('ขึ้นชั่งเท้าเปล่า รอจนตัวเลขบนตาชั่งนิ่ง','Step on the scale barefoot and wait until the number settles')}</li><li>${L('พิมพ์ตัวเลขที่ตาชั่งโชว์ (กก.) แล้วกด “จับคู่” ทันที','Type the number the scale shows (kg) and tap “Pair” right away')}</li></ol>
+   <ol class="sc-steps"><li>${L('ปิดแอป Orsen/แอปตาชั่งก่อน วางมือถือไว้ใกล้ตาชั่ง','Close the scale\'s own app and keep the phone close to the scale')}</li><li>${L('ขึ้นชั่งเท้าเปล่า รอจนตัวเลขบนตาชั่งนิ่ง','Step on the scale barefoot and wait until the number settles')}</li><li>${L('พิมพ์ตัวเลขที่ตาชั่งโชว์ (กก.) แล้วกด “จับคู่” ทันที','Type the number the scale shows (kg) and tap “Pair” right away')}</li></ol>
    <div class="sc-kg"><input id="scKg" type="number" inputmode="decimal" step="0.1" placeholder="0.0"><b>${L('กก.','kg')}</b></div>
    <div class="sc-st" id="scSt">${L('กำลังค้นหาตาชั่ง…','Looking for the scale…')}</div>
    <div class="wt-row"><button type="button" class="no" id="scNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="scGo">${L('จับคู่','Pair')}</button></div>
-   <button type="button" class="sc-link" id="scDump" style="display:none">📋 ${L('ส่งข้อมูลบลูทูธให้ผู้พัฒนา','Send Bluetooth data to the developer')}</button>`);
+   <button type="button" class="sc-link" id="scDump">📋 ${L('ส่งข้อมูลบลูทูธให้ผู้พัฒนา','Send Bluetooth data to the developer')}</button>`);
   const st=m.querySelector('#scSt'),set=(t,c)=>{st.textContent=t;st.className='sc-st'+(c?' '+c:'')};
   listener=(k,d)=>{if(k==='adv')set(L(`กำลังค้นหา… พบอุปกรณ์บลูทูธ ${hist.size} เครื่อง`,`Looking… ${hist.size} Bluetooth device${hist.size>1?'s':''} nearby`));
    else if(k==='std'){s.bleScale={std:true,addr:d.addr,name:d.name};save();close();toast(L('จับคู่ตาชั่งแล้ว ✓','Scale paired ✓'));window.FWWeight&&FWWeight.saveWeight(d.kg,localDay())}
@@ -4947,16 +4957,16 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
   m.querySelector('#scGo').onclick=()=>{const kg=Number(m.querySelector('#scKg').value);
    if(!(kg>=15&&kg<=300)){set(L('พิมพ์ตัวเลขที่ตาชั่งโชว์ก่อน','Type the number the scale shows first'),'bad');return}
    const b=learn(kg);
-   if(b&&(b.varied||b.name)){m.dataset.done=1;s.bleScale={addr:b.addr,name:b.name||'',off:b.off,n:b.n,le:b.le,div:b.div};save();close();
+   if(b&&(b.varied||b.name)){m.dataset.done=1;s.bleScale={addr:b.addr,ch:b.ch,name:b.name||'',off:b.off,n:b.n,le:b.le,div:b.div};save();close();
     toast(L('จับคู่ตาชั่งแล้ว ✓ ครั้งต่อไปแอปอ่านน้ำหนักให้เอง','Scale paired ✓ next time the app reads it for you'));
     window.FWWeight&&FWWeight.saveWeight(kg,localDay());return}
    set(L('ยังหาไม่เจอ ลองลงจากตาชั่ง ขึ้นใหม่ พอเลขนิ่งแล้วพิมพ์และกดจับคู่อีกครั้ง','Not found yet · step off, step on again, and when it settles type the number and tap Pair'),'bad');
-   m.querySelector('#scDump').style.display='block';try{B.start(90)}catch(e){}};
+   try{B.start(90)}catch(e){}probeNearby(3)};
   m.querySelector('#scDump').onclick=()=>{const kg=m.querySelector('#scKg').value;
-   const txt=`MeowFit scale data\nscale shows: ${kg} kg\nphone: ${navigator.userAgent}\n\n`+dumpLog.slice(-250).join('\n');
+   const txt=`MeowFit scale data\nscale shows: ${kg} kg\nphone: ${navigator.userAgent}\n\n`+dumpLog.filter(l=>!/ A /.test(l)).concat(dumpLog.filter(l=>/ A /.test(l)).slice(-250)).join('\n');
    try{if(window.FoodWellShare&&FoodWellShare.share){FoodWellShare.share(txt,'','');return}}catch(e){}
    try{navigator.clipboard.writeText(txt);toast(L('คัดลอกแล้ว วางส่งให้ผู้พัฒนาได้เลย','Copied · paste it to the developer'))}catch(e){}};
-  try{B.start(90)}catch(e){}}
+  try{B.start(90)}catch(e){}probed.clear();const pt=setInterval(()=>{if(!document.getElementById('scModal')){clearInterval(pt);return}probeNearby(2)},4000)}
  // ---- read: weigh-in from a paired scale
  function read(){
   const c=s.bleScale;let vals=[],done=false;
@@ -4970,7 +4980,8 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
   const lock=v=>{done=true;kg=v;show(v);st.textContent=L('น้ำหนักนิ่งแล้ว ✓','Reading is steady ✓');st.className='sc-st ok';okb.disabled=false;okb.style.opacity=1;try{B.stop()}catch(e){}};
   listener=(k,d)=>{if(done)return;
    if(k==='std'&&mine(d.addr,d.name)){lock(d.kg);return}
-   if(k==='adv'&&mine(d.addr,d.name)&&!c.std){const h=hist.get(d.addr);const v=h&&decode(h[h.length-1]);if(!v)return;show(v);
+   if(k==='gattoff'&&c.ch&&d===c.addr){setTimeout(()=>{try{B.probe(c.addr)}catch(e){}},1500);return}
+   if((k==='adv'&&!c.ch&&mine(d.addr,d.name)||k==='gatt'&&c.ch&&d.addr===c.addr&&d.c===c.ch)&&!c.std){const h=hist.get(c.ch?d.addr+'|'+c.ch:d.addr);const v=h&&decode(h[h.length-1]);if(!v)return;show(v);
     vals.push({t:Date.now(),v});vals=vals.filter(x=>Date.now()-x.t<4000);
     const same=vals.filter(x=>Math.abs(x.v-v)<0.05);if(same.length>=3&&same[same.length-1].t-same[0].t>=1200)lock(v)}
    else if(k==='error'){st.textContent=errMsg(d);st.className='sc-st bad'}
@@ -4978,7 +4989,7 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
   m.querySelector('#scNo').onclick=close;
   m.querySelector('#scRe').onclick=()=>{close();pair()};
   okb.onclick=()=>{if(kg){close();window.FWWeight&&FWWeight.saveWeight(kg,localDay());toast(L(`บันทึก ${kg} กก. จากตาชั่งแล้ว ⚖️`,`Saved ${kg} kg from the scale ⚖️`))}};
-  try{B.start(90)}catch(e){}}
+  try{B.start(90)}catch(e){}if(c.ch){try{B.probe(c.addr)}catch(e){}}}
  window.FWScale={open:()=>s.bleScale?read():pair(),pair,status:()=>ok,forget:()=>{delete s.bleScale;save()}};
 })();
 </script>

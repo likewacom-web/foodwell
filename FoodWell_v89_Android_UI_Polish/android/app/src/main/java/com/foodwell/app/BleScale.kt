@@ -3,6 +3,7 @@ package com.foodwell.app
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -36,6 +37,9 @@ import java.util.UUID
  * Answers the page through onScale(kind, json):
  *  "adv"  {addr, name, rssi, raw}   raw = advertisement + scan response as hex
  *  "std"  {addr, name, kg}          standard Weight Scale measurement
+ *  "svcs" {addr, list:[{s, c, p}]}  services / characteristics of a probed device (p = properties)
+ *  "gatt" {addr, c, hex}            notification from a probed device (scales that send the weight
+ *                                   only over a connection)
  *  "scan" "on" | "off"
  *  "error" "old" | "none" | "perm" | "off"
  */
@@ -109,6 +113,7 @@ class BleScale(private val activity: ComponentActivity, private val emit: (fn: S
         if (scanning) runCatching { adapter?.bluetoothLeScanner?.stopScan(cb) }
         scanning = false
         runCatching { gatt?.close() }; gatt = null
+        probes.values.forEach { runCatching { it.disconnect(); it.close() } }; probes.clear(); pending.clear()
         emit("onScale", q("scan") + "," + q("off"))
     }
 
@@ -173,6 +178,72 @@ class BleScale(private val activity: ComponentActivity, private val emit: (fn: S
             val name = runCatching { g.device.name }.getOrNull() ?: ""
             emit("onScale", q("std") + "," + q(JSONObject().put("addr", g.device.address).put("name", name)
                 .put("kg", Math.round(kg * 10) / 10.0).toString()))
+        }
+    }
+
+    // ---- probe: connect to a device and listen to every characteristic that can notify / indicate
+    private val probes = HashMap<String, BluetoothGatt>()
+    private val pending = HashMap<String, ArrayDeque<BluetoothGattDescriptor>>()
+
+    /** Connects to [addr] (at most 3 at a time) and reports its services and notifications. */
+    @JavascriptInterface
+    @SuppressLint("MissingPermission")
+    fun probe(addr: String) = main.post {
+        if (status() != "ok" || !granted() || adapter?.isEnabled != true) return@post
+        if (probes.containsKey(addr) || probes.size >= 3) return@post
+        val dev = runCatching { adapter?.getRemoteDevice(addr) }.getOrNull() ?: return@post
+        probes[addr] = dev.connectGatt(activity, false, probeCb, BluetoothDevice.TRANSPORT_LE)
+        main.removeCallbacks(timeout); main.postDelayed(timeout, secs * 1000L)
+    }
+
+    private fun short(u: UUID): String = u.toString().let { if (it.endsWith("-0000-1000-8000-00805f9b34fb") && it.startsWith("0000")) it.substring(4, 8) else it }
+
+    @SuppressLint("MissingPermission")
+    @Suppress("DEPRECATION")
+    private fun nextDescriptor(g: BluetoothGatt) {
+        val d = pending[g.device.address]?.removeFirstOrNull() ?: return
+        val v = if (d.characteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+            BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE else BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+        g.setCharacteristicNotification(d.characteristic, true)
+        if (Build.VERSION.SDK_INT >= 33) g.writeDescriptor(d, v) else { d.value = v; g.writeDescriptor(d) }
+    }
+
+    private val probeCb = object : BluetoothGattCallback() {
+        @SuppressLint("MissingPermission")
+        override fun onConnectionStateChange(g: BluetoothGatt, status: Int, newState: Int) {
+            if (newState == BluetoothProfile.STATE_CONNECTED) main.post { g.discoverServices() }
+            else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                runCatching { g.close() }
+                main.post { if (probes[g.device.address] === g) probes.remove(g.device.address) }
+                emit("onScale", q("gattoff") + "," + q(g.device.address))
+            }
+        }
+
+        override fun onServicesDiscovered(g: BluetoothGatt, status: Int) {
+            val list = org.json.JSONArray()
+            val q2 = ArrayDeque<BluetoothGattDescriptor>()
+            for (sv in g.services) for (ch in sv.characteristics) {
+                list.put(JSONObject().put("s", short(sv.uuid)).put("c", short(ch.uuid)).put("p", ch.properties))
+                val canListen = ch.properties and (BluetoothGattCharacteristic.PROPERTY_NOTIFY or BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+                if (canListen) ch.getDescriptor(CCCD)?.let { q2.addLast(it) }
+            }
+            emit("onScale", q("svcs") + "," + q(JSONObject().put("addr", g.device.address).put("list", list).toString()))
+            main.post { pending[g.device.address] = q2; nextDescriptor(g) }
+        }
+
+        override fun onDescriptorWrite(g: BluetoothGatt, d: BluetoothGattDescriptor, status: Int) { main.post { nextDescriptor(g) } }
+
+        @Deprecated("Deprecated in Java")
+        @Suppress("DEPRECATION")
+        override fun onCharacteristicChanged(g: BluetoothGatt, ch: BluetoothGattCharacteristic) {
+            if (Build.VERSION.SDK_INT < 33) note(g, ch, ch.value ?: return)
+        }
+
+        override fun onCharacteristicChanged(g: BluetoothGatt, ch: BluetoothGattCharacteristic, value: ByteArray) = note(g, ch, value)
+
+        private fun note(g: BluetoothGatt, ch: BluetoothGattCharacteristic, v: ByteArray) {
+            emit("onScale", q("gatt") + "," + q(JSONObject().put("addr", g.device.address).put("c", short(ch.uuid))
+                .put("hex", v.joinToString("") { "%02x".format(it) }).toString()))
         }
     }
 
