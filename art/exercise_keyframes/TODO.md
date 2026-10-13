@@ -4,7 +4,8 @@ The first 20 moves are finished (key frames in this folder, clips in assets/anim
 the vector cat (workout_rig.js). Their poses are listed in `poses_todo.py` (view, start pose A, end pose B).
 
 ## How to continue
-1. For each move generate A, then B (with A as the image reference, so props and character match), then the middle
+1. (Plan used for the boxing set, cheaper and good enough: only A and B per move, the clip builder makes the middle.)
+   For each move generate A, then B (with A as the image reference, so props and character match), then the middle
    frame M (references A and B, "exactly halfway between"). Prompt style: see EXERCISE_ART_PROMPTS.md / earlier ones.
    Character references (Canva media ids): side `MAHXnc0RAeM` (squat_a), `MAHXncQFE-o` (walk_a); front `MAHXnQubxXo`
    (jacks_a); floor `MAHXnR4Yj2k` (plank_a), `MAHXnWXeysE` (bridge_a); gym `MAHXnjOqTmg` (row_a).
@@ -17,3 +18,4 @@ the vector cat (workout_rig.js). Their poses are listed in `poses_todo.py` (view
 - `kpush_a` MAHXojEfNPg
 - `dips_a` MAHXpvDZClU
 - `deadbug_a` MAHXpzt3iU4
+- `legsw_b` MAHX7OONLjM (check: leg looks forward like A, may need a redo with the leg clearly behind)
