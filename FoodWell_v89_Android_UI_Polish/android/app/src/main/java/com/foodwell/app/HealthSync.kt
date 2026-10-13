@@ -8,8 +8,10 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -22,7 +24,8 @@ import java.time.ZoneId
 
 /**
  * Reads steps, active calories and workouts that watches and health apps (Samsung Health, Google Fit,
- * Garmin, Fitbit, Mi Fitness …) write to Android's Health Connect. Read-only; FoodWell never writes there.
+ * Garmin, Fitbit, Mi Fitness …) write to Android's Health Connect, and weight / body fat from smart scales
+ * (their apps — Zepp Life, Huawei Health, Withings, Eufy, Renpho … — save each weigh-in there). Read-only; FoodWell never writes there.
  * Answers the page through onHealth(kind, json).
  */
 class HealthSync(private val activity: ComponentActivity, private val emit: (fn: String, arg: String) -> Unit) {
@@ -30,6 +33,8 @@ class HealthSync(private val activity: ComponentActivity, private val emit: (fn:
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+        HealthPermission.getReadPermission(WeightRecord::class),
+        HealthPermission.getReadPermission(BodyFatRecord::class),
     )
     private val launcher: ActivityResultLauncher<Set<String>> =
         activity.registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
@@ -103,6 +108,21 @@ class HealthSync(private val activity: ComponentActivity, private val emit: (fn:
             }
         }
         out.put("sessions", sessions)
+        // smart-scale weigh-ins: [{id, t, kg, src}] and body fat [{t, pct}]
+        val since = from.atZone(zone).toInstant()
+        val weights = JSONArray()
+        if (HealthPermission.getReadPermission(WeightRecord::class) in g) {
+            for (r in client.readRecords(ReadRecordsRequest(WeightRecord::class, TimeRangeFilter.between(since, Instant.now()))).records)
+                weights.put(JSONObject().put("id", r.metadata.id).put("t", r.time.toEpochMilli())
+                    .put("kg", Math.round(r.weight.inKilograms * 10) / 10.0).put("src", r.metadata.dataOrigin.packageName))
+        }
+        out.put("weights", weights)
+        val fat = JSONArray()
+        if (HealthPermission.getReadPermission(BodyFatRecord::class) in g) {
+            for (r in client.readRecords(ReadRecordsRequest(BodyFatRecord::class, TimeRangeFilter.between(since, Instant.now()))).records)
+                fat.put(JSONObject().put("t", r.time.toEpochMilli()).put("pct", Math.round(r.percentage.value * 10) / 10.0))
+        }
+        out.put("bodyFat", fat)
         out.put("granted", JSONArray(g.map { short(it) }))
         return out.toString()
     }

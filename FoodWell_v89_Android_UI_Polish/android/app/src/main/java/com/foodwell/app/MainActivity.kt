@@ -25,6 +25,9 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +44,7 @@ import java.io.File
 
 class MainActivity : ComponentActivity() {
     private lateinit var web: WebView
+    private lateinit var scale: BleScale
     private lateinit var fileChooserLauncher: ActivityResultLauncher<Intent>
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
@@ -58,6 +62,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupShortcuts()
         // Last theme chosen in the page (light by default), so the first frame isn't the wrong colour.
         val themePrefs = getSharedPreferences("foodwell_theme", MODE_PRIVATE)
         val dark = runCatching { Color.parseColor(themePrefs.getString("bg", "#f6f7fa")) }.getOrDefault(Color.rgb(246, 247, 250))
@@ -82,6 +87,7 @@ class MainActivity : ComponentActivity() {
         rooms = FriendRooms(this) { fn, arg -> callJs(fn, arg) }
         stepsLive = StepCounter.Live(this) { callJs("onSteps", JSONObject.quote(StepCounter.days(this).toString())) }
         health = HealthSync(this) { fn, arg -> callJs(fn, arg) }
+        scale = BleScale(this) { fn, arg -> callJs(fn, arg) }
         pendingPrivacy = isPrivacyIntent(intent)
         stepPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
             if (ok) { StepCounter.setEnabled(this, true); stepsLive.start() }
@@ -105,7 +111,7 @@ class MainActivity : ComponentActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView, url: String?) {
                     // Opened from a reminder: jump to its page once the app has loaded.
-                    pendingPage?.let { p -> pendingPage = null; view.postDelayed({ callJs("go", JSONObject.quote(p)) }, 400) }
+                    pendingPage?.let { p -> pendingPage = null; view.postDelayed({ openPage(p) }, 400) }
                     // Opened from a friend's invite link (foodwell://join?c=CODE).
                     pendingJoin?.let { c -> pendingJoin = null; view.postDelayed({ callJs("onJoinLink", JSONObject.quote(c)) }, 900) }
                     if (pendingPrivacy) { pendingPrivacy = false; view.postDelayed({ callJs("fwPrivacy", "") }, 700) }
@@ -184,6 +190,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(ShareApi(this@MainActivity), "FoodWellShare")
             addJavascriptInterface(StepsApi(), "FoodWellSteps")
             addJavascriptInterface(HealthApi(), "FoodWellHealth")
+            addJavascriptInterface(scale, "FoodWellScale")
             addJavascriptInterface(LocalBackup(this@MainActivity), "FoodWellBackup")
             loadUrl("file:///android_asset/index.html")
         }
@@ -311,7 +318,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.getStringExtra("page")?.let { callJs("go", JSONObject.quote(it)) }
+        intent.getStringExtra("page")?.let { openPage(it) }
         joinCode(intent)?.let { callJs("onJoinLink", JSONObject.quote(it)) }
         if (isPrivacyIntent(intent)) callJs("fwPrivacy", "")
     }
@@ -330,11 +337,15 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         stepsLive.stop()
         pro.onPause()
+        if (::scale.isInitialized) scale.onPause()
+        // stop the page's animations (exercise clips etc.) while the app isn't on screen; JS still runs
+        if (::web.isInitialized) web.onPause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        if (::web.isInitialized) web.onResume()
         stepsLive.start()
         pro.onResume()
     }
@@ -343,6 +354,22 @@ class MainActivity : ComponentActivity() {
         pro.onDestroy()
         super.onDestroy()
     }
+
+    /** Pages opened from reminders, the widget and app-icon shortcuts; "addfood" opens the food form ready to type. */
+    private fun openPage(p: String) = if (p == "addfood") callJs("fwAddFood", "") else callJs("go", JSONObject.quote(p))
+
+    /** Long-press the app icon: "Log food" and "Water" (labels follow the in-app language, refreshed on each start). */
+    private fun setupShortcuts() = runCatching {
+        fun sc(id: String, th: String, en: String, page: String, icon: Int) = ShortcutInfoCompat.Builder(this, id)
+            .setShortLabel(Lang.t(this, th, en))
+            .setIcon(IconCompat.createWithResource(this, icon))
+            .setIntent(Intent(this, MainActivity::class.java).setAction(Intent.ACTION_VIEW).putExtra("page", page))
+            .build()
+        ShortcutManagerCompat.setDynamicShortcuts(this, listOf(
+            sc("add_food", "บันทึกอาหาร", "Log food", "addfood", R.drawable.shortcut_food),
+            sc("water", "ดื่มน้ำ", "Water", "water", R.drawable.shortcut_water)
+        ))
+    }.onFailure { Log.w("FoodWell", "shortcuts", it) }
 
     /** arg must already be a JS literal (e.g. JSONObject.quote(...), "true"). */
     private fun callJs(fn: String, arg: String) = runOnUiThread {

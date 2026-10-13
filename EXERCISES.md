@@ -5,7 +5,7 @@
 
 **id** ใช้อ้างอิงในโค้ด และควรใช้เป็นชื่อไฟล์อนิเมชัน เช่น `anim/squat.webp`
 
-**อนิเมชันที่ใส่แล้ว:** `march` · เพิ่มไฟล์ใหม่ที่ `assets/anim/<id>.webp` แล้วเพิ่ม id ใน `const ANIM=new Set([...])` (index.html บล็อก v117)
+**ภาพที่ใส่แล้ว (แมว MeowFit ภาพเคลื่อนไหว 32 เฟรม):** `armc` `box` `bridge` `calf` `catcow` `climb` `hip` `jacks` `knees` `lunge` `march` `neck` `plank` `push` `row` `skater` `squat` `superman` `walk` `wallsit` — ไฟล์ `assets/anim/<id>.webp` สร้างจากภาพวาดหลัก (key frame) ใน `art/exercise_keyframes/` ด้วย `python3 art/exercise_keyframes/build_clips.py` แล้วใส่ `<id>:'v'` ใน `const ANIM={...}` (index.html) ท่าที่ยังไม่มีภาพจะใช้ตัวการ์ตูนเวกเตอร์ (workout_rig.js)
 
 ## วอร์มอัพ
 
@@ -125,3 +125,17 @@
 | `kneeup` | 🦵 ยกเข่าดึงแขน | Standing knee drives | วินาที | 30 | ยกแขนเหนือหัว ดึงศอกลงพร้อมยกเข่าขึ้น สลับข้าง |
 | `latraise` | 🏋️ ยกดัมเบลด้านข้าง | Lateral raises | ครั้ง | 12 | ถือดัมเบลข้างลำตัว ยกออกด้านข้างถึงระดับไหล่ |
 | `dbrow` | 🏋️ ดัมเบลโรว์ | Bent-over rows | ครั้ง | 12 | โน้มตัว หลังตรง ดึงดัมเบลเข้าหาเอว บีบสะบัก |
+
+## ชุดมวย (v138)
+| id | ท่า | Move |
+|---|---|---|
+| `shuffle` | ขยับเท้านักมวย | Boxer shuffle |
+| `jab` | หมัดแย็บ | Jab |
+| `jabcross` | แย็บ-ตรง (1-2) | Jab-cross |
+| `hook` | หมัดฮุก | Hooks |
+| `upper` | อัปเปอร์คัต | Uppercuts |
+| `slip` | หลบหมัด (สลิป) | Slips |
+| `bobweave` | ย่อหลบ (บ็อบแอนด์วีฟ) | Bob and weave |
+| `combo` | คอมโบ 1-2-3-2 | Combo 1-2-3-2 |
+
+โปรแกรม: `box1` หัดชกมวย มือใหม่ · `box2` มวยคาร์ดิโอ 20 นาที · `box3` มวยเข้มข้น (ยกละ 3 นาที) — หมวด "หัดชกมวย" ภาพยังเป็นแมวเวกเตอร์ (workout_rig.js)

@@ -33,6 +33,7 @@ main{padding:0 12px 94px}
 .summary{background:#f1adc3;color:#30232a;border-radius:26px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.summary .label{font-size:18px;font-weight:800}.summary .value{font-size:44px;font-weight:800;line-height:1}.summary .unit{font-size:17px;margin-left:5px}.summary p{margin:6px 0 0;color:#654c56;font-size:13px}.ring{width:108px;height:108px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#17191f 0 230deg,#e58ea9 230deg 360deg);position:relative}.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#f1adc3}.ring span{position:relative;z-index:1;font-size:18px;font-weight:800;text-align:center}
 .twocards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mini{background:#1a1c22;border:1px solid #272a31;border-radius:22px;padding:17px 14px;min-height:145px}.mini .ico{font-size:31px}.mini h3{margin:7px 0 0;font-size:18px}.mini .count{font-size:25px;font-weight:800}.mini small{color:#9698a0}.bar{height:9px;background:#353840;border-radius:99px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px}.blue i{background:var(--blue);width:0;transition:width .4s}.green i{background:var(--green);width:0;transition:width .4s}
 .mini-goal{display:block;margin-top:6px;color:#8f929b;font-size:11px}
+.section-head .sh-actions{display:flex;gap:4px;align-items:center}.section-head .sh-add{background:#f6d9e4;color:#b8577c;border-radius:999px;padding:6px 12px;font-weight:700}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:4px 3px 10px}.section-head h2{font-size:22px;margin:0}.section-head button{border:0;background:none;color:#ee8eb0;font-weight:800;font-size:15px}
 .food-row{display:flex;gap:12px;overflow-x:auto;padding:2px 0 10px}.food{min-width:92px;height:104px;background:#303139;border-radius:23px;display:grid;place-items:center;font-size:49px;border:1px solid #3a3c45}.food span{font-size:11px;color:#d2d2d6;margin-top:-20px}
 .page{display:none;padding-top:18px}.page.active{display:block}
@@ -274,7 +275,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="mini"><div class="ico">🏃</div><h3>เคลื่อนไหว</h3><div class="count"><span id="moveCount">0</span> <small>นาที</small></div><div class="bar green"><i id="moveBarFill"></i></div><small class="mini-goal" id="moveGoalTxt"></small></div>
 </div>
 <div class="dashboard-entry home-sortable" data-home-key="dashboard-entry" style="margin:12px 0"><button class="primary" type="button" data-go="dashboard" style="width:100%">📊 ดู Dashboard ของฉัน</button></div>
-<div class="home-food-section home-sortable" data-home-key="food-section"><div class="section-head"><h2>มื้ออาหารวันนี้</h2><button data-go="food">ดูทั้งหมด</button></div><div id="foodStrip" class="food-row"></div></div>
+<div class="home-food-section home-sortable" data-home-key="food-section"><div class="section-head"><h2>มื้ออาหารวันนี้</h2><div class="sh-actions"><button type="button" class="sh-add" onclick="fwAddFood()">＋ เพิ่มอาหาร</button><button data-go="food">ดูทั้งหมด</button></div></div><div id="foodStrip" class="food-row"></div></div>
 </section>
 
 <section id="food" class="page">
@@ -568,7 +569,13 @@ const v39OldPreview=previewPhotoFile;
 previewPhotoFile=function(file){v39OldPreview(file);if(file)showV39Assist();else hideV39Assist()};
 $("clearPhoto").addEventListener("click",hideV39Assist);$("clearPhoto").addEventListener("click",()=>showAiCard(false));
 
-$("foodFocus").onclick=()=>{go("food");$("foodName").focus()};
+// shortcut to log a meal (+ button menu, home, app-icon shortcut, widget): opens the food form ready to type,
+// with the meal and time filled in from the clock unless something is already being typed or edited
+window.fwAddFood=function(){go("food");
+ if(!editingId&&!$("foodName").value.trim()){const d=new Date(),h=d.getHours()+d.getMinutes()/60;$("meal").selectedIndex=h<10.5?0:h<15?1:h<21?2:3;$("foodTime").value=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+ const ed=document.querySelector("#food .food-editor");if(ed)ed.scrollIntoView({behavior:"smooth",block:"start"});
+ setTimeout(()=>$("foodName").focus(),250);return true};
+$("foodFocus").onclick=()=>fwAddFood();
 // v40 AI Food Recognition connector
 function setAiStatus(t){if($("v40AiStatus"))$("v40AiStatus").textContent=t}
 function showAiCard(show){if($("v40AiCard"))$("v40AiCard").style.display=show?"block":"none"}
@@ -1446,7 +1453,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    <button class="wp-btn ghost" type="button" id="wpEdit">✏️ ปรับแผน</button><button class="wp-btn ghost" type="button" id="wpEnd" style="color:#ef718d">จบแผนนี้</button>
    <p class="body-note" style="font-size:11px;color:#7f828c;line-height:1.6;margin-top:12px">ค่าประมาณจาก 1 กก. ≈ 7,700 kcal · น้ำหนักขึ้นลงรายวันได้ 0.5–1 กก. ให้ดูแนวโน้มรายสัปดาห์ · ไม่ใช่คำแนะนำทางการแพทย์</p>`;
   document.getElementById('wpSaveW').onclick=()=>{const v=r1(Number(document.getElementById('wpWeigh').value));if(!(v>=30&&v<=300)){toast('ใส่น้ำหนักให้ถูกต้อง');return}
-   s.weightLog=(s.weightLog||[]).filter(x=>x.date!==today());s.weightLog.push({date:today(),kg:v});s.profile=s.profile||{};s.profile.weight=v;save();
+   s.weightLog=(s.weightLog||[]).filter(x=>x.date!==today());s.weightLog.push({date:today(),kg:v,at:Date.now()});s.profile=s.profile||{};s.profile.weight=v;save();
    toast(v<=P.target?'ถึงเป้าหมายแล้ว! เก่งมาก 🎉':'บันทึกแล้ว ✨');renderPlan()};
   view.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{s.weightLog=(s.weightLog||[]).filter(x=>x.date!==b.dataset.del);const l=log();if(l.length)s.profile.weight=l[l.length-1].kg;save();renderPlan()});
   document.getElementById('wpEdit').onclick=()=>{editing=true;draft={target:P.target,pace:P.pace};renderPlan()};
@@ -2694,6 +2701,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  }
  document.getElementById('dashInsights')?.addEventListener('click',()=>document.getElementById('fw71-btn')?.click());
  const ITEMS=[
+  {action:()=>window.fwAddFood&&fwAddFood(),icon:'🍽️',label:fwL('เพิ่มอาหารที่กิน','Log a meal')},
   {action:()=>{go('dashboard');window.scrollTo({top:0})},icon:'📊',label:'Dashboard'},
   {action:openAccount,icon:'☁️',label:'บัญชี / ซิงก์'},
   {sel:'#fw67-btn',icon:'🗓️',label:'แผนอาหาร'},
@@ -3109,8 +3117,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .wo-pbar{height:6px;border-radius:9px;background:#ffffff26;margin:10px 0 0;overflow:hidden}.wo-pbar i{display:block;height:100%;background:#7dd3a8}
 .wo-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
 .wo-main .ph{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.75;font-weight:800}
-.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto}svg.wo-anim{height:min(64vw,280px)}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain;display:block}
-.wo-frames{position:relative;display:block}.wo-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .25s}.wo-frames img.on{opacity:1}.wo-frames.wo-anim{aspect-ratio:1}.wo-main h2{margin:0;font-size:26px}
+.wo-main .em{font-size:72px;line-height:1.1}.wo-anim{display:block;width:min(64vw,280px);height:auto;margin:0 auto;border-radius:22px}svg.wo-anim{height:min(64vw,280px)}.wo-thumb{width:44px;height:44px;border-radius:10px;background:#00000008;object-fit:contain;display:block}
+.wo-frames{position:relative;display:block}.wo-frames img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}.wo-frames img.prev{opacity:1;z-index:1}.wo-frames img.on{opacity:1;z-index:2}.wo-frames.wo-anim{aspect-ratio:1;border-radius:22px;overflow:hidden}.wo-main h2{margin:0;font-size:26px}
 .wo-main .amt{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
 .wo-main .cue{font-size:14px;opacity:.85;max-width:420px;line-height:1.6}.wo-main .nx{font-size:13px;opacity:.7;margin-top:8px}
 .wo-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px}
@@ -3198,19 +3206,38 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   kneeup:['ยกเข่าดึงแขน','Standing knee drives','🦵','s',30,'ยกแขนเหนือหัว ดึงศอกลงพร้อมยกเข่าขึ้น สลับข้าง','Arms up, pull elbows down as one knee comes up, alternate'],
   latraise:['ยกดัมเบลด้านข้าง','Lateral raises','🏋️','r',12,'ถือดัมเบลข้างลำตัว ยกออกด้านข้างถึงระดับไหล่','Dumbbells at your sides, raise out to shoulder height'],
   dbrow:['ดัมเบลโรว์','Bent-over rows','🏋️','r',12,'โน้มตัว หลังตรง ดึงดัมเบลเข้าหาเอว บีบสะบัก','Hinge forward with a flat back, row dumbbells to your waist, squeeze shoulder blades'],
+  // boxing set
+  jab:['หมัดแย็บ','Jab','🥊','s',30,'การ์ดสูง ยื่นหมัดหน้าตรงไปเร็ว ๆ แล้วดึงกลับมาที่คาง','Hands up, snap the lead fist straight out and back to your chin'],
+  jabcross:['แย็บ-ตรง (1-2)','Jab-cross (1-2)','🥊','s',30,'แย็บหมัดหน้า ตามด้วยหมัดตรงหลัง บิดสะโพกและส้นเท้าหลังตาม','Jab, then the rear straight — turn the back hip and heel with it'],
+  hook:['หมัดฮุก','Hooks','🥊','s',30,'งอศอกราว 90° เหวี่ยงหมัดโค้งระดับไหล่ บิดลำตัวตาม สลับซ้าย-ขวา','Elbow at about 90°, swing the fist round at shoulder height, turn your body, alternate'],
+  upper:['อัปเปอร์คัต','Uppercuts','🥊','s',30,'ย่อเข่าเล็กน้อย ดันหมัดจากล่างขึ้นบนด้วยแรงขา สลับซ้าย-ขวา','Dip the knees and drive the fist upward from the legs, alternate'],
+  slip:['หลบหมัด (สลิป)','Slips','🌀','s',30,'การ์ดสูง เอียงตัวหลบออกจากแนวกลาง ซ้าย-ขวา เข่าย่อนิด ๆ','Hands up, move your head off the centre line left and right, soft knees'],
+  bobweave:['ย่อหลบ (บ็อบแอนด์วีฟ)','Bob and weave','🌀','s',30,'การ์ดสูง ย่อตัวลอดหมัดสมมติเป็นรูปตัว U สลับซ้าย-ขวา หลังตรง','Hands up, dip under an imaginary punch in a U shape, side to side, back straight'],
+  shuffle:['ขยับเท้านักมวย','Boxer shuffle','👟','s',45,'การ์ดสูง เด้งเบา ๆ บนปลายเท้า สลับเท้าหน้า-หลัง','Hands up, bounce lightly on the balls of your feet, switching feet'],
+  combo:['คอมโบ 1-2-3-2','Combo 1-2-3-2','🥊','s',40,'แย็บ ตรง ฮุก ตรง ต่อเนื่อง แล้วกลับการ์ด หายใจออกทุกหมัด','Jab, cross, hook, cross, back to guard — breathe out on every punch'],
   rest:['พัก','Rest','😮‍💨','s',30,'หายใจลึก ๆ จิบน้ำได้','Breathe deeply, sip some water'],
  };
  const nm=id=>L(X[id][0],X[id][1]),cue=id=>L(X[id][5],X[id][6]);
  // Pictures for each move, best first: a looping clip (anim/<id>.webp), drawn key frames (anim/<id>_1.webp …
  // shown in turn), or the built-in vector figure (workout_rig.js). See EXERCISES.md.
- const ANIM={march:'v'};
- const art=(id,cls)=>{const a=ANIM[id];
+ // ANIM value: a number n = frames 1…n in turn, or a list = the order to show frame numbers in
+ // (e.g. [1,3,2,3]: start, in-between, end, in-between). Each frame fades in over the one before.
+ // smooth 30-frame clips built from the drawn key frames in art/exercise_keyframes (see EXERCISES.md)
+ const ANIM={armc:'v',box:'v',jab:'v',jabcross:'v',hook:'v',upper:'v',slip:'v',bobweave:'v',shuffle:'v',combo:'v',bridge:'v',calf:'v',catcow:'v',climb:'v',hip:'v',jacks:'v',knees:'v',lunge:'v',march:'v',neck:'v',plank:'v',push:'v',row:'v',skater:'v',squat:'v',superman:'v',walk:'v',wallsit:'v'};
+ const art=(id,cls)=>{const a=ANIM[id],seq=Array.isArray(a)?a:a>1?[...Array(a)].map((_,i)=>i+1):null;
   if(a==='v')return `<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`;
-  if(a>1)return `<span class="wo-frames ${cls}" data-fr="${id}" data-n="${a}">${[...Array(a)].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i?'':'on'}">`).join('')}</span>`;
+  if(seq)return `<span class="wo-frames ${cls}" data-fr="${id}" data-seq="${seq}">${[...Array(Math.max(...seq))].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i+1===seq[0]?'on':''}">`).join('')}</span>`;
   return window.FWRig&&FWRig.has(id)?FWRig.svg(id,cls):X[id][2]};
- // key-frame pictures: show frame n of each move in step with the move's tempo
- setInterval(()=>{const now=Date.now();document.querySelectorAll('.wo-frames[data-fr]').forEach(el=>{const n=+el.dataset.n,cyc=(window.FWRig&&FWRig.has(el.dataset.fr)?FWRig.cycle(el.dataset.fr):1600),i=Math.floor((now%cyc)/cyc*n);
-  el.querySelectorAll('img').forEach((im,j)=>im.classList.toggle('on',j===i))})},120);
+ // key-frame pictures: step through the frames in time with the move's tempo; the new frame fades in
+ // on top of the old one (kept fully visible underneath, so nothing shows through mid-fade)
+ setInterval(()=>{const now=Date.now();document.querySelectorAll('.wo-frames[data-fr]').forEach(el=>{
+  const seq=el.dataset.seq.split(',').map(Number),cyc=(window.FWRig&&FWRig.has(el.dataset.fr)?FWRig.cycle(el.dataset.fr):1600),st=cyc/seq.length,
+   f=seq[Math.floor((now%cyc)/st)],cur=el._f||seq[0];el._f=f;if(f===cur)return;
+  const ims=el.querySelectorAll('img'),old=ims[cur-1],nw=ims[f-1];if(!old||!nw)return;
+  ims.forEach(im=>{if(im!==old&&im!==nw)im.classList.remove('on','prev')});
+  old.classList.remove('on');old.classList.add('prev');
+  nw.classList.remove('prev');nw.style.transition='none';nw.style.opacity='0';void nw.offsetWidth;
+  nw.style.transition=`opacity ${Math.round(Math.min(450,st*.75))}ms ease-in-out`;nw.style.opacity='';nw.classList.add('on')})},50);
  const anims=root=>{try{window.FWRig&&FWRig.scan(root)}catch(e){console.error(e)}};
  // ---- session types ----
  const TYPES={
@@ -3809,6 +3836,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   ['aerobic','💃','แอโรบิกในบ้าน','Home aerobics','cardio',2,6,'ขยับต่อเนื่อง สนุก หัวใจแข็งแรง','Keep moving, have fun, train your heart',{rounds:3,rest:10,rrest:45,warm:1,cool:1},[['rope',45],['jacks',40],['box',45],['kneeup',40],['butt',30],['skater',30]]],
   ['ropejump','🪢','กระโดดเชือก 15 นาที','Jump rope 15','cardio',2,10,'กระโดด 1 นาที พัก 30 วินาที 8 รอบ','1 min on, 30 s off, 8 rounds',{rounds:8,rrest:30,warm:1,cool:1},[['rope',60]]],
   ['walkrun','🏃','เดินสลับวิ่ง 20 นาที','Walk-run 20','cardio',1,6,'เริ่มวิ่งแบบค่อยเป็นค่อยไป วิ่ง 1 เดิน 2 นาที','Start running gently: run 1, walk 2',{rounds:6,warm:1,cool:1},[['jog',1],['walk',2]]],
+  ['box1','🥊','หัดชกมวย มือใหม่','Boxing basics','boxing',1,6,'ท่าพื้นฐาน การ์ด แย็บ ตรง หลบ 3 รอบ ไม่ต้องใช้อุปกรณ์','Guard, jab, cross and slips, 3 rounds, no equipment',{rounds:3,rest:15,rrest:45,warm:1,cool:1},[['shuffle',30],['jab',30],['jabcross',30],['slip',30],['box',30]]],
+  ['box2','🥊','มวยคาร์ดิโอ 20 นาที','Boxing cardio 20','boxing',2,7.5,'ชกต่อเนื่อง ฮุก อัปเปอร์คัต ย่อหลบ เหงื่อท่วม','Non-stop punches, hooks, uppercuts and weaves — a real sweat',{rounds:3,rest:15,rrest:60,warm:1,cool:1},[['shuffle',40],['jabcross',40],['hook',40],['upper',40],['bobweave',40],['combo',40],['knees',30]]],
+  ['box3','🔥','มวยเข้มข้น (ยกละ 3 นาที)','Fight rounds','boxing',3,9,'4 ยก แต่ละยกเหมือนชกจริง พักระหว่างยก 1 นาที','4 rounds that feel like a real fight, 1 minute between rounds',{rounds:4,rest:10,rrest:60,warm:1,cool:1},[['combo',45],['hook',30],['upper',30],['bobweave',30],['burpee',20],['shuffle',45]]],
   ['back','🩹','ดูแลหลัง ลดปวดหลัง','Back care','health',1,2.5,'ยืดและเสริมแกนกลางเบา ๆ ถ้าปวดมากให้หยุดและพบแพทย์','Gentle stretches and core work — stop and see a doctor if it hurts',{rest:10},[['catcow',60],['child',45],['birddog',10],['bridge',12],['cobra',30],['twist',60],['ham',60]]],
   ['knee','🦿','เข่าแข็งแรง','Knee strength','health',1,3.5,'เสริมกล้ามเนื้อรอบเข่า แรงกระแทกต่ำ','Build the muscles around the knee with low impact',{rounds:2,rest:20,rrest:45,warm:1,cool:1},[['sitstand',10],['calf',15],['bridge',12],['hipabd',30],['wallsit',20],['legsw',30]]],
   ['senior','🧓','วัยเก๋า ปลอดภัย','Gentle for seniors','health',1,3,'นั่ง-ยืน ผนัง เก้าอี้ ฝึกทรงตัวและกำลังขา','Chair and wall moves for balance and leg strength',{rounds:2,rest:30,rrest:60},[['march',60],['sitstand',8],['wpush',10],['calf',10],['armc',30],['sbend',30],['neck',30]]],
@@ -3818,7 +3848,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   ['fb3','🔥','ทั้งตัว ขั้นสูง','Full body — advanced','full',3,7,'หนัก ครบ กระโดด สำหรับคนฟิต','Hard and complete, with jumps',{rounds:3,rest:15,rrest:60,warm:1,cool:1},[['burpee',10],['jsquat',15],['push',15],['climb',45],['slunge',16],['shtap',40],['legraise',15]]],
   ['gym','🏢','ยิม ทั้งตัว','Gym full body','full',2,5,'เครื่องและดัมเบลพื้นฐาน 3 เซ็ต','Basic machines and dumbbells, 3 sets',{rounds:3,rest:45,rrest:90,warm:1,cool:1},[['gsquat',10],['bench',10],['row',12],['rdl',10],['ohp',10],['latpd',12]]],
  ];
- const CATS=[['all','✨',L('ทั้งหมด','All')],['quick','⏱️',L('สั้น ๆ ระหว่างวัน','Quick')],['core','🔥',L('หน้าท้อง','Abs & core')],['lower','🍑',L('ก้นและขา','Glutes & legs')],['upper','💪',L('แขนและไหล่','Arms & shoulders')],['cardio','⚡',L('คาร์ดิโอ / HIIT','Cardio / HIIT')],['health','🩹',L('ดูแลสุขภาพ','Care')],['full','🏋️',L('ทั้งตัว','Full body')]];
+ const CATS=[['all','✨',L('ทั้งหมด','All')],['quick','⏱️',L('สั้น ๆ ระหว่างวัน','Quick')],['core','🔥',L('หน้าท้อง','Abs & core')],['lower','🍑',L('ก้นและขา','Glutes & legs')],['upper','💪',L('แขนและไหล่','Arms & shoulders')],['cardio','⚡',L('คาร์ดิโอ / HIIT','Cardio / HIIT')],['boxing','🥊',L('หัดชกมวย','Boxing')],['health','🩹',L('ดูแลสุขภาพ','Care')],['full','🏋️',L('ทั้งตัว','Full body')]];
  const prog=id=>PR.find(p=>p[0]===id);
  const progDef=p=>({title:L(p[2],p[3]),e:p[1],met:p[6],...p[9],moves:p[10]});
  const mine=()=>(s.workoutCustom=s.workoutCustom||[]);
@@ -3829,8 +3859,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const S=key=>W.session(key,W.plan()||{level:'1',min:30},localDay());
  const lv=n=>`<span class="wl-lv">${'●'.repeat(n)}${'○'.repeat(3-n)}</span>`;
  // ---- move categories for the picker ----
- const MC=[['all',L('ทั้งหมด','All')],['warm',L('วอร์ม / คาร์ดิโอ','Warm-up / cardio')],['lower',L('ขา / ก้น','Legs / glutes')],['upper',L('แขน / อก / หลัง','Arms / chest / back')],['core',L('หน้าท้อง','Core')],['stretch',L('ยืดเหยียด','Stretch')],['gym',L('อุปกรณ์ / ยิม','Equipment / gym')]];
- const MCAT={warm:'march armc legsw jacks knees climb skater burpee box rope butt kneeup walk jog bike ellip',lower:'squat lunge bridge wallsit calf stepup sumosq jsquat slunge dkick hipabd sitstand',
+ const MC=[['all',L('ทั้งหมด','All')],['warm',L('วอร์ม / คาร์ดิโอ','Warm-up / cardio')],['boxing',L('มวย','Boxing')],['lower',L('ขา / ก้น','Legs / glutes')],['upper',L('แขน / อก / หลัง','Arms / chest / back')],['core',L('หน้าท้อง','Core')],['stretch',L('ยืดเหยียด','Stretch')],['gym',L('อุปกรณ์ / ยิม','Equipment / gym')]];
+ const MCAT={warm:'march armc legsw jacks knees climb skater burpee rope butt kneeup walk jog bike ellip',boxing:'box shuffle jab jabcross hook upper slip bobweave combo',lower:'squat lunge bridge wallsit calf stepup sumosq jsquat slunge dkick hipabd sitstand',
   upper:'kpush push dips superman shtap wpush inch',core:'plank deadbug splank crunch bicycle legraise flutter rtwist birddog',stretch:'catcow child ham hip chest twist cobra fold quad sbend neck reach',gym:'gsquat bench row latpd ohp rdl lpress curl triext latraise dbrow'};
  const catOf=id=>Object.keys(MCAT).find(k=>MCAT[k].split(' ').includes(id))||'warm';
  const ALL=Object.keys(W.X).filter(id=>id!=='rest');
@@ -4351,6 +4381,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .hc-top{display:flex;align-items:center;gap:10px}.hc-top .em{font-size:28px}.hc-top .tx{flex:1;min-width:0}.hc-top b{display:block;font-size:15px}.hc-top small{display:block;font-size:12px;color:var(--muted);line-height:1.45}
 .hc-top button{border:0;border-radius:12px;padding:9px 12px;font-weight:800;font-family:inherit;background:#7cc4f5;color:#10243a;white-space:nowrap}
 .hc-top button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.hc-scale{margin-top:10px;padding:9px 12px;border-radius:12px;background:#FFF1F5;color:#7A3653;font-size:12px;line-height:1.5}
 .hc-links{display:flex;gap:6px;margin-top:10px}.hc-links button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px;font-family:inherit;font-size:12px;font-weight:700}
 </style>
 <script>
@@ -4369,10 +4400,11 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   if(sdk==='none'){card.style.display='none';return}card.style.display='';
   const last=S.last?new Date(S.last).toLocaleTimeString(EN?'en-GB':'th-TH',{hour:'2-digit',minute:'2-digit'}):'';
   card.innerHTML=`<div class="hc-top"><span class="em">⌚</span><span class="tx"><b>${on?L('เชื่อม Health Connect แล้ว','Connected to Health Connect'):L('เชื่อมนาฬิกา / แอปสุขภาพ','Connect a watch / health app')}</b>
-   <small>${on?L(`ดึงก้าว แคลที่ใช้ และการออกกำลังกายอัตโนมัติ${last?' · อัปเดต '+last:''}`,`Steps, active calories and workouts come in automatically${last?' · updated '+last:''}`)
+   <small>${on?L(`ดึงก้าว แคลที่ใช้ การออกกำลังกาย และน้ำหนักจากตาชั่งอัตโนมัติ${last?' · อัปเดต '+last:''}`,`Steps, active calories, workouts and scale weight come in automatically${last?' · updated '+last:''}`)
    :sdk==='update'?L('ต้องติดตั้ง/อัปเดต Health Connect จาก Play Store ก่อน','Install or update Health Connect from the Play Store first')
-   :L('ดึงก้าว แคล และการออกกำลังกายจาก Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness ฯลฯ ผ่าน Health Connect','Get steps, calories and workouts from Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness and more via Health Connect')}</small></span>
+   :L('ดึงก้าว แคล การออกกำลังกาย และน้ำหนักจากตาชั่งอัจฉริยะ (Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness, Zepp Life, Huawei Health ฯลฯ) ผ่าน Health Connect','Get steps, calories, workouts and smart-scale weight (Samsung Health, Google Fit, Garmin, Fitbit, Mi Fitness, Zepp Life, Huawei Health and more) via Health Connect')}</small></span>
    ${on?`<button type="button" class="ghost" id="hcSync">${busy?'…':'↻'}</button>`:`<button type="button" id="hcOn">${sdk==='update'?L('ติดตั้ง','Install'):L('เชื่อม','Connect')}</button>`}</div>
+   ${on&&!(S.granted||[]).includes('READ_WEIGHT')?`<div class="hc-scale">⚖️ ${L('มีตาชั่งอัจฉริยะ? แตะ “เลือกข้อมูลที่แชร์” แล้วเปิด <b>น้ำหนัก</b> น้ำหนักจะเข้าแอปเองทุกครั้งที่ชั่ง','Have a smart scale? Tap “Choose data” and turn on <b>Weight</b> — every weigh-in comes in by itself')}</div>`:''}
    ${on?`<div class="hc-links"><button type="button" id="hcPerm">⚙️ ${L('เลือกข้อมูลที่แชร์','Choose data')}</button><button type="button" id="hcOff">${L('เลิกเชื่อม','Disconnect')}</button></div>`:''}`;
   const q=id=>card.querySelector(id);
   q('#hcOn')&&(q('#hcOn').onclick=()=>{S.on=true;save();H().connect()});
@@ -4395,6 +4427,18 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // tidy entries imported before this change
  if((s.moves||[]).some(m=>m.hcId)){mergeWatch([]);save()}
  const sessionKcal=(label,min)=>typeof moveKcal==='function'?moveKcal(label,'',min):Math.round(5*bodyWeight()*min/60);
+ // smart-scale weigh-ins (via Health Connect) go into the weight log: one per day, the latest reading wins over
+ // older ones; a weight you typed yourself later that day stays, and so do entries typed before this feature.
+ // Each reading is imported once, so one you delete doesn't come back.
+ function importWeights(ws,fat){if(!ws||!ws.length)return 0;const seen=new Set(s.hcWeightSeen||[]);s.weightLog=s.weightLog||[];let n=0;
+  ws.slice().sort((a,b)=>a.t-b.t).forEach(w=>{if(seen.has(w.id))return;seen.add(w.id);if(!(w.kg>=20&&w.kg<=350))return;
+   const day=localDay(new Date(w.t)),ex=s.weightLog.find(x=>x.date===day);
+   if(ex&&(ex.scale?(ex.at||0)>w.t:(!ex.at||ex.at>w.t)))return;
+   const f=(fat||[]).filter(x=>localDay(new Date(x.t))===day&&Math.abs(x.t-w.t)<3*3600e3).sort((a,b)=>Math.abs(a.t-w.t)-Math.abs(b.t-w.t))[0];
+   s.weightLog=s.weightLog.filter(x=>x.date!==day);const e={date:day,kg:w.kg,at:w.t,scale:true};if(f&&f.pct>2&&f.pct<75)e.fat=f.pct;s.weightLog.push(e);n++});
+  s.hcWeightSeen=[...seen].slice(-1000);
+  if(n){const l=s.weightLog.slice().sort((a,b)=>a.date.localeCompare(b.date));s.profile=s.profile||{};s.profile.weight=l[l.length-1].kg}
+  return n}
  window.onHealth=function(kind,json){let d={};try{d=JSON.parse(json)}catch(e){d=json}const S=st();
   if(kind==='permission'){S.granted=d.granted||[];if(S.granted.length){S.on=true;save();toast(L('เชื่อม Health Connect แล้ว ⌚','Health Connect connected ⌚'));sync(true)}else{toast(L('ยังไม่ได้อนุญาตข้อมูล','No data allowed yet'));save();draw()}return}
   busy=false;
@@ -4407,8 +4451,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   (d.sessions||[]).forEach(x=>{if(ignored.has(x.id))return;const min=Math.max(1,Math.round((x.end-x.start)/60000));if(min>600)return;
    const lab=LABEL[x.type]||LABEL.other,label=(x.title&&x.title.length<40?x.title:L(lab[0],lab[1])),t=new Date(x.start);
    units.push({start:x.start,date:localDay(t),label,min,kcal:sessionKcal(lab[0],min),count:1,ids:[x.id],time:t.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),src:x.src})});
-  const added=mergeWatch(units);
+  const added=mergeWatch(units),wAdded=importWeights(d.weights,d.bodyFat);
   save();if(added)toast(L(`นำเข้าการออกกำลังกาย ${added} รายการจากนาฬิกา ⌚`,`Imported ${added} workout${added>1?'s':''} from your watch ⌚`));
+  if(wAdded){const l=s.weightLog.slice().sort((a,b)=>a.date.localeCompare(b.date)).pop();setTimeout(()=>toast(L(`⚖️ น้ำหนักจากตาชั่ง ${l.kg} กก.${wAdded>1?` (นำเข้า ${wAdded} วัน)`:''}`,`⚖️ Scale weight ${l.kg} kg${wAdded>1?` (${wAdded} days imported)`:''}`)),added?2600:0)}
   if(typeof render==='function')render();else window.FWSteps&&FWSteps.redraw();draw()};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){}return o};
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&st().on&&Date.now()-(st().last||0)>5*60000)sync(false)});
@@ -4757,6 +4802,7 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
 .wt-hint{text-align:center;font-size:12.5px;min-height:18px;opacity:.85}
 .wt-row{display:flex;gap:8px;margin-top:14px}.wt-row button{flex:1;border:0;border-radius:14px;padding:13px;font-weight:800;font-family:inherit;font-size:15px;min-height:48px}
 .wt-row .ok{background:#ff7eb6;color:#241521}.wt-row .no{background:rgba(127,127,127,.16);color:inherit}
+.wt-scale{display:block;width:100%;margin-top:12px;border:1px dashed rgba(255,126,182,.6);border-radius:14px;padding:11px;background:none;color:inherit;font-family:inherit;font-size:13px;font-weight:700;text-align:center}
 </style>
 <script>
 (function(){
@@ -4771,13 +4817,24 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  const ago=d=>{const n=Math.round((new Date(today()+'T12:00:00')-new Date(d+'T12:00:00'))/864e5);return n<=0?L('วันนี้','today'):n===1?L('เมื่อวาน','yesterday'):n<7?L(n+' วันก่อน',n+' days ago'):fmtDay(d)};
  // one entry per day; the profile weight (used for targets and calorie burn) follows the newest entry
  function saveWeight(kg,day){
-  s.weightLog=(s.weightLog||[]).filter(x=>x.date!==day);s.weightLog.push({date:day,kg});
+  s.weightLog=(s.weightLog||[]).filter(x=>x.date!==day);s.weightLog.push({date:day,kg,at:Date.now()});
   s.profile=s.profile||{};s.profile.weight=latest().kg;
   save();if(typeof render==='function')render();
   if(document.querySelector('#weightPlan.page.active')&&window.go)go('weightPlan');
  }
  window.FWWeight={saveWeight,current};
 
+ // smart scales: weigh-ins arrive through Health Connect (card on the Movement page)
+ // Bluetooth scale read directly (block v137 below defines window.FWScale)
+ function bleBtn(){let st='none';try{st=window.FoodWellScale?FoodWellScale.status():'none'}catch(e){}if(st!=='ok')return '';
+  return `<button type="button" class="wt-scale" id="wtBle" style="border-style:solid">📡 ${s.bleScale?L('อ่านจากตาชั่งบลูทูธ','Read from the Bluetooth scale'):L('เชื่อมตาชั่งบลูทูธโดยตรง (Orsen ฯลฯ)','Connect a Bluetooth scale directly (Orsen etc.)')}</button>`}
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#wtBle')){document.getElementById('wtModal')?.remove();window.FWScale&&FWScale.open()}});
+ function scaleLink(){const H=window.FoodWellHealth;let sdk='none';try{sdk=H?H.sdk():'none'}catch(e){}
+  if(sdk==='none')return '';const g=(s.health&&s.health.on&&s.health.granted)||[];
+  return g.includes('READ_WEIGHT')?`<div class="wt-scale">⚖️ ${L('เชื่อมตาชั่งแล้ว น้ำหนักจะเข้ามาเองทุกครั้งที่ชั่ง','Scale connected · weigh-ins come in by themselves')}</div>`
+   :`<button type="button" class="wt-scale" id="wtScale">⚖️ ${L('เชื่อมตาชั่งอัจฉริยะ ให้น้ำหนักเข้าแอปเอง','Connect a smart scale to log weight automatically')} ›</button>`}
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#wtScale')){document.getElementById('wtModal')?.remove();go('move');
+  setTimeout(()=>{const c=document.getElementById('hcCard');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});const b=c.querySelector('#hcOn,#hcPerm');b&&b.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],{duration:600,iterations:2})}},250)}});
  function sheet(){
   document.getElementById('wtModal')?.remove();
   const cur=current(),last=latest(),P=s.weightPlan;
@@ -4787,7 +4844,7 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
    <div class="wt-step"><button type="button" data-d="-0.1" aria-label="-0.1">−</button><input id="wtKg" type="number" inputmode="decimal" step="0.1" min="20" max="300" value="${cur||''}" placeholder="60.0"><em>${L('กก.','kg')}</em><button type="button" data-d="0.1" aria-label="+0.1">+</button></div>
    <div class="wt-date"><span>📅</span><input id="wtDay" type="date" value="${today()}" max="${today()}"></div>
    <div class="wt-hint" id="wtHint"></div>
-   <div class="wt-row"><button type="button" class="no" id="wtNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="wtOk">${L('บันทึก','Save')}</button></div></div>`;
+   <div class="wt-row"><button type="button" class="no" id="wtNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="wtOk">${L('บันทึก','Save')}</button></div>${bleBtn()}${scaleLink()}</div>`;
   document.body.appendChild(m);
   const inp=m.querySelector('#wtKg'),day=m.querySelector('#wtDay'),hint=m.querySelector('#wtHint');
   const val=()=>r1(Number(inp.value));
@@ -4844,6 +4901,108 @@ button.fl-more:active,.mr-more:active{transform:scale(.98)}
  const og=window.go;if(og)window.go=function(p){if(p==='weigh'){og('home');setTimeout(sheet,150);return}return og.apply(this,arguments)};
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{card()}catch(e){console.error(e)}return o};
  card();
+})();
+</script>
+<!-- v137 Bluetooth bathroom scales (window.FoodWellScale, Android 12+). Most low-cost scales (Orsen and other
+     OEM scales) broadcast the reading in their Bluetooth advertisement in a format of their own. Pairing learns
+     it: step on the scale, type the number it shows, and we look for that number (×10/×100/×20/×200, 16/24-bit,
+     either byte order) in the bytes of a nearby device whose bytes at that spot were changing. After that the
+     weight is read straight from the broadcast. Standard Weight Scale service readings ("std") work as is. -->
+<style>
+.sc-live{text-align:center;font-size:54px;font-weight:900;margin:8px 0 2px;font-variant-numeric:tabular-nums}.sc-live small{font-size:18px;font-weight:700;opacity:.7;margin-left:4px}
+.sc-st{text-align:center;font-size:13px;opacity:.85;min-height:20px;line-height:1.5}.sc-st.ok{color:#4fc38a;opacity:1;font-weight:800}.sc-st.bad{color:#ef8a6b;opacity:1}
+.sc-steps{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.7;opacity:.85}
+.sc-kg{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0}.sc-kg input{width:130px;text-align:center;font-size:30px;font-weight:900;border:0;border-bottom:2px solid #ff7eb6;background:none;color:inherit;font-family:inherit}
+.sc-link{display:block;margin:12px auto 0;border:0;background:none;color:#ff7eb6;font-weight:800;font-family:inherit;font-size:13px}
+</style>
+<script>
+(function(){
+ const B=window.FoodWellScale;if(!B||typeof s==='undefined')return;
+ let ok='none';try{ok=B.status()}catch(e){}
+ const L=(th,en)=>(window.fwLang&&fwLang()==='en')?en:th;
+ const hist=new Map(),probed=new Set();let listener=null,dumpLog=[];
+ const bytes=h=>{const a=new Uint8Array(h.length>>1);for(let i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a};
+ const rd=(b,off,n,le)=>{let v=0;for(let i=0;i<n;i++){const x=b[le?off+n-1-i:off+i];if(x===undefined)return NaN;v=v*256+x}return v};
+ window.onScale=function(kind,json){let d=json;try{d=JSON.parse(json)}catch(e){}
+  const ts=new Date().toISOString().slice(11,23),put=(key,e)=>{let h=hist.get(key);if(!h){h=[];hist.set(key,h)}h.push(e);if(h.length>80)h.shift()};
+  if(kind==='adv'){put(d.addr,{t:Date.now(),b:bytes(d.raw||''),name:d.name||'',rssi:d.rssi,raw:d.raw});dumpLog.push(`${ts} A ${d.addr} ${d.rssi} ${d.name||'-'} ${d.raw}`)}
+  // notifications from a device we connected to: kept under "addr|characteristic"
+  else if(kind==='gatt'){const a=hist.get(d.addr),last=a&&a[a.length-1];put(d.addr+'|'+d.c,{t:Date.now(),b:bytes(d.hex||''),name:last?last.name:'',rssi:last?last.rssi:-60});dumpLog.push(`${ts} G ${d.addr} ${d.c} ${d.hex}`)}
+  else if(kind==='svcs'){dumpLog.push(`${ts} S ${d.addr} ${(d.list||[]).map(x=>x.s+'/'+x.c+':'+x.p).join(' ')}`)}
+  else if(kind==='gattoff'){probed.delete(d);dumpLog.push(`${ts} X ${d}`)}
+  if(dumpLog.length>600)dumpLog.shift();
+  listener&&listener(kind,d)};
+ // where in the broadcast is the number the user read off the scale?
+ const ENC=[[10,2],[100,2],[20,2],[200,2],[1000,3],[10,3],[100,3]];
+ function learn(kg){const since=Date.now()-25000;let best=null;
+  hist.forEach((h,addr)=>{const rec=h.filter(x=>x.t>=since);if(!rec.length)return;const last=rec[rec.length-1].b;
+   ENC.forEach(([div,n])=>[false,true].forEach(le=>{const want=Math.round(kg*div),tol=Math.max(1,Math.round(div/10));
+    for(let off=0;off+n<=last.length;off++){const v=rd(last,off,n,le);if(Math.abs(v-want)>tol)continue;
+     const seen=new Set(rec.map(x=>rd(x.b,off,n,le)).filter(x=>!isNaN(x)));
+     const sc=(seen.size>1?100:0)+(rec[rec.length-1].name?5:0)+Math.max(0,100+(rec[rec.length-1].rssi||-100))/10-(n===3?3:0)-(div===10||div===100?0:2);
+     if(!best||sc>best.sc)best={sc,addr:addr.split('|')[0],ch:addr.split('|')[1]||'',name:rec[rec.length-1].name,off,n,le,div,varied:seen.size>1}}}))});
+  return best}
+ function decode(e){const c=s.bleScale;if(!c)return null;const v=rd(e.b,c.off,c.n,c.le);if(isNaN(v))return null;const kg=Math.round(v/c.div*10)/10;return kg>=15&&kg<=300?kg:null}
+ const mine=(addr,name)=>{const c=s.bleScale;return c&&(addr===c.addr||(c.name&&name===c.name))};
+ // connect to the likeliest devices (strongest signal, not phones/laptops/earbuds by Apple or Microsoft) and listen
+ const company=b=>{for(let i=0;i<b.length;){const n=b[i];if(!n)break;if(b[i+1]===0xff&&n>=3)return b[i+2]|(b[i+3]<<8);i+=n+1}return -1};
+ function probeNearby(max){const now=Date.now(),c=[];
+  hist.forEach((h,k)=>{if(k.includes('|'))return;const e=h[h.length-1];if(now-e.t>8000||e.rssi<-82||probed.has(k))return;const co=company(e.b);if(co===0x004c||co===0x0006)return;c.push([k,e.rssi+(e.name?3:0)])});
+  c.sort((a,b)=>b[1]-a[1]).slice(0,max).forEach(([k])=>{probed.add(k);try{B.probe(k)}catch(e){}})}
+ function modal(html){document.getElementById('scModal')?.remove();const m=document.createElement('div');m.className='wt-modal';m.id='scModal';m.setAttribute('translate','no');
+  m.innerHTML=`<div class="wt-sheet" role="dialog" aria-modal="true">${html}</div>`;document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)close()});return m}
+ function close(){listener=null;try{B.stop()}catch(e){}document.getElementById('scModal')?.remove()}
+ const errMsg=c=>c==='perm'?L('ต้องอนุญาต “อุปกรณ์ใกล้เคียง” (บลูทูธ) ก่อนนะ','Allow “Nearby devices” (Bluetooth) first'):c==='off'?L('เปิดบลูทูธก่อน แล้วลองใหม่','Turn Bluetooth on and try again'):c==='old'?L('ต้องใช้ Android 12 ขึ้นไป','Needs Android 12 or newer'):L('มือถือนี้ไม่รองรับบลูทูธ LE','This phone has no Bluetooth LE');
+ // ---- pair: learn the scale's format
+ function pair(){hist.clear();dumpLog=[];
+  const m=modal(`<h3>📡 ${L('จับคู่ตาชั่งบลูทูธ','Pair a Bluetooth scale')}</h3>
+   <ol class="sc-steps"><li>${L('ปิดแอป Orsen/แอปตาชั่งก่อน วางมือถือไว้ใกล้ตาชั่ง','Close the scale\'s own app and keep the phone close to the scale')}</li><li>${L('ขึ้นชั่งเท้าเปล่า รอจนตัวเลขบนตาชั่งนิ่ง','Step on the scale barefoot and wait until the number settles')}</li><li>${L('พิมพ์ตัวเลขที่ตาชั่งโชว์ (กก.) แล้วกด “จับคู่” ทันที','Type the number the scale shows (kg) and tap “Pair” right away')}</li></ol>
+   <div class="sc-kg"><input id="scKg" type="number" inputmode="decimal" step="0.1" placeholder="0.0"><b>${L('กก.','kg')}</b></div>
+   <div class="sc-st" id="scSt">${L('กำลังค้นหาตาชั่ง…','Looking for the scale…')}</div>
+   <div class="wt-row"><button type="button" class="no" id="scNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="scGo">${L('จับคู่','Pair')}</button></div>
+   <button type="button" class="sc-link" id="scDump">📋 ${L('ส่งข้อมูลบลูทูธให้ผู้พัฒนา','Send Bluetooth data to the developer')}</button>`);
+  const st=m.querySelector('#scSt'),set=(t,c)=>{st.textContent=t;st.className='sc-st'+(c?' '+c:'')};
+  listener=(k,d)=>{if(k==='adv')set(L(`กำลังค้นหา… พบอุปกรณ์บลูทูธ ${hist.size} เครื่อง`,`Looking… ${hist.size} Bluetooth device${hist.size>1?'s':''} nearby`));
+   else if(k==='std'){s.bleScale={std:true,addr:d.addr,name:d.name};save();close();toast(L('จับคู่ตาชั่งแล้ว ✓','Scale paired ✓'));window.FWWeight&&FWWeight.saveWeight(d.kg,localDay())}
+   else if(k==='error')set(errMsg(d),'bad');else if(k==='scan'&&d==='off'&&!m.dataset.done)set(L('หยุดค้นหาแล้ว · กด “จับคู่” เพื่อค้นหาใหม่','Stopped looking · tap “Pair” to look again'))};
+  m.querySelector('#scNo').onclick=close;
+  m.querySelector('#scGo').onclick=()=>{const kg=Number(m.querySelector('#scKg').value);
+   if(!(kg>=15&&kg<=300)){set(L('พิมพ์ตัวเลขที่ตาชั่งโชว์ก่อน','Type the number the scale shows first'),'bad');return}
+   const b=learn(kg);
+   if(b&&(b.varied||b.name)){m.dataset.done=1;s.bleScale={addr:b.addr,ch:b.ch,name:b.name||'',off:b.off,n:b.n,le:b.le,div:b.div};save();close();
+    toast(L('จับคู่ตาชั่งแล้ว ✓ ครั้งต่อไปแอปอ่านน้ำหนักให้เอง','Scale paired ✓ next time the app reads it for you'));
+    window.FWWeight&&FWWeight.saveWeight(kg,localDay());return}
+   set(L('ยังหาไม่เจอ ลองลงจากตาชั่ง ขึ้นใหม่ พอเลขนิ่งแล้วพิมพ์และกดจับคู่อีกครั้ง','Not found yet · step off, step on again, and when it settles type the number and tap Pair'),'bad');
+   try{B.start(90)}catch(e){}probeNearby(3)};
+  m.querySelector('#scDump').onclick=()=>{const kg=m.querySelector('#scKg').value;
+   const txt=`MeowFit scale data\nscale shows: ${kg} kg\nphone: ${navigator.userAgent}\n\n`+dumpLog.filter(l=>!/ A /.test(l)).concat(dumpLog.filter(l=>/ A /.test(l)).slice(-250)).join('\n');
+   try{if(window.FoodWellShare&&FoodWellShare.share){FoodWellShare.share(txt,'','');return}}catch(e){}
+   try{navigator.clipboard.writeText(txt);toast(L('คัดลอกแล้ว วางส่งให้ผู้พัฒนาได้เลย','Copied · paste it to the developer'))}catch(e){}};
+  try{B.start(90)}catch(e){}probed.clear();const pt=setInterval(()=>{if(!document.getElementById('scModal')){clearInterval(pt);return}probeNearby(2)},4000)}
+ // ---- read: weigh-in from a paired scale
+ function read(){
+  const c=s.bleScale;let vals=[],done=false;
+  const m=modal(`<h3>⚖️ ${L('ชั่งน้ำหนัก','Weigh in')}${c.name?` · <small style="opacity:.7">${c.name}</small>`:''}</h3>
+   <div class="sc-live" id="scLive">--.-<small>${L('กก.','kg')}</small></div>
+   <div class="sc-st" id="scSt">${L('ขึ้นชั่งได้เลย 🐾','Step on the scale 🐾')}</div>
+   <div class="wt-row"><button type="button" class="no" id="scNo">${L('ยกเลิก','Cancel')}</button><button type="button" class="ok" id="scOk" disabled style="opacity:.5">${L('บันทึก','Save')}</button></div>
+   <button type="button" class="sc-link" id="scRe">↻ ${L('จับคู่ตาชั่งใหม่','Pair the scale again')}</button>`);
+  const live=m.querySelector('#scLive'),st=m.querySelector('#scSt'),okb=m.querySelector('#scOk');let kg=null;
+  const show=v=>{live.innerHTML=`${v.toFixed(1)}<small>${L('กก.','kg')}</small>`};
+  const lock=v=>{done=true;kg=v;show(v);st.textContent=L('น้ำหนักนิ่งแล้ว ✓','Reading is steady ✓');st.className='sc-st ok';okb.disabled=false;okb.style.opacity=1;try{B.stop()}catch(e){}};
+  listener=(k,d)=>{if(done)return;
+   if(k==='std'&&mine(d.addr,d.name)){lock(d.kg);return}
+   if(k==='gattoff'&&c.ch&&d===c.addr){setTimeout(()=>{try{B.probe(c.addr)}catch(e){}},1500);return}
+   if((k==='adv'&&!c.ch&&mine(d.addr,d.name)||k==='gatt'&&c.ch&&d.addr===c.addr&&d.c===c.ch)&&!c.std){const h=hist.get(c.ch?d.addr+'|'+c.ch:d.addr);const v=h&&decode(h[h.length-1]);if(!v)return;show(v);
+    vals.push({t:Date.now(),v});vals=vals.filter(x=>Date.now()-x.t<4000);
+    const same=vals.filter(x=>Math.abs(x.v-v)<0.05);if(same.length>=3&&same[same.length-1].t-same[0].t>=1200)lock(v)}
+   else if(k==='error'){st.textContent=errMsg(d);st.className='sc-st bad'}
+   else if(k==='scan'&&d==='off'){st.textContent=L('หมดเวลา · กดยกเลิกแล้วลองใหม่','Timed out · close and try again')}};
+  m.querySelector('#scNo').onclick=close;
+  m.querySelector('#scRe').onclick=()=>{close();pair()};
+  okb.onclick=()=>{if(kg){close();window.FWWeight&&FWWeight.saveWeight(kg,localDay());toast(L(`บันทึก ${kg} กก. จากตาชั่งแล้ว ⚖️`,`Saved ${kg} kg from the scale ⚖️`))}};
+  try{B.start(90)}catch(e){}if(c.ch){try{B.probe(c.addr)}catch(e){}}}
+ window.FWScale={open:()=>s.bleScale?read():pair(),pair,status:()=>ok,forget:()=>{delete s.bleScale;save()}};
 })();
 </script>
 <!-- v135 Paw branding: profiles still on the old default leaf avatar switch to the paw once -->
