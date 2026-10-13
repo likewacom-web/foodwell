@@ -3206,6 +3206,15 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   kneeup:['ยกเข่าดึงแขน','Standing knee drives','🦵','s',30,'ยกแขนเหนือหัว ดึงศอกลงพร้อมยกเข่าขึ้น สลับข้าง','Arms up, pull elbows down as one knee comes up, alternate'],
   latraise:['ยกดัมเบลด้านข้าง','Lateral raises','🏋️','r',12,'ถือดัมเบลข้างลำตัว ยกออกด้านข้างถึงระดับไหล่','Dumbbells at your sides, raise out to shoulder height'],
   dbrow:['ดัมเบลโรว์','Bent-over rows','🏋️','r',12,'โน้มตัว หลังตรง ดึงดัมเบลเข้าหาเอว บีบสะบัก','Hinge forward with a flat back, row dumbbells to your waist, squeeze shoulder blades'],
+  // boxing set
+  jab:['หมัดแย็บ','Jab','🥊','s',30,'การ์ดสูง ยื่นหมัดหน้าตรงไปเร็ว ๆ แล้วดึงกลับมาที่คาง','Hands up, snap the lead fist straight out and back to your chin'],
+  jabcross:['แย็บ-ตรง (1-2)','Jab-cross (1-2)','🥊','s',30,'แย็บหมัดหน้า ตามด้วยหมัดตรงหลัง บิดสะโพกและส้นเท้าหลังตาม','Jab, then the rear straight — turn the back hip and heel with it'],
+  hook:['หมัดฮุก','Hooks','🥊','s',30,'งอศอกราว 90° เหวี่ยงหมัดโค้งระดับไหล่ บิดลำตัวตาม สลับซ้าย-ขวา','Elbow at about 90°, swing the fist round at shoulder height, turn your body, alternate'],
+  upper:['อัปเปอร์คัต','Uppercuts','🥊','s',30,'ย่อเข่าเล็กน้อย ดันหมัดจากล่างขึ้นบนด้วยแรงขา สลับซ้าย-ขวา','Dip the knees and drive the fist upward from the legs, alternate'],
+  slip:['หลบหมัด (สลิป)','Slips','🌀','s',30,'การ์ดสูง เอียงตัวหลบออกจากแนวกลาง ซ้าย-ขวา เข่าย่อนิด ๆ','Hands up, move your head off the centre line left and right, soft knees'],
+  bobweave:['ย่อหลบ (บ็อบแอนด์วีฟ)','Bob and weave','🌀','s',30,'การ์ดสูง ย่อตัวลอดหมัดสมมติเป็นรูปตัว U สลับซ้าย-ขวา หลังตรง','Hands up, dip under an imaginary punch in a U shape, side to side, back straight'],
+  shuffle:['ขยับเท้านักมวย','Boxer shuffle','👟','s',45,'การ์ดสูง เด้งเบา ๆ บนปลายเท้า สลับเท้าหน้า-หลัง','Hands up, bounce lightly on the balls of your feet, switching feet'],
+  combo:['คอมโบ 1-2-3-2','Combo 1-2-3-2','🥊','s',40,'แย็บ ตรง ฮุก ตรง ต่อเนื่อง แล้วกลับการ์ด หายใจออกทุกหมัด','Jab, cross, hook, cross, back to guard — breathe out on every punch'],
   rest:['พัก','Rest','😮‍💨','s',30,'หายใจลึก ๆ จิบน้ำได้','Breathe deeply, sip some water'],
  };
  const nm=id=>L(X[id][0],X[id][1]),cue=id=>L(X[id][5],X[id][6]);
@@ -3827,6 +3836,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   ['aerobic','💃','แอโรบิกในบ้าน','Home aerobics','cardio',2,6,'ขยับต่อเนื่อง สนุก หัวใจแข็งแรง','Keep moving, have fun, train your heart',{rounds:3,rest:10,rrest:45,warm:1,cool:1},[['rope',45],['jacks',40],['box',45],['kneeup',40],['butt',30],['skater',30]]],
   ['ropejump','🪢','กระโดดเชือก 15 นาที','Jump rope 15','cardio',2,10,'กระโดด 1 นาที พัก 30 วินาที 8 รอบ','1 min on, 30 s off, 8 rounds',{rounds:8,rrest:30,warm:1,cool:1},[['rope',60]]],
   ['walkrun','🏃','เดินสลับวิ่ง 20 นาที','Walk-run 20','cardio',1,6,'เริ่มวิ่งแบบค่อยเป็นค่อยไป วิ่ง 1 เดิน 2 นาที','Start running gently: run 1, walk 2',{rounds:6,warm:1,cool:1},[['jog',1],['walk',2]]],
+  ['box1','🥊','หัดชกมวย มือใหม่','Boxing basics','boxing',1,6,'ท่าพื้นฐาน การ์ด แย็บ ตรง หลบ 3 รอบ ไม่ต้องใช้อุปกรณ์','Guard, jab, cross and slips, 3 rounds, no equipment',{rounds:3,rest:15,rrest:45,warm:1,cool:1},[['shuffle',30],['jab',30],['jabcross',30],['slip',30],['box',30]]],
+  ['box2','🥊','มวยคาร์ดิโอ 20 นาที','Boxing cardio 20','boxing',2,7.5,'ชกต่อเนื่อง ฮุก อัปเปอร์คัต ย่อหลบ เหงื่อท่วม','Non-stop punches, hooks, uppercuts and weaves — a real sweat',{rounds:3,rest:15,rrest:60,warm:1,cool:1},[['shuffle',40],['jabcross',40],['hook',40],['upper',40],['bobweave',40],['combo',40],['knees',30]]],
+  ['box3','🔥','มวยเข้มข้น (ยกละ 3 นาที)','Fight rounds','boxing',3,9,'4 ยก แต่ละยกเหมือนชกจริง พักระหว่างยก 1 นาที','4 rounds that feel like a real fight, 1 minute between rounds',{rounds:4,rest:10,rrest:60,warm:1,cool:1},[['combo',45],['hook',30],['upper',30],['bobweave',30],['burpee',20],['shuffle',45]]],
   ['back','🩹','ดูแลหลัง ลดปวดหลัง','Back care','health',1,2.5,'ยืดและเสริมแกนกลางเบา ๆ ถ้าปวดมากให้หยุดและพบแพทย์','Gentle stretches and core work — stop and see a doctor if it hurts',{rest:10},[['catcow',60],['child',45],['birddog',10],['bridge',12],['cobra',30],['twist',60],['ham',60]]],
   ['knee','🦿','เข่าแข็งแรง','Knee strength','health',1,3.5,'เสริมกล้ามเนื้อรอบเข่า แรงกระแทกต่ำ','Build the muscles around the knee with low impact',{rounds:2,rest:20,rrest:45,warm:1,cool:1},[['sitstand',10],['calf',15],['bridge',12],['hipabd',30],['wallsit',20],['legsw',30]]],
   ['senior','🧓','วัยเก๋า ปลอดภัย','Gentle for seniors','health',1,3,'นั่ง-ยืน ผนัง เก้าอี้ ฝึกทรงตัวและกำลังขา','Chair and wall moves for balance and leg strength',{rounds:2,rest:30,rrest:60},[['march',60],['sitstand',8],['wpush',10],['calf',10],['armc',30],['sbend',30],['neck',30]]],
@@ -3836,7 +3848,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   ['fb3','🔥','ทั้งตัว ขั้นสูง','Full body — advanced','full',3,7,'หนัก ครบ กระโดด สำหรับคนฟิต','Hard and complete, with jumps',{rounds:3,rest:15,rrest:60,warm:1,cool:1},[['burpee',10],['jsquat',15],['push',15],['climb',45],['slunge',16],['shtap',40],['legraise',15]]],
   ['gym','🏢','ยิม ทั้งตัว','Gym full body','full',2,5,'เครื่องและดัมเบลพื้นฐาน 3 เซ็ต','Basic machines and dumbbells, 3 sets',{rounds:3,rest:45,rrest:90,warm:1,cool:1},[['gsquat',10],['bench',10],['row',12],['rdl',10],['ohp',10],['latpd',12]]],
  ];
- const CATS=[['all','✨',L('ทั้งหมด','All')],['quick','⏱️',L('สั้น ๆ ระหว่างวัน','Quick')],['core','🔥',L('หน้าท้อง','Abs & core')],['lower','🍑',L('ก้นและขา','Glutes & legs')],['upper','💪',L('แขนและไหล่','Arms & shoulders')],['cardio','⚡',L('คาร์ดิโอ / HIIT','Cardio / HIIT')],['health','🩹',L('ดูแลสุขภาพ','Care')],['full','🏋️',L('ทั้งตัว','Full body')]];
+ const CATS=[['all','✨',L('ทั้งหมด','All')],['quick','⏱️',L('สั้น ๆ ระหว่างวัน','Quick')],['core','🔥',L('หน้าท้อง','Abs & core')],['lower','🍑',L('ก้นและขา','Glutes & legs')],['upper','💪',L('แขนและไหล่','Arms & shoulders')],['cardio','⚡',L('คาร์ดิโอ / HIIT','Cardio / HIIT')],['boxing','🥊',L('หัดชกมวย','Boxing')],['health','🩹',L('ดูแลสุขภาพ','Care')],['full','🏋️',L('ทั้งตัว','Full body')]];
  const prog=id=>PR.find(p=>p[0]===id);
  const progDef=p=>({title:L(p[2],p[3]),e:p[1],met:p[6],...p[9],moves:p[10]});
  const mine=()=>(s.workoutCustom=s.workoutCustom||[]);
@@ -3847,8 +3859,8 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const S=key=>W.session(key,W.plan()||{level:'1',min:30},localDay());
  const lv=n=>`<span class="wl-lv">${'●'.repeat(n)}${'○'.repeat(3-n)}</span>`;
  // ---- move categories for the picker ----
- const MC=[['all',L('ทั้งหมด','All')],['warm',L('วอร์ม / คาร์ดิโอ','Warm-up / cardio')],['lower',L('ขา / ก้น','Legs / glutes')],['upper',L('แขน / อก / หลัง','Arms / chest / back')],['core',L('หน้าท้อง','Core')],['stretch',L('ยืดเหยียด','Stretch')],['gym',L('อุปกรณ์ / ยิม','Equipment / gym')]];
- const MCAT={warm:'march armc legsw jacks knees climb skater burpee box rope butt kneeup walk jog bike ellip',lower:'squat lunge bridge wallsit calf stepup sumosq jsquat slunge dkick hipabd sitstand',
+ const MC=[['all',L('ทั้งหมด','All')],['warm',L('วอร์ม / คาร์ดิโอ','Warm-up / cardio')],['boxing',L('มวย','Boxing')],['lower',L('ขา / ก้น','Legs / glutes')],['upper',L('แขน / อก / หลัง','Arms / chest / back')],['core',L('หน้าท้อง','Core')],['stretch',L('ยืดเหยียด','Stretch')],['gym',L('อุปกรณ์ / ยิม','Equipment / gym')]];
+ const MCAT={warm:'march armc legsw jacks knees climb skater burpee rope butt kneeup walk jog bike ellip',boxing:'box shuffle jab jabcross hook upper slip bobweave combo',lower:'squat lunge bridge wallsit calf stepup sumosq jsquat slunge dkick hipabd sitstand',
   upper:'kpush push dips superman shtap wpush inch',core:'plank deadbug splank crunch bicycle legraise flutter rtwist birddog',stretch:'catcow child ham hip chest twist cobra fold quad sbend neck reach',gym:'gsquat bench row latpd ohp rdl lpress curl triext latraise dbrow'};
  const catOf=id=>Object.keys(MCAT).find(k=>MCAT[k].split(' ').includes(id))||'warm';
  const ALL=Object.keys(W.X).filter(id=>id!=='rest');
