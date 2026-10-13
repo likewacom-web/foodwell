@@ -109,6 +109,18 @@ class MainActivity : ComponentActivity() {
             overScrollMode = WebView.OVER_SCROLL_NEVER
             setBackgroundColor(dark)
             webViewClient = object : WebViewClient() {
+                // mailto:, tel:, market: and similar links go to the matching app (e.g. the AI-result report email).
+                override fun shouldOverrideUrlLoading(view: WebView, request: android.webkit.WebResourceRequest): Boolean {
+                    val uri = request.url
+                    if (uri.scheme in setOf("http", "https", "file", "data", "about", "blob", "javascript", null)) return false
+                    val action = if (uri.scheme == "mailto") Intent.ACTION_SENDTO else Intent.ACTION_VIEW
+                    runCatching { startActivity(Intent(action, uri)) }.onFailure {
+                        android.widget.Toast.makeText(this@MainActivity,
+                            Lang.t(this@MainActivity, "ไม่พบแอปที่เปิดลิงก์นี้ได้", "No app found to open this link"),
+                            android.widget.Toast.LENGTH_LONG).show()
+                    }
+                    return true
+                }
                 override fun onPageFinished(view: WebView, url: String?) {
                     // Opened from a reminder: jump to its page once the app has loaded.
                     pendingPage?.let { p -> pendingPage = null; view.postDelayed({ openPage(p) }, 400) }
