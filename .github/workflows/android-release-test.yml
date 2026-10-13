@@ -37,12 +37,12 @@ jobs:
       - name: Install Android SDK 35
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
 
       - uses: gradle/actions/setup-gradle@v6
         with:
           cache-provider: basic
-          gradle-version: '8.9'
+          gradle-version: '8.14.3'
 
       - name: Throwaway upload key (test only, never uploaded)
         run: |
@@ -75,7 +75,7 @@ jobs:
           fail(){ echo "::error::$1"; exit 1; }
           grep -q 'android:debuggable="true"' manifest.xml && fail "release bundle is debuggable" || echo "not debuggable: OK"
           grep -q 'android:versionCode="1000"' manifest.xml || fail "versionCode from -PversionCode not applied"
-          grep -q 'android:targetSdkVersion="35"' manifest.xml || fail "targetSdk is not 35 (Play requires 35+)"
+          grep -q 'android:targetSdkVersion="36"' manifest.xml || fail "targetSdk is not 36 (Play requires 36+)"
           grep -q 'android:dataExtractionRules' manifest.xml || fail "backup rules missing"
           echo "===== permissions ====="; grep -o 'uses-permission[^>]*android:name="[^"]*"' manifest.xml | sed 's/.*name="//;s/"$//' | sort | tee perms.txt
           grep -qE 'READ_CONTACTS|ACCESS_FINE_LOCATION|READ_SMS|READ_EXTERNAL_STORAGE|READ_MEDIA_IMAGES' perms.txt && fail "unexpected sensitive permission (would need a Play declaration)" || echo "no unexpected sensitive permissions"
@@ -84,7 +84,7 @@ jobs:
           echo "assets present: OK"
           grep -q 'google-services' contents.txt && echo "Firebase config: included" || echo "Firebase config: not in this build (sync card explains setup)"
           {
-            echo "- signed, valid, not debuggable, targetSdk 35, versionCode applied"
+            echo "- signed, valid, not debuggable, targetSdk 36, versionCode applied"
             echo "- permissions: $(tr '\n' ' ' < perms.txt)"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -115,7 +115,7 @@ jobs:
           java -jar "$RUNNER_TEMP/bundletool.jar" build-apks --bundle="$AAB" --output=app.apks --mode=universal \
             --ks="$FW_KEYSTORE" --ks-pass=pass:testpass --ks-key-alias=test --key-pass=pass:testpass
           unzip -o app.apks universal.apk
-          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 -v 4 universal.apk > zipalign.txt && echo "zipalign 16 KB: OK" || { tail -20 zipalign.txt; echo "::error::APK is not zip-aligned for 16 KB pages"; exit 1; }
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 -v 4 universal.apk > zipalign.txt && echo "zipalign 16 KB: OK" || { tail -20 zipalign.txt; echo "::error::APK is not zip-aligned for 16 KB pages"; exit 1; }
           echo "- universal APK: $(du -h universal.apk | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Enable KVM

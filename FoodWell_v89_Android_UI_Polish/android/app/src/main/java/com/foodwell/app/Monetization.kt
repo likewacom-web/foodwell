@@ -18,7 +18,6 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
-import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -32,6 +31,8 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import org.json.JSONObject
 
 /**
@@ -105,8 +106,10 @@ class Monetization(
                     .setProductId(PRODUCT_ID).setProductType(BillingClient.ProductType.INAPP).build()
             )
         ).build()
-        val r = billing.queryProductDetails(params)
-        product = r.productDetailsList?.firstOrNull()
+        // Billing 8 hands back a QueryProductDetailsResult; the callback form keeps this independent of the ktx wrapper.
+        product = suspendCancellableCoroutine { cont ->
+            billing.queryProductDetailsAsync(params) { _, res -> if (cont.isActive) cont.resume(res.productDetailsList.firstOrNull()) }
+        }
         if (product == null) message = Lang.t(activity, "ยังไม่พบสินค้า \"$PRODUCT_ID\" ใน Google Play Console", "Product \"$PRODUCT_ID\" not found in Google Play Console yet")
         emitStatus()
     }
