@@ -3223,7 +3223,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  // ANIM value: a number n = frames 1…n in turn, or a list = the order to show frame numbers in
  // (e.g. [1,3,2,3]: start, in-between, end, in-between). Each frame fades in over the one before.
  // smooth 30-frame clips built from the drawn key frames in art/exercise_keyframes (see EXERCISES.md)
- const ANIM={armc:'v',box:'v',bridge:'v',calf:'v',catcow:'v',climb:'v',hip:'v',jacks:'v',knees:'v',lunge:'v',march:'v',neck:'v',plank:'v',push:'v',row:'v',skater:'v',squat:'v',superman:'v',walk:'v',wallsit:'v'};
+ const ANIM={armc:'v',box:'v',jab:'v',bridge:'v',calf:'v',catcow:'v',climb:'v',hip:'v',jacks:'v',knees:'v',lunge:'v',march:'v',neck:'v',plank:'v',push:'v',row:'v',skater:'v',squat:'v',superman:'v',walk:'v',wallsit:'v'};
  const art=(id,cls)=>{const a=ANIM[id],seq=Array.isArray(a)?a:a>1?[...Array(a)].map((_,i)=>i+1):null;
   if(a==='v')return `<img class="${cls}" src="anim/${id}.webp" alt="" draggable="false">`;
   if(seq)return `<span class="wo-frames ${cls}" data-fr="${id}" data-seq="${seq}">${[...Array(Math.max(...seq))].map((_,i)=>`<img src="anim/${id}_${i+1}.webp" alt="" draggable="false" class="${i+1===seq[0]?'on':''}">`).join('')}</span>`;

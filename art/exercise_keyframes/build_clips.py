@@ -17,11 +17,20 @@ CYCLE = {"armc": 1400, "box": 600, "bridge": 1400, "calf": 1200, "catcow": 1800,
 F8, F4 = [1, 4, 3, 5, 2, 5, 3, 4], [1, 3, 2, 3]
 SEQ = {m: F8 for m in 'armc box bridge calf catcow climb hip jacks knees lunge march push row skater superman'.split()}
 SEQ.update(squat=[1, 3, 5, 2, 5, 3], walk=[1, 4, 3, 2, 3, 4], neck=F4, plank=F4, wallsit=F4)
+# Boxing moves mix the box guard/jab frames (box_1 guard, box_2 jab) with boxing_<pose>.webp.
+G, J = 'box_1', 'box_2'
+SEQ.update(jab=[G, 'box_4', 'box_3', J, 'box_3', 'box_4'], jabcross=[G, J, G, 'boxing_cross'], hook=[G, 'boxing_hook'],
+           upper=[G, 'boxing_upper'], slip=[G, 'boxing_slip'], bobweave=[G, 'boxing_bob'],
+           shuffle=[G, 'boxing_shuffle'], combo=[J, 'boxing_cross', 'boxing_hook', 'boxing_upper'])
+CYCLE.update(jab=960, jabcross=1000, hook=1000, upper=1000, slip=840, bobweave=720, shuffle=600, combo=1400)
 
+import sys
+ONLY = set(sys.argv[1:])  # optional: build just these moves
 dis = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
 
 def load(mv, n):
-    im = np.array(Image.open(os.path.join(HERE, f'{mv}_{n}.webp')).convert('RGB'))
+    name = n if isinstance(n, str) else f'{mv}_{n}'
+    im = np.array(Image.open(os.path.join(HERE, name + '.webp')).convert('RGB'))
     return cv2.resize(cv2.cvtColor(im, cv2.COLOR_RGB2BGR), (SIZE, SIZE), interpolation=cv2.INTER_AREA)
 
 def flow(a, b):
@@ -38,6 +47,7 @@ def tween(a, b, n):
             for t in (k / (n + 1) for k in range(1, n + 1))]
 
 for mv, seq in SEQ.items():
+    if ONLY and mv not in ONLY: continue
     keys = {n: load(mv, n) for n in set(seq)}
     per = max(0, round(FRAMES / len(seq)) - 1)
     frames = []
