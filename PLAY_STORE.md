@@ -50,7 +50,11 @@ GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (
 - **GitHub Pages:** Repo → Settings → Pages → Source: `main` / โฟลเดอร์ `/docs` → URL จะเป็น `https://<user>.github.io/<repo>/privacy-policy.html` (repo ต้องเป็น public หรือใช้แผนที่รองรับ Pages)
 - **Google Sites** (ฟรี): สร้างหน้าใหม่ แล้วคัดลอกเนื้อหาจาก `docs/privacy-policy.html`
 
-⚠️ ก่อนเผยแพร่ แก้ **`[อีเมลติดต่อ / CONTACT EMAIL]`** ในไฟล์ `docs/privacy-policy.html` และ `assets/privacy.html` เป็นอีเมลที่ใช้ติดต่อผู้ใช้
+อีเมลติดต่อผู้ใช้: **meowfitcaloriestracker@gmail.com** (ใส่แล้วใน `docs/privacy-policy.html`, `docs/delete-account.html` และ `assets/privacy.html`)
+
+ลิงก์ที่ใช้ใน Play Console (GitHub Pages จาก `main` / `docs`):
+- นโยบายความเป็นส่วนตัว: `https://likewacom-web.github.io/foodwell/privacy-policy.html`
+- ลบบัญชีและข้อมูล: `https://likewacom-web.github.io/foodwell/delete-account.html`
 
 ---
 
@@ -181,7 +185,7 @@ Nutrition values are estimates, not medical advice.
 - **Government / Financial / News:** No
 
 ## 10. ก่อนกด Publish
-- [ ] แก้อีเมลติดต่อในนโยบาย แล้วเผยแพร่ URL
+- [x] ใส่อีเมลติดต่อในนโยบาย · [ ] เปิด GitHub Pages แล้วเช็กว่าลิงก์เปิดได้
 - [ ] ถ้าใช้ซิงก์: เพิ่ม **SHA-1 ของ App signing key** (Play Console → Setup → App signing) ลงใน Firebase → Project settings → Android app แล้วดาวน์โหลด `google-services.json` ใหม่ใส่ `app/` — ไม่งั้นล็อกอิน Google บนเวอร์ชันจาก Play จะไม่ทำงาน
 - [ ] ถ้าเปิดโฆษณา: สร้าง AdMob app + ad units, ใส่ `app-ads.txt` บนเว็บไซต์ผู้พัฒนา, สร้างสินค้า `remove_ads` (ดู `MONETIZATION.md`)
 - [ ] ทดสอบ Internal testing บนมือถือจริงอย่างน้อย 1 เครื่อง
