@@ -597,7 +597,9 @@ if($("aiEndpoint"))$("aiEndpoint").value=s.settings.aiEndpoint||"";
 const v40OldPreview=previewPhotoFile;previewPhotoFile=function(file){v40OldPreview(file);showAiCard(!!file)};
 
 let editingId=null, modalId=null;
-function resetFoodForm(){editingId=null;$("foodFormTitle").textContent="เพิ่มอาหาร";$("addFood").textContent="บันทึกอาหาร";$("cancelEdit").style.display="none";["foodName","kcal","protein","carbs","fat","fiber","sodium","sugar","note","foodTime"].forEach(id=>{if($(id))$(id).value=""});$("photo").value="";window.fwPendingPhoto=null}
+function resetFoodForm(){editingId=null;$("foodFormTitle").textContent="เพิ่มอาหาร";$("addFood").textContent="บันทึกอาหาร";$("cancelEdit").style.display="none";["foodName","kcal","protein","carbs","fat","fiber","sodium","sugar","note","foodTime"].forEach(id=>{if($(id))$(id).value=""});$("photo").value="";window.fwPendingPhoto=null;fwClearFoodPhoto()}
+// After saving (or cancelling), drop the photo, its preview and the AI result so the next meal starts clean.
+function fwClearFoodPhoto(){["photo","photoCamera"].forEach(id=>{if($(id))$(id).value=""});$("clearPhoto")?.click();const r=$("v40AiResult");if(r){r.innerHTML="";r.classList.remove("show")}}
 function startEdit(id){let f=s.foods.find(x=>x.id===id);if(!f)return;go("food");editingId=id;$("foodFormTitle").textContent="แก้ไขอาหาร";$("addFood").textContent="บันทึกการแก้ไข";$("cancelEdit").style.display="block";$("foodName").value=f.name;$("meal").value=f.meal;$("kcal").value=f.kcal||"";$("protein").value=f.protein||"";$("carbs").value=f.carbs||"";$("fat").value=f.fat||"";$("fiber").value=f.fiber||"";$("sodium").value=f.sodium||"";$("sugar").value=f.sugar||"";$("foodTime").value=f.time||"";$("note").value=f.note||"";window.scrollTo({top:0,behavior:"smooth"})}
 $("cancelEdit").onclick=resetFoodForm;
 function isFoodFavorite(id){const f=s.foods.find(x=>x.id===id);return !!f?.favorite}
