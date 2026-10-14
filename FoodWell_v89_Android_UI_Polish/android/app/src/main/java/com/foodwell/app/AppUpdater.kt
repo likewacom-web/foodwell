@@ -1,5 +1,6 @@
 package com.foodwell.app
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -22,7 +23,7 @@ import org.json.JSONObject
 class AppUpdater(private val act: ComponentActivity, private val emit: (String, String) -> Unit) {
     private val mgr = AppUpdateManagerFactory.create(act)
     private val launcher = act.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { r ->
-        send(if (r.resultCode == ComponentActivity.RESULT_OK) "started" else "cancelled")
+        send(if (r.resultCode == Activity.RESULT_OK) "started" else "cancelled")
     }
 
     private fun send(state: String, code: Int = 0, msg: String = "") =
