@@ -67,18 +67,23 @@ GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (
 
 **คำอธิบายเต็ม:**
 ```
-MeowFit ช่วยให้ดูแลการกินและสุขภาพได้ง่าย ๆ ทุกวัน แบบไม่กดดันตัวเอง
+MeowFit ช่วยให้ดูแลการกินและสุขภาพได้ง่าย ๆ ทุกวัน แบบไม่กดดันตัวเอง พร้อมน้องแมวเป็นเพื่อนออกกำลังกาย 🐾
 
 🍱 บันทึกอาหารง่าย
 • ฐานข้อมูลอาหารไทยกว่า 240 เมนู พิมพ์ชื่อแล้วเติมค่าโภชนาการให้
 • สแกนบาร์โค้ดสินค้า (Open Food Facts) ใส่ปริมาณที่กินจริงได้
 • ถ่ายรูปอาหาร และวิเคราะห์ด้วย AI
 • เมนูทำเอง คำนวณจากวัตถุดิบ · กินเหมือนเดิมได้ในแตะเดียว
+• ปุ่มลัดเพิ่มอาหารจากหน้าหลัก วิดเจ็ต และกดค้างที่ไอคอนแอป
 
 🎯 เป้าหมายเฉพาะคุณ
 • คำนวณ BMI (เกณฑ์คนเอเชีย) แคลอรี่ โปรตีน คาร์บ ไขมัน ที่ควรได้ต่อวัน
 • แผนลดน้ำหนัก กำหนดเป้าและจังหวะเอง
 • IF (อดอาหารเป็นช่วง) พร้อมตัวนับเวลา
+
+⚖️ น้ำหนักและตาชั่งอัจฉริยะ
+• รับน้ำหนักและไขมันในร่างกายจากตาชั่งผ่าน Health Connect อัตโนมัติ
+• เชื่อมตาชั่งบลูทูธได้โดยตรง
 
 🥗 เมนูสุขภาพ
 • 39 สูตรอาหารไทยสุขภาพ แนะนำตามแคลอรี่ที่เหลือในวันนั้น
@@ -86,10 +91,12 @@ MeowFit ช่วยให้ดูแลการกินและสุขภ
 
 🏋️ แผนออกกำลังกาย
 • จัดตารางตามเป้าหมาย ระดับ และเวลาที่มี ทำที่บ้าน ยิม หรือกลางแจ้ง
-• โหมดนำเล่น มีตัวจับเวลาและท่าตัวอย่างขยับได้ 42 ท่า
+• โหมดนำเล่น มีตัวจับเวลาและน้องแมวสาธิตท่า 70+ ท่า
+• ชุดหัดชกมวย 8 ท่า: แย็บ ฮุก อัปเปอร์คัต หลบหมัด และคอมโบ
 
 💧 น้ำและการเคลื่อนไหว
 • เป้าดื่มน้ำตามน้ำหนักตัว · ประเมินแคลอรี่จากกิจกรรม 40+ ประเภท
+• ดึงก้าวเดินและการออกกำลังกายจากนาฬิกาผ่าน Health Connect
 
 📊 เข้าใจตัวเองมากขึ้น
 • สรุปรายสัปดาห์ ข้อสังเกตอัตโนมัติ (เช่น น้ำตาลส่วนใหญ่มาจากเครื่องดื่ม)
@@ -110,18 +117,23 @@ MeowFit ช่วยให้ดูแลการกินและสุขภ
 
 **Full description:**
 ```
-MeowFit makes it easy to look after what you eat and how you feel — without the pressure.
+MeowFit makes it easy to look after what you eat and how you feel — without the pressure, with a cheerful cat as your workout buddy 🐾
 
 🍱 Easy food logging
 • 240+ Thai dishes: type a name and the nutrition fills in
 • Barcode scanning (Open Food Facts) with the amount you actually ate
 • Food photos with AI analysis
 • Home recipes calculated from ingredients · repeat a meal in one tap
+• Quick "Log food" shortcuts on the home screen, widget and app icon
 
 🎯 Targets made for you
 • BMI (Asian cut-offs) and daily calories, protein, carbs and fat
 • Weight-loss plan with your own target and pace
 • Intermittent fasting timer
+
+⚖️ Weight & smart scales
+• Weight and body fat from your smart scale, imported automatically via Health Connect
+• Connect Bluetooth bathroom scales directly
 
 🥗 Healthy recipes
 • 39 healthy Thai recipes suggested from what's left for today
@@ -129,10 +141,12 @@ MeowFit makes it easy to look after what you eat and how you feel — without th
 
 🏋️ Workout plans
 • A weekly schedule for your goal, level and time — at home, gym or outdoors
-• Guided timer with 42 animated exercises
+• Guided timer with 70+ exercises demonstrated by the MeowFit cat
+• Boxing set with 8 moves: jab, cross, hook, uppercut, slip and combos
 
 💧 Water & movement
 • Water goal from your weight · calories burned for 40+ activities
+• Steps and workouts from your watch via Health Connect
 
 📊 Understand yourself
 • Weekly summary and automatic insights (e.g. most of your sugar comes from drinks)

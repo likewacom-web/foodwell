@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <script>
 // fwL(th,en): pick the message for the chosen language (for text built from variables, which word lookup can't translate well)
+// MeowFit's own AI proxy (Cloudflare Worker -> Gemini, key kept on Cloudflare; see ai-proxy/). A URL saved in Settings overrides it.
+window.FW_AI_DEFAULT='https://round-frog-a0d0meowfit-ai.meowfitcaloriestracker.workers.dev/?k=70a9520d';
+window.fwAiEndpoint=()=>{try{return String(s.settings.aiEndpoint||document.getElementById('aiEndpoint')?.value||FW_AI_DEFAULT||'').trim()}catch(e){return String(FW_AI_DEFAULT||'')}};
 window.fwL=(th,en)=>{try{return localStorage.getItem('fw_lang')==='en'?en:th}catch(e){return th}};
 </script>
 <script>
@@ -28,7 +31,7 @@ body{margin:0;background:#262626;color:var(--text);font-family:"Noto Sans Thai",
 .header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #202229}
 .header .back{font-size:28px;color:#ddd}.title{font-size:24px;font-weight:800}.head-actions{display:flex;gap:12px}.circle-btn{width:40px;height:40px;border:1px solid #363840;border-radius:12px;background:#181a20;color:#ddd;font-size:18px}
 main{padding:0 12px 94px}
-.home-date{text-align:center;padding:14px 0 10px;position:relative}.home-date .moon{position:absolute;left:4px;top:13px;width:48px;height:48px;border-radius:50%;background:#252933;display:grid;place-items:center;font-size:28px}.home-date .gear{position:absolute;right:4px;top:17px;font-size:25px}.home-date h1{font-size:35px;margin:0;line-height:1.1}.home-date p{margin:3px 0 0;color:#9698a0;font-size:16px}
+.home-date{text-align:center;padding:14px 0 10px;position:relative}.home-date .moon:active{transform:scale(.9)}.home-date .moon{transition:transform .15s;-webkit-tap-highlight-color:transparent;position:absolute;left:4px;top:13px;width:48px;height:48px;border-radius:50%;background:#252933;display:grid;place-items:center;font-size:28px}.home-date .gear{position:absolute;right:4px;top:17px;font-size:25px}.home-date h1{font-size:35px;margin:0;line-height:1.1}.home-date p{margin:3px 0 0;color:#9698a0;font-size:16px}
 .welcome{margin:0 0 14px;padding:22px 18px;border-radius:28px;background:linear-gradient(135deg,#242129,#201f25);min-height:145px;display:flex;align-items:center;justify-content:space-between;border:1px solid #2d2c33}.welcome .bubble{background:#f2b4c8;color:#3a2730;border-radius:22px;padding:16px 18px;font-size:18px;font-weight:700;line-height:1.5;max-width:70%}.cat{font-size:58px;filter:saturate(.75)}
 .summary{background:#f1adc3;color:#30232a;border-radius:26px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.summary .label{font-size:18px;font-weight:800}.summary .value{font-size:44px;font-weight:800;line-height:1}.summary .unit{font-size:17px;margin-left:5px}.summary p{margin:6px 0 0;color:#654c56;font-size:13px}.ring{width:108px;height:108px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#17191f 0 230deg,#e58ea9 230deg 360deg);position:relative}.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#f1adc3}.ring span{position:relative;z-index:1;font-size:18px;font-weight:800;text-align:center}
 .twocards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mini{background:#1a1c22;border:1px solid #272a31;border-radius:22px;padding:17px 14px;min-height:145px}.mini .ico{font-size:31px}.mini h3{margin:7px 0 0;font-size:18px}.mini .count{font-size:25px;font-weight:800}.mini small{color:#9698a0}.bar{height:9px;background:#353840;border-radius:99px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px}.blue i{background:var(--blue);width:0;transition:width .4s}.green i{background:var(--green);width:0;transition:width .4s}
@@ -170,7 +173,7 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 .dashboard-kicker{color:#ee9bb7;font-size:10px;font-weight:900;letter-spacing:.12em}.dashboard-hero h2{margin:5px 0 3px;font-size:22px}.dashboard-hero p{margin:0;color:#9c9ea7;font-size:11px}.dashboard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.dashboard-stat{background:#20222a;border:1px solid #343640;border-radius:17px;padding:11px 8px;text-align:center}.dashboard-stat b{display:block;font-size:17px}.dashboard-stat small{display:block;color:#999ba5;font-size:9px;margin-top:3px}.dashboard-card{background:#191b22;border:1px solid #30323a;border-radius:22px;padding:15px;margin-bottom:12px}.dashboard-card h3{margin:0;font-size:14px}.dashboard-card p{color:#92949e;font-size:10px;margin:4px 0 12px}.dash-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:end;height:150px}.dash-col{height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:5px}.dash-bar{width:100%;max-width:28px;min-height:5px;border-radius:10px 10px 5px 5px;background:linear-gradient(180deg,#f4b2c9,#d87fa5);box-shadow:0 5px 16px rgba(239,160,188,.12)}.dash-col small{font-size:8px;color:#898b95}.dash-value{font-size:8px;color:#c8c9d0}.dashboard-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.dashboard-mini{background:#20222a;border:1px solid #343640;border-radius:18px;padding:13px}.dashboard-mini b{font-size:20px}.dashboard-mini small{display:block;color:#999ba5;font-size:9px;margin-top:3px}.dashboard-note{padding:12px;border-radius:16px;background:linear-gradient(90deg,#251e26,#20232c);border:1px solid #45323c;color:#d9a0b6;font-size:11px;line-height:1.55}
 @media(max-width:360px){.dashboard-stats{gap:5px}.dashboard-stat b{font-size:15px}}
 
-.profile-hero{background:linear-gradient(135deg,#25212a,#1b1d24);border:1px solid #3b3340;border-radius:24px;padding:18px;margin:10px 0 12px;position:relative;overflow:hidden}.profile-hero:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(239,160,188,.10);right:-45px;top:-55px}.profile-main{display:flex;align-items:center;gap:14px;position:relative;z-index:1}.profile-avatar-lg{width:76px;height:76px;border-radius:25px;display:grid;place-items:center;background:#302a34;border:1px solid #51404c;font-size:38px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.profile-hero h2{margin:0;font-size:22px}.profile-hero p{margin:4px 0 0;color:#a5a6ae;font-size:10px}.profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:15px;position:relative;z-index:1}.profile-stat{background:#20222a;border-radius:15px;padding:10px 6px;text-align:center}.profile-stat b{display:block;font-size:18px}.profile-stat small{color:#92949d;font-size:8px}.profile-insight{margin-top:10px;background:#20222a;border-radius:15px;padding:11px;color:#c8c9cf;font-size:10px;line-height:1.55}.profile-section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.profile-section-title h3{margin:0;font-size:14px}.profile-section-title small{color:#888b94;font-size:9px}.profile-chip-row{display:flex;gap:7px;flex-wrap:wrap}.profile-chip{background:#262932;border:1px solid #383b45;border-radius:999px;padding:7px 10px;color:#d6d7dc;font-size:9px}.profile-recent{display:grid;gap:7px}.profile-recent-item{display:flex;align-items:center;gap:9px;background:#20222a;border-radius:13px;padding:10px}.profile-recent-icon{width:34px;height:34px;border-radius:11px;background:#2c2f38;display:grid;place-items:center}.profile-recent-item b{font-size:10px}.profile-recent-item small{display:block;color:#858891;font-size:8px;margin-top:2px}.theme-soft .profile-hero{background:linear-gradient(135deg,#fff5f8,#f4eef2);border-color:#ead9df}.theme-soft .profile-avatar-lg,.theme-soft .profile-stat,.theme-soft .profile-insight,.theme-soft .profile-recent-item{background:#fff}.theme-soft .profile-chip{background:#f5eef2;border-color:#ead9df;color:#555}
+.profile-hero{background:linear-gradient(135deg,#25212a,#1b1d24);border:1px solid #3b3340;border-radius:24px;padding:18px;margin:10px 0 12px;position:relative;overflow:hidden}.profile-hero:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(239,160,188,.10);right:-45px;top:-55px}.profile-avatar-lg.has-photo{background-size:cover!important;background-position:center!important;overflow:hidden}.pf-photo-row{display:flex;align-items:center;gap:12px;margin:10px 0 12px}.pf-photo-btns{flex:1}.pf-photo-btns>div{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}.pf-photo-btns .secondary-btn{padding:8px 10px;font-size:12px}.pf-photo-btns small{color:var(--muted,#999);font-size:11px}.profile-main{display:flex;align-items:center;gap:14px;position:relative;z-index:1}.profile-avatar-lg{width:76px;height:76px;border-radius:25px;display:grid;place-items:center;background:#302a34;border:1px solid #51404c;font-size:38px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.profile-hero h2{margin:0;font-size:22px}.profile-hero p{margin:4px 0 0;color:#a5a6ae;font-size:10px}.profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:15px;position:relative;z-index:1}.profile-stat{background:#20222a;border-radius:15px;padding:10px 6px;text-align:center}.profile-stat b{display:block;font-size:18px}.profile-stat small{color:#92949d;font-size:8px}.profile-insight{margin-top:10px;background:#20222a;border-radius:15px;padding:11px;color:#c8c9cf;font-size:10px;line-height:1.55}.profile-section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.profile-section-title h3{margin:0;font-size:14px}.profile-section-title small{color:#888b94;font-size:9px}.profile-chip-row{display:flex;gap:7px;flex-wrap:wrap}.profile-chip{background:#262932;border:1px solid #383b45;border-radius:999px;padding:7px 10px;color:#d6d7dc;font-size:9px}.profile-recent{display:grid;gap:7px}.profile-recent-item{display:flex;align-items:center;gap:9px;background:#20222a;border-radius:13px;padding:10px}.profile-recent-icon{width:34px;height:34px;border-radius:11px;background:#2c2f38;display:grid;place-items:center}.profile-recent-item b{font-size:10px}.profile-recent-item small{display:block;color:#858891;font-size:8px;margin-top:2px}.theme-soft .profile-hero{background:linear-gradient(135deg,#fff5f8,#f4eef2);border-color:#ead9df}.theme-soft .profile-avatar-lg,.theme-soft .profile-stat,.theme-soft .profile-insight,.theme-soft .profile-recent-item{background:#fff}.theme-soft .profile-chip{background:#f5eef2;border-color:#ead9df;color:#555}
 
 /* MeowFit v36 — Custom Home */
 .home-custom-tools{display:flex;gap:7px;margin:10px 0}.home-custom-tools button{flex:1;border:1px solid #383a43;background:#20222a;color:#eee;border-radius:14px;padding:10px;font-weight:800;font-size:10px}.home-edit-hint{display:none;padding:9px 11px;border:1px dashed #80506a;background:#241d25;color:#dba1b8;border-radius:14px;font-size:9px;margin-bottom:9px}.home-editing .home-edit-hint{display:block}.home-editing .home-sortable{outline:1px dashed #e58bab;outline-offset:4px;cursor:grab}.home-sortable.dragging{opacity:.45;transform:scale(.99)}.home-card-hidden{display:none!important}.home-widget-menu{display:none;background:#191b22;border:1px solid #343640;border-radius:18px;padding:10px;margin-bottom:10px}.home-widget-menu.open{display:block}.home-widget-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px}.home-widget-row span{font-size:10px}.home-widget-row button{border:0;border-radius:10px;padding:7px 10px;background:#2b2d36;color:#eee;font-size:9px;font-weight:800}.theme-soft .home-widget-menu{background:#fff;border-color:#e6dbe0}.theme-soft .home-widget-row button{background:#f3edf0;color:#444}
@@ -193,7 +196,7 @@ label{display:block;color:#c7c7cc;font-size:12px;margin:9px 0}input,select,texta
 .v39-suggestions{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:9px}.v39-suggest{border:1px solid #343640;background:#181a20;color:#eee;border-radius:13px;padding:9px;text-align:left;font-size:11px;cursor:pointer}.v39-suggest small{display:block;color:#8f929b;font-size:9px;margin-top:2px}
 
 /* v40 AI food recognition connector */
-.v40-ai-card{margin-top:10px;padding:12px;border-radius:18px;background:linear-gradient(135deg,rgba(239,160,188,.10),rgba(142,112,255,.08));border:1px solid rgba(239,160,188,.20)}.v40-ai-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.v40-ai-head b{font-size:13px}.v40-ai-head span{font-size:10px;color:#aaa}.v40-ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.v40-ai-btn{border:1px solid #454751;background:#252831;color:#fff;border-radius:13px;padding:10px;font-weight:800;cursor:pointer}.v40-ai-btn.primary-ai{background:linear-gradient(135deg,#f2b1c7,#b889e8);color:#2d2430;border:0}.v40-ai-status{font-size:10px;color:#aaa;line-height:1.55;margin-top:8px}.v40-ai-result{margin-top:9px;display:none}.v40-ai-result.show{display:block}.v40-ai-result .ai-result-box{background:#20232a;border:1px solid #393c46;border-radius:15px;padding:11px}.v40-ai-candidates{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.v40-ai-candidates button{border:1px solid #464954;background:#292c34;color:#eee;border-radius:12px;padding:7px 9px;font-size:10px}.v40-ai-settings small{display:block;color:#999;font-size:10px;line-height:1.5;margin-top:5px}.v40-ai-settings input{width:100%;margin-top:8px}
+.v40-ai-card{margin-top:10px;padding:12px;border-radius:18px;background:linear-gradient(135deg,rgba(239,160,188,.10),rgba(142,112,255,.08));border:1px solid rgba(239,160,188,.20)}.v40-ai-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.v40-ai-head b{font-size:13px}.v40-ai-head span{font-size:10px;color:#aaa}.v40-ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.v40-ai-btn{border:1px solid #454751;background:#252831;color:#fff;border-radius:13px;padding:10px;font-weight:800;cursor:pointer}.v40-ai-btn.primary-ai{background:linear-gradient(135deg,#f2b1c7,#b889e8);color:#2d2430;border:0}.v40-ai-status{font-size:10px;color:#aaa;line-height:1.55;margin-top:8px}.v40-ai-result{margin-top:9px;display:none}.v40-ai-result.show{display:block}.v40-ai-result .ai-result-box{background:#20232a;border:1px solid #393c46;border-radius:15px;padding:11px}.v40-ai-candidates{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.v40-ai-candidates button{border:1px solid #464954;background:#292c34;color:#eee;border-radius:12px;padding:7px 9px;font-size:10px}.v40-ai-report{display:block;margin:9px 0 0 auto;background:none;border:0;color:#aaa;font-size:10px;text-decoration:underline;cursor:pointer;padding:2px 0}.v40-ai-settings small{display:block;color:#999;font-size:10px;line-height:1.5;margin-top:5px}.v40-ai-settings input{width:100%;margin-top:8px}
 
 
 
@@ -292,7 +295,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <label>โซเดียม (mg)<input id="sodium" type="number" min="0"></label>
 <label>น้ำตาล (g)<input id="sugar" type="number" min="0" step=".1"></label>
 </div>
-<label>รูปอาหาร</label><div class="v38-photo-tools"><label class="photo-btn">📷 ถ่ายรูป<input id="photoCamera" type="file" accept="image/*" capture="environment" style="display:none"></label><label class="photo-btn">🖼️ เลือกรูป<input id="photo" type="file" accept="image/*" style="display:none"></label></div><div class="v38-photo-hint">ใช้กล้องหรือเลือกรูปอาหารจากเครื่องได้เลย</div><div id="photoPreview" class="photo-preview"><img id="photoPreviewImg" alt="ตัวอย่างรูปอาหาร"><button type="button" id="clearPhoto">ลบรูป</button></div><div class="v39-assist" id="v39PhotoAssist" style="display:none"><div class="v39-assist-head"><b>✨ ผู้ช่วยกรอกข้อมูลจากรูป</b><span>เลือกประเภทอาหาร</span></div><div class="v39-assist-note">ช่วยตั้งชื่อรายการจากรูปแบบรวดเร็ว โดยยังไม่วิเคราะห์วัตถุในภาพหรือประเมินโภชนาการอัตโนมัติ</div><div class="v39-chips"><button type="button" class="v39-chip" data-v39-type="ข้าว">🍚 ข้าว</button><button type="button" class="v39-chip" data-v39-type="เส้น">🍜 เส้น</button><button type="button" class="v39-chip" data-v39-type="ผัก">🥗 ผัก</button><button type="button" class="v39-chip" data-v39-type="ผลไม้">🍎 ผลไม้</button><button type="button" class="v39-chip" data-v39-type="เครื่องดื่ม">🥤 เครื่องดื่ม</button><button type="button" class="v39-chip" data-v39-type="ของหวาน">🍰 ของหวาน</button></div><div class="v39-suggestions" id="v39Suggestions"></div></div><div class="v40-ai-card" id="v40AiCard" style="display:none"><div class="v40-ai-head"><b>🤖 วิเคราะห์อาหารด้วย AI</b><span>ต้องเชื่อม AI endpoint</span></div><div class="v40-ai-status" id="v40AiStatus">ระบบจะส่งเฉพาะรูปที่คุณเลือกไปยัง endpoint ที่ตั้งค่าไว้ แล้วนำชื่ออาหารที่ได้มากรอกให้</div><div class="v40-ai-actions"><button type="button" class="v40-ai-btn primary-ai" id="v40AnalyzeBtn">✨ วิเคราะห์รูป</button><button type="button" class="v40-ai-btn" id="v40UseManualBtn">✍️ กรอกเอง</button></div><div class="v40-ai-result" id="v40AiResult"></div></div>
+<label>รูปอาหาร</label><div class="v38-photo-tools"><label class="photo-btn">📷 ถ่ายรูป<input id="photoCamera" type="file" accept="image/*" capture="environment" style="display:none"></label><label class="photo-btn">🖼️ เลือกรูป<input id="photo" type="file" accept="image/*" style="display:none"></label></div><div class="v38-photo-hint">ใช้กล้องหรือเลือกรูปอาหารจากเครื่องได้เลย</div><div id="photoPreview" class="photo-preview"><img id="photoPreviewImg" alt="ตัวอย่างรูปอาหาร"><button type="button" id="clearPhoto">ลบรูป</button></div><div class="v39-assist" id="v39PhotoAssist" style="display:none"><div class="v39-assist-head"><b>✨ ผู้ช่วยกรอกข้อมูลจากรูป</b><span>เลือกประเภทอาหาร</span></div><div class="v39-assist-note">ช่วยตั้งชื่อรายการจากรูปแบบรวดเร็ว โดยยังไม่วิเคราะห์วัตถุในภาพหรือประเมินโภชนาการอัตโนมัติ</div><div class="v39-chips"><button type="button" class="v39-chip" data-v39-type="ข้าว">🍚 ข้าว</button><button type="button" class="v39-chip" data-v39-type="เส้น">🍜 เส้น</button><button type="button" class="v39-chip" data-v39-type="ผัก">🥗 ผัก</button><button type="button" class="v39-chip" data-v39-type="ผลไม้">🍎 ผลไม้</button><button type="button" class="v39-chip" data-v39-type="เครื่องดื่ม">🥤 เครื่องดื่ม</button><button type="button" class="v39-chip" data-v39-type="ของหวาน">🍰 ของหวาน</button></div><div class="v39-suggestions" id="v39Suggestions"></div></div><div class="v40-ai-card" id="v40AiCard" style="display:none"><div class="v40-ai-head"><b>🤖 วิเคราะห์อาหารด้วย AI</b><span>ชื่ออาหาร + แคลอรี่โดยประมาณ</span></div><div class="v40-ai-status" id="v40AiStatus">ส่งเฉพาะรูปที่คุณเลือกไปให้ AI (Google Gemini) ช่วยเดาชื่ออาหารและค่าโภชนาการ แล้วกรอกให้ ตรวจสอบก่อนบันทึกได้เสมอ</div><div class="v40-ai-actions"><button type="button" class="v40-ai-btn primary-ai" id="v40AnalyzeBtn">✨ วิเคราะห์รูป</button><button type="button" class="v40-ai-btn" id="v40UseManualBtn">✍️ กรอกเอง</button></div><div class="v40-ai-result" id="v40AiResult"></div></div>
 <div class="two">
 <label>โปรตีน (g)<input id="protein" type="number" min="0" step=".1"></label>
 <label>คาร์บ (g)<input id="carbs" type="number" min="0" step=".1"></label>
@@ -414,6 +417,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
   <h2>👤 โปรไฟล์</h2>
   <label>ชื่อที่อยากให้แสดง<input id="profileName" placeholder="เช่น เพื่อนของ MeowFit"></label>
   <label>อีโมจิประจำตัว<input id="profileEmoji" maxlength="2" placeholder="🌿"></label>
+  <div class="pf-photo-row"><div class="profile-avatar-lg" id="pfPhotoPrev">🐾</div><div class="pf-photo-btns"><b>รูปโปรไฟล์</b><div><label class="secondary-btn">📷 ถ่ายรูป<input id="pfCam" type="file" accept="image/*" capture="user" hidden></label><label class="secondary-btn">🖼️ เลือกรูป<input id="pfPick" type="file" accept="image/*" hidden></label><button type="button" class="secondary-btn" id="pfDel">ลบรูป</button></div><small>ไม่ใส่รูป จะใช้อีโมจิแทน</small></div></div>
   <button class="primary" id="saveProfile">บันทึกโปรไฟล์</button>
 </div>
 <div class="card">
@@ -430,7 +434,7 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
     <div class="setting-row"><div><b>ความถี่การเตือน</b><small>เมื่อเปิดการเตือนด้านบน</small></div><select id="reminderMinutes" style="background:#2a2d35;color:#fff;border:1px solid #3a3d45;border-radius:10px;padding:8px"><option value="30">30 นาที</option><option value="60">1 ชั่วโมง</option><option value="120">2 ชั่วโมง</option><option value="180">3 ชั่วโมง</option><option value="240">4 ชั่วโมง</option></select></div>
   </div>
 </div>
-<div class="card v40-ai-settings"><h2>🤖 AI Food Recognition</h2><p style="color:#999;font-size:11px;line-height:1.6">ใส่ URL ของ MeowFit AI proxy (Cloudflare Worker + Gemini ฟรี) เพื่อเปิดการวิเคราะห์รูปอาหาร · วิธีตั้งค่าอยู่ในไฟล์ ai-proxy/README.md ของโปรเจกต์ · อย่าใส่ API key ลงในแอปโดยตรง</p><label>AI Endpoint<input id="aiEndpoint" placeholder="https://foodwell-ai.xxxx.workers.dev/?k=รหัสของคุณ" autocomplete="off"></label><small>Endpoint รับ POST JSON: { "image": "data:image/..." } และตอบกลับอย่างน้อย { "name": "ชื่ออาหาร" }</small><div class="two" style="margin-top:9px"><button class="secondary-btn" id="saveAiEndpoint">บันทึก Endpoint</button><button class="secondary-btn" id="testAiEndpoint">ทดสอบการเชื่อมต่อ</button></div></div>
+<div class="card v40-ai-settings"><h2>🤖 AI Food Recognition</h2><p style="color:#999;font-size:11px;line-height:1.6">การวิเคราะห์รูปอาหารใช้เซิร์ฟเวอร์ AI ของ MeowFit อัตโนมัติ ไม่ต้องตั้งค่า · ช่องนี้สำหรับผู้ที่ต้องการใช้เซิร์ฟเวอร์ของตัวเอง (ปล่อยว่างไว้ = ใช้ของ MeowFit) · อย่าใส่ API key ลงในแอปโดยตรง</p><label>AI Endpoint<input id="aiEndpoint" placeholder="https://foodwell-ai.xxxx.workers.dev/?k=รหัสของคุณ" autocomplete="off"></label><small>Endpoint รับ POST JSON: { "image": "data:image/..." } และตอบกลับอย่างน้อย { "name": "ชื่ออาหาร" }</small><div class="two" style="margin-top:9px"><button class="secondary-btn" id="saveAiEndpoint">บันทึก Endpoint</button><button class="secondary-btn" id="testAiEndpoint">ทดสอบการเชื่อมต่อ</button></div></div>
 
 <div class="card">
   <h2>🌱 เกี่ยวกับ MeowFit</h2>
@@ -540,9 +544,21 @@ function go(p){document.querySelectorAll(".page").forEach(x=>x.classList.toggle(
 document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
-function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=s.profile.emoji||"🐾";if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"MeowFit"}
-$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🐾"};
-$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"MeowFit";s.profile.emoji=$("profileEmoji").value.trim()||"🐾";save();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
+function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge")){$("profileAvatarLarge").textContent=s.profile.emoji||"🐾";window.fwAvatar&&fwAvatar()}if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"MeowFit"}
+$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🐾";window.fwPfPending=undefined;fwAvatar($("pfPhotoPrev"),s.profile.photo)};
+// Profile photo: a small square JPEG (data URL) in s.profile.photo; without one the emoji is shown.
+window.fwAvatar=(el,photo)=>{const list=el?[[el,photo]]:[[$("profileAvatarLarge"),s.profile.photo],[$("pfPhotoPrev"),s.profile.photo]];
+ list.forEach(([e,ph])=>{if(!e)return;if(ph){e.textContent="";e.style.backgroundImage=`url("${ph}")`;e.classList.add("has-photo")}else{e.style.backgroundImage="";e.classList.remove("has-photo");e.textContent=s.profile.emoji||"🐾"}})};
+function fwPfFile(inp){const f=inp.files&&inp.files[0];inp.value="";if(!f)return;const r=new FileReader();
+ r.onload=async()=>{try{const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=r.result});
+  const n=256,c=document.createElement("canvas");c.width=c.height=n;const k=Math.min(img.width,img.height);
+  c.getContext("2d").drawImage(img,(img.width-k)/2,(img.height-k)/2,k,k,0,0,n,n);
+  window.fwPfPending=c.toDataURL("image/jpeg",.85);fwAvatar($("pfPhotoPrev"),window.fwPfPending);toast(fwL("กด บันทึกโปรไฟล์ เพื่อใช้รูปนี้","Tap Save profile to use this photo"))}catch(e){toast(fwL("เปิดรูปนี้ไม่ได้","Could not open this photo"))}};
+ r.readAsDataURL(f)}
+$("pfCam").onchange=e=>fwPfFile(e.target);$("pfPick").onchange=e=>fwPfFile(e.target);
+$("pfDel").onclick=()=>{window.fwPfPending="";fwAvatar($("pfPhotoPrev"),"")};
+$("profileAvatarLarge").style.cursor="pointer";$("profileAvatarLarge").onclick=()=>{if($("profileEditor").style.display==="none")$("editProfileHero").click();$("profileEditor").scrollIntoView({behavior:"smooth",block:"center"})};
+$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"MeowFit";s.profile.emoji=$("profileEmoji").value.trim()||"🐾";if(window.fwPfPending!==undefined){s.profile.photo=window.fwPfPending||"";window.fwPfPending=undefined}save();fwAvatar();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
 $("softTheme")&&($("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()});
 let reminderTimer=null;
 function reminderMessage(){const msgs=["พักสายตาสักครู่ และดูแลตัวเองตามที่รู้สึกเหมาะสมนะ ♡","ถึงเวลาเช็กอินกับตัวเองสักนิดนะ 🌿","ถ้ารู้สึกกระหาย ลองจิบน้ำสักหน่อยก็ได้ 💧","พักจากหน้าจอสักครู่เมื่อสะดวกนะ ✨"];return msgs[Math.floor(Math.random()*msgs.length)]}
@@ -583,16 +599,20 @@ function normalizeAiResult(data){const name=String(data?.name||data?.foodName||d
 // Shrink photos before upload/storage: faster, uses less AI quota, and keeps localStorage small.
 function shrinkImage(src,max,quality){return new Promise(res=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',quality))};img.onerror=()=>res(src);img.src=src})}
 function saveAiAnalysis(x){}
-async function analyzeFoodWithAI(){const file=$("photo")?.files?.[0];const endpoint=String(s.settings.aiEndpoint||$("aiEndpoint")?.value||"").trim();if(!file){toast("เลือกรูปอาหารก่อน");return}if(!endpoint){toast(fwL("ตั้งค่า AI Endpoint ในหน้า More ก่อน","Set the AI endpoint in Settings first"));go("more");return}setAiStatus("กำลังส่งรูปไปวิเคราะห์…");$("v40AnalyzeBtn").disabled=true;try{const original=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const image=await shrinkImage(original,1024,.82);const resp=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image})});if(!resp.ok){let msg="HTTP "+resp.status;try{const j=await resp.json();if(j&&j.error)msg=j.error}catch(_){}throw new Error(msg)}const data=await resp.json();const out=normalizeAiResult(data);if(!out.name)throw new Error("ไม่พบชื่ออาหารในผลลัพธ์");$("foodName").value=out.name;const filled=[];Object.entries(out.nutrition||{}).forEach(([k,v])=>{const el=$(k);if(el&&!el.value){el.value=v;filled.push(k)}});const box=$("v40AiResult");const conf=out.confidence==null?"":" · ความมั่นใจ "+Math.round(out.confidence*100)+"%";box.innerHTML=`<div class="ai-result-box"><b>✨ ${esc(out.name)}</b><div style="font-size:10px;color:#999;margin-top:4px">AI แนะนำชื่อจากรูป${filled.length?" และค่าโภชนาการโดยประมาณ":""} — ตรวจสอบก่อนบันทึก${conf}</div><div class="v40-ai-candidates">${out.candidates.map(x=>`<button type="button" data-ai-name="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;box.classList.add("show");box.querySelectorAll("[data-ai-name]").forEach(b=>b.onclick=()=>{$("foodName").value=b.dataset.aiName;toast("เลือกชื่อแล้ว ✨")});saveAiAnalysis({name:out.name,candidates:out.candidates,confidence:out.confidence,image:await shrinkImage(image,160,.7)});setAiStatus("วิเคราะห์เสร็จแล้ว — กรุณาตรวจสอบชื่อก่อนบันทึก");toast("วิเคราะห์รูปเสร็จแล้ว ✨")}catch(e){setAiStatus("เชื่อมต่อ AI ไม่สำเร็จ: "+e.message+" · ใช้ผู้ช่วยแบบเลือกประเภทอาหารได้");toast("วิเคราะห์รูปไม่สำเร็จ")}finally{$("v40AnalyzeBtn").disabled=false}}
+// Google Play's AI-generated content policy: users must be able to report AI output from inside the app.
+function fwReportAi(out){const to="meowfitcaloriestracker@gmail.com";const subj=fwL("รายงานผล AI วิเคราะห์อาหาร - MeowFit","AI food analysis report - MeowFit");const body=[fwL("ผลที่ AI ให้","AI result")+": "+(out.name||"-"),fwL("ตัวเลือกอื่น","Other suggestions")+": "+((out.candidates||[]).join(", ")||"-"),fwL("ความมั่นใจ","Confidence")+": "+(out.confidence==null?"-":Math.round(out.confidence*100)+"%"),fwL("ค่าโภชนาการ","Nutrition")+": "+(Object.entries(out.nutrition||{}).map(([k,v])=>k+" "+v).join(", ")||"-"),fwL("เวลา","Time")+": "+new Date().toLocaleString(),"",fwL("ปัญหาที่พบ (เช่น ชื่ออาหารผิด แคลอรี่ผิดมาก เนื้อหาไม่เหมาะสม):","What was wrong (e.g. wrong food, calories far off, inappropriate content):"),""].join("\n");location.href="mailto:"+to+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);toast(fwL("ขอบคุณที่ช่วยแจ้ง 🙏","Thanks for the report 🙏"))}
+async function analyzeFoodWithAI(){const file=$("photo")?.files?.[0];const endpoint=fwAiEndpoint();if(!file){toast("เลือกรูปอาหารก่อน");return}if(!endpoint){toast(fwL("ตั้งค่า AI Endpoint ในหน้า More ก่อน","Set the AI endpoint in Settings first"));go("more");return}setAiStatus("กำลังส่งรูปไปวิเคราะห์…");$("v40AnalyzeBtn").disabled=true;try{const original=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const image=await shrinkImage(original,1024,.82);const resp=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image})});if(!resp.ok){let msg="HTTP "+resp.status;try{const j=await resp.json();if(j&&j.error)msg=j.error}catch(_){}throw new Error(msg)}const data=await resp.json();const out=normalizeAiResult(data);if(!out.name)throw new Error("ไม่พบชื่ออาหารในผลลัพธ์");$("foodName").value=out.name;const filled=[];Object.entries(out.nutrition||{}).forEach(([k,v])=>{const el=$(k);if(el&&!el.value){el.value=v;filled.push(k)}});const box=$("v40AiResult");const conf=out.confidence==null?"":" · ความมั่นใจ "+Math.round(out.confidence*100)+"%";box.innerHTML=`<div class="ai-result-box"><b>✨ ${esc(out.name)}</b><div style="font-size:10px;color:#999;margin-top:4px">AI แนะนำชื่อจากรูป${filled.length?" และค่าโภชนาการโดยประมาณ":""} — ตรวจสอบก่อนบันทึก${conf}</div><div class="v40-ai-candidates">${out.candidates.map(x=>`<button type="button" data-ai-name="${esc(x)}">${esc(x)}</button>`).join("")}</div><button type="button" class="v40-ai-report" id="v40AiReport">🚩 ${fwL("รายงานผล AI ที่ผิดหรือไม่เหมาะสม","Report a wrong or inappropriate AI result")}</button></div>`;box.classList.add("show");$("v40AiReport").onclick=()=>fwReportAi(out);box.querySelectorAll("[data-ai-name]").forEach(b=>b.onclick=()=>{$("foodName").value=b.dataset.aiName;toast("เลือกชื่อแล้ว ✨")});saveAiAnalysis({name:out.name,candidates:out.candidates,confidence:out.confidence,image:await shrinkImage(image,160,.7)});setAiStatus("วิเคราะห์เสร็จแล้ว — กรุณาตรวจสอบชื่อก่อนบันทึก");toast("วิเคราะห์รูปเสร็จแล้ว ✨")}catch(e){setAiStatus("เชื่อมต่อ AI ไม่สำเร็จ: "+e.message+" · ใช้ผู้ช่วยแบบเลือกประเภทอาหารได้");toast("วิเคราะห์รูปไม่สำเร็จ")}finally{$("v40AnalyzeBtn").disabled=false}}
 $("v40AnalyzeBtn").onclick=analyzeFoodWithAI;$("v40UseManualBtn").onclick=()=>{$("foodName").focus();toast("กรอกข้อมูลเองได้เลย")};
 $("saveAiEndpoint").onclick=()=>{s.settings.aiEndpoint=$("aiEndpoint").value.trim();save();toast(s.settings.aiEndpoint?fwL("บันทึก AI Endpoint แล้ว","AI endpoint saved"):fwL("ล้าง AI Endpoint แล้ว","AI endpoint cleared"))};
-$("testAiEndpoint").onclick=async()=>{const endpoint=String($("aiEndpoint").value.trim()||s.settings.aiEndpoint||"");if(!endpoint){toast("ใส่ AI Endpoint ก่อน");return}try{const r=await fetch(endpoint,{method:"OPTIONS"});toast(r.ok?fwL("เชื่อมต่อ endpoint ได้","Endpoint connected"):fwL("endpoint ตอบกลับแล้ว แต่ต้องตรวจสอบรูปแบบ API","The endpoint answered, but check its API format"))}catch(e){toast(fwL("ยังเชื่อมต่อ endpoint ไม่ได้","Can't reach the endpoint yet"))}};
+$("testAiEndpoint").onclick=async()=>{const endpoint=String($("aiEndpoint").value.trim()||fwAiEndpoint());if(!endpoint){toast("ใส่ AI Endpoint ก่อน");return}try{const r=await fetch(endpoint,{method:"OPTIONS"});toast(r.ok?fwL("เชื่อมต่อ endpoint ได้","Endpoint connected"):fwL("endpoint ตอบกลับแล้ว แต่ต้องตรวจสอบรูปแบบ API","The endpoint answered, but check its API format"))}catch(e){toast(fwL("ยังเชื่อมต่อ endpoint ไม่ได้","Can't reach the endpoint yet"))}};
 if($("aiEndpoint"))$("aiEndpoint").value=s.settings.aiEndpoint||"";
 
 const v40OldPreview=previewPhotoFile;previewPhotoFile=function(file){v40OldPreview(file);showAiCard(!!file)};
 
 let editingId=null, modalId=null;
-function resetFoodForm(){editingId=null;$("foodFormTitle").textContent="เพิ่มอาหาร";$("addFood").textContent="บันทึกอาหาร";$("cancelEdit").style.display="none";["foodName","kcal","protein","carbs","fat","fiber","sodium","sugar","note","foodTime"].forEach(id=>{if($(id))$(id).value=""});$("photo").value="";window.fwPendingPhoto=null}
+function resetFoodForm(){editingId=null;$("foodFormTitle").textContent="เพิ่มอาหาร";$("addFood").textContent="บันทึกอาหาร";$("cancelEdit").style.display="none";["foodName","kcal","protein","carbs","fat","fiber","sodium","sugar","note","foodTime"].forEach(id=>{if($(id))$(id).value=""});$("photo").value="";window.fwPendingPhoto=null;fwClearFoodPhoto()}
+// After saving (or cancelling), drop the photo, its preview and the AI result so the next meal starts clean.
+function fwClearFoodPhoto(){["photo","photoCamera"].forEach(id=>{if($(id))$(id).value=""});$("clearPhoto")?.click();const r=$("v40AiResult");if(r){r.innerHTML="";r.classList.remove("show")}}
 function startEdit(id){let f=s.foods.find(x=>x.id===id);if(!f)return;go("food");editingId=id;$("foodFormTitle").textContent="แก้ไขอาหาร";$("addFood").textContent="บันทึกการแก้ไข";$("cancelEdit").style.display="block";$("foodName").value=f.name;$("meal").value=f.meal;$("kcal").value=f.kcal||"";$("protein").value=f.protein||"";$("carbs").value=f.carbs||"";$("fat").value=f.fat||"";$("fiber").value=f.fiber||"";$("sodium").value=f.sodium||"";$("sugar").value=f.sugar||"";$("foodTime").value=f.time||"";$("note").value=f.note||"";window.scrollTo({top:0,behavior:"smooth"})}
 $("cancelEdit").onclick=resetFoodForm;
 function isFoodFavorite(id){const f=s.foods.find(x=>x.id===id);return !!f?.favorite}
@@ -876,7 +896,7 @@ function renderProfileStats(){
  $("profileStatMove").textContent=(allMove+s.moves.reduce((a,x)=>a+Number(x.min||0),0)).toLocaleString();
  $("profileStatDays").textContent=activeDays.toLocaleString();
  $("profileHeroName").textContent=s.profile.name||"MeowFit";
- $("profileAvatarLarge").textContent=s.profile.emoji||"🐾";
+ $("profileAvatarLarge").textContent=s.profile.emoji||"🐾";window.fwAvatar&&fwAvatar();
  const total=(allFoodCount+todayFoods)+(allWater+Number(s.water||0))+(allMove+s.moves.length);
  $("profileInsight").textContent=total?`บันทึกของคุณกำลังค่อย ๆ สร้างภาพรวมของวันต่าง ๆ — วันนี้มีอาหาร ${todayFoods} รายการ น้ำ ${(s.water||0).toLocaleString()} ml และการเคลื่อนไหว ${s.moves.reduce((a,x)=>a+Number(x.min||0),0)} นาที`:`เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨`;
 }
@@ -1662,7 +1682,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   document.documentElement.style.setProperty('--accent',(ACCENTS[t.accent]||ACCENTS.pink)[2]);
   patchInline(document.body);
   if(window.FoodWellTheme)try{FoodWellTheme.setBars(light?'#f6f7fa':'#101116',light)}catch(e){}
-  drawCard();
+  drawCard();moonIcon(light);
  }
  function setTheme(patch){s.settings=s.settings||{};s.settings.theme=Object.assign(theme(),patch);if(s.settings.softTheme){s.settings.softTheme=false}save();apply()}
  function drawCard(){
@@ -1683,8 +1703,17 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  document.getElementById('softTheme')?.closest('.setting-row')?.remove();
  if(s.settings&&s.settings.softTheme){s.settings.softTheme=false;document.body.classList.remove('theme-soft')}
  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(theme().mode==='system')apply()});
- window.fwApplyTheme=apply;
+ // Home moon/sun button: one tap switches light <-> dark (sets the mode, so it overrides "follow phone").
+ function moonIcon(light){const m=document.querySelector('.home-date .moon');if(!m)return;m.textContent=light?'🌙':'☀️';
+  m.setAttribute('aria-label',light?fwL('เปลี่ยนเป็นธีมมืด','Switch to dark theme'):fwL('เปลี่ยนเป็นธีมสว่าง','Switch to light theme'))}
+ const moon=document.querySelector('.home-date .moon');
+ if(moon){moon.setAttribute('role','button');moon.tabIndex=0;moon.style.cursor='pointer';
+  const flip=()=>{const light=isLight(theme());setTheme({mode:light?'dark':'light'});if(typeof toast==='function')toast(light?fwL('ธีมมืด 🌙','Dark theme 🌙'):fwL('ธีมสว่าง ☀️','Light theme ☀️'))};
+  moon.addEventListener('click',flip);moon.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}})}
+ window.fwApplyTheme=apply;window.fwSetTheme=setTheme;
  apply();
+ // styles further down the page (sync card, report, …) aren't parsed yet: apply again once the whole page is in
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
 })();
 </script>
 <!-- v105 AI photo analysis quota: 3 free a day, watch a rewarded ad for more (only when ads are on) -->
@@ -1723,7 +1752,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function badge(){let b=document.getElementById('rwLeft');if(!limited()){b&&b.remove();return}
   if(!b){b=document.createElement('span');b.id='rwLeft';b.className='rw-left';btn.appendChild(b)}const n=left();b.textContent=n?`ฟรีอีก ${n}`:'▶️ ดูโฆษณา'}
  // same checks the analyser makes first, so a missing photo/endpoint doesn't use up a free try
- const ready=()=>!!document.getElementById('photo')?.files?.[0]&&!!String(s.settings.aiEndpoint||document.getElementById('aiEndpoint')?.value||'').trim();
+ const ready=()=>!!document.getElementById('photo')?.files?.[0]&&!!fwAiEndpoint();
  function go_(){const x=q();x.used++;saveQ(x);badge();return run()}
  btn.onclick=()=>{if(!limited()||!ready())return run();if(left()>0)return go_();sheet.classList.add('show')};
  const close=()=>sheet.classList.remove('show');
@@ -2680,6 +2709,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .fw92-fab{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:5900;width:60px;height:60px;border:0;border-radius:50%;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#24141b;font-size:28px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
 .fw92-fab:active{transform:scale(.92)}
 .fw92-fab.open{transform:rotate(45deg)}
+.fw92-fab.dragging{transition:none;transform:scale(1.08);box-shadow:0 18px 36px rgba(0,0,0,.45);touch-action:none}
+.fw92-fab{touch-action:none}
+.fw92-menu.left{align-items:flex-start}.fw92-menu.left .fw92-item{flex-direction:row-reverse}
 .fw92-backdrop{position:fixed;inset:0;z-index:5898;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .fw92-backdrop.show{opacity:1;pointer-events:auto}
 .fw92-menu{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(156px + env(safe-area-inset-bottom));z-index:5899;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
@@ -2720,15 +2752,57 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    menu.appendChild(b);
   });
  }
- function open(){build();fab.classList.add('open');fab.setAttribute('aria-expanded','true');menu.classList.add('show');backdrop.classList.add('show')}
+ function open(){build();place();fab.classList.add('open');fab.setAttribute('aria-expanded','true');menu.classList.add('show');backdrop.classList.add('show')}
+ // The button can be dragged anywhere (it covered list items); it snaps to the nearest side and
+ // remembers its spot on this phone (fw_ key: not synced to other devices).
+ const KEY='fw_fab_pos';
+ function loadPos(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
+ function clampY(y){const h=window.innerHeight,s=fab.offsetHeight||60;return Math.max(12,Math.min(h-s-76,y))}
+ function apply(pos){
+  if(!pos){fab.style.left=fab.style.top=fab.style.right=fab.style.bottom='';return}
+  const w=window.innerWidth,s=fab.offsetHeight||60,m=16;
+  fab.style.bottom='auto';fab.style.top=clampY(pos.y)+'px';
+  if(pos.side==='left'){fab.style.left=m+'px';fab.style.right='auto'}else{fab.style.right=m+'px';fab.style.left='auto'}
+ }
+ function place(){
+  const pos=loadPos();menu.classList.toggle('left',!!pos&&pos.side==='left');
+  if(!pos){menu.style.left=menu.style.right=menu.style.bottom=menu.style.top='';return}
+  const r=fab.getBoundingClientRect(),h=window.innerHeight;
+  // not enough room above the button: open the menu below it instead
+  if(r.top<menu.childElementCount*62+20){menu.style.top=(r.bottom+12)+'px';menu.style.bottom='auto'}else{menu.style.bottom=(h-r.top+12)+'px';menu.style.top='auto'}
+  if(pos.side==='left'){menu.style.left='16px';menu.style.right='auto'}else{menu.style.right='16px';menu.style.left='auto'}
+ }
+ function drag(){
+  apply(loadPos());
+  let sx=0,sy=0,ox=0,oy=0,moving=false,id=null;
+  fab.addEventListener('pointerdown',e=>{if(fab.classList.contains('open'))return;id=e.pointerId;sx=e.clientX;sy=e.clientY;const r=fab.getBoundingClientRect();ox=sx-r.left;oy=sy-r.top;moving=false});
+  fab.addEventListener('pointermove',e=>{
+   if(e.pointerId!==id)return;
+   if(!moving&&Math.hypot(e.clientX-sx,e.clientY-sy)<8)return;
+   if(!moving){moving=true;fab.classList.add('dragging');try{fab.setPointerCapture(id)}catch(_){}}
+   const s=fab.offsetWidth;fab.style.right=fab.style.bottom='auto';
+   fab.style.left=Math.max(4,Math.min(window.innerWidth-s-4,e.clientX-ox))+'px';
+   fab.style.top=Math.max(4,Math.min(window.innerHeight-s-4,e.clientY-oy))+'px';
+   e.preventDefault();
+  });
+  const end=e=>{
+   if(e.pointerId!==id)return;id=null;if(!moving)return;moving=false;fab._dragged=true;fab.classList.remove('dragging');
+   const r=fab.getBoundingClientRect(),pos={side:r.left+r.width/2<window.innerWidth/2?'left':'right',y:r.top};
+   try{localStorage.setItem(KEY,JSON.stringify(pos))}catch(_){}
+   apply(pos);setTimeout(()=>{fab._dragged=false},350);
+  };
+  fab.addEventListener('pointerup',end);fab.addEventListener('pointercancel',end);
+  window.addEventListener('resize',()=>apply(loadPos()));
+ }
  function init(){
   if(document.getElementById('fw92-fab'))return;
   backdrop=document.createElement('div');backdrop.className='fw92-backdrop';backdrop.onclick=close;
   menu=document.createElement('div');menu.className='fw92-menu';menu.setAttribute('role','menu');
   fab=document.createElement('button');fab.id='fw92-fab';fab.className='fw92-fab';fab.type='button';
   fab.textContent='＋';fab.setAttribute('aria-label','เมนูเพิ่มเติม');fab.setAttribute('aria-expanded','false');
-  fab.onclick=()=>fab.classList.contains('open')?close():open();
+  fab.onclick=()=>{if(fab._dragged){fab._dragged=false;return}fab.classList.contains('open')?close():open()};
   document.body.append(backdrop,menu,fab);
+  drag();
   document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
@@ -3775,6 +3849,41 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
   b.innerHTML=`<span class="ic">🔒</span><span class="tx"><b>${L('นโยบายความเป็นส่วนตัว','Privacy policy')}</b><small>${L('อ่านว่าแอปเก็บและใช้ข้อมูลอะไรบ้าง','What the app stores and how it is used')}</small></span><span class="go">›</span>`;
   b.onclick=window.fwPrivacy;g.querySelector('h3').after(b)}
  addRow();setTimeout(addRow,1500);
+})();
+</script>
+<!-- v130 Check for updates (Google Play in-app updates, native bridge window.FoodWellUpdate) -->
+<style>.upd-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#e8557a;color:#fff;font-size:11px;font-weight:800;vertical-align:1px}</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th, U=()=>window.FoodWellUpdate;
+ let asked=false,avail=false;
+ function ver(){try{const v=JSON.parse(U().version());return v.name?`${v.name} (${v.code})`:''}catch(e){return ''}}
+ function draw(){
+  const b=document.getElementById('updRow');if(!b)return;const v=U()?ver():'';
+  b.querySelector('small').textContent=(avail?L('มีเวอร์ชันใหม่ แตะเพื่ออัปเดต','A new version is ready, tap to update'):L('อัปเดตแอปจาก Google Play','Update the app from Google Play'))+(v?` · ${L('เวอร์ชัน','version')} ${v}`:'');
+  b.querySelector('.upd-badge').style.display=avail?'inline-block':'none';
+ }
+ function addRow(){const g=document.getElementById('setg-about');if(!g||document.getElementById('updRow'))return;
+  const b=document.createElement('button');b.type='button';b.className='set-row';b.id='updRow';
+  b.innerHTML=`<span class="ic">🔄</span><span class="tx"><b>${L('ตรวจหาอัปเดต','Check for updates')}<span class="upd-badge" style="display:none">${L('ใหม่','New')}</span></b><small></small></span><span class="go">›</span>`;
+  b.onclick=window.fwCheckUpdate;(document.getElementById('ppRow')||g.querySelector('h3')).after(b);draw()}
+ window.fwCheckUpdate=()=>{
+  if(!U()){toast(L('ตรวจหาอัปเดตได้ในแอปที่ติดตั้งจาก Google Play','Updates can be checked in the app installed from Google Play'));return}
+  asked=true;toast(L('กำลังตรวจหาอัปเดต…','Checking for updates…'));U().check(true);
+ };
+ // Answers from Android: none / available / started / cancelled / error
+ window.onAppUpdate=json=>{let r={};try{r=JSON.parse(json)}catch(e){}
+  if(r.state==='available'){avail=true;draw();if(!asked)toast(L('มี MeowFit เวอร์ชันใหม่ 🎉 ไปที่ ตั้งค่า → ตรวจหาอัปเดต','A new MeowFit version is out 🎉 Settings → Check for updates'))}
+  else if(r.state==='none'){avail=false;draw();if(asked)toast(L('เป็นเวอร์ชันล่าสุดแล้ว ✅','You have the latest version ✅'))}
+  else if(r.state==='cancelled'){if(asked)toast(L('ยกเลิกการอัปเดต','Update cancelled'))}
+  else if(r.state==='error'&&asked){
+   // e.g. installed outside Google Play: offer the store page instead
+   if(confirm(L('ตรวจหาอัปเดตในแอปไม่ได้ (ต้องติดตั้งจาก Google Play) เปิดหน้า MeowFit ใน Play Store แทนไหม?','Could not check in the app (it needs an install from Google Play). Open MeowFit in the Play Store instead?')))U().openStore()}
+  asked=false;
+ };
+ addRow();setTimeout(addRow,1500);
+ // quiet check a few seconds after start: shows a "New" badge (and one toast) when Play has an update
+ if(U())setTimeout(()=>{try{U().check(false)}catch(e){}},6000);
 })();
 </script>
 <!-- v122 Workout library: ready-made programs (abs, glutes, HIIT, back care, desk breaks …), "My workouts" builder
