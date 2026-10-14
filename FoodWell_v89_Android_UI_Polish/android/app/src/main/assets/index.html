@@ -401,6 +401,13 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
   </div>
   <div class="profile-insight" id="profileInsight">เริ่มบันทึกสิ่งที่ทำในแต่ละวัน แล้วภาพรวมจะค่อย ๆ เติมขึ้นตรงนี้ ✨</div>
 </div>
+<div class="card" id="profileEditor" style="display:none">
+  <h2>👤 โปรไฟล์</h2>
+  <label>ชื่อที่อยากให้แสดง<input id="profileName" placeholder="เช่น เพื่อนของ MeowFit"></label>
+  <label>อีโมจิประจำตัว<input id="profileEmoji" maxlength="16" placeholder="🌿"></label>
+  <div class="pf-photo-row"><div class="profile-avatar-lg" id="pfPhotoPrev">🐾</div><div class="pf-photo-btns"><b>รูปโปรไฟล์</b><div><label class="secondary-btn">📷 ถ่ายรูป<input id="pfCam" type="file" accept="image/*" capture="user" hidden></label><label class="secondary-btn">🖼️ เลือกรูป<input id="pfPick" type="file" accept="image/*" hidden></label><button type="button" class="secondary-btn" id="pfDel">ลบรูป</button></div><small>ไม่ใส่รูป จะใช้อีโมจิแทน</small></div></div>
+  <button class="primary" id="saveProfile">บันทึกโปรไฟล์</button>
+</div>
 <div class="card body-card" id="bodyCard">
   <div class="trend-head"><h2>🎯 ร่างกายและเป้าหมาย</h2><small>ใช้คำนวณ BMI และเป้าหมายต่อวัน</small></div>
   <div class="body-form">
@@ -412,13 +419,6 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
     <label class="wide">เป้าหมาย<select id="bodyGoal"><option value="lose">ลดน้ำหนัก (~0.5 กก./สัปดาห์)</option><option value="maintain">คงน้ำหนัก</option><option value="gain">เพิ่มน้ำหนัก / สร้างกล้ามเนื้อ</option></select></label>
   </div>
   <div id="bodyResult" class="body-result"></div>
-</div>
-<div class="card" id="profileEditor" style="display:none">
-  <h2>👤 โปรไฟล์</h2>
-  <label>ชื่อที่อยากให้แสดง<input id="profileName" placeholder="เช่น เพื่อนของ MeowFit"></label>
-  <label>อีโมจิประจำตัว<input id="profileEmoji" maxlength="2" placeholder="🌿"></label>
-  <div class="pf-photo-row"><div class="profile-avatar-lg" id="pfPhotoPrev">🐾</div><div class="pf-photo-btns"><b>รูปโปรไฟล์</b><div><label class="secondary-btn">📷 ถ่ายรูป<input id="pfCam" type="file" accept="image/*" capture="user" hidden></label><label class="secondary-btn">🖼️ เลือกรูป<input id="pfPick" type="file" accept="image/*" hidden></label><button type="button" class="secondary-btn" id="pfDel">ลบรูป</button></div><small>ไม่ใส่รูป จะใช้อีโมจิแทน</small></div></div>
-  <button class="primary" id="saveProfile">บันทึกโปรไฟล์</button>
 </div>
 <div class="card">
   <h2>📝 โน้ตประจำวัน</h2>
@@ -545,7 +545,7 @@ document.querySelectorAll(".nav").forEach(x=>x.onclick=()=>go(x.dataset.page));
 
 document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
 function applySettings(){document.body.classList.toggle("theme-soft",!!s.settings.softTheme);$("softTheme")&&($("softTheme").checked=!!s.settings.softTheme);$("gentleReminder").checked=!!s.settings.gentleReminder;$("reminderMinutes").value=String(s.settings.reminderMinutes||180);if($("profileAvatarLarge")){$("profileAvatarLarge").textContent=s.profile.emoji||"🐾";window.fwAvatar&&fwAvatar()}if($("profileHeroName"))$("profileHeroName").textContent=s.profile.name||"MeowFit"}
-$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🐾";window.fwPfPending=undefined;fwAvatar($("pfPhotoPrev"),s.profile.photo)};
+$("editProfileHero").onclick=()=>{$("profileEditor").style.display=$("profileEditor").style.display==="none"?"block":"none";$('profileName').value=s.profile.name||"";$('profileEmoji').value=s.profile.emoji||"🐾";window.fwPfPending=undefined;fwAvatar($("pfPhotoPrev"),s.profile.photo);if($("profileEditor").style.display!=="none")setTimeout(()=>$("profileEditor").scrollIntoView({behavior:"smooth",block:"center"}),30)};
 // Profile photo: a small square JPEG (data URL) in s.profile.photo; without one the emoji is shown.
 window.fwAvatar=(el,photo)=>{const list=el?[[el,photo]]:[[$("profileAvatarLarge"),s.profile.photo],[$("pfPhotoPrev"),s.profile.photo]];
  list.forEach(([e,ph])=>{if(!e)return;if(ph){e.textContent="";e.style.backgroundImage=`url("${ph}")`;e.classList.add("has-photo")}else{e.style.backgroundImage="";e.classList.remove("has-photo");e.textContent=s.profile.emoji||"🐾"}})};
@@ -558,7 +558,7 @@ function fwPfFile(inp){const f=inp.files&&inp.files[0];inp.value="";if(!f)return
 $("pfCam").onchange=e=>fwPfFile(e.target);$("pfPick").onchange=e=>fwPfFile(e.target);
 $("pfDel").onclick=()=>{window.fwPfPending="";fwAvatar($("pfPhotoPrev"),"")};
 $("profileAvatarLarge").style.cursor="pointer";$("profileAvatarLarge").onclick=()=>{if($("profileEditor").style.display==="none")$("editProfileHero").click();$("profileEditor").scrollIntoView({behavior:"smooth",block:"center"})};
-$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"MeowFit";s.profile.emoji=$("profileEmoji").value.trim()||"🐾";if(window.fwPfPending!==undefined){s.profile.photo=window.fwPfPending||"";window.fwPfPending=undefined}save();fwAvatar();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
+$("saveProfile").onclick=()=>{s.profile.name=$("profileName").value.trim()||"MeowFit";s.profile.emoji=(()=>{const v=$("profileEmoji").value.trim();if(!v)return"🐾";try{return [...new Intl.Segmenter().segment(v)][0].segment}catch(e){return [...v].slice(0,2).join("")}})();if(window.fwPfPending!==undefined){s.profile.photo=window.fwPfPending||"";window.fwPfPending=undefined}save();fwAvatar();$("profileEditor").style.display="none";toast("บันทึกโปรไฟล์แล้ว")};
 $("softTheme")&&($("softTheme").onchange=e=>{s.settings.softTheme=e.target.checked;save()});
 let reminderTimer=null;
 function reminderMessage(){const msgs=["พักสายตาสักครู่ และดูแลตัวเองตามที่รู้สึกเหมาะสมนะ ♡","ถึงเวลาเช็กอินกับตัวเองสักนิดนะ 🌿","ถ้ารู้สึกกระหาย ลองจิบน้ำสักหน่อยก็ได้ 💧","พักจากหน้าจอสักครู่เมื่อสะดวกนะ ✨"];return msgs[Math.floor(Math.random()*msgs.length)]}
