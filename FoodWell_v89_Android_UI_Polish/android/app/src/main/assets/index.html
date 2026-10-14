@@ -5,7 +5,7 @@
 <script>
 // fwL(th,en): pick the message for the chosen language (for text built from variables, which word lookup can't translate well)
 // MeowFit's own AI proxy (Cloudflare Worker -> Gemini, key kept on Cloudflare; see ai-proxy/). A URL saved in Settings overrides it.
-window.FW_AI_DEFAULT='https://round-frog-a0d0meowfit-ai.meowfitcaloriestracker.workers.dev/';
+window.FW_AI_DEFAULT='https://round-frog-a0d0meowfit-ai.meowfitcaloriestracker.workers.dev/?k=70a9520d';
 window.fwAiEndpoint=()=>{try{return String(s.settings.aiEndpoint||document.getElementById('aiEndpoint')?.value||FW_AI_DEFAULT||'').trim()}catch(e){return String(FW_AI_DEFAULT||'')}};
 window.fwL=(th,en)=>{try{return localStorage.getItem('fw_lang')==='en'?en:th}catch(e){return th}};
 </script>
