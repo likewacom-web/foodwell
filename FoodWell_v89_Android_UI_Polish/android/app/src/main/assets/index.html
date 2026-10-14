@@ -3838,6 +3838,41 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  addRow();setTimeout(addRow,1500);
 })();
 </script>
+<!-- v130 Check for updates (Google Play in-app updates, native bridge window.FoodWellUpdate) -->
+<style>.upd-badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#e8557a;color:#fff;font-size:11px;font-weight:800;vertical-align:1px}</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th, U=()=>window.FoodWellUpdate;
+ let asked=false,avail=false;
+ function ver(){try{const v=JSON.parse(U().version());return v.name?`${v.name} (${v.code})`:''}catch(e){return ''}}
+ function draw(){
+  const b=document.getElementById('updRow');if(!b)return;const v=U()?ver():'';
+  b.querySelector('small').textContent=(avail?L('มีเวอร์ชันใหม่ แตะเพื่ออัปเดต','A new version is ready, tap to update'):L('อัปเดตแอปจาก Google Play','Update the app from Google Play'))+(v?` · ${L('เวอร์ชัน','version')} ${v}`:'');
+  b.querySelector('.upd-badge').style.display=avail?'inline-block':'none';
+ }
+ function addRow(){const g=document.getElementById('setg-about');if(!g||document.getElementById('updRow'))return;
+  const b=document.createElement('button');b.type='button';b.className='set-row';b.id='updRow';
+  b.innerHTML=`<span class="ic">🔄</span><span class="tx"><b>${L('ตรวจหาอัปเดต','Check for updates')}<span class="upd-badge" style="display:none">${L('ใหม่','New')}</span></b><small></small></span><span class="go">›</span>`;
+  b.onclick=window.fwCheckUpdate;(document.getElementById('ppRow')||g.querySelector('h3')).after(b);draw()}
+ window.fwCheckUpdate=()=>{
+  if(!U()){toast(L('ตรวจหาอัปเดตได้ในแอปที่ติดตั้งจาก Google Play','Updates can be checked in the app installed from Google Play'));return}
+  asked=true;toast(L('กำลังตรวจหาอัปเดต…','Checking for updates…'));U().check(true);
+ };
+ // Answers from Android: none / available / started / cancelled / error
+ window.onAppUpdate=json=>{let r={};try{r=JSON.parse(json)}catch(e){}
+  if(r.state==='available'){avail=true;draw();if(!asked)toast(L('มี MeowFit เวอร์ชันใหม่ 🎉 ไปที่ ตั้งค่า → ตรวจหาอัปเดต','A new MeowFit version is out 🎉 Settings → Check for updates'))}
+  else if(r.state==='none'){avail=false;draw();if(asked)toast(L('เป็นเวอร์ชันล่าสุดแล้ว ✅','You have the latest version ✅'))}
+  else if(r.state==='cancelled'){if(asked)toast(L('ยกเลิกการอัปเดต','Update cancelled'))}
+  else if(r.state==='error'&&asked){
+   // e.g. installed outside Google Play: offer the store page instead
+   if(confirm(L('ตรวจหาอัปเดตในแอปไม่ได้ (ต้องติดตั้งจาก Google Play) เปิดหน้า MeowFit ใน Play Store แทนไหม?','Could not check in the app (it needs an install from Google Play). Open MeowFit in the Play Store instead?')))U().openStore()}
+  asked=false;
+ };
+ addRow();setTimeout(addRow,1500);
+ // quiet check a few seconds after start: shows a "New" badge (and one toast) when Play has an update
+ if(U())setTimeout(()=>{try{U().check(false)}catch(e){}},6000);
+})();
+</script>
 <!-- v122 Workout library: ready-made programs (abs, glutes, HIIT, back care, desk breaks …), "My workouts" builder
  (pick moves, amounts, rounds, rests) and putting any of them on a weekday of the plan -->
 <style>

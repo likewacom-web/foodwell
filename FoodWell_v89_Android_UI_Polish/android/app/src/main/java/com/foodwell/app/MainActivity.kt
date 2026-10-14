@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var pro: Monetization
     private lateinit var notifyPermission: ActivityResultLauncher<String>
     private var pendingPage: String? = null
+    private lateinit var updater: AppUpdater
     private var pendingJoin: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +89,7 @@ class MainActivity : ComponentActivity() {
         stepsLive = StepCounter.Live(this) { callJs("onSteps", JSONObject.quote(StepCounter.days(this).toString())) }
         health = HealthSync(this) { fn, arg -> callJs(fn, arg) }
         scale = BleScale(this) { fn, arg -> callJs(fn, arg) }
+        updater = AppUpdater(this) { fn, arg -> callJs(fn, arg) }
         pendingPrivacy = isPrivacyIntent(intent)
         stepPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
             if (ok) { StepCounter.setEnabled(this, true); stepsLive.start() }
@@ -203,6 +205,7 @@ class MainActivity : ComponentActivity() {
             addJavascriptInterface(StepsApi(), "FoodWellSteps")
             addJavascriptInterface(HealthApi(), "FoodWellHealth")
             addJavascriptInterface(scale, "FoodWellScale")
+            addJavascriptInterface(updater, "FoodWellUpdate")
             addJavascriptInterface(LocalBackup(this@MainActivity), "FoodWellBackup")
             loadUrl("file:///android_asset/index.html")
         }
@@ -360,6 +363,7 @@ class MainActivity : ComponentActivity() {
         if (::web.isInitialized) web.onResume()
         stepsLive.start()
         pro.onResume()
+        if (::updater.isInitialized) updater.onResume()
     }
 
     override fun onDestroy() {
