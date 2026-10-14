@@ -31,7 +31,7 @@ body{margin:0;background:#262626;color:var(--text);font-family:"Noto Sans Thai",
 .header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #202229}
 .header .back{font-size:28px;color:#ddd}.title{font-size:24px;font-weight:800}.head-actions{display:flex;gap:12px}.circle-btn{width:40px;height:40px;border:1px solid #363840;border-radius:12px;background:#181a20;color:#ddd;font-size:18px}
 main{padding:0 12px 94px}
-.home-date{text-align:center;padding:14px 0 10px;position:relative}.home-date .moon{position:absolute;left:4px;top:13px;width:48px;height:48px;border-radius:50%;background:#252933;display:grid;place-items:center;font-size:28px}.home-date .gear{position:absolute;right:4px;top:17px;font-size:25px}.home-date h1{font-size:35px;margin:0;line-height:1.1}.home-date p{margin:3px 0 0;color:#9698a0;font-size:16px}
+.home-date{text-align:center;padding:14px 0 10px;position:relative}.home-date .moon:active{transform:scale(.9)}.home-date .moon{transition:transform .15s;-webkit-tap-highlight-color:transparent;position:absolute;left:4px;top:13px;width:48px;height:48px;border-radius:50%;background:#252933;display:grid;place-items:center;font-size:28px}.home-date .gear{position:absolute;right:4px;top:17px;font-size:25px}.home-date h1{font-size:35px;margin:0;line-height:1.1}.home-date p{margin:3px 0 0;color:#9698a0;font-size:16px}
 .welcome{margin:0 0 14px;padding:22px 18px;border-radius:28px;background:linear-gradient(135deg,#242129,#201f25);min-height:145px;display:flex;align-items:center;justify-content:space-between;border:1px solid #2d2c33}.welcome .bubble{background:#f2b4c8;color:#3a2730;border-radius:22px;padding:16px 18px;font-size:18px;font-weight:700;line-height:1.5;max-width:70%}.cat{font-size:58px;filter:saturate(.75)}
 .summary{background:#f1adc3;color:#30232a;border-radius:26px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.summary .label{font-size:18px;font-weight:800}.summary .value{font-size:44px;font-weight:800;line-height:1}.summary .unit{font-size:17px;margin-left:5px}.summary p{margin:6px 0 0;color:#654c56;font-size:13px}.ring{width:108px;height:108px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#17191f 0 230deg,#e58ea9 230deg 360deg);position:relative}.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#f1adc3}.ring span{position:relative;z-index:1;font-size:18px;font-weight:800;text-align:center}
 .twocards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.mini{background:#1a1c22;border:1px solid #272a31;border-radius:22px;padding:17px 14px;min-height:145px}.mini .ico{font-size:31px}.mini h3{margin:7px 0 0;font-size:18px}.mini .count{font-size:25px;font-weight:800}.mini small{color:#9698a0}.bar{height:9px;background:#353840;border-radius:99px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px}.blue i{background:var(--blue);width:0;transition:width .4s}.green i{background:var(--green);width:0;transition:width .4s}
@@ -1669,7 +1669,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   document.documentElement.style.setProperty('--accent',(ACCENTS[t.accent]||ACCENTS.pink)[2]);
   patchInline(document.body);
   if(window.FoodWellTheme)try{FoodWellTheme.setBars(light?'#f6f7fa':'#101116',light)}catch(e){}
-  drawCard();
+  drawCard();moonIcon(light);
  }
  function setTheme(patch){s.settings=s.settings||{};s.settings.theme=Object.assign(theme(),patch);if(s.settings.softTheme){s.settings.softTheme=false}save();apply()}
  function drawCard(){
@@ -1690,7 +1690,14 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  document.getElementById('softTheme')?.closest('.setting-row')?.remove();
  if(s.settings&&s.settings.softTheme){s.settings.softTheme=false;document.body.classList.remove('theme-soft')}
  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(theme().mode==='system')apply()});
- window.fwApplyTheme=apply;
+ // Home moon/sun button: one tap switches light <-> dark (sets the mode, so it overrides "follow phone").
+ function moonIcon(light){const m=document.querySelector('.home-date .moon');if(!m)return;m.textContent=light?'🌙':'☀️';
+  m.setAttribute('aria-label',light?fwL('เปลี่ยนเป็นธีมมืด','Switch to dark theme'):fwL('เปลี่ยนเป็นธีมสว่าง','Switch to light theme'))}
+ const moon=document.querySelector('.home-date .moon');
+ if(moon){moon.setAttribute('role','button');moon.tabIndex=0;moon.style.cursor='pointer';
+  const flip=()=>{const light=isLight(theme());setTheme({mode:light?'dark':'light'});if(typeof toast==='function')toast(light?fwL('ธีมมืด 🌙','Dark theme 🌙'):fwL('ธีมสว่าง ☀️','Light theme ☀️'))};
+  moon.addEventListener('click',flip);moon.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}})}
+ window.fwApplyTheme=apply;window.fwSetTheme=setTheme;
  apply();
 })();
 </script>
