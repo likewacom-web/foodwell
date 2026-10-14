@@ -4551,9 +4551,12 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  window.onHealth=function(kind,json){let d={};try{d=JSON.parse(json)}catch(e){d=json}const S=st();
   if(kind==='permission'){S.granted=d.granted||[];if(S.granted.length){S.on=true;save();toast(L('เชื่อม Health Connect แล้ว ⌚','Health Connect connected ⌚'));sync(true)}else{toast(L('ยังไม่ได้อนุญาตข้อมูล','No data allowed yet'));save();draw()}return}
   busy=false;
-  if(kind==='error'){if(d!=='none')toast(L('ดึงข้อมูลไม่สำเร็จ: ','Couldn\'t read: ')+d);draw();return}
+  if(kind==='error'){if(d!=='none')toast(/SecurityException|requires android\.permission/.test(String(d))?L('Health Connect ยังไม่อนุญาตข้อมูลบางอย่าง · เปิดได้ที่ แอป Health Connect → สิทธิ์ของแอป → MeowFit','Health Connect hasn\'t allowed some data yet · Health Connect app → App permissions → MeowFit'):L('ดึงข้อมูลไม่สำเร็จ: ','Couldn\'t read: ')+d);draw();return}
   if(kind!=='data')return;
   S.granted=d.granted||S.granted;S.last=Date.now();
+  // types Health Connect refused this time (switched off in its settings): say so once, the rest still synced
+  const NAMES={steps:['ก้าวเดิน','steps'],kcal:['แคลอรี่จากกิจกรรม','active calories'],exercise:['การออกกำลังกาย','workouts'],weight:['น้ำหนัก','weight'],bodyFat:['ไขมันในร่างกาย','body fat']};
+  const sk=(d.skipped||[]).join(',');if(sk&&sk!==S.skipNote)setTimeout(()=>toast(L('ซิงก์แล้ว ยกเว้น ','Synced, except ')+(d.skipped||[]).map(k=>L(...(NAMES[k]||[k,k]))).join(', ')+L(' (ยังไม่อนุญาตใน Health Connect)',' (not allowed in Health Connect)')),400);S.skipNote=sk;
   s.hcDays=s.hcDays||{};for(const k in (d.days||{}))s.hcDays[k]=d.days[k];
   // watch workouts: one movement entry per day and activity, each Health Connect session counted once
   const ignored=new Set(s.hcIgnored||[]),units=[];

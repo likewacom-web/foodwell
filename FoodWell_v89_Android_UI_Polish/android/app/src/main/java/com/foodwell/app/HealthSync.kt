@@ -2,6 +2,7 @@ package com.foodwell.app
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.health.connect.client.HealthConnectClient
@@ -76,24 +77,25 @@ class HealthSync(private val activity: ComponentActivity, private val emit: (fn:
         val to = LocalDate.now().plusDays(1).atStartOfDay()
         val out = JSONObject()
         val perDay = JSONObject()
-        val metrics = buildSet {
-            if (HealthPermission.getReadPermission(StepsRecord::class) in g) add(StepsRecord.COUNT_TOTAL)
-            if (HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class) in g) add(ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL)
+        // Each data type is read on its own: if Health Connect refuses one (a permission switched off in its
+        // settings, or not yet granted on this phone) the others still sync; refused types are listed in "skipped".
+        val skipped = JSONArray()
+        suspend fun part(name: String, perm: String, block: suspend () -> Unit) {
+            if (perm !in g) return
+            try { block() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; Log.w("FoodWell", "health $name", e); skipped.put(name) }
         }
-        if (metrics.isNotEmpty()) {
-            val groups = client.aggregateGroupByPeriod(
-                AggregateGroupByPeriodRequest(metrics, TimeRangeFilter.between(from, to), Period.ofDays(1))
-            )
-            for (grp in groups) {
-                val o = JSONObject()
-                grp.result[StepsRecord.COUNT_TOTAL]?.let { o.put("steps", it) }
-                grp.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.let { o.put("kcal", Math.round(it.inKilocalories)) }
-                if (o.length() > 0) perDay.put(grp.startTime.toLocalDate().toString(), o)
-            }
+        fun day(d: String): JSONObject = perDay.optJSONObject(d) ?: JSONObject().also { perDay.put(d, it) }
+        part("steps", HealthPermission.getReadPermission(StepsRecord::class)) {
+            for (grp in client.aggregateGroupByPeriod(AggregateGroupByPeriodRequest(setOf(StepsRecord.COUNT_TOTAL), TimeRangeFilter.between(from, to), Period.ofDays(1))))
+                grp.result[StepsRecord.COUNT_TOTAL]?.let { day(grp.startTime.toLocalDate().toString()).put("steps", it) }
+        }
+        part("kcal", HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class)) {
+            for (grp in client.aggregateGroupByPeriod(AggregateGroupByPeriodRequest(setOf(ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL), TimeRangeFilter.between(from, to), Period.ofDays(1))))
+                grp.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.let { day(grp.startTime.toLocalDate().toString()).put("kcal", Math.round(it.inKilocalories)) }
         }
         out.put("days", perDay)
         val sessions = JSONArray()
-        if (HealthPermission.getReadPermission(ExerciseSessionRecord::class) in g) {
+        part("exercise", HealthPermission.getReadPermission(ExerciseSessionRecord::class)) {
             val res = client.readRecords(
                 ReadRecordsRequest(ExerciseSessionRecord::class, TimeRangeFilter.between(from.atZone(zone).toInstant(), Instant.now()))
             )
@@ -111,19 +113,20 @@ class HealthSync(private val activity: ComponentActivity, private val emit: (fn:
         // smart-scale weigh-ins: [{id, t, kg, src}] and body fat [{t, pct}]
         val since = from.atZone(zone).toInstant()
         val weights = JSONArray()
-        if (HealthPermission.getReadPermission(WeightRecord::class) in g) {
+        part("weight", HealthPermission.getReadPermission(WeightRecord::class)) {
             for (r in client.readRecords(ReadRecordsRequest(WeightRecord::class, TimeRangeFilter.between(since, Instant.now()))).records)
                 weights.put(JSONObject().put("id", r.metadata.id).put("t", r.time.toEpochMilli())
                     .put("kg", Math.round(r.weight.inKilograms * 10) / 10.0).put("src", r.metadata.dataOrigin.packageName))
         }
         out.put("weights", weights)
         val fat = JSONArray()
-        if (HealthPermission.getReadPermission(BodyFatRecord::class) in g) {
+        part("bodyFat", HealthPermission.getReadPermission(BodyFatRecord::class)) {
             for (r in client.readRecords(ReadRecordsRequest(BodyFatRecord::class, TimeRangeFilter.between(since, Instant.now()))).records)
                 fat.put(JSONObject().put("t", r.time.toEpochMilli()).put("pct", Math.round(r.percentage.value * 10) / 10.0))
         }
         out.put("bodyFat", fat)
         out.put("granted", JSONArray(g.map { short(it) }))
+        out.put("skipped", skipped)
         return out.toString()
     }
 
