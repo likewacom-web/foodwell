@@ -1699,6 +1699,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   moon.addEventListener('click',flip);moon.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}})}
  window.fwApplyTheme=apply;window.fwSetTheme=setTheme;
  apply();
+ // styles further down the page (sync card, report, …) aren't parsed yet: apply again once the whole page is in
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
 })();
 </script>
 <!-- v105 AI photo analysis quota: 3 free a day, watch a rewarded ad for more (only when ads are on) -->
