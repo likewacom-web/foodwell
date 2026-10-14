@@ -2685,6 +2685,9 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .fw92-fab{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:5900;width:60px;height:60px;border:0;border-radius:50%;background:linear-gradient(135deg,#f0a9c0,#e887aa);color:#24141b;font-size:28px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
 .fw92-fab:active{transform:scale(.92)}
 .fw92-fab.open{transform:rotate(45deg)}
+.fw92-fab.dragging{transition:none;transform:scale(1.08);box-shadow:0 18px 36px rgba(0,0,0,.45);touch-action:none}
+.fw92-fab{touch-action:none}
+.fw92-menu.left{align-items:flex-start}.fw92-menu.left .fw92-item{flex-direction:row-reverse}
 .fw92-backdrop{position:fixed;inset:0;z-index:5898;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
 .fw92-backdrop.show{opacity:1;pointer-events:auto}
 .fw92-menu{position:fixed;right:max(16px,calc((100vw - 430px)/2 + 16px));bottom:calc(156px + env(safe-area-inset-bottom));z-index:5899;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
@@ -2725,15 +2728,57 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    menu.appendChild(b);
   });
  }
- function open(){build();fab.classList.add('open');fab.setAttribute('aria-expanded','true');menu.classList.add('show');backdrop.classList.add('show')}
+ function open(){build();place();fab.classList.add('open');fab.setAttribute('aria-expanded','true');menu.classList.add('show');backdrop.classList.add('show')}
+ // The button can be dragged anywhere (it covered list items); it snaps to the nearest side and
+ // remembers its spot on this phone (fw_ key: not synced to other devices).
+ const KEY='fw_fab_pos';
+ function loadPos(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
+ function clampY(y){const h=window.innerHeight,s=fab.offsetHeight||60;return Math.max(12,Math.min(h-s-76,y))}
+ function apply(pos){
+  if(!pos){fab.style.left=fab.style.top=fab.style.right=fab.style.bottom='';return}
+  const w=window.innerWidth,s=fab.offsetHeight||60,m=16;
+  fab.style.bottom='auto';fab.style.top=clampY(pos.y)+'px';
+  if(pos.side==='left'){fab.style.left=m+'px';fab.style.right='auto'}else{fab.style.right=m+'px';fab.style.left='auto'}
+ }
+ function place(){
+  const pos=loadPos();menu.classList.toggle('left',!!pos&&pos.side==='left');
+  if(!pos){menu.style.left=menu.style.right=menu.style.bottom=menu.style.top='';return}
+  const r=fab.getBoundingClientRect(),h=window.innerHeight;
+  // not enough room above the button: open the menu below it instead
+  if(r.top<menu.childElementCount*62+20){menu.style.top=(r.bottom+12)+'px';menu.style.bottom='auto'}else{menu.style.bottom=(h-r.top+12)+'px';menu.style.top='auto'}
+  if(pos.side==='left'){menu.style.left='16px';menu.style.right='auto'}else{menu.style.right='16px';menu.style.left='auto'}
+ }
+ function drag(){
+  apply(loadPos());
+  let sx=0,sy=0,ox=0,oy=0,moving=false,id=null;
+  fab.addEventListener('pointerdown',e=>{if(fab.classList.contains('open'))return;id=e.pointerId;sx=e.clientX;sy=e.clientY;const r=fab.getBoundingClientRect();ox=sx-r.left;oy=sy-r.top;moving=false});
+  fab.addEventListener('pointermove',e=>{
+   if(e.pointerId!==id)return;
+   if(!moving&&Math.hypot(e.clientX-sx,e.clientY-sy)<8)return;
+   if(!moving){moving=true;fab.classList.add('dragging');try{fab.setPointerCapture(id)}catch(_){}}
+   const s=fab.offsetWidth;fab.style.right=fab.style.bottom='auto';
+   fab.style.left=Math.max(4,Math.min(window.innerWidth-s-4,e.clientX-ox))+'px';
+   fab.style.top=Math.max(4,Math.min(window.innerHeight-s-4,e.clientY-oy))+'px';
+   e.preventDefault();
+  });
+  const end=e=>{
+   if(e.pointerId!==id)return;id=null;if(!moving)return;moving=false;fab._dragged=true;fab.classList.remove('dragging');
+   const r=fab.getBoundingClientRect(),pos={side:r.left+r.width/2<window.innerWidth/2?'left':'right',y:r.top};
+   try{localStorage.setItem(KEY,JSON.stringify(pos))}catch(_){}
+   apply(pos);setTimeout(()=>{fab._dragged=false},350);
+  };
+  fab.addEventListener('pointerup',end);fab.addEventListener('pointercancel',end);
+  window.addEventListener('resize',()=>apply(loadPos()));
+ }
  function init(){
   if(document.getElementById('fw92-fab'))return;
   backdrop=document.createElement('div');backdrop.className='fw92-backdrop';backdrop.onclick=close;
   menu=document.createElement('div');menu.className='fw92-menu';menu.setAttribute('role','menu');
   fab=document.createElement('button');fab.id='fw92-fab';fab.className='fw92-fab';fab.type='button';
   fab.textContent='＋';fab.setAttribute('aria-label','เมนูเพิ่มเติม');fab.setAttribute('aria-expanded','false');
-  fab.onclick=()=>fab.classList.contains('open')?close():open();
+  fab.onclick=()=>{if(fab._dragged){fab._dragged=false;return}fab.classList.contains('open')?close():open()};
   document.body.append(backdrop,menu,fab);
+  drag();
   document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
