@@ -51,6 +51,19 @@ const json = (body, status = 200) =>
     headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" },
   });
 
+// Turns Gemini's error into a short Thai reason the app can show, so a broken key or setting is obvious.
+function explain(status, detail) {
+  let msg = "";
+  try {
+    msg = JSON.parse(detail)?.error?.message || "";
+  } catch {}
+  if (/API key not valid|API_KEY_INVALID/i.test(detail)) return "คีย์ Gemini ไม่ถูกต้อง · สร้างคีย์ใหม่แล้วใส่ใน GEMINI_API_KEY";
+  if (/expired/i.test(msg)) return "คีย์ Gemini หมดอายุ · สร้างคีย์ใหม่แล้วใส่ใน GEMINI_API_KEY";
+  if (/location is not supported/i.test(msg)) return "Gemini ไม่รองรับตำแหน่งของเซิร์ฟเวอร์ตอนนี้ · ลองใหม่อีกครั้ง";
+  if (/image/i.test(msg)) return "Gemini อ่านรูปนี้ไม่ได้ · ลองถ่ายใหม่";
+  return `Gemini ตอบกลับ ${status}${msg ? ": " + msg.slice(0, 120) : ""}`;
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
@@ -96,7 +109,8 @@ export default {
       if (resp.status === 429) return json({ error: "ใช้เกินโควตาฟรีของ Gemini แล้ว ลองใหม่ภายหลัง" }, 429);
       if (!resp.ok) {
         const detail = await resp.text();
-        return json({ error: `Gemini ตอบกลับ ${resp.status}`, detail: detail.slice(0, 300) }, 502);
+        console.log("gemini", model, resp.status, detail.slice(0, 500));
+        return json({ error: explain(resp.status, detail), detail: detail.slice(0, 300) }, 502);
       }
 
       const out = await resp.json();
