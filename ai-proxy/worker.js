@@ -23,9 +23,18 @@ Look at the photo and identify the main dish or food item.
 - "name": the most likely dish name in Thai (e.g. "ข้าวกะเพราไก่ไข่ดาว"). If it is not food, use "".
 - "candidates": up to 4 alternative Thai names, most likely first (include "name" first).
 - "confidence": 0 to 1.
+- "is_food": false if the photo does not show food or drink.
 - Estimate nutrition for the whole portion visible: kcal, protein (g), carbs (g), fat (g),
-  fiber (g), sugar (g), sodium (mg). These are rough estimates; round to whole numbers.
-- "is_food": false if the photo does not show food or drink.`;
+  fiber (g), sugar (g), sodium (mg). Round to whole numbers.
+How to estimate (work through these steps before answering):
+1. List every component on the plate or in the pack separately (rice, meat, egg, sauce, bread, drink …).
+2. Judge each portion size from visible references: plate or bowl size (Thai plate ≈ 23 cm),
+   spoon, hand, packaging. A Thai street-food plate of rice is about 150–200 g cooked rice.
+3. Count hidden calories that Thai cooking usually adds: frying oil (stir-fry ≈ 1–2 tbsp),
+   sugar in sauces and drinks, coconut milk in curries, mayonnaise and ketchup.
+4. Use typical Thai street-food or 7-Eleven recipes rather than home-cooked or Western ones.
+   If the item is packaged and a label is readable, use the label.
+5. Sum the components; macros must roughly agree with kcal (4·protein + 4·carbs + 9·fat ≈ kcal).`;
 
 const SCHEMA = {
   type: "OBJECT",
@@ -50,6 +59,19 @@ const json = (body, status = 200) =>
     status,
     headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" },
   });
+
+// Turns Gemini's error into a short Thai reason the app can show, so a broken key or setting is obvious.
+function explain(status, detail) {
+  let msg = "";
+  try {
+    msg = JSON.parse(detail)?.error?.message || "";
+  } catch {}
+  if (/API key not valid|API_KEY_INVALID/i.test(detail)) return "คีย์ Gemini ไม่ถูกต้อง · สร้างคีย์ใหม่แล้วใส่ใน GEMINI_API_KEY";
+  if (/expired/i.test(msg)) return "คีย์ Gemini หมดอายุ · สร้างคีย์ใหม่แล้วใส่ใน GEMINI_API_KEY";
+  if (/location is not supported/i.test(msg)) return "Gemini ไม่รองรับตำแหน่งของเซิร์ฟเวอร์ตอนนี้ · ลองใหม่อีกครั้ง";
+  if (/image/i.test(msg)) return "Gemini อ่านรูปนี้ไม่ได้ · ลองถ่ายใหม่";
+  return `Gemini ตอบกลับ ${status}${msg ? ": " + msg.slice(0, 120) : ""}`;
+}
 
 export default {
   async fetch(request, env) {
@@ -96,7 +118,8 @@ export default {
       if (resp.status === 429) return json({ error: "ใช้เกินโควตาฟรีของ Gemini แล้ว ลองใหม่ภายหลัง" }, 429);
       if (!resp.ok) {
         const detail = await resp.text();
-        return json({ error: `Gemini ตอบกลับ ${resp.status}`, detail: detail.slice(0, 300) }, 502);
+        console.log("gemini", model, resp.status, detail.slice(0, 500));
+        return json({ error: explain(resp.status, detail), detail: detail.slice(0, 300) }, 502);
       }
 
       const out = await resp.json();
