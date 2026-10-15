@@ -23,9 +23,18 @@ Look at the photo and identify the main dish or food item.
 - "name": the most likely dish name in Thai (e.g. "ข้าวกะเพราไก่ไข่ดาว"). If it is not food, use "".
 - "candidates": up to 4 alternative Thai names, most likely first (include "name" first).
 - "confidence": 0 to 1.
+- "is_food": false if the photo does not show food or drink.
 - Estimate nutrition for the whole portion visible: kcal, protein (g), carbs (g), fat (g),
-  fiber (g), sugar (g), sodium (mg). These are rough estimates; round to whole numbers.
-- "is_food": false if the photo does not show food or drink.`;
+  fiber (g), sugar (g), sodium (mg). Round to whole numbers.
+How to estimate (work through these steps before answering):
+1. List every component on the plate or in the pack separately (rice, meat, egg, sauce, bread, drink …).
+2. Judge each portion size from visible references: plate or bowl size (Thai plate ≈ 23 cm),
+   spoon, hand, packaging. A Thai street-food plate of rice is about 150–200 g cooked rice.
+3. Count hidden calories that Thai cooking usually adds: frying oil (stir-fry ≈ 1–2 tbsp),
+   sugar in sauces and drinks, coconut milk in curries, mayonnaise and ketchup.
+4. Use typical Thai street-food or 7-Eleven recipes rather than home-cooked or Western ones.
+   If the item is packaged and a label is readable, use the label.
+5. Sum the components; macros must roughly agree with kcal (4·protein + 4·carbs + 9·fat ≈ kcal).`;
 
 const SCHEMA = {
   type: "OBJECT",
