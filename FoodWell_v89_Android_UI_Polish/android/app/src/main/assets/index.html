@@ -3004,15 +3004,36 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
 .fw98-link{border:0;background:none;color:#e9a3bb;font-weight:700;font-size:13px;font-family:inherit;padding:10px 0 0;text-decoration:underline}
 .fw98-msg{margin-top:8px;font-size:12px;color:#f4c76b}
 .fw98-list{margin:8px 0 0;padding-left:18px;font-size:13px;color:#cfd2da;line-height:1.7}
+.fw98-code{display:flex;gap:8px;margin-top:10px}
+.fw98-code input{flex:1;min-width:0;border-radius:12px;border:1px solid #4a3442;background:#15141a;color:#fff;padding:11px 12px;font:700 15px/1.2 ui-monospace,monospace;letter-spacing:1px;text-transform:uppercase}
+.fw98-code button{border:0;border-radius:12px;padding:0 14px;font-weight:800;font-family:inherit;background:#f0a9c0;color:#2b1820}
+.fw98-code button:disabled{opacity:.5}
 </style>
 <script>
 (function(){
  const P=()=>window.FoodWellPro;
- let st={};
+ let st={},codeOpen=false,codeDraft='';
  const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  function render(){
   const box=document.getElementById('fw98');if(!box)return;
   box.className='fw98-card'+(st.adFree?' done':'');
+  const msg=st.message?'<div class="fw98-msg">'+esc(st.message)+'</div>':'';
+  // activation code row: hidden behind a link until opened; the draft survives re-renders
+  const code=codeOpen?'<div class="fw98-code"><input id="fw98CodeIn" placeholder="MEOW-XXXX-XXXX" maxlength="24" autocomplete="off" autocapitalize="characters" value="'+esc(codeDraft)+'"><button id="fw98CodeGo"'+(st.redeeming?' disabled':'')+'>'+(st.redeeming?'กำลังตรวจ…':'เปิดใช้งาน')+'</button></div>'
+   :'<button class="fw98-link" id="fw98CodeOpen">'+(st.adFree?'🎟️ ใส่โค้ดเพิ่มเพื่อต่อเวลา':'🎟️ มีโค้ดเปิดใช้งาน? ใส่โค้ด')+'</button>';
+  const wire=()=>{
+   const o=box.querySelector('#fw98CodeOpen');if(o)o.onclick=()=>{codeOpen=true;render();box.querySelector('#fw98CodeIn')?.focus()};
+   const inp=box.querySelector('#fw98CodeIn');if(!inp)return;
+   inp.oninput=()=>{codeDraft=inp.value};
+   const go=()=>{codeDraft=inp.value.trim();if(!codeDraft||!P()||!P().redeem)return;P().redeem(codeDraft)};
+   box.querySelector('#fw98CodeGo').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
+  };
+  if(st.adFree&&!st.purchased){
+   const until=st.codeForever?'ใช้ได้ถาวร':'ใช้ได้ถึง '+new Date(st.codeUntil).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+   box.innerHTML='<div class="fw96-head"><span style="font-size:24px">🎟️</span><h3>MeowFit ตัวเต็ม</h3></div><div class="fw96-small">เปิดด้วยโค้ดแล้ว · '+until+'<br>ไม่มีโฆษณา และวิเคราะห์รูปอาหารด้วย AI ได้ไม่จำกัด</div>'+msg+(st.codeForever?'':code);
+   wire();
+   return;
+  }
   if(st.adFree){
    box.innerHTML='<div class="fw96-head"><span style="font-size:24px">⭐</span><h3>MeowFit ไม่มีโฆษณา</h3></div><div class="fw96-small">ขอบคุณที่สนับสนุนครับ 💖 สิทธิ์นี้ผูกกับบัญชี Google Play ของคุณ ลงแอปใหม่หรือเปลี่ยนเครื่องก็ยังไม่มีโฆษณา</div>';
    return;
@@ -3022,12 +3043,16 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
    +'<ul class="fw98-list"><li>ซื้อครั้งเดียว ใช้ได้ตลอด ไม่ใช่รายเดือน</li><li>วิเคราะห์รูปอาหารด้วย AI ได้ไม่จำกัด</li><li>ใช้ได้ทุกเครื่องที่ใช้บัญชี Google Play เดียวกัน</li><li>ช่วยสนับสนุนการพัฒนา MeowFit</li></ul>'
    +(st.adsEnabled?'':'<div class="fw96-small">เวอร์ชันนี้ยังไม่แสดงโฆษณา</div>')
    +'<button class="fw98-buy" id="fw98Buy"'+(st.billingReady?'':' disabled')+'>'+(st.pending?'⏳ รอการชำระเงิน':'ซื้อเพื่อปิดโฆษณา'+price)+'</button>'
-   +(st.message?'<div class="fw98-msg">'+esc(st.message)+'</div>':'')
-   +'<button class="fw98-link" id="fw98Restore">กู้คืนการซื้อ</button>';
+   +msg
+   +'<button class="fw98-link" id="fw98Restore">กู้คืนการซื้อ</button>'
+   +'<div>'+code+'</div>';
+  wire();
   box.querySelector('#fw98Buy').onclick=()=>P()&&P().buy();
   box.querySelector('#fw98Restore').onclick=()=>{if(!P())return;st.message='กำลังตรวจสอบกับ Google Play…';render();P().restore()};
  }
- window.onProStatus=json=>{try{st=JSON.parse(json)}catch(e){}render()};
+ window.onProStatus=json=>{const was=st.adFree;try{st=JSON.parse(json)}catch(e){}
+  if(st.adFree&&!was&&!st.purchased){codeOpen=false;codeDraft='';typeof toast==='function'&&toast('เปิดใช้งานตัวเต็มแล้ว 🎉')}
+  render()};
  function init(){
   if(!P()||document.getElementById('fw98'))return;
   const card=document.createElement('section');card.id='fw98';

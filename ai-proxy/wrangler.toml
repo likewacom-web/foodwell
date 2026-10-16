@@ -1,5 +1,12 @@
 # Optional: deploy from a computer with `npx wrangler deploy`,
-# then `npx wrangler secret put GEMINI_API_KEY` and `npx wrangler secret put APP_TOKEN`.
+# then `npx wrangler secret put GEMINI_API_KEY`, `npx wrangler secret put APP_TOKEN`
+# and (for activation codes) `npx wrangler secret put ADMIN_TOKEN`.
 name = "foodwell-ai"
 main = "worker.js"
 compatibility_date = "2026-09-01"
+
+# Activation codes: create a KV namespace (`npx wrangler kv namespace create CODES`)
+# and put the id it prints below, then uncomment.
+# [[kv_namespaces]]
+# binding = "CODES"
+# id = "<kv namespace id>"
