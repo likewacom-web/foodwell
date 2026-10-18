@@ -1,6 +1,7 @@
 package com.foodwell.app
 
 import android.content.Context
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
@@ -30,10 +31,15 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.security.MessageDigest
 
 /**
  * Banner ads (AdMob) plus a one-time Google Play purchase that removes them for good.
@@ -41,6 +47,10 @@ import org.json.JSONObject
  * Ads only run when the build sets ADS_ENABLED (gradle -Pads=true, see MONETIZATION.md); otherwise
  * this class still handles the purchase so the "remove ads" card can be tried. The purchase is
  * remembered locally and restored from Google Play on every launch (and on reinstall/new phone).
+ *
+ * An activation code (made with the AI Worker's /admin page) gives the same full version for the
+ * code's number of days, or for good. Each code works on one phone only; entering it again on that
+ * phone (after a reinstall) restores it.
  */
 class Monetization(
     private val activity: ComponentActivity,
@@ -59,13 +69,26 @@ class Monetization(
     private var adView: AdView? = null
     private var rewarded: RewardedAd? = null
     private var rewardedLoading = false
+    private var adsStarted = false
+    private var redeeming = false
 
-    var adFree: Boolean
+    /** Bought "remove ads" on Google Play. */
+    private var purchased: Boolean
         get() = prefs.getBoolean("adFree", false)
-        private set(v) {
+        set(v) {
             prefs.edit().putBoolean("adFree", v).apply()
             if (v) activity.runOnUiThread { removeAds() }
         }
+
+    /** End of the full version from an activation code (epoch ms; Long.MAX_VALUE = for good, 0 = none). */
+    private var codeUntil: Long
+        get() = prefs.getLong("codeUntil", 0L)
+        set(v) { prefs.edit().putLong("codeUntil", v).apply() }
+
+    private fun codeActive() = codeUntil > System.currentTimeMillis()
+
+    /** Full version: no ads and unlimited AI photo analysis. */
+    val adFree: Boolean get() = purchased || codeActive()
 
     fun start() {
         connect()
@@ -96,6 +119,10 @@ class Monetization(
         .put("pending", pending)
         .put("message", message)
         .put("rewardedReady", rewarded != null)
+        .put("purchased", purchased)
+        .put("codeUntil", if (codeActive()) codeUntil else 0L)
+        .put("codeForever", codeActive() && codeUntil == Long.MAX_VALUE)
+        .put("redeeming", redeeming)
 
     private fun emitStatus() = emit("onProStatus", JSONObject.quote(statusJson().toString()))
 
@@ -146,7 +173,7 @@ class Monetization(
                 QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
             )
             r.purchasesList.forEach { handle(it) }
-            if (!quiet && !adFree && !pending) message = Lang.t(activity, "ไม่พบการซื้อในบัญชี Google Play นี้", "No purchase found on this Google Play account")
+            if (!quiet && !purchased && !pending) message = Lang.t(activity, "ไม่พบการซื้อในบัญชี Google Play นี้", "No purchase found on this Google Play account")
             emitStatus()
         }
     }
@@ -176,7 +203,7 @@ class Monetization(
                 }
                 pending = false
                 message = ""
-                adFree = true
+                purchased = true
             }
             Purchase.PurchaseState.PENDING -> {
                 pending = true
@@ -188,7 +215,74 @@ class Monetization(
 
     // ---- Ads -----------------------------------------------------------------------------------
 
+    /** Checks [raw] with the Worker; a valid, unused code turns on the full version for its days. */
+    fun redeem(raw: String) {
+        val code = raw.uppercase().filter { it.isLetterOrDigit() }
+        if (code.length < 8) {
+            message = Lang.t(activity, "ใส่โค้ดให้ครบ", "Enter the whole code")
+            emitStatus()
+            return
+        }
+        if (redeeming) return
+        redeeming = true
+        message = ""
+        emitStatus()
+        activity.lifecycleScope.launch {
+            val (status, body) = withContext(Dispatchers.IO) { postRedeem(code) }
+            redeeming = false
+            val err = body?.optString("error").orEmpty()
+            if (status == 200 && body != null) {
+                val now = System.currentTimeMillis()
+                val until = when {
+                    body.optBoolean("forever") -> Long.MAX_VALUE
+                    // same code again on this phone (reinstall): restore its own end date
+                    body.optBoolean("again") -> body.optLong("until")
+                    // a new code adds its days on top of any time still left
+                    else -> maxOf(now, codeUntil.coerceAtMost(Long.MAX_VALUE / 2)) + body.optLong("days") * 86_400_000L
+                }
+                if (until > now) {
+                    codeUntil = maxOf(codeUntil, until)
+                    message = ""
+                    activity.runOnUiThread { removeAds() }
+                } else {
+                    message = Lang.t(activity, "โค้ดนี้หมดเวลาใช้งานแล้ว", "This code's time is already over")
+                }
+            } else {
+                message = err.ifEmpty {
+                    if (status == 0) Lang.t(activity, "ไม่มีอินเทอร์เน็ต · ลองใหม่อีกครั้ง", "No internet · try again")
+                    else Lang.t(activity, "ตรวจโค้ดไม่สำเร็จ ($status)", "Couldn't check the code ($status)")
+                }
+            }
+            emitStatus()
+        }
+    }
+
+    /** (HTTP status, JSON body); status 0 when the request never got an answer. */
+    private fun postRedeem(code: String): Pair<Int, JSONObject?> = try {
+        val c = URL(REDEEM_URL).openConnection() as HttpURLConnection
+        c.requestMethod = "POST"
+        c.connectTimeout = 15000
+        c.readTimeout = 15000
+        c.doOutput = true
+        c.setRequestProperty("Content-Type", "application/json")
+        c.outputStream.use { it.write(JSONObject().put("code", code).put("device", deviceId()).toString().toByteArray()) }
+        val status = c.responseCode
+        val text = (if (status < 400) c.inputStream else c.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
+        c.disconnect()
+        status to runCatching { JSONObject(text) }.getOrNull()
+    } catch (e: Exception) {
+        Log.w(TAG, "redeem", e)
+        0 to null
+    }
+
+    /** Stable per phone and app (survives reinstall), hashed so the raw Android ID never leaves the phone. */
+    private fun deviceId(): String {
+        val raw = Settings.Secure.getString(activity.contentResolver, Settings.Secure.ANDROID_ID).orEmpty() + ":" + activity.packageName
+        return MessageDigest.getInstance("SHA-256").digest(raw.toByteArray()).joinToString("") { "%02x".format(it) }.take(32)
+    }
+
     private fun showAds() {
+        adsStarted = true
         // Google requires the consent form (EEA/UK) before personalised ads are requested.
         val consent = UserMessagingPlatform.getConsentInformation(activity)
         consent.requestConsentInfoUpdate(
@@ -250,6 +344,7 @@ class Monetization(
     }
 
     private fun removeAds() {
+        adsStarted = false
         adView?.destroy()
         adView = null
         adContainer.removeAllViews()
@@ -257,7 +352,12 @@ class Monetization(
     }
 
     fun onPause() = adView?.pause()
-    fun onResume() = adView?.resume()
+    fun onResume() {
+        adView?.resume()
+        // a code's time ran out while the app was in the background
+        if (codeUntil != 0L && !codeActive()) { codeUntil = 0L; emitStatus() }
+        if (BuildConfig.ADS_ENABLED && !adFree && !adsStarted) showAds()
+    }
     fun onDestroy() {
         adView?.destroy()
         billing.endConnection()
@@ -274,6 +374,8 @@ class Monetization(
     companion object {
         /** One-time ("in-app") product to create in Play Console → Monetize → In-app products. */
         const val PRODUCT_ID = "remove_ads"
+        /** Activation codes are checked by the same Cloudflare Worker as the AI photo analysis (ai-proxy/worker.js). */
+        private const val REDEEM_URL = "https://round-frog-a0d0meowfit-ai.meowfitcaloriestracker.workers.dev/redeem?k=70a9520d"
         private const val TAG = "FoodWell"
     }
 }

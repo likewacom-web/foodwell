@@ -589,9 +589,11 @@ class MainActivity : ComponentActivity() {
     // ---- One-time purchase that removes ads (Google Play Billing) ------------------------------
 
     inner class ProApi {
-        /** {adsEnabled, adFree, billingReady, price, pending, message} */
+        /** {adsEnabled, adFree, purchased, codeUntil, codeForever, redeeming, billingReady, price, pending, message} */
         @JavascriptInterface fun status(): String = pro.statusJson().toString()
         @JavascriptInterface fun buy() = pro.buy()
+        /** Activation code; the answer comes back through onProStatus. */
+        @JavascriptInterface fun redeem(code: String) = runOnUiThread { pro.redeem(code) }
         @JavascriptInterface fun restore() = pro.restore()
         @JavascriptInterface fun showRewarded() = pro.showRewarded()
     }
