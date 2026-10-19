@@ -368,6 +368,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         pro.onDestroy()
+        if (::updater.isInitialized) updater.onDestroy()
         super.onDestroy()
     }
 
