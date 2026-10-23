@@ -687,7 +687,8 @@ function renderCoreFoodLog(){
 window.repeatFood=function(id){const f=s.foods.find(x=>x.id===id);if(!f)return;go('food');$("foodName").value=f.name;$("meal").value=f.meal||'เช้า';$("kcal").value=f.kcal||'';$("protein").value=f.protein||'';$("carbs").value=f.carbs||'';$("fat").value=f.fat||'';$("fiber").value=f.fiber||'';$("sodium").value=f.sodium||'';$("sugar").value=f.sugar||'';$("note").value=f.note||'';$("foodTime").value='';toast('เติมข้อมูลจากรายการเดิมแล้ว · ตรวจสอบก่อนบันทึก')};
 document.querySelectorAll('[data-core-meal]').forEach(b=>b.onclick=()=>{meal=b.dataset.coreMeal;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.meal===meal));renderFood();toast('กรองมื้อ '+meal)});
 function renderFoodPhotos(){const el=$("foodPhotoGrid");if(!el)return;const a=s.foods.filter(f=>f.photo).slice(0,8);el.innerHTML=a.length?a.map(f=>`<div class="food-photo-tile" onclick="openFoodModal(${f.id})"><img src="${f.photo}" alt=""><span>${esc(f.name)}</span></div>`).join(""):'<div class="food-empty-tip">ยังไม่มีรูปอาหาร · ลองถ่ายหรือเลือกรูปตอนเพิ่มอาหาร 📷</div>';}
-function renderFood(){renderCoreFoodLog();let q=$("search").value.toLowerCase();let a=s.foods.filter(f=>(meal==="ทั้งหมด"||f.meal===meal)&&f.name.toLowerCase().includes(q));$("foodList").innerHTML=a.length?a.map(foodCard).join(""):'<div class="item"><div class="meta"><b>ยังไม่มีรายการอาหาร</b><small>เพิ่มมื้ออาหารของคุณได้เลย</small></div></div>'}
+// The list shows today only and starts empty again at midnight; earlier days stay in the history calendar.
+function renderFood(){renderCoreFoodLog();let q=$("search").value.toLowerCase(),today=localDay();let a=s.foods.filter(f=>foodDay(f)===today&&(meal==="ทั้งหมด"||f.meal===meal)&&f.name.toLowerCase().includes(q));$("foodList").innerHTML=a.length?a.map(foodCard).join(""):'<div class="item"><div class="meta"><b>วันนี้ยังไม่มีรายการอาหาร</b><small>เพิ่มมื้ออาหารของคุณได้เลย · รายการเริ่มใหม่ทุกเที่ยงคืน ดูวันก่อน ๆ ได้ในประวัติ</small></div></div>'}
 
 function dayRecord(date){
  const foods=s.foods.filter(f=>foodDay(f)===date).length;
@@ -1010,7 +1011,7 @@ function renderKcal(){
  box.innerHTML=vals.map((v,i)=>`<div class="dash-col"><span class="dash-value">${v.toLocaleString()}</span><div class="dash-bar" style="height:${Math.max(5,(v/max)*108)}px"></div><small>${new Date(days[i]+"T12:00:00").toLocaleDateString("th-TH",{weekday:"short"})}</small></div>`).join("");
  if($("dashKcalNote"))$("dashKcalNote").textContent=avg?`เฉลี่ย ${avg.toLocaleString()} kcal ต่อวัน (เฉพาะวันที่มีบันทึก)`:"kcal จากอาหารที่บันทึกในแต่ละวัน";
 }
-function render(){if(Array.isArray(s.waterLog))s.water=waterOn(localDay());applySettings();startReminder();renderFoodPhotos();let d=new Date();$("date").textContent=d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});$("waterCount").textContent=s.water.toLocaleString();$("waterBig").textContent=s.water.toLocaleString();renderWaterHistoryV54();$("moveCount").textContent=todayMoveMin();{const wg=waterGoal(),wm=todayMoveMin();if($("waterBarFill"))$("waterBarFill").style.width=Math.min(100,s.water/wg*100)+"%";if($("moveBarFill"))$("moveBarFill").style.width=Math.min(100,wm/MOVE_GOAL*100)+"%";if($("waterGoalTxt"))$("waterGoalTxt").textContent=s.water>=wg?"ครบเป้า "+wg.toLocaleString()+" ml 🎉":"เป้า "+wg.toLocaleString()+" ml";if($("moveGoalTxt"))$("moveGoalTxt").textContent=wm>=MOVE_GOAL?"ครบ "+MOVE_GOAL+" นาทีแล้ว 🎉":"เป้า "+MOVE_GOAL+" นาที/วัน"}renderKcal();let icons=["🍳","🍜","🍤","🍎","🥗","🍙"];$("foodStrip").innerHTML=s.foods.length?s.foods.slice(0,6).map((f,i)=>`<div class="food">${f.photo?`<img src="${f.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:23px">`:icons[i%icons.length]}<span>${esc(f.name.slice(0,10))}</span></div>`).join(""):'<div class="food">🍱<span>ยังไม่มีอาหาร</span></div>';
+function render(){if(Array.isArray(s.waterLog))s.water=waterOn(localDay());applySettings();startReminder();renderFoodPhotos();let d=new Date();$("date").textContent=d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"});$("waterCount").textContent=s.water.toLocaleString();$("waterBig").textContent=s.water.toLocaleString();renderWaterHistoryV54();$("moveCount").textContent=todayMoveMin();{const wg=waterGoal(),wm=todayMoveMin();if($("waterBarFill"))$("waterBarFill").style.width=Math.min(100,s.water/wg*100)+"%";if($("moveBarFill"))$("moveBarFill").style.width=Math.min(100,wm/MOVE_GOAL*100)+"%";if($("waterGoalTxt"))$("waterGoalTxt").textContent=s.water>=wg?"ครบเป้า "+wg.toLocaleString()+" ml 🎉":"เป้า "+wg.toLocaleString()+" ml";if($("moveGoalTxt"))$("moveGoalTxt").textContent=wm>=MOVE_GOAL?"ครบ "+MOVE_GOAL+" นาทีแล้ว 🎉":"เป้า "+MOVE_GOAL+" นาที/วัน"}renderKcal();let icons=["🍳","🍜","🍤","🍎","🥗","🍙"];const todayFoods=s.foods.filter(f=>foodDay(f)===localDay());$("foodStrip").innerHTML=todayFoods.length?todayFoods.slice(0,6).map((f,i)=>`<div class="food">${f.photo?`<img src="${f.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:23px">`:icons[i%icons.length]}<span>${esc(f.name.slice(0,10))}</span></div>`).join(""):'<div class="food">🍱<span>ยังไม่มีอาหาร</span></div>';
 renderFood();
 renderInsights();
 renderTrophies();
@@ -4421,6 +4422,18 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  const box=document.getElementById('foodList');if(!box)return;
  new MutationObserver(m=>{if(m.some(r=>[...r.addedNodes].some(n=>n.classList&&n.classList.contains('item'))))trim()}).observe(box,{childList:true});
  trim();
+})();
+</script>
+<!-- v131 New day at midnight: redraw everything that shows "today" (food list, kcal, water …) when the date changes,
+ whether the app stays open past midnight or comes back from the background on a new day -->
+<script>
+(function(){
+ let day=localDay(),timer=0;
+ function check(){if(localDay()===day)return;day=localDay();try{render()}catch(e){try{renderFood()}catch(_){}}}
+ function arm(){clearTimeout(timer);const n=new Date(),next=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,2);
+  timer=setTimeout(()=>{check();arm()},Math.min(next-n,6*3600e3))}
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden){check();arm()}});
+ arm();
 })();
 </script>
 <!-- v125 Steps (phone step sensor via FoodWellSteps, or typed in) and calories burned today:
