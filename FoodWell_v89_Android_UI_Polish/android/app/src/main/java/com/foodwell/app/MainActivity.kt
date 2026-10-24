@@ -607,19 +607,22 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface
         fun saveText(name: String, text: String): String = try {
             val safe = name.replace(Regex("[^A-Za-z0-9._-]"), "_")
+            val csv = safe.endsWith(".csv", ignoreCase = true)
             if (Build.VERSION.SDK_INT >= 29) {
                 val values = ContentValues().apply {
                     put(MediaStore.Downloads.DISPLAY_NAME, safe)
-                    put(MediaStore.Downloads.MIME_TYPE, "application/json")
+                    put(MediaStore.Downloads.MIME_TYPE, if (csv) "text/csv" else "application/json")
                 }
                 val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
                     ?: error("insert failed")
                 contentResolver.openOutputStream(uri)!!.use { it.write(text.toByteArray()) }
-                Lang.t(this@MainActivity, "บันทึกไฟล์สำรองไว้ในโฟลเดอร์ Download แล้ว: $safe", "Backup saved to the Download folder: $safe")
+                if (csv) Lang.t(this@MainActivity, "บันทึกไฟล์ไว้ในโฟลเดอร์ Download แล้ว: $safe", "Saved to the Download folder: $safe")
+                else Lang.t(this@MainActivity, "บันทึกไฟล์สำรองไว้ในโฟลเดอร์ Download แล้ว: $safe", "Backup saved to the Download folder: $safe")
             } else {
                 val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: filesDir
                 val f = File(dir, safe).apply { writeText(text) }
-                Lang.t(this@MainActivity, "บันทึกไฟล์สำรองแล้ว: ${f.absolutePath}", "Backup saved: ${f.absolutePath}")
+                if (csv) Lang.t(this@MainActivity, "บันทึกไฟล์แล้ว: ${f.absolutePath}", "Saved: ${f.absolutePath}")
+                else Lang.t(this@MainActivity, "บันทึกไฟล์สำรองแล้ว: ${f.absolutePath}", "Backup saved: ${f.absolutePath}")
             }
         } catch (e: Exception) {
             Log.w(TAG, "saveText failed", e)

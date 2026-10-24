@@ -447,6 +447,10 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="page-title"><div><p>WEIGHT PLAN</p><h1>📉 แผนลดน้ำหนัก</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
 <div id="wpView"></div>
 </section>
+<section id="progress" class="page">
+<div class="page-title"><div><p>BODY PROGRESS</p><h1>📏 รอบเอว & รูปความเปลี่ยนแปลง</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
+<div id="pgView"></div>
+</section>
 <section id="recipes" class="page">
 <div class="page-title"><div><p>MY RECIPES</p><h1>🍳 เมนูทำเอง</h1></div><button class="secondary-btn" type="button" data-go="food">กลับ</button></div>
 <div id="rcBody"></div>
@@ -1493,6 +1497,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 <!-- v102 Thai food database: type a name, pick a dish, nutrients fill in -->
 <script src="foods_th.js"></script>
 <script src="foods_more.js"></script>
+<script src="foods_stores.js"></script>
 <style>
 .fw-name-wrap{position:relative}
 .fw-sugg{position:absolute;left:0;right:0;top:100%;z-index:60;margin-top:4px;background:#1f2128;border:1px solid #34363f;border-radius:16px;box-shadow:0 16px 40px #0008;overflow:hidden;display:none;max-height:340px;overflow-y:auto}
@@ -2087,6 +2092,454 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  init();if(!document.getElementById('vtCard'))setTimeout(init,500);
 })();
 </script>
+<!-- v133 Waist and weekly progress photos. Kept on this phone only: waist in localStorage (fw_waist_local), photos in
+ IndexedDB (meowfit_local/photos). Neither is part of the synced data (s), the backup file or Android's cloud backup. -->
+<style>
+.pg-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.pg-card h3{margin:0 0 4px;font-size:17px}.pg-sub{font-size:12px;color:var(--muted);margin:0 0 10px}
+.pg-row{display:flex;gap:8px}.pg-row input{flex:1;min-width:0;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 12px;font:16px inherit;font-family:inherit}
+.pg-btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;font-size:14px;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.pg-btn.alt{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.pg-big{width:100%;padding:14px;font-size:15px}
+.pg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pg-stat{padding:10px;border-radius:14px;background:var(--panel2);text-align:center}.pg-stat b{display:block;font-size:18px}.pg-stat small{font-size:11px;color:var(--muted)}
+.pg-spark{width:100%;height:70px;margin-top:10px}
+.pg-due{margin:0 0 10px;padding:10px 12px;border-radius:14px;background:#f4c76b26;color:#b7791f;font-size:13px;font-weight:700}
+.pg-due.ok{background:#2f9e6e1f;color:#2f9e6e}
+.pg-cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pg-cmp figure{margin:0}.pg-cmp img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;background:var(--panel2)}
+.pg-cmp figcaption{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
+.pg-cmp select{width:100%;margin-bottom:6px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px;font-family:inherit}
+.pg-diff{margin-top:8px;text-align:center;font-weight:800;font-size:14px}
+.pg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.pg-th{position:relative}.pg-th img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block}
+.pg-th small{position:absolute;left:4px;bottom:4px;font-size:10px;background:#0009;color:#fff;border-radius:6px;padding:1px 5px}
+.pg-th button{position:absolute;right:3px;top:3px;border:0;border-radius:8px;background:#0008;color:#fff;font-size:12px;padding:2px 5px}
+.pg-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th,WK='fw_waist_local',DAY=864e5;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const fmt=d=>new Date(d+'T12:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+ // Monday of the week, as YYYY-MM-DD
+ const weekOf=d=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()-((x.getDay()+6)%7));return localDay(x)};
+ // ---- waist (small, localStorage) ----
+ function waist(){try{return JSON.parse(localStorage.getItem(WK)||'[]')}catch(e){return []}}
+ function saveWaist(a){try{localStorage.setItem(WK,JSON.stringify(a))}catch(e){toast(L('บันทึกไม่สำเร็จ · พื้นที่ในเครื่องเต็ม','Could not save · storage is full'))}}
+ const waistNear=d=>{const a=waist().filter(x=>x.d<=d);return a.length?a[a.length-1].cm:null};
+ // ---- photos (IndexedDB) ----
+ let dbp=null;
+ function db(){return dbp||(dbp=new Promise((ok,no)=>{if(!window.indexedDB)return no(new Error('no IndexedDB'));const r=indexedDB.open('meowfit_local',1);
+  r.onupgradeneeded=()=>{r.result.createObjectStore('photos',{keyPath:'id'})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}))}
+ async function tx(mode,fn){const d=await db();return new Promise((ok,no)=>{const t=d.transaction('photos',mode),st=t.objectStore('photos');const r=fn(st);t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})}
+ // If this WebView can't open IndexedDB, keep (smaller) photos in localStorage instead: still on the phone only.
+ const LK='fw_progress_photos',lsGet=()=>{try{return JSON.parse(localStorage.getItem(LK)||'[]')}catch(e){return []}};
+ let useLS=false;
+ const store={
+  all:async()=>{if(!useLS)try{return (await tx('readonly',st=>st.getAll()))||[]}catch(e){useLS=true}return lsGet()},
+  put:async p=>{if(!useLS)try{return await tx('readwrite',st=>st.put(p))}catch(e){useLS=true}
+   p.img=await shrinkImage(p.img,600,.7);const a=lsGet().filter(x=>x.id!==p.id);a.push(p);localStorage.setItem(LK,JSON.stringify(a))},
+  del:async id=>{if(!useLS)try{return await tx('readwrite',st=>st.delete(id))}catch(e){useLS=true}
+   localStorage.setItem(LK,JSON.stringify(lsGet().filter(x=>x.id!==id)))}};
+ const allPhotos=async()=>(await store.all()).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.id-b.id);
+ let photos=[],fromId=null,toId=null;
+ async function load(){try{photos=await allPhotos()}catch(e){photos=[]}}
+ function spark(a){if(a.length<2)return '';const w=300,h=70,vs=a.map(x=>x.cm),mn=Math.min(...vs),mx=Math.max(...vs),r=(mx-mn)||1;
+  const pts=a.map((x,i)=>[i/(a.length-1)*w,h-6-(x.cm-mn)/r*(h-12)]);
+  return `<svg class="pg-spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="#e887aa" stroke-width="3" stroke-linejoin="round" points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>${pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="#e887aa"/>`).join('')}</svg>`}
+ function draw(){
+  const v=document.getElementById('pgView');if(!v)return;
+  const w=waist(),today=localDay(),last=w[w.length-1],first=w[0];
+  const thisWeek=photos.some(p=>weekOf(p.d)===weekOf(today));
+  let h=`<div class="pg-card"><h3>📏 ${L('รอบเอว','Waist')}</h3><div class="pg-sub">${L('วัดระดับสะดือ ตอนเช้าก่อนกินอาหาร จะเทียบได้แม่นที่สุด','Measure at the navel, in the morning before eating, for the fairest comparison')}</div>
+   <div class="pg-row"><input id="pgCm" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="${L('เช่น 82.5','e.g. 82.5')}" value="${last&&last.d===today?last.cm:''}"><span style="align-self:center;color:var(--muted)">cm</span><button type="button" class="pg-btn" id="pgSaveCm">${L('บันทึก','Save')}</button></div>`;
+  if(w.length){const ch=+(last.cm-first.cm).toFixed(1);
+   h+=`<div class="pg-stats"><div class="pg-stat"><b>${last.cm}</b><small>${L('ล่าสุด','Latest')} · ${fmt(last.d)}</small></div><div class="pg-stat"><b>${first.cm}</b><small>${L('เริ่มต้น','Start')} · ${fmt(first.d)}</small></div><div class="pg-stat"><b style="color:${ch<=0?'#2f9e6e':'#e8557a'}">${ch>0?'+':''}${ch}</b><small>cm ${L('เปลี่ยนไป','change')}</small></div></div>`+spark(w.slice(-20))}
+  h+='</div>';
+  h+=`<div class="pg-card"><h3>📸 ${L('รูปความเปลี่ยนแปลง','Progress photos')}</h3><div class="pg-sub">${L('ถ่ายสัปดาห์ละ 1 รูป ท่าเดิม ที่เดิม แสงเดิม แล้วเทียบก่อน–หลัง','One photo a week, same pose, place and light, then compare before and after')}</div>
+   <div class="pg-due${thisWeek?' ok':''}">${thisWeek?'✅ '+L('สัปดาห์นี้ถ่ายแล้ว','This week is done'):'📸 '+L('ยังไม่ได้ถ่ายรูปของสัปดาห์นี้','No photo for this week yet')}</div>
+   <button type="button" class="pg-btn pg-big" id="pgShot">📷 ${L('ถ่าย / เลือกรูปของวันนี้','Take / pick today’s photo')}</button>
+   <input type="file" id="pgFile" accept="image/*" style="display:none">`;
+  if(photos.length>=2){
+   const a=photos.find(p=>p.id===fromId)||photos[0],b=photos.find(p=>p.id===toId)||photos[photos.length-1];
+   const opt=sel=>photos.map(p=>`<option value="${p.id}"${p.id===sel.id?' selected':''}>${fmt(p.d)}</option>`).join('');
+   const days=Math.round((new Date(b.d)-new Date(a.d))/DAY),wa=a.waist??waistNear(a.d),wb=b.waist??waistNear(b.d);
+   h+=`<div class="pg-cmp"><figure><select id="pgFrom">${opt(a)}</select><img src="${a.img}" alt=""><figcaption>${L('ก่อน','Before')} · ${fmt(a.d)}${wa?` · ${wa} cm`:''}</figcaption></figure>
+    <figure><select id="pgTo">${opt(b)}</select><img src="${b.img}" alt=""><figcaption>${L('หลัง','After')} · ${fmt(b.d)}${wb?` · ${wb} cm`:''}</figcaption></figure></div>
+    <div class="pg-diff">${L(`ห่างกัน ${days} วัน`,`${days} days apart`)}${wa&&wb?` · ${L('รอบเอว','waist')} ${wb-wa>0?'+':''}${(wb-wa).toFixed(1)} cm`:''}</div>`}
+  if(photos.length)h+=`<div class="pg-grid">${photos.slice().reverse().map(p=>`<div class="pg-th"><img src="${p.img}" alt=""><small>${fmt(p.d)}</small><button type="button" data-del="${p.id}" aria-label="${L('ลบ','Delete')}">✕</button></div>`).join('')}</div>`;
+  h+=`<div class="pg-note">🔒 ${L('รูปและรอบเอวเก็บไว้ในมือถือเครื่องนี้เท่านั้น ไม่ซิงก์ ไม่ส่งขึ้นคลาวด์ และไม่รวมในไฟล์สำรองข้อมูล ถ้าถอนการติดตั้งแอปหรือล้างข้อมูลแอป รูปจะหายไปด้วย','Photos and waist stay on this phone only: never synced, uploaded or put in backup files. Uninstalling the app or clearing its data deletes them.')}</div></div>`;
+  v.innerHTML=h;
+  v.querySelector('#pgSaveCm').onclick=()=>{const cm=Math.round(Number(v.querySelector('#pgCm').value)*10)/10;
+   if(!(cm>=30&&cm<=250)){toast(L('ใส่รอบเอวเป็นเซนติเมตร (30–250)','Enter your waist in cm (30–250)'));return}
+   const a=waist().filter(x=>x.d!==today);a.push({d:today,cm});a.sort((x,y)=>x.d<y.d?-1:1);saveWaist(a);draw();toast(L(`บันทึกรอบเอว ${cm} cm ✅`,`Waist ${cm} cm saved ✅`))};
+  const file=v.querySelector('#pgFile');v.querySelector('#pgShot').onclick=()=>file.click();
+  file.onchange=()=>{const f=file.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{
+   try{const img=await shrinkImage(r.result,900,.8);const p={id:Date.now(),d:today,img,waist:waistNear(today)};
+    await store.put(p);await load();toId=null;draw();toast(L('เก็บรูปแล้ว 📸','Photo saved 📸'))}
+   catch(e){toast(L('เก็บรูปไม่สำเร็จ: ','Could not save the photo: ')+e.message)}};r.readAsDataURL(f);file.value=''};
+  const fs=v.querySelector('#pgFrom'),ts=v.querySelector('#pgTo');
+  if(fs)fs.onchange=()=>{fromId=Number(fs.value);draw()};if(ts)ts.onchange=()=>{toId=Number(ts.value);draw()};
+  v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!confirm(L('ลบรูปนี้?','Delete this photo?')))return;
+   const id=Number(b.dataset.del);await store.del(id);if(fromId===id)fromId=null;if(toId===id)toId=null;await load();draw()});
+ }
+ const og=window.go;if(og)window.go=function(p){og(p);if(p==='progress'){load().then(draw);window.scrollTo({top:0})}};
+ // entry points next to the weight-plan buttons (Dashboard and the body card on the More page)
+ const entry=()=>{const b=document.createElement('button');b.type='button';b.className='wp-entry';
+  b.innerHTML='<span class="ic">📏</span><span><b>'+L('รอบเอว & รูปก่อน–หลัง','Waist & before/after photos')+'</b><small>'+L('ถ่ายรูปทุกสัปดาห์ เก็บในเครื่องเท่านั้น','A photo a week, kept on this phone only')+'</small></span><em>›</em>';b.onclick=()=>go('progress');return b};
+ function place(){document.querySelectorAll('.wp-entry:not(.pg-entry)').forEach(w=>{if(!w.nextElementSibling||!w.nextElementSibling.matches('.pg-entry')){const e=entry();e.classList.add('pg-entry');w.after(e)}})}
+ place();setTimeout(place,800);
+ window.fwOpenProgress=()=>go('progress');
+})();
+</script>
+<!-- v134 Convenience stores and chains (foods_stores.js): browse 7-Eleven, coffee / bubble tea and fast food,
+ log an item in one tap. The same items also come up in the food-name search. -->
+<style>
+.st7-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.st7-card h3{margin:0;font-size:17px}.st7-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.st7-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}.st7-chips::-webkit-scrollbar{display:none}
+.st7-chips button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:700}
+.st7-chips button.on{background:#2f9e6e;border-color:#2f9e6e;color:#fff}
+.st7-q{width:100%;box-sizing:border-box;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 12px;font:14px inherit;font-family:inherit}
+.st7-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.st7-row:first-of-type{border-top:0}
+.st7-row .tx{flex:1;min-width:0}.st7-row b{display:block;font-size:14px;line-height:1.35}.st7-row small{display:block;color:var(--muted);font-size:12px}
+.st7-add{flex:none;border:0;border-radius:12px;min-width:44px;height:38px;font-weight:800;font-size:18px;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.st7-more{width:100%;margin-top:6px;border:1px dashed var(--line);background:none;color:var(--text);border-radius:12px;padding:9px;font-family:inherit;font-weight:700}
+.st7-note{font-size:11px;color:var(--muted);margin-top:8px}
+</style>
+<script>
+(function(){
+ const R=window.FW_STORE_FOODS;if(!R||!R.length)return;
+ const L=(th,en)=>window.fwL?fwL(th,en):th,EN=()=>(window.fwLang&&fwLang())==='en',EM=window.FW_FOODS_EN||{};
+ const nm=t=>EN()&&EM[t]?EM[t]:t;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const norm=t=>String(t||'').toLowerCase().replace(/[\s\-()·.,/]/g,'');
+ const mealAt=d=>{const h=d.getHours()+d.getMinutes()/60;return h<10.5?'เช้า':h<15?'กลางวัน':h<21?'เย็น':'ของว่าง'};
+ const CATS=[...new Set(R.map(r=>r[1]))],SHOW=5;
+ let cat=CATS[0],q='',all=false;
+ function list(){const qn=norm(q);
+  return R.filter(r=>qn?norm(r[0]+','+r[10]+','+(EM[r[0]]||'')).includes(qn):r[1]===cat)}
+ function log(r){const now=new Date(),id=Date.now();
+  s.foods.unshift({id,createdAt:id,name:r[0],meal:mealAt(now),kcal:r[2],protein:r[3],carbs:r[4],fat:r[5],sugar:r[6],fiber:r[7],sodium:r[8],
+   note:L('ค่าประมาณ · ','Estimate · ')+r[9],date:localDay(now),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),favorite:false});
+  save();toast(L(`บันทึก ${r[0]} · ${r[2]} kcal ✅`,`Logged ${nm(r[0])} · ${r[2]} kcal ✅`))}
+ function draw(){
+  const box=document.getElementById('st7Card');if(!box)return;
+  const a=list(),shown=all||q?a:a.slice(0,SHOW);
+  box.innerHTML=`<h3>🏪 ${L('ร้านสะดวกซื้อ & ร้านดัง','Convenience stores & chains')}</h3><div class="st7-sub">${L('แตะ + เพื่อบันทึกทันที','Tap + to log it right away')}</div>
+   <div class="st7-chips">${CATS.map(c=>`<button type="button" data-c="${esc(c)}" class="${!q&&c===cat?'on':''}">${c==='7-Eleven'?'🏪 ':c.startsWith('กาแฟ')?'☕ ':'🍔 '}${esc(nm(c))}</button>`).join('')}</div>
+   <input class="st7-q" id="st7Q" type="search" placeholder="${L('ค้นหา เช่น ข้าวกล่อง, ไข่มุก, KFC','Search e.g. rice box, boba, KFC')}" value="${esc(q)}">
+   <div id="st7List">${shown.map((r,i)=>`<div class="st7-row"><div class="tx"><b>${esc(nm(r[0]))}</b><small>${esc(r[9])} · ${r[2]} kcal · P ${r[3]} C ${r[4]} F ${r[5]}</small></div><button type="button" class="st7-add" data-i="${R.indexOf(r)}" aria-label="${L('บันทึก','Log')}">+</button></div>`).join('')||`<div class="st7-sub">${L('ไม่พบรายการ','Nothing found')}</div>`}</div>
+   ${!q&&a.length>SHOW?`<button type="button" class="st7-more" id="st7More">${all?L('▲ ย่อ','▲ Less'):L(`▼ ดูทั้งหมด (${a.length})`,`▼ Show all (${a.length})`)}</button>`:''}
+   <div class="st7-note">${L('ค่าโภชนาการเป็นค่าประมาณ ไม่ใช่ข้อมูลทางการของร้าน ถ้ามีฉลากบนกล่อง ใช้ตัวเลขบนฉลากจะแม่นกว่า','Nutrition values are estimates, not the shops’ official figures; a label on the pack is more accurate.')}</div>`;
+  box.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{cat=b.dataset.c;q='';all=false;draw()});
+  box.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>log(R[b.dataset.i]));
+  const m=box.querySelector('#st7More');if(m)m.onclick=()=>{all=!all;draw()};
+  const qi=box.querySelector('#st7Q');qi.oninput=()=>{q=qi.value;const pos=qi.selectionStart;draw();const n=box.querySelector('#st7Q');n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}};
+ }
+ function init(){if(document.getElementById('st7Card'))return;
+  const ref=document.getElementById('rpCard')||document.querySelector('#food .food-repeat-card');if(!ref)return;
+  const c=document.createElement('div');c.className='st7-card';c.id='st7Card';ref.before(c);draw()}
+ init();if(!document.getElementById('st7Card'))setTimeout(init,600);
+})();
+</script>
+<script src="cat_art.js"></script>
+<!-- v135 (1) Mood and hunger after eating: a small bar after a meal is logged asks 😊😐😫 and how hungry you were
+ (stored on the food as f.mood / f.hunger); a weekly card on the Dashboard spots patterns like sweets when stressed.
+ (2) The cat's daily quests on Home: 3 a day; finishing all of them earns a 🐾 paw, spent in the cat shop on
+ accessories worn by the Home cat or poses (animations). Progress lives in s.cat so it follows sync. -->
+<style>
+.md-bar{position:fixed;left:10px;right:10px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:6900;max-width:540px;margin:0 auto;padding:12px 14px;border-radius:18px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-shadow:0 10px 30px #0004;transform:translateY(140%);transition:transform .25s}
+.md-bar.show{transform:none}
+.md-bar b{display:block;font-size:13px;margin-bottom:6px}.md-bar .x{position:absolute;right:8px;top:6px;border:0;background:none;color:var(--muted);font-size:16px}
+.md-opts{display:flex;gap:6px;margin-bottom:8px}.md-opts:last-child{margin-bottom:0}
+.md-opts button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 4px;font-family:inherit;font-size:13px;line-height:1.25}
+.md-opts button.on{border-color:#e887aa;background:#e887aa26;font-weight:800}
+.md-opts button span{display:block;font-size:20px}
+.mi-card,.cq-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.mi-card h3,.cq-card h3{margin:0;font-size:17px}.mi-sub,.cq-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.mi-bars{display:flex;gap:8px}.mi-bars div{flex:1;text-align:center;padding:8px 4px;border-radius:14px;background:var(--panel2)}.mi-bars b{display:block;font-size:18px}.mi-bars small{font-size:11px;color:var(--muted)}
+.mi-tip{margin-top:8px;padding:10px 12px;border-radius:14px;background:#f4c76b22;font-size:13px;line-height:1.5}.mi-tip.good{background:#2f9e6e1c}
+.cq-head{display:flex;align-items:center;gap:8px}.cq-head h3{flex:1}.cq-paws{font-weight:800;font-size:14px;padding:4px 10px;border-radius:999px;background:#f4c76b2e;color:#b7791f}
+.cq-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.cq-row:first-of-type{border-top:0}
+.cq-row .ic{font-size:22px;width:28px;text-align:center}.cq-row .tx{flex:1;min-width:0}.cq-row b{display:block;font-size:14px}.cq-row small{display:block;color:var(--muted);font-size:12px}
+.cq-bar{height:6px;border-radius:9px;background:var(--panel2);margin-top:5px;overflow:hidden}.cq-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#f7bfd0,#e887aa)}
+.cq-row.done b{text-decoration:line-through;opacity:.7}.cq-row .ok{font-size:18px}
+.cq-shopbtn{width:100%;margin-top:10px;border:0;border-radius:14px;padding:11px;font-weight:800;font-family:inherit;background:linear-gradient(135deg,#bcd7f5,#b49cf0);color:#1d1b2b}
+.cq-shop{position:fixed;inset:0;z-index:6500;background:#0007;display:none;align-items:flex-end;justify-content:center}.cq-shop.show{display:flex}
+.cq-shop .box{width:100%;max-width:560px;max-height:84vh;overflow-y:auto;background:var(--panel);color:var(--text);border-radius:24px 24px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.cq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.cq-item{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:16px;padding:10px 6px;text-align:center;font-family:inherit}
+.cq-item .e{font-size:30px;display:block}.cq-item b{display:block;font-size:12px;margin-top:2px}.cq-item small{font-size:11px;color:var(--muted)}
+.cq-item.wear{border-color:#2f9e6e;background:#2f9e6e1c}.cq-item.lock{opacity:.55}
+#home .welcome .cat .fw-catsvg{width:1.5em;height:auto;display:block;overflow:visible}
+#home .welcome .cat:has(.fw-catsvg){filter:none}
+.fw-catsvg .tail{animation:catTail 2.4s ease-in-out infinite}
+@keyframes catTail{0%,100%{transform:rotate(0)}50%{transform:rotate(-9deg)}}
+.cq-item .fw-catsvg{width:58px;height:auto;display:block;margin:0 auto}
+#home .welcome .cat.pose-dance{animation:catDance 1.1s ease-in-out infinite!important}
+#home .welcome .cat.pose-spin{animation:catSpin 2.4s linear infinite!important}
+#home .welcome .cat.pose-bounce{animation:catBounce .9s ease-in-out infinite!important;transform-origin:50% 100%}
+@keyframes catDance{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg) translateY(-4px)}}
+@keyframes catSpin{to{transform:rotate(360deg)}}
+@keyframes catBounce{0%,100%{transform:translateY(0) scale(1.04,.96)}45%{transform:translateY(-16px) scale(.97,1.04)}}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const today=()=>localDay();
+ // ================= (1) mood & hunger =================
+ const MOODS=[['good','😊',L('สบายใจ','Happy')],['ok','😐',L('เฉย ๆ','Okay')],['bad','😫',L('เครียด/เหนื่อย','Stressed')]];
+ const HUNGER=[['low','🙂',L('ไม่หิว','Not hungry')],['mid','😋',L('หิวพอดี','Hungry')],['high','🤤',L('หิวมาก','Starving')]];
+ let lastTop=null,pending=[],hideT=0;
+ const bar=document.createElement('div');bar.className='md-bar';bar.id='mdBar';document.body.appendChild(bar);
+ function close(){bar.classList.remove('show');pending=[]}
+ function drawBar(){
+  const f=s.foods.find(x=>x.id===pending[0]);if(!f){close();return}
+  const opt=(list,key)=>list.map(([v,e,t])=>`<button type="button" data-${key}="${v}" class="${f[key]===v?'on':''}"><span>${e}</span>${esc(t)}</button>`).join('');
+  bar.innerHTML=`<button type="button" class="x" aria-label="close">✕</button><b>${L('กินแล้วรู้สึกยังไง?','How do you feel after eating?')} · ${esc(f.name.slice(0,28))}${pending.length>1?` +${pending.length-1}`:''}</b>
+   <div class="md-opts">${opt(MOODS,'mood')}</div><b>${L('ก่อนกินหิวแค่ไหน?','How hungry were you before?')}</b><div class="md-opts">${opt(HUNGER,'hunger')}</div>`;
+  bar.querySelector('.x').onclick=close;
+  bar.querySelectorAll('button[data-mood],button[data-hunger]').forEach(b=>b.onclick=()=>{
+   const k=b.dataset.mood?'mood':'hunger',v=b.dataset.mood||b.dataset.hunger;
+   pending.forEach(id=>{const x=s.foods.find(y=>y.id===id);if(x)x[k]=v});
+   const done=pending.every(id=>{const x=s.foods.find(y=>y.id===id);return !x||(x.mood&&x.hunger)});
+   save();if(done){toast(L('จดไว้แล้ว ขอบคุณนะ 🐾','Noted, thanks 🐾'));close()}else{drawBar();arm()}});
+ }
+ function arm(){clearTimeout(hideT);hideT=setTimeout(close,15000)}
+ // new foods logged just now (by any form, voice, store card, repeat meals …) without a mood yet
+ function watchNew(){
+  const top=s.foods[0]&&s.foods[0].id;
+  if(lastTop===null){lastTop=top;return}
+  if(top===lastTop)return;
+  const fresh=[];for(const f of s.foods){if(f.id===lastTop)break;if(!f.mood&&Date.now()-Number(f.createdAt||f.id)<60000)fresh.push(f.id)}
+  lastTop=top;if(!fresh.length)return;
+  pending=fresh;drawBar();bar.classList.add('show');arm();
+ }
+ // weekly insight card (Dashboard)
+ const SWEET=/หวาน|เค้ก|ไอศกรีม|ไอติม|โดนัท|ช็อก|ขนม|ชานม|ไข่มุก|ชาเย็น|ชาไทย|โกโก้|น้ำอัดลม|โค้ก|เป๊ปซี่|ลูกอม|คุกกี้|บิงซู|ฟราปเป้|มอคค่า|cake|donut|ice cream|chocolate|boba/i;
+ const sweet=f=>Number(f.sugar||0)>=15||SWEET.test(f.name||'');
+ const hourOf=f=>{const d=new Date(Number(f.createdAt||f.id));return d.getHours()};
+ function insights(){
+  const since=new Date();since.setDate(since.getDate()-6);const from=localDay(since);
+  const a=s.foods.filter(f=>foodDay(f)>=from&&(f.mood||f.hunger));
+  const cnt=k=>a.filter(f=>f.mood===k).length;
+  const tips=[];
+  if(a.length>=5){
+   const bad=a.filter(f=>f.mood==='bad'),bs=bad.filter(sweet).length,allS=a.filter(sweet).length;
+   if(bad.length>=3&&bs>=2&&bs/bad.length>=allS/a.length+.15)tips.push(['',L(`🍰 กินของหวานตอนเครียดบ่อย (${bs} จาก ${bad.length} มื้อที่เครียด) ลองพักสั้น ๆ เดินเล่น หรือดื่มน้ำเย็นก่อนนะ`,`🍰 Sweets often come with stress (${bs} of ${bad.length} stressed meals). Try a short walk or a glass of water first`)]);
+   const low=a.filter(f=>f.hunger==='low').length;
+   if(low>=3)tips.push(['',L(`🙂 กินตอนไม่หิว ${low} ครั้ง ลองถามตัวเองก่อนกินว่าหิวจริงหรือแค่อยากกิน`,`🙂 Ate when not hungry ${low} times. Before eating, ask: hungry, or just craving?`)]);
+   const high=a.filter(f=>f.hunger==='high').length;
+   if(high>=3)tips.push(['',L(`🤤 หิวมากก่อนมื้อ ${high} ครั้ง ลองเพิ่มของว่างโปรตีน เช่น ไข่ต้ม นม หรือถั่ว ระหว่างมื้อ จะได้ไม่กินเยอะเกิน`,`🤤 Starving before ${high} meals. A protein snack between meals (egg, milk, nuts) helps avoid overeating`)]);
+   const late=bad.filter(f=>hourOf(f)>=21).length;
+   if(late>=2)tips.push(['',L(`🌙 มื้อดึกตอนเครียด ${late} ครั้ง ลองชาอุ่น ๆ หรือนอนเร็วขึ้นสักนิด`,`🌙 ${late} late-night meals when stressed. Try warm tea or an earlier night`)]);
+   const avg=x=>x.length?x.reduce((t,f)=>t+Number(f.kcal||0),0)/x.length:0,good=a.filter(f=>f.mood==='good');
+   if(bad.length>=2&&good.length>=2&&avg(bad)>avg(good)*1.25)tips.push(['',L(`📈 ตอนเครียดกินต่อมื้อมากกว่าตอนสบายใจ ~${Math.round(avg(bad)-avg(good))} kcal`,`📈 Stressed meals average ~${Math.round(avg(bad)-avg(good))} kcal more than happy ones`)]);
+   if(!tips.length&&cnt('good')>=a.length*.6)tips.push(['good',L('😊 สัปดาห์นี้กินแบบสบายใจเป็นส่วนใหญ่ เยี่ยมมาก!','😊 Mostly happy meals this week, great!')]);
+   if(!tips.length)tips.push(['good',L('ยังไม่เห็นรูปแบบที่น่าห่วง จดต่อไปเรื่อย ๆ นะ','No worrying pattern yet, keep noting')]);
+  }
+  return {n:a.length,good:cnt('good'),ok:cnt('ok'),bad:cnt('bad'),tips};
+ }
+ function drawInsight(){
+  let c=document.getElementById('miCard');
+  if(!c){const ref=document.querySelector('#dashboard .dashboard-hero');if(!ref)return;c=document.createElement('div');c.className='mi-card';c.id='miCard';
+   let after=ref;while(after.nextElementSibling&&after.nextElementSibling.classList.contains('wp-entry'))after=after.nextElementSibling;after.after(c)}
+  const r=insights();
+  c.innerHTML=`<h3>🧠 ${L('อารมณ์กับการกิน · 7 วัน','Mood & eating · 7 days')}</h3><div class="mi-sub">${L('จากที่จดหลังกินแต่ละมื้อ','From what you noted after meals')}</div>`
+   +(r.n?`<div class="mi-bars">${MOODS.map(([k,e,t])=>`<div><b>${e} ${r[k]}</b><small>${esc(t)}</small></div>`).join('')}</div>`:'')
+   +(r.n>=5?r.tips.map(([cl,t])=>`<div class="mi-tip ${cl}">${esc(t)}</div>`).join('')
+    :`<div class="mi-tip good">${L(`จดอารมณ์หลังกินอีก ${5-r.n} มื้อ แล้วจะเห็นสรุปของสัปดาห์ (หลังบันทึกอาหาร จะมีแถบเล็ก ๆ ถามด้านล่าง)`,`Note your mood after ${5-r.n} more meals to see the weekly summary (a small bar asks after you log food)`)}</div>`);
+ }
+ // ================= (2) the cat's daily quests =================
+ const cat=()=>(s.cat=s.cat||{paws:0,owned:[],wear:'',pose:'',done:{}});
+ const QUESTS={
+  water:{ic:'💧',t:()=>L('ดื่มน้ำครบเป้า','Drink your water goal'),v:()=>waterOn(today()),g:()=>waterGoal(),u:'ml'},
+  steps:{ic:'👣',t:()=>L('เดินครบ 6,000 ก้าว','Walk 6,000 steps'),v:()=>window.fwStepsOn?fwStepsOn(today()):0,g:()=>6000,u:L('ก้าว','steps')},
+  meals:{ic:'🍱',t:()=>L('บันทึกอาหารครบ 3 มื้อ','Log 3 meals'),v:()=>new Set(s.foods.filter(f=>foodDay(f)===today()&&['เช้า','กลางวัน','เย็น'].includes(f.meal)).map(f=>f.meal)).size,g:()=>3,u:L('มื้อ','meals')},
+  move:{ic:'🏃',t:()=>L('ขยับร่างกาย 20 นาที','Move for 20 minutes'),v:()=>todayMoveMin(),g:()=>20,u:L('นาที','min')},
+  mood:{ic:'😊',t:()=>L('จดอารมณ์หลังกิน 2 มื้อ','Note your mood after 2 meals'),v:()=>s.foods.filter(f=>foodDay(f)===today()&&f.mood).length,g:()=>2,u:L('มื้อ','meals')},
+  protein:{ic:'🥚',t:()=>L('กินโปรตีนครบ 60 g','Eat 60 g of protein'),v:()=>Math.round(s.foods.filter(f=>foodDay(f)===today()).reduce((t,f)=>t+Number(f.protein||0),0)),g:()=>60,u:'g'}};
+ const ROTATE=['steps','meals','move','mood','protein'];
+ // water every day + 2 others picked by the date, so every phone shows the same three
+ function todays(){const d=today(),n=[...d].reduce((a,c)=>a*31+c.charCodeAt(0)>>>0,7);const i=n%ROTATE.length;let j=(Math.floor(n/7))%ROTATE.length;if(j===i)j=(j+1)%ROTATE.length;return ['water',ROTATE[i],ROTATE[j]]}
+ const SHOP=[
+  ['bow','🎀',L('โบว์','Bow'),'head',2],['flower','🌸',L('ดอกไม้','Flower'),'side',2],['scarf','🧣',L('ผ้าพันคอ','Scarf'),'neck',3],
+  ['shades','🕶️',L('แว่นกันแดด','Sunglasses'),'face',4],['tophat','🎩',L('หมวกสูง','Top hat'),'head',5],['phones','🎧',L('หูฟัง','Headphones'),'head',6],
+  ['santa','🎅',L('หมวกซานต้า','Santa hat'),'head',4],['student','🎒',L('ชุดนักเรียน','School uniform'),'neck',5],
+  ['medal','🏅',L('เหรียญทอง','Gold medal'),'neck',8],['crown','👑',L('มงกุฎ','Crown'),'head',10],
+  ['bounce','⤴️',L('ท่ากระโดดโบกมือ','Bounce & wave'),'pose',3],['dance','💃',L('ท่าเต้นชูมือ','Dance pose'),'pose',6],['spin','🌀',L('ท่าหมุนตัว','Spin pose'),'pose',9]];
+ // drawn cat (cat_art.js); falls back to the emoji if the art file didn't load
+ const art=o=>window.FWCatArt?FWCatArt.svg(o):'';
+ function dressCat(){const el=document.querySelector('#home .welcome .cat');if(!el)return;const c=cat();
+  const key=(c.wear||'')+'|'+(c.pose||'');
+  if(window.FWCatArt&&el.dataset.drawn!==key){el.innerHTML=art({wear:c.wear,pose:c.pose});el.dataset.drawn=key;el.setAttribute('aria-label','MeowFit')}
+  el.classList.remove('pose-dance','pose-spin','pose-bounce');if(c.pose)el.classList.add('pose-'+c.pose)}
+ function award(){const c=cat(),d=today();if(c.done[d])return;
+  if(todays().every(k=>QUESTS[k].v()>=QUESTS[k].g())){c.done[d]=1;c.paws=(c.paws||0)+1;
+   const keys=Object.keys(c.done).sort();if(keys.length>60)keys.slice(0,keys.length-60).forEach(k=>delete c.done[k]);
+   save();toast(L('ทำภารกิจครบแล้ว! ได้ 🐾 1 อุ้งเท้า ไปแต่งตัวให้แมวกัน','All quests done! +1 🐾 paw, dress up your cat'));
+   const el=document.querySelector('#home .welcome .cat');if(el){el.classList.remove('fw-hop');void el.offsetWidth;el.classList.add('fw-hop')}}}
+ function drawQuests(){
+  let c=document.getElementById('cqCard');
+  if(!c){const w=document.querySelector('#home .welcome');if(!w)return;c=document.createElement('div');c.className='cq-card';c.id='cqCard';w.after(c)}
+  const k=todays(),cc=cat(),allDone=!!cc.done[today()];
+  c.innerHTML=`<div class="cq-head"><h3>🐾 ${L('ภารกิจของแมววันนี้','Cat’s quests today')}</h3><span class="cq-paws">🐾 ${cc.paws||0}</span></div>
+   <div class="cq-sub">${allDone?L('ครบทั้ง 3 ภารกิจแล้ว พรุ่งนี้มีภารกิจใหม่นะ ✨','All 3 done, new quests tomorrow ✨'):L('ทำครบ 3 อย่าง ได้ 🐾 1 อุ้งเท้า ไว้แลกของแต่งแมว','Finish all 3 to earn a 🐾 paw for cat outfits')}</div>`
+   +k.map(id=>{const q=QUESTS[id],v=q.v(),g=q.g(),ok=v>=g;
+    return `<div class="cq-row${ok?' done':''}"><span class="ic">${q.ic}</span><div class="tx"><b>${esc(q.t())}</b><small>${Math.min(v,g).toLocaleString()} / ${g.toLocaleString()} ${esc(q.u)}</small><div class="cq-bar"><i style="width:${Math.min(100,v/g*100)}%"></i></div></div><span class="ok">${ok?'✅':''}</span></div>`}).join('')
+   +`<button type="button" class="cq-shopbtn" id="cqShop">🎁 ${L('ร้านของแมว · แต่งตัว & ท่าทาง','Cat shop · outfits & poses')}</button>`;
+  c.querySelector('#cqShop').onclick=openShop;
+ }
+ const sheet=document.createElement('div');sheet.className='cq-shop';sheet.innerHTML='<div class="box"></div>';document.body.appendChild(sheet);
+ sheet.addEventListener('click',e=>{if(e.target===sheet)sheet.classList.remove('show')});
+ function openShop(){drawShop();sheet.classList.add('show')}
+ function drawShop(){const c=cat(),box=sheet.querySelector('.box');
+  box.innerHTML=`<div class="cq-head"><h3>🎁 ${L('ร้านของแมว','Cat shop')}</h3><span class="cq-paws">🐾 ${c.paws||0}</span><button type="button" class="rc-icon" id="cqX">✕</button></div>
+   <div class="cq-sub">${L('แตะเพื่อแลกด้วยอุ้งเท้า 🐾 ของที่มีแล้วแตะเพื่อใส่หรือถอด','Tap to buy with 🐾 paws; tap something you own to wear or remove it')}</div>
+   <div class="cq-grid">${SHOP.map(([id,e,t,slot,price])=>{const own=(c.owned||[]).includes(id),on=c.wear===id||c.pose===id;
+    const pic=window.FWCatArt?art(slot==='pose'?{pose:id==='spin'?'':id,wear:c.wear}:{wear:id,pose:c.pose}):`<span class="e">${e}</span>`;
+    return `<button type="button" class="cq-item${on?' wear':''}${!own&&(c.paws||0)<price?' lock':''}" data-id="${id}">${pic}<b>${esc(t)}</b><small>${on?L('ใส่อยู่','Wearing'):own?L('มีแล้ว','Owned'):'🐾 '+price}</small></button>`}).join('')}</div>`;
+  box.querySelector('#cqX').onclick=()=>sheet.classList.remove('show');
+  box.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const it=SHOP.find(x=>x[0]===b.dataset.id),[id,e,t,slot,price]=it;
+   c.owned=c.owned||[];
+   if(!c.owned.includes(id)){if((c.paws||0)<price){toast(L(`ต้องใช้ 🐾 ${price} · มี ${c.paws||0}`,`Needs 🐾 ${price} · you have ${c.paws||0}`));return}
+    c.paws-=price;c.owned.push(id);toast(L(`ได้ ${t} แล้ว! ${e}`,`Got ${t}! ${e}`))}
+   if(slot==='pose')c.pose=c.pose===id?'':id;else c.wear=c.wear===id?'':id;
+   save();drawShop();dressCat();drawQuests()});
+ }
+ // ---- hooks ----
+ function tick(){try{watchNew()}catch(e){}try{award()}catch(e){}try{drawQuests();dressCat()}catch(e){}try{drawInsight()}catch(e){}}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);tick();return o};
+ tick();setTimeout(tick,1500);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+ window.fwCat={quests:todays,cat};
+})();
+</script>
+<!-- v136 (7) Export to CSV for Excel / Google Sheets: foods, a daily summary and weight, for a chosen period.
+ (8) Monthly summary on the Dashboard: one calendar month at a time against the month before, with PDF and CSV. -->
+<style>
+.ex-card,.mo-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.ex-card h3,.mo-card h3{margin:0;font-size:17px}.ex-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.ex-chips{display:flex;gap:6px;flex-wrap:wrap}.ex-chips button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:700}
+.ex-chips button.on{background:#2f9e6e;border-color:#2f9e6e;color:#fff}
+.ex-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.ex-btns button,.mo-acts button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:10px 4px;font-family:inherit;font-weight:800;font-size:13px;line-height:1.3}
+.ex-btns button span{display:block;font-size:20px}
+.mo-head{display:flex;align-items:center;gap:6px}.mo-head h3{flex:1;text-align:center}
+.mo-head button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;width:38px;height:36px;font-size:16px}
+.mo-head button:disabled{opacity:.35}
+.mo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mo-t{padding:10px 12px;border-radius:14px;background:var(--panel2)}.mo-t small{display:block;font-size:11px;color:var(--muted)}.mo-t b{font-size:19px}.mo-t em{font-style:normal;font-size:11px;font-weight:800;margin-left:4px}
+.mo-t em.up{color:#e8557a}.mo-t em.down{color:#2f9e6e}.mo-t em.eq{color:var(--muted)}
+.mo-sec{margin-top:12px;font-size:13px}.mo-sec b{display:block;margin-bottom:4px}
+.mo-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;max-width:280px}.mo-cal i{aspect-ratio:1;border-radius:6px;background:var(--panel2)}.mo-cal span{font-size:10px;color:var(--muted);text-align:center}
+.mo-cal i.l{background:#e887aa66}.mo-cal i.g{background:#2f9e6e}.mo-cal i.o{background:#f59f6b}.mo-cal i.x{visibility:hidden}
+.mo-key{font-size:11px;color:var(--muted);margin-top:4px}
+.mo-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th,EN=()=>(window.fwLang&&fwLang())==='en';
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const n0=v=>Math.round(v).toLocaleString(),n1=v=>(Math.round(v*10)/10).toLocaleString();
+ const addD=(d,k)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+k);return localDay(x)};
+ const target=()=>{const T=typeof bodyTargets==='function'?bodyTargets():null;return (window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||null};
+ const steps=d=>window.fwStepsOn?Number(fwStepsOn(d))||0:0;
+ // ---------- CSV ----------
+ const cell=v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+ const csv=rows=>'﻿'+rows.map(r=>r.map(cell).join(',')).join('\r\n'); // BOM: Excel reads Thai correctly
+ function saveFile(name,text){
+  if(window.FoodWellFiles){toast(FoodWellFiles.saveText(name,text));return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);toast(L('ดาวน์โหลดไฟล์แล้ว: ','Downloaded: ')+name)}
+ const MOOD={good:'😊',ok:'😐',bad:'😫'},HUNG={low:L('ไม่หิว','not hungry'),mid:L('หิวพอดี','hungry'),high:L('หิวมาก','starving')};
+ function foodsCsv(days){const set=new Set(days);
+  const a=s.foods.filter(f=>set.has(foodDay(f))).sort((x,y)=>(foodDay(x)+(x.time||'')).localeCompare(foodDay(y)+(y.time||'')));
+  return csv([[L('วันที่','date'),L('เวลา','time'),L('มื้อ','meal'),L('อาหาร','food'),'kcal',L('โปรตีน g','protein g'),L('คาร์บ g','carbs g'),L('ไขมัน g','fat g'),L('ใยอาหาร g','fiber g'),L('น้ำตาล g','sugar g'),L('โซเดียม mg','sodium mg'),L('อารมณ์','mood'),L('ความหิว','hunger'),L('หมายเหตุ','note')],
+   ...a.map(f=>[foodDay(f),f.time||'',f.meal||'',f.name,f.kcal||0,f.protein||0,f.carbs||0,f.fat||0,f.fiber||0,f.sugar||0,f.sodium||0,MOOD[f.mood]||'',HUNG[f.hunger]||'',f.note||''])])}
+ function dailyCsv(days){const t=target();
+  return csv([[L('วันที่','date'),'kcal',L('เป้า kcal','target kcal'),L('โปรตีน g','protein g'),L('คาร์บ g','carbs g'),L('ไขมัน g','fat g'),L('น้ำตาล g','sugar g'),L('โซเดียม mg','sodium mg'),L('น้ำ ml','water ml'),L('ขยับ นาที','move min'),L('ก้าว','steps'),L('น้ำหนัก กก.','weight kg'),L('จำนวนรายการอาหาร','food items')],
+   ...days.map(d=>{const n=nutrientsOn(d),w=(s.weightLog||[]).find(x=>x.date===d);
+    return [d,Math.round(kcalOn(d)),t||'',n1(n.protein||0),n1(n.carbs||0),n1(n.fat||0),n1(n.sugar||0),Math.round(n.sodium||0),waterOn(d),moveMinOn(d),steps(d)||'',w?w.kg:'',s.foods.filter(f=>foodDay(f)===d).length]})].map(r=>r.map(v=>typeof v==='string'?v.replace(/,/g,''):v)))}
+ function weightCsv(days){const set=new Set(days);
+  return csv([[L('วันที่','date'),L('น้ำหนัก กก.','weight kg')],...(s.weightLog||[]).filter(x=>set.has(x.date)).sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[x.date,x.kg])])}
+ function firstDay(){const ds=[...s.foods.map(foodDay),...(s.weightLog||[]).map(x=>x.date),...(s.waterLog||[]).map(x=>typeof entryDay==='function'?entryDay(x):x.date)].filter(Boolean).sort();return ds[0]||localDay()}
+ const range=(a,b)=>{const out=[];for(let d=a;d<=b&&out.length<4000;d=addD(d,1))out.push(d);return out};
+ let exP=30;
+ function exDays(){const t=localDay();return exP?range(addD(t,-(exP-1)),t):range(firstDay(),t)}
+ function drawExport(){const box=document.getElementById('exCard');if(!box)return;
+  box.innerHTML=`<h3>📤 ${L('ส่งออกข้อมูล (CSV)','Export data (CSV)')}</h3><div class="ex-sub">${L('เปิดได้ใน Excel, Google Sheets หรือส่งให้นักโภชนาการ · ไฟล์ไปอยู่ในโฟลเดอร์ Download','Opens in Excel or Google Sheets, or send it to your dietitian · saved to the Download folder')}</div>
+   <div class="ex-chips">${[[30,L('30 วัน','30 days')],[90,L('90 วัน','90 days')],[365,L('1 ปี','1 year')],[0,L('ทั้งหมด','All')]].map(([v,t])=>`<button type="button" data-p="${v}" class="${v===exP?'on':''}">${t}</button>`).join('')}</div>
+   <div class="ex-btns"><button type="button" data-x="foods"><span>🍱</span>${L('รายการอาหาร','Foods')}</button><button type="button" data-x="daily"><span>📅</span>${L('สรุปรายวัน','Daily summary')}</button><button type="button" data-x="weight"><span>⚖️</span>${L('น้ำหนัก','Weight')}</button></div>`;
+  box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{exP=Number(b.dataset.p);drawExport()});
+  box.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>exportKind(b.dataset.x,exDays(),exP?exP+'d':'all'))}
+ function exportKind(kind,days,tag){
+  const f={foods:foodsCsv,daily:dailyCsv,weight:weightCsv}[kind];
+  if(kind==='weight'&&!(s.weightLog||[]).some(x=>days.includes(x.date))){toast(L('ยังไม่มีน้ำหนักในช่วงนี้','No weight in this period yet'));return}
+  saveFile(`MeowFit-${kind}-${tag}-${localDay()}.csv`,f(days))}
+ // ---------- monthly summary ----------
+ let mo=0;
+ const monthDays=off=>{const n=new Date();const y=n.getFullYear(),m=n.getMonth()+off,first=new Date(y,m,1),last=new Date(y,m+1,0),today=localDay();
+  return {first,days:range(localDay(first),localDay(last)).filter(d=>d<=today)}};
+ function stats(days){const t=target();
+  const logged=days.filter(d=>s.foods.some(f=>foodDay(f)===d)),kc=logged.map(kcalOn);
+  const avgK=kc.length?kc.reduce((a,b)=>a+b,0)/kc.length:0;
+  const onT=t?logged.filter(d=>{const k=kcalOn(d);return k>=t*.9&&k<=t*1.1}).length:null;
+  const under=t?logged.filter(d=>kcalOn(d)<t*.9).length:null;
+  const w=(s.weightLog||[]).filter(x=>days.includes(x.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  const wd=days.map(waterOn).filter(v=>v>0),st=days.map(steps).filter(v=>v>0);
+  let best=0,run=0;days.forEach(d=>{if(logged.includes(d)){run++;best=Math.max(best,run)}else run=0});
+  const freq={};s.foods.filter(f=>days.includes(foodDay(f))).forEach(f=>{freq[f.name]=(freq[f.name]||0)+1});
+  const moods={good:0,ok:0,bad:0};s.foods.filter(f=>days.includes(foodDay(f))&&f.mood).forEach(f=>moods[f.mood]=(moods[f.mood]||0)+1);
+  return {t,days:days.length,logged,avgK,onT,under,wStart:w[0],wEnd:w[w.length-1],water:wd.length?wd.reduce((a,b)=>a+b,0)/wd.length:0,
+   move:days.reduce((a,d)=>a+moveMinOn(d),0),steps:st.length?st.reduce((a,b)=>a+b,0)/st.length:0,best,
+   top:Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3),moods}}
+ // arrow vs last month; lowerIsGood flips the colour (kcal, weight)
+ const delta=(a,b,lowerIsGood,fmt=n0)=>{if(!b)return '';const d=a-b;if(Math.abs(d)<0.05)return '<em class="eq">=</em>';
+  const good=lowerIsGood?d<0:d>0;return `<em class="${good?'down':'up'}">${d>0?'▲':'▼'}${fmt(Math.abs(d))}</em>`};
+ function drawMonth(){const box=document.getElementById('moCard');if(!box)return;
+  const {first,days}=monthDays(mo),cur=stats(days),prev=stats(monthDays(mo-1).days);
+  const name=first.toLocaleDateString(EN()?'en-GB':'th-TH',{month:'long',year:'numeric'});
+  const wCh=cur.wStart&&cur.wEnd&&cur.wStart!==cur.wEnd?cur.wEnd.kg-cur.wStart.kg:null;
+  const lead=(first.getDay()+6)%7,t=cur.t;
+  const cal=(EN()?['M','T','W','T','F','S','S']:['จ','อ','พ','พฤ','ศ','ส','อา']).map(x=>`<span>${x}</span>`).join('')+[...Array(lead)].map(()=>'<i class="x"></i>').join('')+days.map(d=>{const k=kcalOn(d),l=cur.logged.includes(d);
+   return `<i class="${!l?'':t&&k>=t*.9&&k<=t*1.1?'g':t&&k>t*1.1?'o':'l'}" title="${d}"></i>`}).join('');
+  const tile=(lab,val,extra='')=>`<div class="mo-t"><small>${lab}</small><b>${val}</b>${extra}</div>`;
+  box.innerHTML=`<div class="mo-head"><button type="button" id="moPrev" aria-label="prev">◀</button><h3>📅 ${esc(name)}</h3><button type="button" id="moNext" aria-label="next"${mo>=0?' disabled':''}>▶</button></div>
+   <div class="ex-sub" style="text-align:center">${L('สรุปรายเดือน · เทียบกับเดือนก่อน','Monthly summary · vs the month before')}</div>
+   ${cur.logged.length?`<div class="mo-grid">
+    ${tile(L('วันที่บันทึกอาหาร','Days logged'),`${cur.logged.length}/${cur.days}`,delta(cur.logged.length,prev.logged.length,false))}
+    ${tile(L('พลังงานเฉลี่ย/วัน','Avg kcal/day'),n0(cur.avgK),delta(cur.avgK,prev.avgK,true))}
+    ${t?tile(L('วันที่ใกล้เป้า ±10%','Days on target ±10%'),`${cur.onT} ${L('วัน','d')}`,delta(cur.onT,prev.onT,false)):''}
+    ${tile(L('น้ำหนักเปลี่ยน','Weight change'),wCh==null?'–':`${wCh>0?'+':''}${n1(wCh)} ${L('กก.','kg')}`)}
+    ${tile(L('น้ำเฉลี่ย/วัน','Avg water/day'),`${n0(cur.water)} ml`,delta(cur.water,prev.water,false))}
+    ${tile(L('ขยับรวม','Total movement'),`${n0(cur.move)} ${L('นาที','min')}`,delta(cur.move,prev.move,false))}
+    ${cur.steps?tile(L('ก้าวเฉลี่ย/วัน','Avg steps/day'),n0(cur.steps),delta(cur.steps,prev.steps,false)):''}
+    ${tile(L('บันทึกต่อเนื่องยาวสุด','Longest streak'),`${cur.best} ${L('วัน','d')}`)}
+   </div>
+   <div class="mo-sec"><b>${L('ปฏิทินเดือนนี้','This month')}</b><div class="mo-cal">${cal}</div><div class="mo-key">${t?L('🟩 ใกล้เป้า · 🟧 เกินเป้า · 🩷 บันทึกแล้ว (ต่ำกว่าเป้า)','🟩 on target · 🟧 over · 🩷 logged (under)'):L('🩷 วันที่บันทึกอาหาร','🩷 days with food logged')}</div></div>
+   ${cur.top.length?`<div class="mo-sec"><b>${L('กินบ่อยที่สุด','Most eaten')}</b>${cur.top.map(([n,c],i)=>`${['🥇','🥈','🥉'][i]} ${esc(n)} · ${c} ${L('ครั้ง','×')}`).join('<br>')}</div>`:''}
+   ${cur.moods.good+cur.moods.ok+cur.moods.bad?`<div class="mo-sec"><b>${L('อารมณ์หลังกิน','Mood after eating')}</b>😊 ${cur.moods.good} · 😐 ${cur.moods.ok} · 😫 ${cur.moods.bad}</div>`:''}
+   <div class="mo-acts"><button type="button" id="moPdf">📄 PDF ${L('เดือนนี้','this month')}</button><button type="button" id="moCsv">📤 CSV ${L('เดือนนี้','this month')}</button></div>`
+   :`<div class="ex-sub" style="text-align:center;margin-top:12px">${L('ยังไม่มีบันทึกอาหารในเดือนนี้','No food logged this month')}</div>`}`;
+  box.querySelector('#moPrev').onclick=()=>{mo--;drawMonth()};box.querySelector('#moNext').onclick=()=>{if(mo<0){mo++;drawMonth()}};
+  const pdf=box.querySelector('#moPdf');if(pdf)pdf.onclick=()=>{if(!window.FWReport){toast('PDF ไม่พร้อม');return}const html=FWReport.build(days),title=`MeowFit-${days[0].slice(0,7)}`;
+   if(window.FoodWellPrint){FoodWellPrint.print(html,title);toast(L('กำลังเปิดหน้าพิมพ์ / บันทึก PDF…','Opening print / save as PDF…'))}
+   else{const w=window.open('','_blank');if(!w){toast(L('เบราว์เซอร์บล็อกหน้าต่างใหม่','The browser blocked the new window'));return}w.document.write(html);w.document.close();setTimeout(()=>w.print(),600)}};
+  const c=box.querySelector('#moCsv');if(c)c.onclick=()=>exportKind('daily',days,days[0].slice(0,7));
+ }
+ function init(){const ref=document.getElementById('rptCard');if(!ref)return false;
+  if(!document.getElementById('moCard')){const m=document.createElement('div');m.className='mo-card';m.id='moCard';ref.before(m)}
+  if(!document.getElementById('exCard')){const e=document.createElement('div');e.className='ex-card';e.id='exCard';ref.after(e)}
+  drawMonth();drawExport();return true}
+ if(!init())setTimeout(init,800);
+ const og=window.go;if(og)window.go=function(p){og(p);if(p==='dashboard'){drawMonth();drawExport()}};
+ window.FWExport={foodsCsv,dailyCsv,weightCsv};
+})();
+</script>
 <!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
 <script src="ingredients_th.js"></script>
 <style>
@@ -2256,8 +2709,9 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const fmtD=(d,o)=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',o||{day:'numeric',month:'short',year:'2-digit'});
  const n0=v=>Math.round(v).toLocaleString(),n1=v=>(Math.round(v*10)/10).toLocaleString();
  function build(days){const h=build0(days);return window.fwT?fwT(h):h}
+ // days: a number of days back from today, or a list of YYYY-MM-DD dates (the monthly summary passes a month)
  function build0(days){
-  const list=[...Array(days)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1)+i);return localDay(d)});
+  const list=Array.isArray(days)?days:[...Array(days)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1)+i);return localDay(d)});days=list.length;
   const rows=list.map(d=>({d,kcal:kcalOn(d),n:nutrientsOn(d),water:waterOn(d),move:moveMinOn(d),foods:s.foods.filter(f=>foodDay(f)===d).length}));
   const logged=rows.filter(r=>r.foods>0),avg=k=>logged.length?logged.reduce((a,r)=>a+(k==='kcal'?r.kcal:r.n[k]),0)/logged.length:0;
   const wd=rows.filter(r=>r.water>0),avgWater=wd.length?wd.reduce((a,r)=>a+r.water,0)/wd.length:0,moveTotal=rows.reduce((a,r)=>a+r.move,0);
@@ -4554,7 +5008,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function merge(json){let d={};try{d=JSON.parse(json||'{}')}catch(e){}s.stepsLog=s.stepsLog||{};let ch=false;
   for(const k in d){const v=Number(d[k])||0;if(v>(s.stepsLog[k]||0)){s.stepsLog[k]=v;ch=true}}return ch}
  const hcDay=d=>(s.hcDays||{})[d]||{};
- const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Math.max(Number((s.stepsLog||{})[d]||0),Number(hcDay(d).steps||0))};
+ const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Math.max(Number((s.stepsLog||{})[d]||0),Number(hcDay(d).steps||0))};window.fwStepsOn=stepsOn;
  const goal=()=>Number(s.stepGoal)||8000;
  const stride=()=>{const h=Number(s.profile&&s.profile.height);return h>=100?h*0.415/100:0.7};
  const stepKcal=n=>n*bodyWeight()*0.0005; // ~0.5 kcal per kg per 1,000 steps
