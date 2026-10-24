@@ -2244,6 +2244,176 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  init();if(!document.getElementById('st7Card'))setTimeout(init,600);
 })();
 </script>
+<!-- v135 (1) Mood and hunger after eating: a small bar after a meal is logged asks 😊😐😫 and how hungry you were
+ (stored on the food as f.mood / f.hunger); a weekly card on the Dashboard spots patterns like sweets when stressed.
+ (2) The cat's daily quests on Home: 3 a day; finishing all of them earns a 🐾 paw, spent in the cat shop on
+ accessories worn by the Home cat or poses (animations). Progress lives in s.cat so it follows sync. -->
+<style>
+.md-bar{position:fixed;left:10px;right:10px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:6900;max-width:540px;margin:0 auto;padding:12px 14px;border-radius:18px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-shadow:0 10px 30px #0004;transform:translateY(140%);transition:transform .25s}
+.md-bar.show{transform:none}
+.md-bar b{display:block;font-size:13px;margin-bottom:6px}.md-bar .x{position:absolute;right:8px;top:6px;border:0;background:none;color:var(--muted);font-size:16px}
+.md-opts{display:flex;gap:6px;margin-bottom:8px}.md-opts:last-child{margin-bottom:0}
+.md-opts button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 4px;font-family:inherit;font-size:13px;line-height:1.25}
+.md-opts button.on{border-color:#e887aa;background:#e887aa26;font-weight:800}
+.md-opts button span{display:block;font-size:20px}
+.mi-card,.cq-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.mi-card h3,.cq-card h3{margin:0;font-size:17px}.mi-sub,.cq-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.mi-bars{display:flex;gap:8px}.mi-bars div{flex:1;text-align:center;padding:8px 4px;border-radius:14px;background:var(--panel2)}.mi-bars b{display:block;font-size:18px}.mi-bars small{font-size:11px;color:var(--muted)}
+.mi-tip{margin-top:8px;padding:10px 12px;border-radius:14px;background:#f4c76b22;font-size:13px;line-height:1.5}.mi-tip.good{background:#2f9e6e1c}
+.cq-head{display:flex;align-items:center;gap:8px}.cq-head h3{flex:1}.cq-paws{font-weight:800;font-size:14px;padding:4px 10px;border-radius:999px;background:#f4c76b2e;color:#b7791f}
+.cq-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.cq-row:first-of-type{border-top:0}
+.cq-row .ic{font-size:22px;width:28px;text-align:center}.cq-row .tx{flex:1;min-width:0}.cq-row b{display:block;font-size:14px}.cq-row small{display:block;color:var(--muted);font-size:12px}
+.cq-bar{height:6px;border-radius:9px;background:var(--panel2);margin-top:5px;overflow:hidden}.cq-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#f7bfd0,#e887aa)}
+.cq-row.done b{text-decoration:line-through;opacity:.7}.cq-row .ok{font-size:18px}
+.cq-shopbtn{width:100%;margin-top:10px;border:0;border-radius:14px;padding:11px;font-weight:800;font-family:inherit;background:linear-gradient(135deg,#bcd7f5,#b49cf0);color:#1d1b2b}
+.cq-shop{position:fixed;inset:0;z-index:6500;background:#0007;display:none;align-items:flex-end;justify-content:center}.cq-shop.show{display:flex}
+.cq-shop .box{width:100%;max-width:560px;max-height:84vh;overflow-y:auto;background:var(--panel);color:var(--text);border-radius:24px 24px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.cq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.cq-item{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:16px;padding:10px 6px;text-align:center;font-family:inherit}
+.cq-item .e{font-size:30px;display:block}.cq-item b{display:block;font-size:12px;margin-top:2px}.cq-item small{font-size:11px;color:var(--muted)}
+.cq-item.wear{border-color:#2f9e6e;background:#2f9e6e1c}.cq-item.lock{opacity:.55}
+#home .welcome .cat{position:relative}
+.cat-acc{position:absolute;pointer-events:none;line-height:1}
+.cat-acc.head{left:50%;top:-38%;transform:translateX(-50%);font-size:.55em}
+.cat-acc.face{left:50%;top:22%;transform:translateX(-50%);font-size:.42em}
+.cat-acc.neck{left:50%;top:62%;transform:translateX(-50%);font-size:.45em}
+.cat-acc.side{right:-30%;top:-5%;font-size:.42em}
+#home .welcome .cat.pose-dance{animation:catDance 1.1s ease-in-out infinite!important}
+#home .welcome .cat.pose-spin{animation:catSpin 2.4s linear infinite!important}
+#home .welcome .cat.pose-bounce{animation:catBounce .9s ease-in-out infinite!important}
+@keyframes catDance{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg) translateY(-4px)}}
+@keyframes catSpin{to{transform:rotate(360deg)}}
+@keyframes catBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const today=()=>localDay();
+ // ================= (1) mood & hunger =================
+ const MOODS=[['good','😊',L('สบายใจ','Happy')],['ok','😐',L('เฉย ๆ','Okay')],['bad','😫',L('เครียด/เหนื่อย','Stressed')]];
+ const HUNGER=[['low','🙂',L('ไม่หิว','Not hungry')],['mid','😋',L('หิวพอดี','Hungry')],['high','🤤',L('หิวมาก','Starving')]];
+ let lastTop=null,pending=[],hideT=0;
+ const bar=document.createElement('div');bar.className='md-bar';bar.id='mdBar';document.body.appendChild(bar);
+ function close(){bar.classList.remove('show');pending=[]}
+ function drawBar(){
+  const f=s.foods.find(x=>x.id===pending[0]);if(!f){close();return}
+  const opt=(list,key)=>list.map(([v,e,t])=>`<button type="button" data-${key}="${v}" class="${f[key]===v?'on':''}"><span>${e}</span>${esc(t)}</button>`).join('');
+  bar.innerHTML=`<button type="button" class="x" aria-label="close">✕</button><b>${L('กินแล้วรู้สึกยังไง?','How do you feel after eating?')} · ${esc(f.name.slice(0,28))}${pending.length>1?` +${pending.length-1}`:''}</b>
+   <div class="md-opts">${opt(MOODS,'mood')}</div><b>${L('ก่อนกินหิวแค่ไหน?','How hungry were you before?')}</b><div class="md-opts">${opt(HUNGER,'hunger')}</div>`;
+  bar.querySelector('.x').onclick=close;
+  bar.querySelectorAll('button[data-mood],button[data-hunger]').forEach(b=>b.onclick=()=>{
+   const k=b.dataset.mood?'mood':'hunger',v=b.dataset.mood||b.dataset.hunger;
+   pending.forEach(id=>{const x=s.foods.find(y=>y.id===id);if(x)x[k]=v});
+   const done=pending.every(id=>{const x=s.foods.find(y=>y.id===id);return !x||(x.mood&&x.hunger)});
+   save();if(done){toast(L('จดไว้แล้ว ขอบคุณนะ 🐾','Noted, thanks 🐾'));close()}else{drawBar();arm()}});
+ }
+ function arm(){clearTimeout(hideT);hideT=setTimeout(close,15000)}
+ // new foods logged just now (by any form, voice, store card, repeat meals …) without a mood yet
+ function watchNew(){
+  const top=s.foods[0]&&s.foods[0].id;
+  if(lastTop===null){lastTop=top;return}
+  if(top===lastTop)return;
+  const fresh=[];for(const f of s.foods){if(f.id===lastTop)break;if(!f.mood&&Date.now()-Number(f.createdAt||f.id)<60000)fresh.push(f.id)}
+  lastTop=top;if(!fresh.length)return;
+  pending=fresh;drawBar();bar.classList.add('show');arm();
+ }
+ // weekly insight card (Dashboard)
+ const SWEET=/หวาน|เค้ก|ไอศกรีม|ไอติม|โดนัท|ช็อก|ขนม|ชานม|ไข่มุก|ชาเย็น|ชาไทย|โกโก้|น้ำอัดลม|โค้ก|เป๊ปซี่|ลูกอม|คุกกี้|บิงซู|ฟราปเป้|มอคค่า|cake|donut|ice cream|chocolate|boba/i;
+ const sweet=f=>Number(f.sugar||0)>=15||SWEET.test(f.name||'');
+ const hourOf=f=>{const d=new Date(Number(f.createdAt||f.id));return d.getHours()};
+ function insights(){
+  const since=new Date();since.setDate(since.getDate()-6);const from=localDay(since);
+  const a=s.foods.filter(f=>foodDay(f)>=from&&(f.mood||f.hunger));
+  const cnt=k=>a.filter(f=>f.mood===k).length;
+  const tips=[];
+  if(a.length>=5){
+   const bad=a.filter(f=>f.mood==='bad'),bs=bad.filter(sweet).length,allS=a.filter(sweet).length;
+   if(bad.length>=3&&bs>=2&&bs/bad.length>=allS/a.length+.15)tips.push(['',L(`🍰 กินของหวานตอนเครียดบ่อย (${bs} จาก ${bad.length} มื้อที่เครียด) ลองพักสั้น ๆ เดินเล่น หรือดื่มน้ำเย็นก่อนนะ`,`🍰 Sweets often come with stress (${bs} of ${bad.length} stressed meals). Try a short walk or a glass of water first`)]);
+   const low=a.filter(f=>f.hunger==='low').length;
+   if(low>=3)tips.push(['',L(`🙂 กินตอนไม่หิว ${low} ครั้ง ลองถามตัวเองก่อนกินว่าหิวจริงหรือแค่อยากกิน`,`🙂 Ate when not hungry ${low} times. Before eating, ask: hungry, or just craving?`)]);
+   const high=a.filter(f=>f.hunger==='high').length;
+   if(high>=3)tips.push(['',L(`🤤 หิวมากก่อนมื้อ ${high} ครั้ง ลองเพิ่มของว่างโปรตีน เช่น ไข่ต้ม นม หรือถั่ว ระหว่างมื้อ จะได้ไม่กินเยอะเกิน`,`🤤 Starving before ${high} meals. A protein snack between meals (egg, milk, nuts) helps avoid overeating`)]);
+   const late=bad.filter(f=>hourOf(f)>=21).length;
+   if(late>=2)tips.push(['',L(`🌙 มื้อดึกตอนเครียด ${late} ครั้ง ลองชาอุ่น ๆ หรือนอนเร็วขึ้นสักนิด`,`🌙 ${late} late-night meals when stressed. Try warm tea or an earlier night`)]);
+   const avg=x=>x.length?x.reduce((t,f)=>t+Number(f.kcal||0),0)/x.length:0,good=a.filter(f=>f.mood==='good');
+   if(bad.length>=2&&good.length>=2&&avg(bad)>avg(good)*1.25)tips.push(['',L(`📈 ตอนเครียดกินต่อมื้อมากกว่าตอนสบายใจ ~${Math.round(avg(bad)-avg(good))} kcal`,`📈 Stressed meals average ~${Math.round(avg(bad)-avg(good))} kcal more than happy ones`)]);
+   if(!tips.length&&cnt('good')>=a.length*.6)tips.push(['good',L('😊 สัปดาห์นี้กินแบบสบายใจเป็นส่วนใหญ่ เยี่ยมมาก!','😊 Mostly happy meals this week, great!')]);
+   if(!tips.length)tips.push(['good',L('ยังไม่เห็นรูปแบบที่น่าห่วง จดต่อไปเรื่อย ๆ นะ','No worrying pattern yet, keep noting')]);
+  }
+  return {n:a.length,good:cnt('good'),ok:cnt('ok'),bad:cnt('bad'),tips};
+ }
+ function drawInsight(){
+  let c=document.getElementById('miCard');
+  if(!c){const ref=document.querySelector('#dashboard .dashboard-hero');if(!ref)return;c=document.createElement('div');c.className='mi-card';c.id='miCard';
+   let after=ref;while(after.nextElementSibling&&after.nextElementSibling.classList.contains('wp-entry'))after=after.nextElementSibling;after.after(c)}
+  const r=insights();
+  c.innerHTML=`<h3>🧠 ${L('อารมณ์กับการกิน · 7 วัน','Mood & eating · 7 days')}</h3><div class="mi-sub">${L('จากที่จดหลังกินแต่ละมื้อ','From what you noted after meals')}</div>`
+   +(r.n?`<div class="mi-bars">${MOODS.map(([k,e,t])=>`<div><b>${e} ${r[k]}</b><small>${esc(t)}</small></div>`).join('')}</div>`:'')
+   +(r.n>=5?r.tips.map(([cl,t])=>`<div class="mi-tip ${cl}">${esc(t)}</div>`).join('')
+    :`<div class="mi-tip good">${L(`จดอารมณ์หลังกินอีก ${5-r.n} มื้อ แล้วจะเห็นสรุปของสัปดาห์ (หลังบันทึกอาหาร จะมีแถบเล็ก ๆ ถามด้านล่าง)`,`Note your mood after ${5-r.n} more meals to see the weekly summary (a small bar asks after you log food)`)}</div>`);
+ }
+ // ================= (2) the cat's daily quests =================
+ const cat=()=>(s.cat=s.cat||{paws:0,owned:[],wear:'',pose:'',done:{}});
+ const QUESTS={
+  water:{ic:'💧',t:()=>L('ดื่มน้ำครบเป้า','Drink your water goal'),v:()=>waterOn(today()),g:()=>waterGoal(),u:'ml'},
+  steps:{ic:'👣',t:()=>L('เดินครบ 6,000 ก้าว','Walk 6,000 steps'),v:()=>window.fwStepsOn?fwStepsOn(today()):0,g:()=>6000,u:L('ก้าว','steps')},
+  meals:{ic:'🍱',t:()=>L('บันทึกอาหารครบ 3 มื้อ','Log 3 meals'),v:()=>new Set(s.foods.filter(f=>foodDay(f)===today()&&['เช้า','กลางวัน','เย็น'].includes(f.meal)).map(f=>f.meal)).size,g:()=>3,u:L('มื้อ','meals')},
+  move:{ic:'🏃',t:()=>L('ขยับร่างกาย 20 นาที','Move for 20 minutes'),v:()=>todayMoveMin(),g:()=>20,u:L('นาที','min')},
+  mood:{ic:'😊',t:()=>L('จดอารมณ์หลังกิน 2 มื้อ','Note your mood after 2 meals'),v:()=>s.foods.filter(f=>foodDay(f)===today()&&f.mood).length,g:()=>2,u:L('มื้อ','meals')},
+  protein:{ic:'🥚',t:()=>L('กินโปรตีนครบ 60 g','Eat 60 g of protein'),v:()=>Math.round(s.foods.filter(f=>foodDay(f)===today()).reduce((t,f)=>t+Number(f.protein||0),0)),g:()=>60,u:'g'}};
+ const ROTATE=['steps','meals','move','mood','protein'];
+ // water every day + 2 others picked by the date, so every phone shows the same three
+ function todays(){const d=today(),n=[...d].reduce((a,c)=>a*31+c.charCodeAt(0)>>>0,7);const i=n%ROTATE.length;let j=(Math.floor(n/7))%ROTATE.length;if(j===i)j=(j+1)%ROTATE.length;return ['water',ROTATE[i],ROTATE[j]]}
+ const SHOP=[
+  ['bow','🎀',L('โบว์','Bow'),'head',2],['flower','🌸',L('ดอกไม้','Flower'),'side',2],['scarf','🧣',L('ผ้าพันคอ','Scarf'),'neck',3],
+  ['shades','🕶️',L('แว่นกันแดด','Sunglasses'),'face',4],['tophat','🎩',L('หมวกสูง','Top hat'),'head',5],['phones','🎧',L('หูฟัง','Headphones'),'head',6],
+  ['medal','🏅',L('เหรียญทอง','Gold medal'),'neck',8],['crown','👑',L('มงกุฎ','Crown'),'head',10],
+  ['bounce','⤴️',L('ท่ากระโดด','Bounce pose'),'pose',3],['dance','💃',L('ท่าเต้น','Dance pose'),'pose',6],['spin','🌀',L('ท่าหมุนตัว','Spin pose'),'pose',9]];
+ function dressCat(){const el=document.querySelector('#home .welcome .cat');if(!el)return;const c=cat();
+  el.querySelectorAll('.cat-acc').forEach(x=>x.remove());
+  const it=SHOP.find(x=>x[0]===c.wear);if(it){const a=document.createElement('span');a.className='cat-acc '+it[3];a.textContent=it[1];el.appendChild(a)}
+  el.classList.remove('pose-dance','pose-spin','pose-bounce');if(c.pose)el.classList.add('pose-'+c.pose)}
+ function award(){const c=cat(),d=today();if(c.done[d])return;
+  if(todays().every(k=>QUESTS[k].v()>=QUESTS[k].g())){c.done[d]=1;c.paws=(c.paws||0)+1;
+   const keys=Object.keys(c.done).sort();if(keys.length>60)keys.slice(0,keys.length-60).forEach(k=>delete c.done[k]);
+   save();toast(L('ทำภารกิจครบแล้ว! ได้ 🐾 1 อุ้งเท้า ไปแต่งตัวให้แมวกัน','All quests done! +1 🐾 paw, dress up your cat'));
+   const el=document.querySelector('#home .welcome .cat');if(el){el.classList.remove('fw-hop');void el.offsetWidth;el.classList.add('fw-hop')}}}
+ function drawQuests(){
+  let c=document.getElementById('cqCard');
+  if(!c){const w=document.querySelector('#home .welcome');if(!w)return;c=document.createElement('div');c.className='cq-card';c.id='cqCard';w.after(c)}
+  const k=todays(),cc=cat(),allDone=!!cc.done[today()];
+  c.innerHTML=`<div class="cq-head"><h3>🐾 ${L('ภารกิจของแมววันนี้','Cat’s quests today')}</h3><span class="cq-paws">🐾 ${cc.paws||0}</span></div>
+   <div class="cq-sub">${allDone?L('ครบทั้ง 3 ภารกิจแล้ว พรุ่งนี้มีภารกิจใหม่นะ ✨','All 3 done, new quests tomorrow ✨'):L('ทำครบ 3 อย่าง ได้ 🐾 1 อุ้งเท้า ไว้แลกของแต่งแมว','Finish all 3 to earn a 🐾 paw for cat outfits')}</div>`
+   +k.map(id=>{const q=QUESTS[id],v=q.v(),g=q.g(),ok=v>=g;
+    return `<div class="cq-row${ok?' done':''}"><span class="ic">${q.ic}</span><div class="tx"><b>${esc(q.t())}</b><small>${Math.min(v,g).toLocaleString()} / ${g.toLocaleString()} ${esc(q.u)}</small><div class="cq-bar"><i style="width:${Math.min(100,v/g*100)}%"></i></div></div><span class="ok">${ok?'✅':''}</span></div>`}).join('')
+   +`<button type="button" class="cq-shopbtn" id="cqShop">🎁 ${L('ร้านของแมว · แต่งตัว & ท่าทาง','Cat shop · outfits & poses')}</button>`;
+  c.querySelector('#cqShop').onclick=openShop;
+ }
+ const sheet=document.createElement('div');sheet.className='cq-shop';sheet.innerHTML='<div class="box"></div>';document.body.appendChild(sheet);
+ sheet.addEventListener('click',e=>{if(e.target===sheet)sheet.classList.remove('show')});
+ function openShop(){drawShop();sheet.classList.add('show')}
+ function drawShop(){const c=cat(),box=sheet.querySelector('.box');
+  box.innerHTML=`<div class="cq-head"><h3>🎁 ${L('ร้านของแมว','Cat shop')}</h3><span class="cq-paws">🐾 ${c.paws||0}</span><button type="button" class="rc-icon" id="cqX">✕</button></div>
+   <div class="cq-sub">${L('แตะเพื่อแลกด้วยอุ้งเท้า 🐾 ของที่มีแล้วแตะเพื่อใส่หรือถอด','Tap to buy with 🐾 paws; tap something you own to wear or remove it')}</div>
+   <div class="cq-grid">${SHOP.map(([id,e,t,slot,price])=>{const own=(c.owned||[]).includes(id),on=c.wear===id||c.pose===id;
+    return `<button type="button" class="cq-item${on?' wear':''}${!own&&(c.paws||0)<price?' lock':''}" data-id="${id}"><span class="e">${e}</span><b>${esc(t)}</b><small>${on?L('ใส่อยู่','Wearing'):own?L('มีแล้ว','Owned'):'🐾 '+price}</small></button>`}).join('')}</div>`;
+  box.querySelector('#cqX').onclick=()=>sheet.classList.remove('show');
+  box.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const it=SHOP.find(x=>x[0]===b.dataset.id),[id,e,t,slot,price]=it;
+   c.owned=c.owned||[];
+   if(!c.owned.includes(id)){if((c.paws||0)<price){toast(L(`ต้องใช้ 🐾 ${price} · มี ${c.paws||0}`,`Needs 🐾 ${price} · you have ${c.paws||0}`));return}
+    c.paws-=price;c.owned.push(id);toast(L(`ได้ ${t} แล้ว! ${e}`,`Got ${t}! ${e}`))}
+   if(slot==='pose')c.pose=c.pose===id?'':id;else c.wear=c.wear===id?'':id;
+   save();drawShop();dressCat();drawQuests()});
+ }
+ // ---- hooks ----
+ function tick(){try{watchNew()}catch(e){}try{award()}catch(e){}try{drawQuests();dressCat()}catch(e){}try{drawInsight()}catch(e){}}
+ const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);tick();return o};
+ tick();setTimeout(tick,1500);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+ window.fwCat={quests:todays,cat};
+})();
+</script>
 <!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
 <script src="ingredients_th.js"></script>
 <style>
@@ -4711,7 +4881,7 @@ function inject(){if(document.getElementById('fw67-btn'))return;const b=document
  function merge(json){let d={};try{d=JSON.parse(json||'{}')}catch(e){}s.stepsLog=s.stepsLog||{};let ch=false;
   for(const k in d){const v=Number(d[k])||0;if(v>(s.stepsLog[k]||0)){s.stepsLog[k]=v;ch=true}}return ch}
  const hcDay=d=>(s.hcDays||{})[d]||{};
- const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Math.max(Number((s.stepsLog||{})[d]||0),Number(hcDay(d).steps||0))};
+ const stepsOn=d=>{const m=s.stepsManual&&s.stepsManual[d];return m!=null?Number(m):Math.max(Number((s.stepsLog||{})[d]||0),Number(hcDay(d).steps||0))};window.fwStepsOn=stepsOn;
  const goal=()=>Number(s.stepGoal)||8000;
  const stride=()=>{const h=Number(s.profile&&s.profile.height);return h>=100?h*0.415/100:0.7};
  const stepKcal=n=>n*bodyWeight()*0.0005; // ~0.5 kcal per kg per 1,000 steps
