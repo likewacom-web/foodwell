@@ -13,6 +13,8 @@
   tophat:['front',`<g transform="translate(60 22) rotate(-6)"><ellipse cx="0" cy="0" rx="24" ry="5.5" fill="#2A2230" ${st}/><path d="M-14 0 V-27 Q0 -30 14 -27 V0 Z" fill="#2A2230" ${st}/><path d="M-14 -7 Q0 -4 14 -7 V-12 Q0 -9 -14 -12 Z" fill="${PINK}" ${st}/></g>`],
   phones:['front',`<path d="M27 47 Q27 9 60 9 Q93 9 93 47" fill="none" stroke="${O}" stroke-width="9" stroke-linecap="round"/><path d="M27 47 Q27 9 60 9 Q93 9 93 47" fill="none" stroke="#7FB8E8" stroke-width="4.5" stroke-linecap="round"/><rect x="18" y="38" width="15" height="22" rx="7" fill="#7FB8E8" ${st}/><rect x="87" y="38" width="15" height="22" rx="7" fill="#7FB8E8" ${st}/><rect x="22" y="42" width="5" height="14" rx="2.5" fill="#CFE6FA"/><rect x="93" y="42" width="5" height="14" rx="2.5" fill="#CFE6FA"/>`],
   medal:['front',`<path d="M46 74 L58 94 M74 74 L62 94" stroke="${O}" stroke-width="9" stroke-linecap="round"/><path d="M46 74 L58 94 M74 74 L62 94" stroke="#5B8DEF" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="98" r="9" fill="#FFC93C" ${st}/><path d="M60 92.5 l1.7 3.6 3.9 .4 -2.9 2.6 .8 3.9 -3.5 -2 -3.5 2 .8 -3.9 -2.9 -2.6 3.9 -.4 z" fill="#FFF1B8"/>`],
+  santa:['front',`<g transform="translate(60 22) rotate(-8)"><path d="M-26 4 Q-20 -30 8 -26 Q30 -22 34 2 Z" fill="#E8394D" ${st}/><path d="M8 -26 Q26 -26 30 -10" fill="none" ${st}/><circle cx="31" cy="-8" r="6.5" fill="#fff" ${st}/><rect x="-30" y="-2" width="62" height="12" rx="6" fill="#fff" ${st}/></g>`],
+  student:['front',`<path d="M33 112 Q31 84 44 78 L60 92 L76 78 Q89 84 87 112 Z" fill="#fff" ${st}/><path d="M44 78 L52 92 L60 84 Z M76 78 L68 92 L60 84 Z" fill="#fff" ${st}/><path d="M56 86 L64 86 L62 92 L58 92 Z" fill="#1F3A7A" ${st}/><path d="M58 92 L54 108 L60 113 L66 108 L62 92 Z" fill="#1F3A7A" ${st}/><rect x="70" y="96" width="11" height="9" rx="1.5" fill="#fff" ${st}/><path d="M72.5 99.5 h6 M72.5 102 h4" stroke="#5B8DEF" stroke-width="1.6" stroke-linecap="round"/><circle cx="47" cy="98" r="1.6" fill="${O}"/><circle cx="47" cy="105" r="1.6" fill="${O}"/>`],
   crown:['front',`<g transform="translate(60 20)"><path d="M-19 4 L-21 -16 L-10 -6 L0 -20 L10 -6 L21 -16 L19 4 Z" fill="#FFC93C" ${st}/><circle cx="-21" cy="-17" r="2.6" fill="#FFF1B8" ${st}/><circle cx="0" cy="-21" r="2.6" fill="#FFF1B8" ${st}/><circle cx="21" cy="-17" r="2.6" fill="#FFF1B8" ${st}/><circle cx="0" cy="-3" r="3" fill="#E8557A" ${st}/></g>`]
  };
  function face(pose,wear){
@@ -41,6 +43,7 @@ ${paws(pose)}
 <path d="M22 58 l-10 -2 M22 63 l-10 2 M98 58 l10 -2 M98 63 l10 2" stroke="${O}" stroke-width="1.8" stroke-linecap="round"/>
 ${face(pose,wear)}
 ${acc?acc[1]:''}
+${wear==='student'?paws(pose):''}
 <title>${id}</title></svg>`}
  window.FWCatArt={svg,items:Object.keys(WEAR)};
 })();
