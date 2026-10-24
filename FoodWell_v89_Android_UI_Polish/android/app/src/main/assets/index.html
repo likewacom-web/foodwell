@@ -2414,6 +2414,128 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  window.fwCat={quests:todays,cat};
 })();
 </script>
+<!-- v136 (7) Export to CSV for Excel / Google Sheets: foods, a daily summary and weight, for a chosen period.
+ (8) Monthly summary on the Dashboard: one calendar month at a time against the month before, with PDF and CSV. -->
+<style>
+.ex-card,.mo-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.ex-card h3,.mo-card h3{margin:0;font-size:17px}.ex-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.ex-chips{display:flex;gap:6px;flex-wrap:wrap}.ex-chips button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:700}
+.ex-chips button.on{background:#2f9e6e;border-color:#2f9e6e;color:#fff}
+.ex-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.ex-btns button,.mo-acts button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:14px;padding:10px 4px;font-family:inherit;font-weight:800;font-size:13px;line-height:1.3}
+.ex-btns button span{display:block;font-size:20px}
+.mo-head{display:flex;align-items:center;gap:6px}.mo-head h3{flex:1;text-align:center}
+.mo-head button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;width:38px;height:36px;font-size:16px}
+.mo-head button:disabled{opacity:.35}
+.mo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mo-t{padding:10px 12px;border-radius:14px;background:var(--panel2)}.mo-t small{display:block;font-size:11px;color:var(--muted)}.mo-t b{font-size:19px}.mo-t em{font-style:normal;font-size:11px;font-weight:800;margin-left:4px}
+.mo-t em.up{color:#e8557a}.mo-t em.down{color:#2f9e6e}.mo-t em.eq{color:var(--muted)}
+.mo-sec{margin-top:12px;font-size:13px}.mo-sec b{display:block;margin-bottom:4px}
+.mo-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;max-width:280px}.mo-cal i{aspect-ratio:1;border-radius:6px;background:var(--panel2)}.mo-cal span{font-size:10px;color:var(--muted);text-align:center}
+.mo-cal i.l{background:#e887aa66}.mo-cal i.g{background:#2f9e6e}.mo-cal i.o{background:#f59f6b}.mo-cal i.x{visibility:hidden}
+.mo-key{font-size:11px;color:var(--muted);margin-top:4px}
+.mo-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th,EN=()=>(window.fwLang&&fwLang())==='en';
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const n0=v=>Math.round(v).toLocaleString(),n1=v=>(Math.round(v*10)/10).toLocaleString();
+ const addD=(d,k)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+k);return localDay(x)};
+ const target=()=>{const T=typeof bodyTargets==='function'?bodyTargets():null;return (window.fwWeightPlanKcal&&fwWeightPlanKcal())||(T&&T.kcal)||null};
+ const steps=d=>window.fwStepsOn?Number(fwStepsOn(d))||0:0;
+ // ---------- CSV ----------
+ const cell=v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+ const csv=rows=>'﻿'+rows.map(r=>r.map(cell).join(',')).join('\r\n'); // BOM: Excel reads Thai correctly
+ function saveFile(name,text){
+  if(window.FoodWellFiles){toast(FoodWellFiles.saveText(name,text));return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);toast(L('ดาวน์โหลดไฟล์แล้ว: ','Downloaded: ')+name)}
+ const MOOD={good:'😊',ok:'😐',bad:'😫'},HUNG={low:L('ไม่หิว','not hungry'),mid:L('หิวพอดี','hungry'),high:L('หิวมาก','starving')};
+ function foodsCsv(days){const set=new Set(days);
+  const a=s.foods.filter(f=>set.has(foodDay(f))).sort((x,y)=>(foodDay(x)+(x.time||'')).localeCompare(foodDay(y)+(y.time||'')));
+  return csv([[L('วันที่','date'),L('เวลา','time'),L('มื้อ','meal'),L('อาหาร','food'),'kcal',L('โปรตีน g','protein g'),L('คาร์บ g','carbs g'),L('ไขมัน g','fat g'),L('ใยอาหาร g','fiber g'),L('น้ำตาล g','sugar g'),L('โซเดียม mg','sodium mg'),L('อารมณ์','mood'),L('ความหิว','hunger'),L('หมายเหตุ','note')],
+   ...a.map(f=>[foodDay(f),f.time||'',f.meal||'',f.name,f.kcal||0,f.protein||0,f.carbs||0,f.fat||0,f.fiber||0,f.sugar||0,f.sodium||0,MOOD[f.mood]||'',HUNG[f.hunger]||'',f.note||''])])}
+ function dailyCsv(days){const t=target();
+  return csv([[L('วันที่','date'),'kcal',L('เป้า kcal','target kcal'),L('โปรตีน g','protein g'),L('คาร์บ g','carbs g'),L('ไขมัน g','fat g'),L('น้ำตาล g','sugar g'),L('โซเดียม mg','sodium mg'),L('น้ำ ml','water ml'),L('ขยับ นาที','move min'),L('ก้าว','steps'),L('น้ำหนัก กก.','weight kg'),L('จำนวนรายการอาหาร','food items')],
+   ...days.map(d=>{const n=nutrientsOn(d),w=(s.weightLog||[]).find(x=>x.date===d);
+    return [d,Math.round(kcalOn(d)),t||'',n1(n.protein||0),n1(n.carbs||0),n1(n.fat||0),n1(n.sugar||0),Math.round(n.sodium||0),waterOn(d),moveMinOn(d),steps(d)||'',w?w.kg:'',s.foods.filter(f=>foodDay(f)===d).length]})].map(r=>r.map(v=>typeof v==='string'?v.replace(/,/g,''):v)))}
+ function weightCsv(days){const set=new Set(days);
+  return csv([[L('วันที่','date'),L('น้ำหนัก กก.','weight kg')],...(s.weightLog||[]).filter(x=>set.has(x.date)).sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[x.date,x.kg])])}
+ function firstDay(){const ds=[...s.foods.map(foodDay),...(s.weightLog||[]).map(x=>x.date),...(s.waterLog||[]).map(x=>typeof entryDay==='function'?entryDay(x):x.date)].filter(Boolean).sort();return ds[0]||localDay()}
+ const range=(a,b)=>{const out=[];for(let d=a;d<=b&&out.length<4000;d=addD(d,1))out.push(d);return out};
+ let exP=30;
+ function exDays(){const t=localDay();return exP?range(addD(t,-(exP-1)),t):range(firstDay(),t)}
+ function drawExport(){const box=document.getElementById('exCard');if(!box)return;
+  box.innerHTML=`<h3>📤 ${L('ส่งออกข้อมูล (CSV)','Export data (CSV)')}</h3><div class="ex-sub">${L('เปิดได้ใน Excel, Google Sheets หรือส่งให้นักโภชนาการ · ไฟล์ไปอยู่ในโฟลเดอร์ Download','Opens in Excel or Google Sheets, or send it to your dietitian · saved to the Download folder')}</div>
+   <div class="ex-chips">${[[30,L('30 วัน','30 days')],[90,L('90 วัน','90 days')],[365,L('1 ปี','1 year')],[0,L('ทั้งหมด','All')]].map(([v,t])=>`<button type="button" data-p="${v}" class="${v===exP?'on':''}">${t}</button>`).join('')}</div>
+   <div class="ex-btns"><button type="button" data-x="foods"><span>🍱</span>${L('รายการอาหาร','Foods')}</button><button type="button" data-x="daily"><span>📅</span>${L('สรุปรายวัน','Daily summary')}</button><button type="button" data-x="weight"><span>⚖️</span>${L('น้ำหนัก','Weight')}</button></div>`;
+  box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{exP=Number(b.dataset.p);drawExport()});
+  box.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>exportKind(b.dataset.x,exDays(),exP?exP+'d':'all'))}
+ function exportKind(kind,days,tag){
+  const f={foods:foodsCsv,daily:dailyCsv,weight:weightCsv}[kind];
+  if(kind==='weight'&&!(s.weightLog||[]).some(x=>days.includes(x.date))){toast(L('ยังไม่มีน้ำหนักในช่วงนี้','No weight in this period yet'));return}
+  saveFile(`MeowFit-${kind}-${tag}-${localDay()}.csv`,f(days))}
+ // ---------- monthly summary ----------
+ let mo=0;
+ const monthDays=off=>{const n=new Date();const y=n.getFullYear(),m=n.getMonth()+off,first=new Date(y,m,1),last=new Date(y,m+1,0),today=localDay();
+  return {first,days:range(localDay(first),localDay(last)).filter(d=>d<=today)}};
+ function stats(days){const t=target();
+  const logged=days.filter(d=>s.foods.some(f=>foodDay(f)===d)),kc=logged.map(kcalOn);
+  const avgK=kc.length?kc.reduce((a,b)=>a+b,0)/kc.length:0;
+  const onT=t?logged.filter(d=>{const k=kcalOn(d);return k>=t*.9&&k<=t*1.1}).length:null;
+  const under=t?logged.filter(d=>kcalOn(d)<t*.9).length:null;
+  const w=(s.weightLog||[]).filter(x=>days.includes(x.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  const wd=days.map(waterOn).filter(v=>v>0),st=days.map(steps).filter(v=>v>0);
+  let best=0,run=0;days.forEach(d=>{if(logged.includes(d)){run++;best=Math.max(best,run)}else run=0});
+  const freq={};s.foods.filter(f=>days.includes(foodDay(f))).forEach(f=>{freq[f.name]=(freq[f.name]||0)+1});
+  const moods={good:0,ok:0,bad:0};s.foods.filter(f=>days.includes(foodDay(f))&&f.mood).forEach(f=>moods[f.mood]=(moods[f.mood]||0)+1);
+  return {t,days:days.length,logged,avgK,onT,under,wStart:w[0],wEnd:w[w.length-1],water:wd.length?wd.reduce((a,b)=>a+b,0)/wd.length:0,
+   move:days.reduce((a,d)=>a+moveMinOn(d),0),steps:st.length?st.reduce((a,b)=>a+b,0)/st.length:0,best,
+   top:Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3),moods}}
+ // arrow vs last month; lowerIsGood flips the colour (kcal, weight)
+ const delta=(a,b,lowerIsGood,fmt=n0)=>{if(!b)return '';const d=a-b;if(Math.abs(d)<0.05)return '<em class="eq">=</em>';
+  const good=lowerIsGood?d<0:d>0;return `<em class="${good?'down':'up'}">${d>0?'▲':'▼'}${fmt(Math.abs(d))}</em>`};
+ function drawMonth(){const box=document.getElementById('moCard');if(!box)return;
+  const {first,days}=monthDays(mo),cur=stats(days),prev=stats(monthDays(mo-1).days);
+  const name=first.toLocaleDateString(EN()?'en-GB':'th-TH',{month:'long',year:'numeric'});
+  const wCh=cur.wStart&&cur.wEnd&&cur.wStart!==cur.wEnd?cur.wEnd.kg-cur.wStart.kg:null;
+  const lead=(first.getDay()+6)%7,t=cur.t;
+  const cal=(EN()?['M','T','W','T','F','S','S']:['จ','อ','พ','พฤ','ศ','ส','อา']).map(x=>`<span>${x}</span>`).join('')+[...Array(lead)].map(()=>'<i class="x"></i>').join('')+days.map(d=>{const k=kcalOn(d),l=cur.logged.includes(d);
+   return `<i class="${!l?'':t&&k>=t*.9&&k<=t*1.1?'g':t&&k>t*1.1?'o':'l'}" title="${d}"></i>`}).join('');
+  const tile=(lab,val,extra='')=>`<div class="mo-t"><small>${lab}</small><b>${val}</b>${extra}</div>`;
+  box.innerHTML=`<div class="mo-head"><button type="button" id="moPrev" aria-label="prev">◀</button><h3>📅 ${esc(name)}</h3><button type="button" id="moNext" aria-label="next"${mo>=0?' disabled':''}>▶</button></div>
+   <div class="ex-sub" style="text-align:center">${L('สรุปรายเดือน · เทียบกับเดือนก่อน','Monthly summary · vs the month before')}</div>
+   ${cur.logged.length?`<div class="mo-grid">
+    ${tile(L('วันที่บันทึกอาหาร','Days logged'),`${cur.logged.length}/${cur.days}`,delta(cur.logged.length,prev.logged.length,false))}
+    ${tile(L('พลังงานเฉลี่ย/วัน','Avg kcal/day'),n0(cur.avgK),delta(cur.avgK,prev.avgK,true))}
+    ${t?tile(L('วันที่ใกล้เป้า ±10%','Days on target ±10%'),`${cur.onT} ${L('วัน','d')}`,delta(cur.onT,prev.onT,false)):''}
+    ${tile(L('น้ำหนักเปลี่ยน','Weight change'),wCh==null?'–':`${wCh>0?'+':''}${n1(wCh)} ${L('กก.','kg')}`)}
+    ${tile(L('น้ำเฉลี่ย/วัน','Avg water/day'),`${n0(cur.water)} ml`,delta(cur.water,prev.water,false))}
+    ${tile(L('ขยับรวม','Total movement'),`${n0(cur.move)} ${L('นาที','min')}`,delta(cur.move,prev.move,false))}
+    ${cur.steps?tile(L('ก้าวเฉลี่ย/วัน','Avg steps/day'),n0(cur.steps),delta(cur.steps,prev.steps,false)):''}
+    ${tile(L('บันทึกต่อเนื่องยาวสุด','Longest streak'),`${cur.best} ${L('วัน','d')}`)}
+   </div>
+   <div class="mo-sec"><b>${L('ปฏิทินเดือนนี้','This month')}</b><div class="mo-cal">${cal}</div><div class="mo-key">${t?L('🟩 ใกล้เป้า · 🟧 เกินเป้า · 🩷 บันทึกแล้ว (ต่ำกว่าเป้า)','🟩 on target · 🟧 over · 🩷 logged (under)'):L('🩷 วันที่บันทึกอาหาร','🩷 days with food logged')}</div></div>
+   ${cur.top.length?`<div class="mo-sec"><b>${L('กินบ่อยที่สุด','Most eaten')}</b>${cur.top.map(([n,c],i)=>`${['🥇','🥈','🥉'][i]} ${esc(n)} · ${c} ${L('ครั้ง','×')}`).join('<br>')}</div>`:''}
+   ${cur.moods.good+cur.moods.ok+cur.moods.bad?`<div class="mo-sec"><b>${L('อารมณ์หลังกิน','Mood after eating')}</b>😊 ${cur.moods.good} · 😐 ${cur.moods.ok} · 😫 ${cur.moods.bad}</div>`:''}
+   <div class="mo-acts"><button type="button" id="moPdf">📄 PDF ${L('เดือนนี้','this month')}</button><button type="button" id="moCsv">📤 CSV ${L('เดือนนี้','this month')}</button></div>`
+   :`<div class="ex-sub" style="text-align:center;margin-top:12px">${L('ยังไม่มีบันทึกอาหารในเดือนนี้','No food logged this month')}</div>`}`;
+  box.querySelector('#moPrev').onclick=()=>{mo--;drawMonth()};box.querySelector('#moNext').onclick=()=>{if(mo<0){mo++;drawMonth()}};
+  const pdf=box.querySelector('#moPdf');if(pdf)pdf.onclick=()=>{if(!window.FWReport){toast('PDF ไม่พร้อม');return}const html=FWReport.build(days),title=`MeowFit-${days[0].slice(0,7)}`;
+   if(window.FoodWellPrint){FoodWellPrint.print(html,title);toast(L('กำลังเปิดหน้าพิมพ์ / บันทึก PDF…','Opening print / save as PDF…'))}
+   else{const w=window.open('','_blank');if(!w){toast(L('เบราว์เซอร์บล็อกหน้าต่างใหม่','The browser blocked the new window'));return}w.document.write(html);w.document.close();setTimeout(()=>w.print(),600)}};
+  const c=box.querySelector('#moCsv');if(c)c.onclick=()=>exportKind('daily',days,days[0].slice(0,7));
+ }
+ function init(){const ref=document.getElementById('rptCard');if(!ref)return false;
+  if(!document.getElementById('moCard')){const m=document.createElement('div');m.className='mo-card';m.id='moCard';ref.before(m)}
+  if(!document.getElementById('exCard')){const e=document.createElement('div');e.className='ex-card';e.id='exCard';ref.after(e)}
+  drawMonth();drawExport();return true}
+ if(!init())setTimeout(init,800);
+ const og=window.go;if(og)window.go=function(p){og(p);if(p==='dashboard'){drawMonth();drawExport()}};
+ window.FWExport={foodsCsv,dailyCsv,weightCsv};
+})();
+</script>
 <!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
 <script src="ingredients_th.js"></script>
 <style>
@@ -2583,8 +2705,9 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  const fmtD=(d,o)=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',o||{day:'numeric',month:'short',year:'2-digit'});
  const n0=v=>Math.round(v).toLocaleString(),n1=v=>(Math.round(v*10)/10).toLocaleString();
  function build(days){const h=build0(days);return window.fwT?fwT(h):h}
+ // days: a number of days back from today, or a list of YYYY-MM-DD dates (the monthly summary passes a month)
  function build0(days){
-  const list=[...Array(days)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1)+i);return localDay(d)});
+  const list=Array.isArray(days)?days:[...Array(days)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1)+i);return localDay(d)});days=list.length;
   const rows=list.map(d=>({d,kcal:kcalOn(d),n:nutrientsOn(d),water:waterOn(d),move:moveMinOn(d),foods:s.foods.filter(f=>foodDay(f)===d).length}));
   const logged=rows.filter(r=>r.foods>0),avg=k=>logged.length?logged.reduce((a,r)=>a+(k==='kcal'?r.kcal:r.n[k]),0)/logged.length:0;
   const wd=rows.filter(r=>r.water>0),avgWater=wd.length?wd.reduce((a,r)=>a+r.water,0)/wd.length:0,moveTotal=rows.reduce((a,r)=>a+r.move,0);
