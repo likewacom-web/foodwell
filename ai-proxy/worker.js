@@ -1,6 +1,7 @@
 // FoodWell AI proxy — Cloudflare Worker
-// Receives a food photo from the app, asks Gemini to identify it, and returns
-// { name, candidates, confidence, kcal, protein, carbs, fat, fiber, sugar, sodium }.
+// POST /        a food photo → { name, candidates, confidence, kcal, protein, carbs, fat, fiber, sugar, sodium }
+// POST /parse   what the user typed or said they ate → { items: [{ name, qty, meal, kcal, … }] }
+// POST /redeem  activation codes (see below)
 // The Gemini API key stays here as a secret; it is never shipped inside the APK.
 //
 // Settings (Workers → Settings → Variables and Secrets):
@@ -73,6 +74,119 @@ function explain(status, detail) {
   if (/location is not supported/i.test(msg)) return "Gemini ไม่รองรับตำแหน่งของเซิร์ฟเวอร์ตอนนี้ · ลองใหม่อีกครั้ง";
   if (/image/i.test(msg)) return "Gemini อ่านรูปนี้ไม่ได้ · ลองถ่ายใหม่";
   return `Gemini ตอบกลับ ${status}${msg ? ": " + msg.slice(0, 120) : ""}`;
+}
+
+const num = (v) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Math.round(Number(v)) : null);
+
+// Sends parts to Gemini (trying each model in turn) and returns { result, model } with the parsed JSON,
+// or { response } holding the error to send back to the app.
+async function askGemini(env, parts, schema) {
+  const body = {
+    contents: [{ parts }],
+    generationConfig: { responseMimeType: "application/json", responseSchema: schema, temperature: 0.2 },
+  };
+  const models = env.GEMINI_MODEL ? [env.GEMINI_MODEL] : DEFAULT_MODELS;
+  let lastError = "";
+  for (const model of models) {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body: JSON.stringify(body),
+    });
+    if (resp.status === 404) {
+      // Model name retired or renamed — try the next one.
+      lastError = `ไม่พบโมเดล ${model}`;
+      continue;
+    }
+    if (resp.status === 429) return { response: json({ error: "ใช้เกินโควตาฟรีของ Gemini แล้ว ลองใหม่ภายหลัง" }, 429) };
+    if (!resp.ok) {
+      const detail = await resp.text();
+      console.log("gemini", model, resp.status, detail.slice(0, 500));
+      return { response: json({ error: explain(resp.status, detail), detail: detail.slice(0, 300) }, 502) };
+    }
+    const out = await resp.json();
+    const text = out?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+    try {
+      return { result: JSON.parse(text), model };
+    } catch {
+      return { response: json({ error: "อ่านผลจาก Gemini ไม่ได้" }, 502) };
+    }
+  }
+  return { response: json({ error: lastError || "ไม่มีโมเดลที่ใช้ได้ · ตั้ง GEMINI_MODEL ใหม่" }, 502) };
+}
+
+// ---- What I ate, typed or spoken ----------------------------------------------------------------
+// "ข้าวมันไก่ 1 จาน ชาเย็น 1 แก้ว" → one item per food with its own portion and nutrition.
+
+const TEXT_PROMPT = `You are a nutrition assistant for a Thai food-logging app.
+The user wrote or said (often in Thai, sometimes English, possibly with speech-to-text mistakes) what they ate or drank.
+Split it into separate food or drink items. For each item:
+- "name": a clear Thai dish name (fix obvious speech-to-text errors; keep brand names such as 7-Eleven, Mama, Coke).
+- "qty": the portion in Thai as the user said it, e.g. "1 จาน", "2 ฟอง", "1 แก้ว (กลาง)". Assume 1 normal serving if not given.
+- Nutrition for that whole portion: kcal, protein (g), carbs (g), fat (g), fiber (g), sugar (g), sodium (mg).
+  Use typical Thai street-food / 7-Eleven recipes, including cooking oil, sugar and sauces. Round to whole numbers.
+- "meal": one of "เช้า", "กลางวัน", "เย็น", "ของว่าง" only if the user named the meal, else "".
+Ignore anything that is not food or drink. If there is no food at all, return an empty list.
+User text:
+`;
+
+const TEXT_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    items: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          name: { type: "STRING" },
+          qty: { type: "STRING" },
+          meal: { type: "STRING" },
+          kcal: { type: "NUMBER" },
+          protein: { type: "NUMBER" },
+          carbs: { type: "NUMBER" },
+          fat: { type: "NUMBER" },
+          fiber: { type: "NUMBER" },
+          sugar: { type: "NUMBER" },
+          sodium: { type: "NUMBER" },
+        },
+        required: ["name", "kcal"],
+      },
+    },
+  },
+  required: ["items"],
+};
+
+const MEAL_NAMES = ["เช้า", "กลางวัน", "เย็น", "ของว่าง"];
+
+async function parseText(request, env) {
+  let text;
+  try {
+    ({ text } = await request.json());
+  } catch {
+    return json({ error: "ข้อมูลที่ส่งมาไม่ใช่ JSON" }, 400);
+  }
+  text = String(text || "").trim().slice(0, 400);
+  if (!text) return json({ error: "พิมพ์หรือพูดว่ากินอะไรก่อน" }, 400);
+
+  const g = await askGemini(env, [{ text: TEXT_PROMPT + text }], TEXT_SCHEMA);
+  if (g.response) return g.response;
+  const items = (Array.isArray(g.result.items) ? g.result.items : [])
+    .filter((it) => it && String(it.name || "").trim())
+    .slice(0, 12)
+    .map((it) => ({
+      name: String(it.name).trim().slice(0, 80),
+      qty: String(it.qty || "").trim().slice(0, 40),
+      meal: MEAL_NAMES.includes(it.meal) ? it.meal : "",
+      kcal: num(it.kcal),
+      protein: num(it.protein),
+      carbs: num(it.carbs),
+      fat: num(it.fat),
+      fiber: num(it.fiber),
+      sugar: num(it.sugar),
+      sodium: num(it.sodium),
+    }));
+  if (!items.length) return json({ error: "ไม่พบอาหารในข้อความนี้" }, 422);
+  return json({ items, model: g.model });
 }
 
 // ---- Activation codes ---------------------------------------------------------------------
@@ -190,6 +304,7 @@ export default {
     }
     if (path === "/redeem") return redeem(request, env);
     if (!env.GEMINI_API_KEY) return json({ error: "ยังไม่ได้ตั้งค่า GEMINI_API_KEY" }, 500);
+    if (path === "/parse") return parseText(request, env);
 
     let image;
     try {
@@ -202,60 +317,24 @@ export default {
     const [, mimeType, data] = m;
     if (data.length * 0.75 > MAX_IMAGE_BYTES) return json({ error: "รูปใหญ่เกินไป" }, 413);
 
-    const body = {
-      contents: [{ parts: [{ inlineData: { mimeType, data } }, { text: PROMPT }] }],
-      generationConfig: { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.2 },
-    };
+    const g = await askGemini(env, [{ inlineData: { mimeType, data } }, { text: PROMPT }], SCHEMA);
+    if (g.response) return g.response;
+    const { result, model } = g;
+    if (!result.is_food || !result.name) return json({ error: "ไม่พบอาหารในรูปนี้" }, 422);
 
-    const models = env.GEMINI_MODEL ? [env.GEMINI_MODEL] : DEFAULT_MODELS;
-    let lastError = "";
-    for (const model of models) {
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
-          body: JSON.stringify(body),
-        }
-      );
-      if (resp.status === 404) {
-        // Model name retired or renamed — try the next one.
-        lastError = `ไม่พบโมเดล ${model}`;
-        continue;
-      }
-      if (resp.status === 429) return json({ error: "ใช้เกินโควตาฟรีของ Gemini แล้ว ลองใหม่ภายหลัง" }, 429);
-      if (!resp.ok) {
-        const detail = await resp.text();
-        console.log("gemini", model, resp.status, detail.slice(0, 500));
-        return json({ error: explain(resp.status, detail), detail: detail.slice(0, 300) }, 502);
-      }
-
-      const out = await resp.json();
-      const text = out?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch {
-        return json({ error: "อ่านผลจาก Gemini ไม่ได้" }, 502);
-      }
-      if (!result.is_food || !result.name) return json({ error: "ไม่พบอาหารในรูปนี้" }, 422);
-
-      const num = (v) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Math.round(Number(v)) : null);
-      return json({
-        name: String(result.name),
-        candidates: (Array.isArray(result.candidates) ? result.candidates : []).map(String).slice(0, 4),
-        confidence: Number.isFinite(result.confidence) ? Math.max(0, Math.min(1, result.confidence)) : null,
-        kcal: num(result.kcal),
-        protein: num(result.protein),
-        carbs: num(result.carbs),
-        fat: num(result.fat),
-        fiber: num(result.fiber),
-        sugar: num(result.sugar),
-        sodium: num(result.sodium),
-        model,
-      });
-    }
-    return json({ error: lastError || "ไม่มีโมเดลที่ใช้ได้ · ตั้ง GEMINI_MODEL ใหม่" }, 502);
+    return json({
+      name: String(result.name),
+      candidates: (Array.isArray(result.candidates) ? result.candidates : []).map(String).slice(0, 4),
+      confidence: Number.isFinite(result.confidence) ? Math.max(0, Math.min(1, result.confidence)) : null,
+      kcal: num(result.kcal),
+      protein: num(result.protein),
+      carbs: num(result.carbs),
+      fat: num(result.fat),
+      fiber: num(result.fiber),
+      sugar: num(result.sugar),
+      sodium: num(result.sodium),
+      model,
+    });
   },
 };
 
