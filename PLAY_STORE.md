@@ -6,7 +6,7 @@
 |---|---|
 | ไอคอน 512×512 | `store/icon-512.png` |
 | ภาพหน้าปก (Feature graphic) 1024×500 | `store/feature-graphic-th.png`, `store/feature-graphic-en.png` |
-| ภาพหน้าจอมือถือ 1080×1920 (6 ภาพ/ภาษา) | `store/screenshot-th-*.png`, `store/screenshot-en-*.png` |
+| ภาพหน้าจอมือถือ 1080×1920 (8 ภาพ/ภาษา · 7 = แมวและภารกิจ, 8 = พิมพ์/พูดบอกอาหาร) | `store/screenshot-th-*.png`, `store/screenshot-en-*.png` |
 | นโยบายความเป็นส่วนตัว (ไทย + อังกฤษ) | `docs/privacy-policy.html` (ในแอป: ตั้งค่า → เกี่ยวกับ) |
 | Build ไฟล์ .aab ที่เซ็นแล้ว | GitHub Actions → **Release FoodWell (Google Play)** |
 
@@ -63,17 +63,18 @@ GitHub → Actions → **Release FoodWell (Google Play)** → **Run workflow** (
 ### ภาษาไทย
 **ชื่อ (≤30):** MeowFit - นับแคล บันทึกอาหาร
 
-**คำอธิบายสั้น (≤80):** บันทึกอาหารไทย นับแคลอรี่ ดื่มน้ำ ออกกำลังกาย และวางแผนสุขภาพแบบใจดีกับตัวเอง
+**คำอธิบายสั้น (≤80):** นับแคลอาหารไทย พิมพ์/พูด/ถ่ายรูปให้ AI ช่วย ทำภารกิจกับน้องแมว ดูแลตัวเองแบบใจดี
 
 **คำอธิบายเต็ม:**
 ```
 MeowFit ช่วยให้ดูแลการกินและสุขภาพได้ง่าย ๆ ทุกวัน แบบไม่กดดันตัวเอง พร้อมน้องแมวเป็นเพื่อนออกกำลังกาย 🐾
 
 🍱 บันทึกอาหารง่าย
+• พิมพ์หรือพูดว่า “ข้าวมันไก่ 1 จาน ชาเย็น 1 แก้ว” แล้ว AI แยกรายการและแคลอรี่ให้
+• เมนู 7-Eleven, All Café, คาเฟ่อเมซอน, ชานมไข่มุก, KFC, MK กว่า 80 รายการ แตะเดียวบันทึก
 • ฐานข้อมูลอาหารไทยกว่า 240 เมนู พิมพ์ชื่อแล้วเติมค่าโภชนาการให้
-• สแกนบาร์โค้ดสินค้า (Open Food Facts) ใส่ปริมาณที่กินจริงได้
-• ถ่ายรูปอาหาร และวิเคราะห์ด้วย AI
-• เมนูทำเอง คำนวณจากวัตถุดิบ · กินเหมือนเดิมได้ในแตะเดียว
+• ถ่ายรูปอาหารให้ AI วิเคราะห์ · สแกนบาร์โค้ดสินค้า (Open Food Facts)
+• เมนูทำเอง คำนวณจากวัตถุดิบ · กินเหมือนเมื่อวานได้ในแตะเดียว
 • ปุ่มลัดเพิ่มอาหารจากหน้าหลัก วิดเจ็ต และกดค้างที่ไอคอนแอป
 
 🎯 เป้าหมายเฉพาะคุณ
@@ -84,6 +85,12 @@ MeowFit ช่วยให้ดูแลการกินและสุขภ
 ⚖️ น้ำหนักและตาชั่งอัจฉริยะ
 • รับน้ำหนักและไขมันในร่างกายจากตาชั่งผ่าน Health Connect อัตโนมัติ
 • เชื่อมตาชั่งบลูทูธได้โดยตรง
+• บันทึกรอบเอว และถ่ายรูปเทียบก่อน–หลังทุกสัปดาห์ (รูปเก็บในเครื่องเท่านั้น)
+
+🐾 น้องแมวเพื่อนซี้
+• ภารกิจประจำวัน เช่น ดื่มน้ำครบ เดิน 6,000 ก้าว กินโปรตีนครบ
+• ทำครบได้อุ้งเท้า 🐾 ไว้แต่งตัวน้องแมว: มงกุฎ หมวกซานต้า ชุดนักเรียน แว่นกันแดด และอีกเพียบ
+• ปลดล็อกท่ากระโดด ท่าเต้น ท่าหมุนตัว
 
 🥗 เมนูสุขภาพ
 • 39 สูตรอาหารไทยสุขภาพ แนะนำตามแคลอรี่ที่เหลือในวันนั้น
@@ -99,8 +106,10 @@ MeowFit ช่วยให้ดูแลการกินและสุขภ
 • ดึงก้าวเดินและการออกกำลังกายจากนาฬิกาผ่าน Health Connect
 
 📊 เข้าใจตัวเองมากขึ้น
-• สรุปรายสัปดาห์ ข้อสังเกตอัตโนมัติ (เช่น น้ำตาลส่วนใหญ่มาจากเครื่องดื่ม)
-• รายงานสุขภาพ PDF ให้แพทย์หรือนักโภชนาการดูได้
+• จดอารมณ์และความหิวหลังกิน 😊😐😫 แล้วรู้ทันตัวเอง เช่น “กินของหวานตอนเครียดบ่อย”
+• สรุปรายสัปดาห์และรายเดือน เทียบกับเดือนก่อน พร้อมปฏิทินสีตามเป้า
+• ข้อสังเกตอัตโนมัติ (เช่น น้ำตาลส่วนใหญ่มาจากเครื่องดื่ม)
+• รายงาน PDF และส่งออก CSV เปิดใน Excel ให้แพทย์หรือนักโภชนาการดูได้
 
 ✨ และอีกมากมาย
 • ถ้วยรางวัลและการแชร์ความสำเร็จ · วิดเจ็ตหน้าจอ · การแจ้งเตือน
@@ -113,17 +122,18 @@ MeowFit ช่วยให้ดูแลการกินและสุขภ
 ### English
 **Title (≤30):** MeowFit - Calories Tracker
 
-**Short description (≤80):** Log Thai food, count calories, drink water, work out — kindly, every day.
+**Short description (≤80):** Thai calorie counter: type, say or snap your food. Daily quests with your cat
 
 **Full description:**
 ```
 MeowFit makes it easy to look after what you eat and how you feel — without the pressure, with a cheerful cat as your workout buddy 🐾
 
 🍱 Easy food logging
+• Type or say “chicken rice and an iced Thai tea” and AI splits it into items with calories
+• 80+ items from 7-Eleven, All Café, Café Amazon, bubble tea, KFC and MK, logged in one tap
 • 240+ Thai dishes: type a name and the nutrition fills in
-• Barcode scanning (Open Food Facts) with the amount you actually ate
-• Food photos with AI analysis
-• Home recipes calculated from ingredients · repeat a meal in one tap
+• Food photos with AI analysis · barcode scanning (Open Food Facts)
+• Home recipes calculated from ingredients · repeat yesterday's meal in one tap
 • Quick "Log food" shortcuts on the home screen, widget and app icon
 
 🎯 Targets made for you
@@ -134,6 +144,12 @@ MeowFit makes it easy to look after what you eat and how you feel — without th
 ⚖️ Weight & smart scales
 • Weight and body fat from your smart scale, imported automatically via Health Connect
 • Connect Bluetooth bathroom scales directly
+• Waist tracking and weekly before/after photos (photos stay on your phone)
+
+🐾 Your cat buddy
+• Daily quests: hit your water goal, walk 6,000 steps, eat enough protein…
+• Finish them to earn 🐾 paws and dress up your cat: crown, Santa hat, school uniform, sunglasses and more
+• Unlock bounce, dance and spin poses
 
 🥗 Healthy recipes
 • 39 healthy Thai recipes suggested from what's left for today
@@ -149,8 +165,10 @@ MeowFit makes it easy to look after what you eat and how you feel — without th
 • Steps and workouts from your watch via Health Connect
 
 📊 Understand yourself
-• Weekly summary and automatic insights (e.g. most of your sugar comes from drinks)
-• PDF health report to share with your doctor or dietitian
+• Note your mood and hunger after meals 😊😐😫 and spot patterns like “sweets when stressed”
+• Weekly and monthly summaries compared with last month, with a target-coloured calendar
+• Automatic insights (e.g. most of your sugar comes from drinks)
+• PDF report and CSV export (opens in Excel) for your doctor or dietitian
 
 ✨ And more
 • Trophies and shareable cards · home-screen widget · reminders

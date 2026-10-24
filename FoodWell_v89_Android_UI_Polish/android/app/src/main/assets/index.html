@@ -908,9 +908,10 @@ function renderProfileStats(){
 }
 
 
-const HOME_DEFAULT=['welcome','summary','twocards','steps','workout','challenge','healthy','dashboard-entry','food-section'];
+const HOME_DEFAULT=['welcome','quests','summary','twocards','steps','workout','challenge','healthy','dashboard-entry','food-section'];
 function homePrefs(){try{return JSON.parse(localStorage.getItem('foodwell_home_layout_v36')||'{}')}catch(e){return {}}}
-function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();const order=Array.isArray(pref.order)?[...pref.order,...HOME_DEFAULT.filter(k=>!pref.order.includes(k))]:HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
+function applyHomePrefs(){const box=document.getElementById('home');if(!box)return;const pref=homePrefs();// a section added in a later version goes to its default place (after the one before it), not to the end
+ const order=Array.isArray(pref.order)?HOME_DEFAULT.reduce((o,k,i)=>{if(o.includes(k))return o;const prev=HOME_DEFAULT.slice(0,i).reverse().find(x=>o.includes(x));o.splice(prev?o.indexOf(prev)+1:0,0,k);return o},[...pref.order]):HOME_DEFAULT;const nodes={};box.querySelectorAll('[data-home-key]').forEach(n=>nodes[n.dataset.homeKey]=n);const anchor=box.querySelector('.home-custom-tools');order.forEach(k=>{if(nodes[k])box.appendChild(nodes[k])});Object.entries(pref.visible||{}).forEach(([k,v])=>{if(nodes[k])nodes[k].classList.toggle('home-card-hidden',v===false)});}
 function saveHomePrefs(){const order=[...document.querySelectorAll('#home [data-home-key]')].map(x=>x.dataset.homeKey);const visible={};document.querySelectorAll('#home [data-home-key]').forEach(x=>visible[x.dataset.homeKey]=!x.classList.contains('home-card-hidden'));localStorage.setItem('foodwell_home_layout_v36',JSON.stringify({order,visible}));}
 function setupHomeCustomizer(){applyHomePrefs();const btn=document.getElementById('customizeHome'),menu=document.getElementById('homeWidgetMenu'),home=document.getElementById('home');if(!btn||btn.dataset.ready)return;btn.dataset.ready='1';btn.onclick=()=>{home.classList.toggle('home-editing');menu.classList.toggle('open');if(home.classList.contains('home-editing')){document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=true);toast(fwL('โหมดปรับแต่ง Home เปิดแล้ว','Home customize mode on'))}else{saveHomePrefs();document.querySelectorAll('#home [data-home-key]').forEach(n=>n.draggable=false);toast('บันทึกเลย์เอาต์แล้ว')}};document.getElementById('resetHomeLayout').onclick=()=>{localStorage.removeItem('foodwell_home_layout_v36');location.reload()};document.querySelectorAll('[data-widget-toggle]').forEach(b=>b.onclick=()=>{const n=home.querySelector(`[data-home-key="${b.dataset.widgetToggle}"]`);if(n){n.classList.toggle('home-card-hidden');saveHomePrefs();}});let drag=null;home.addEventListener('dragstart',e=>{const n=e.target.closest('[data-home-key]');if(!home.classList.contains('home-editing')||!n)return;drag=n;n.classList.add('dragging')});home.addEventListener('dragend',e=>{if(drag){drag.classList.remove('dragging');saveHomePrefs();drag=null}});home.addEventListener('dragover',e=>{if(!drag||!home.classList.contains('home-editing'))return;e.preventDefault();const target=e.target.closest('[data-home-key]');if(!target||target===drag)return;const r=target.getBoundingClientRect();const before=e.clientY<r.top+r.height/2;if(before)target.before(drag);else target.after(drag)});}
 function renderWaterHistoryV54(){
@@ -2250,8 +2251,8 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  (2) The cat's daily quests on Home: 3 a day; finishing all of them earns a 🐾 paw, spent in the cat shop on
  accessories worn by the Home cat or poses (animations). Progress lives in s.cat so it follows sync. -->
 <style>
-.md-bar{position:fixed;left:10px;right:10px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:6900;max-width:540px;margin:0 auto;padding:12px 14px;border-radius:18px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-shadow:0 10px 30px #0004;transform:translateY(140%);transition:transform .25s}
-.md-bar.show{transform:none}
+.md-bar{position:fixed;left:10px;right:10px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:6900;max-width:540px;margin:0 auto;padding:12px 14px;border-radius:18px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-shadow:0 10px 30px #0004;transform:translateY(calc(100% + 120px));visibility:hidden;transition:transform .25s,visibility 0s .25s}
+.md-bar.show{transform:none;visibility:visible;transition:transform .25s}
 .md-bar b{display:block;font-size:13px;margin-bottom:6px}.md-bar .x{position:absolute;right:8px;top:6px;border:0;background:none;color:var(--muted);font-size:16px}
 .md-opts{display:flex;gap:6px;margin-bottom:8px}.md-opts:last-child{margin-bottom:0}
 .md-opts button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 4px;font-family:inherit;font-size:13px;line-height:1.25}
@@ -2384,7 +2385,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
    const el=document.querySelector('#home .welcome .cat');if(el){el.classList.remove('fw-hop');void el.offsetWidth;el.classList.add('fw-hop')}}}
  function drawQuests(){
   let c=document.getElementById('cqCard');
-  if(!c){const w=document.querySelector('#home .welcome');if(!w)return;c=document.createElement('div');c.className='cq-card';c.id='cqCard';w.after(c)}
+  if(!c){const w=document.querySelector('#home .welcome');if(!w)return;c=document.createElement('div');c.className='cq-card home-sortable';c.id='cqCard';c.dataset.homeKey='quests';w.after(c);if(typeof applyHomePrefs==='function')applyHomePrefs()}
   const k=todays(),cc=cat(),allDone=!!cc.done[today()];
   c.innerHTML=`<div class="cq-head"><h3>🐾 ${L('ภารกิจของแมววันนี้','Cat’s quests today')}</h3><span class="cq-paws">🐾 ${cc.paws||0}</span></div>
    <div class="cq-sub">${allDone?L('ครบทั้ง 3 ภารกิจแล้ว พรุ่งนี้มีภารกิจใหม่นะ ✨','All 3 done, new quests tomorrow ✨'):L('ทำครบ 3 อย่าง ได้ 🐾 1 อุ้งเท้า ไว้แลกของแต่งแมว','Finish all 3 to earn a 🐾 paw for cat outfits')}</div>`
