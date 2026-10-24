@@ -1497,6 +1497,7 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
 <!-- v102 Thai food database: type a name, pick a dish, nutrients fill in -->
 <script src="foods_th.js"></script>
 <script src="foods_more.js"></script>
+<script src="foods_stores.js"></script>
 <style>
 .fw-name-wrap{position:relative}
 .fw-sugg{position:absolute;left:0;right:0;top:100%;z-index:60;margin-top:4px;background:#1f2128;border:1px solid #34363f;border-radius:16px;box-shadow:0 16px 40px #0008;overflow:hidden;display:none;max-height:340px;overflow-y:auto}
@@ -2190,6 +2191,57 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  function place(){document.querySelectorAll('.wp-entry:not(.pg-entry)').forEach(w=>{if(!w.nextElementSibling||!w.nextElementSibling.matches('.pg-entry')){const e=entry();e.classList.add('pg-entry');w.after(e)}})}
  place();setTimeout(place,800);
  window.fwOpenProgress=()=>go('progress');
+})();
+</script>
+<!-- v134 Convenience stores and chains (foods_stores.js): browse 7-Eleven, coffee / bubble tea and fast food,
+ log an item in one tap. The same items also come up in the food-name search. -->
+<style>
+.st7-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.st7-card h3{margin:0;font-size:17px}.st7-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.st7-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}.st7-chips::-webkit-scrollbar{display:none}
+.st7-chips button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:7px 12px;font-family:inherit;font-size:13px;font-weight:700}
+.st7-chips button.on{background:#2f9e6e;border-color:#2f9e6e;color:#fff}
+.st7-q{width:100%;box-sizing:border-box;margin-top:8px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 12px;font:14px inherit;font-family:inherit}
+.st7-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.st7-row:first-of-type{border-top:0}
+.st7-row .tx{flex:1;min-width:0}.st7-row b{display:block;font-size:14px;line-height:1.35}.st7-row small{display:block;color:var(--muted);font-size:12px}
+.st7-add{flex:none;border:0;border-radius:12px;min-width:44px;height:38px;font-weight:800;font-size:18px;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.st7-more{width:100%;margin-top:6px;border:1px dashed var(--line);background:none;color:var(--text);border-radius:12px;padding:9px;font-family:inherit;font-weight:700}
+.st7-note{font-size:11px;color:var(--muted);margin-top:8px}
+</style>
+<script>
+(function(){
+ const R=window.FW_STORE_FOODS;if(!R||!R.length)return;
+ const L=(th,en)=>window.fwL?fwL(th,en):th,EN=()=>(window.fwLang&&fwLang())==='en',EM=window.FW_FOODS_EN||{};
+ const nm=t=>EN()&&EM[t]?EM[t]:t;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const norm=t=>String(t||'').toLowerCase().replace(/[\s\-()·.,/]/g,'');
+ const mealAt=d=>{const h=d.getHours()+d.getMinutes()/60;return h<10.5?'เช้า':h<15?'กลางวัน':h<21?'เย็น':'ของว่าง'};
+ const CATS=[...new Set(R.map(r=>r[1]))],SHOW=5;
+ let cat=CATS[0],q='',all=false;
+ function list(){const qn=norm(q);
+  return R.filter(r=>qn?norm(r[0]+','+r[10]+','+(EM[r[0]]||'')).includes(qn):r[1]===cat)}
+ function log(r){const now=new Date(),id=Date.now();
+  s.foods.unshift({id,createdAt:id,name:r[0],meal:mealAt(now),kcal:r[2],protein:r[3],carbs:r[4],fat:r[5],sugar:r[6],fiber:r[7],sodium:r[8],
+   note:L('ค่าประมาณ · ','Estimate · ')+r[9],date:localDay(now),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),favorite:false});
+  save();toast(L(`บันทึก ${r[0]} · ${r[2]} kcal ✅`,`Logged ${nm(r[0])} · ${r[2]} kcal ✅`))}
+ function draw(){
+  const box=document.getElementById('st7Card');if(!box)return;
+  const a=list(),shown=all||q?a:a.slice(0,SHOW);
+  box.innerHTML=`<h3>🏪 ${L('ร้านสะดวกซื้อ & ร้านดัง','Convenience stores & chains')}</h3><div class="st7-sub">${L('แตะ + เพื่อบันทึกทันที','Tap + to log it right away')}</div>
+   <div class="st7-chips">${CATS.map(c=>`<button type="button" data-c="${esc(c)}" class="${!q&&c===cat?'on':''}">${c==='7-Eleven'?'🏪 ':c.startsWith('กาแฟ')?'☕ ':'🍔 '}${esc(nm(c))}</button>`).join('')}</div>
+   <input class="st7-q" id="st7Q" type="search" placeholder="${L('ค้นหา เช่น ข้าวกล่อง, ไข่มุก, KFC','Search e.g. rice box, boba, KFC')}" value="${esc(q)}">
+   <div id="st7List">${shown.map((r,i)=>`<div class="st7-row"><div class="tx"><b>${esc(nm(r[0]))}</b><small>${esc(r[9])} · ${r[2]} kcal · P ${r[3]} C ${r[4]} F ${r[5]}</small></div><button type="button" class="st7-add" data-i="${R.indexOf(r)}" aria-label="${L('บันทึก','Log')}">+</button></div>`).join('')||`<div class="st7-sub">${L('ไม่พบรายการ','Nothing found')}</div>`}</div>
+   ${!q&&a.length>SHOW?`<button type="button" class="st7-more" id="st7More">${all?L('▲ ย่อ','▲ Less'):L(`▼ ดูทั้งหมด (${a.length})`,`▼ Show all (${a.length})`)}</button>`:''}
+   <div class="st7-note">${L('ค่าโภชนาการเป็นค่าประมาณ ไม่ใช่ข้อมูลทางการของร้าน ถ้ามีฉลากบนกล่อง ใช้ตัวเลขบนฉลากจะแม่นกว่า','Nutrition values are estimates, not the shops’ official figures; a label on the pack is more accurate.')}</div>`;
+  box.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{cat=b.dataset.c;q='';all=false;draw()});
+  box.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>log(R[b.dataset.i]));
+  const m=box.querySelector('#st7More');if(m)m.onclick=()=>{all=!all;draw()};
+  const qi=box.querySelector('#st7Q');qi.oninput=()=>{q=qi.value;const pos=qi.selectionStart;draw();const n=box.querySelector('#st7Q');n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}};
+ }
+ function init(){if(document.getElementById('st7Card'))return;
+  const ref=document.getElementById('rpCard')||document.querySelector('#food .food-repeat-card');if(!ref)return;
+  const c=document.createElement('div');c.className='st7-card';c.id='st7Card';ref.before(c);draw()}
+ init();if(!document.getElementById('st7Card'))setTimeout(init,600);
 })();
 </script>
 <!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
