@@ -688,7 +688,8 @@ window.repeatFood=function(id){const f=s.foods.find(x=>x.id===id);if(!f)return;g
 document.querySelectorAll('[data-core-meal]').forEach(b=>b.onclick=()=>{meal=b.dataset.coreMeal;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x.dataset.meal===meal));renderFood();toast('กรองมื้อ '+meal)});
 function renderFoodPhotos(){const el=$("foodPhotoGrid");if(!el)return;const a=s.foods.filter(f=>f.photo).slice(0,8);el.innerHTML=a.length?a.map(f=>`<div class="food-photo-tile" onclick="openFoodModal(${f.id})"><img src="${f.photo}" alt=""><span>${esc(f.name)}</span></div>`).join(""):'<div class="food-empty-tip">ยังไม่มีรูปอาหาร · ลองถ่ายหรือเลือกรูปตอนเพิ่มอาหาร 📷</div>';}
 // The list shows today only and starts empty again at midnight; earlier days stay in the history calendar.
-function renderFood(){renderCoreFoodLog();let q=$("search").value.toLowerCase(),today=localDay();let a=s.foods.filter(f=>foodDay(f)===today&&(meal==="ทั้งหมด"||f.meal===meal)&&f.name.toLowerCase().includes(q));$("foodList").innerHTML=a.length?a.map(foodCard).join(""):'<div class="item"><div class="meta"><b>วันนี้ยังไม่มีรายการอาหาร</b><small>เพิ่มมื้ออาหารของคุณได้เลย · รายการเริ่มใหม่ทุกเที่ยงคืน ดูวันก่อน ๆ ได้ในประวัติ</small></div></div>'}
+function renderFood(){renderCoreFoodLog();let q=$("search").value.toLowerCase(),today=localDay();let a=s.foods.filter(f=>foodDay(f)===today&&(meal==="ทั้งหมด"||f.meal===meal)&&f.name.toLowerCase().includes(q));const yd=new Date();yd.setDate(yd.getDate()-1);const hadYesterday=!q&&s.foods.some(f=>foodDay(f)===localDay(yd));
+$("foodList").innerHTML=a.length?a.map(foodCard).join(""):'<div class="item"><div class="meta"><b>วันนี้ยังไม่มีรายการอาหาร</b><small>เพิ่มมื้ออาหารของคุณได้เลย · รายการเริ่มใหม่ทุกเที่ยงคืน ดูวันก่อน ๆ ได้ในประวัติ</small>'+(hadYesterday?'<button type="button" class="fl-more" style="margin-top:8px" onclick="document.getElementById(\'rpCard\')?.scrollIntoView({behavior:\'smooth\',block:\'center\'})">🔁 ใช้มื้อเมื่อวาน</button>':'')+'</div></div>'}
 
 function dayRecord(date){
  const foods=s.foods.filter(f=>foodDay(f)===date).length;
@@ -2005,6 +2006,85 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
  if(anchor&&!document.getElementById('rpCard')){const c=document.createElement('div');c.className='rp-card';c.id='rpCard';anchor.after(c)}
  const r0=window.render;if(typeof r0==='function')window.render=function(){const o=r0.apply(this,arguments);try{draw()}catch(e){console.error(e)}return o};
  draw();
+})();
+</script>
+<!-- v132 Say or type what you ate: "ข้าวมันไก่ 1 จาน ชาเย็น 1 แก้ว" → the AI Worker (/parse) splits it into items with
+ calories; tick the ones to keep and log them in one tap. 🎤 uses the phone's speech recognizer (window.FoodWellVoice). -->
+<style>
+.vt-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.vt-card h3{margin:0;font-size:17px}.vt-sub{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.vt-in{display:flex;gap:8px;align-items:stretch}
+.vt-in textarea{flex:1;min-width:0;min-height:48px;max-height:120px;resize:vertical;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 12px;font:15px/1.4 inherit;font-family:inherit}
+.vt-mic{flex:none;width:52px;border:0;border-radius:14px;font-size:22px;background:linear-gradient(135deg,#f7bfd0,#e887aa)}
+.vt-go{width:100%;margin-top:10px;border:0;border-radius:14px;padding:12px;font-weight:800;font-size:15px;font-family:inherit;background:linear-gradient(135deg,#bcd7f5,#b49cf0);color:#1d1b2b}
+.vt-go:disabled{opacity:.55}
+.vt-msg{margin-top:8px;font-size:12px;color:#d9822b}
+.vt-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.vt-item input[type=checkbox]{width:20px;height:20px;flex:none;accent-color:#e887aa}
+.vt-item .tx{flex:1;min-width:0}.vt-item b{display:block;font-size:14px}.vt-item small{display:block;color:var(--muted);font-size:12px}
+.vt-item input[type=number]{width:72px;flex:none;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:7px 6px;text-align:right;font:inherit;font-family:inherit}
+.vt-foot{display:flex;gap:8px;align-items:center;margin-top:10px}
+.vt-foot select{flex:1;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px;font-family:inherit}
+.vt-save{flex:1.4;border:0;border-radius:12px;padding:11px;font-weight:800;font-family:inherit;background:#2f9e6e;color:#fff}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th, V=()=>window.FoodWellVoice;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const MEALS=['เช้า','กลางวัน','เย็น','ของว่าง'],NUT=['protein','carbs','fat','fiber','sugar','sodium'];
+ const mealAt=d=>{const h=d.getHours()+d.getMinutes()/60;return h<10.5?'เช้า':h<15?'กลางวัน':h<21?'เย็น':'ของว่าง'};
+ let items=[],busy=false,said='';
+ function url(){const ep=typeof fwAiEndpoint==='function'?fwAiEndpoint():'';if(!ep)return '';try{const u=new URL(ep);u.pathname='/parse';return u.toString()}catch(e){return ''}}
+ const micOk=()=>{try{return !!(V()&&V().available())}catch(e){return false}};
+ function draw(msg){
+  const box=document.getElementById('vtCard');if(!box)return;
+  const ta=box.querySelector('textarea'),keep=ta?ta.value:said;
+  let h=`<h3>🗣️ ${L('บอกว่ากินอะไร','Say what you ate')}</h3><div class="vt-sub">${L('พิมพ์หรือพูด เช่น “ข้าวมันไก่ 1 จาน ชาเย็น 1 แก้ว” แล้ว AI แยกรายการและแคลอรี่ให้','Type or say e.g. “chicken rice, 1 iced Thai tea” and AI splits it into items with calories')}</div>`
+   +`<div class="vt-in"><textarea id="vtText" maxlength="400" placeholder="${L('กินอะไรไปบ้าง…','What did you eat…')}">${esc(keep)}</textarea>${micOk()?`<button type="button" class="vt-mic" id="vtMic" aria-label="${L('พูด','Speak')}">🎤</button>`:''}</div>`
+   +`<button type="button" class="vt-go" id="vtGo"${busy?' disabled':''}>${busy?L('กำลังแยกรายการ…','Working…'):'✨ '+L('แยกรายการด้วย AI','Split with AI')}</button>`
+   +(msg?`<div class="vt-msg">${esc(msg)}</div>`:'');
+  if(items.length){
+   const meal=(items.find(x=>x.meal)||{}).meal||mealAt(new Date());
+   h+=items.map((it,i)=>`<div class="vt-item"><input type="checkbox" data-i="${i}"${it.on?' checked':''}><div class="tx"><b>${esc(it.name)}</b><small>${esc(it.qty||'')}${it.protein!=null?` · P ${it.protein} C ${it.carbs??0} F ${it.fat??0}`:''}</small></div><input type="number" inputmode="numeric" min="0" data-k="${i}" value="${it.kcal??''}" aria-label="kcal"><small>kcal</small></div>`).join('')
+    +`<div class="vt-foot"><select id="vtMeal">${MEALS.map(m=>`<option${m===meal?' selected':''}>${m}</option>`).join('')}</select><button type="button" class="vt-save" id="vtSave">✅ ${L('บันทึก','Log')} ${items.filter(x=>x.on).length} ${L('รายการ','items')}</button></div>`;
+  }
+  box.innerHTML=h;
+  box.querySelector('#vtText').oninput=e=>{said=e.target.value};
+  box.querySelector('#vtGo').onclick=run;
+  const mic=box.querySelector('#vtMic');if(mic)mic.onclick=()=>{V().listen((window.fwLang&&fwLang())==='en'?'en-US':'th-TH',L('บอกว่ากินอะไร เช่น ข้าวมันไก่ 1 จาน','Say what you ate'))};
+  box.querySelectorAll('[data-i]').forEach(c=>c.onchange=()=>{items[c.dataset.i].on=c.checked;draw()});
+  box.querySelectorAll('[data-k]').forEach(n=>n.onchange=()=>{items[n.dataset.k].kcal=Math.max(0,Math.round(Number(n.value)||0))});
+  const sv=box.querySelector('#vtSave');if(sv)sv.onclick=save_;
+ }
+ async function run(){
+  said=(document.getElementById('vtText')?.value||'').trim();
+  if(!said){draw(L('พิมพ์หรือพูดว่ากินอะไรก่อน','Type or say what you ate first'));return}
+  const u=url();if(!u){draw(L('ยังไม่ได้ตั้งค่า AI Endpoint','The AI endpoint is not set'));return}
+  busy=true;items=[];draw();
+  try{
+   const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:said})});
+   const j=await r.json().catch(()=>({}));
+   if(!r.ok)throw new Error(j.error||('HTTP '+r.status));
+   items=(j.items||[]).map(x=>({...x,on:true}));busy=false;draw();
+  }catch(e){busy=false;draw(L('แยกรายการไม่สำเร็จ: ','Could not split: ')+e.message)}
+ }
+ function save_(){
+  const pick=items.filter(x=>x.on);if(!pick.length){draw(L('เลือกอย่างน้อย 1 รายการ','Pick at least one item'));return}
+  const meal=document.getElementById('vtMeal')?.value||mealAt(new Date()),now=new Date(),t=Date.now();
+  const time=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  pick.forEach((it,i)=>{const id=t+i,f={id,createdAt:id,name:it.qty?`${it.name} (${it.qty})`:it.name,meal,kcal:Number(it.kcal||0),note:L('บันทึกจากข้อความ/เสียง · AI ประมาณ','From text/voice · AI estimate'),date:localDay(now),time,favorite:false};
+   NUT.forEach(k=>{f[k]=Number(it[k]||0)});s.foods.unshift(f)});
+  const kc=pick.reduce((a,x)=>a+Number(x.kcal||0),0);
+  items=[];said='';const ta=document.getElementById('vtText');if(ta)ta.value='';
+  save();draw();toast(L(`บันทึก ${pick.length} รายการ · ${kc.toLocaleString()} kcal ✅`,`Logged ${pick.length} items · ${kc.toLocaleString()} kcal ✅`));
+ }
+ window.onVoiceText=json=>{let r={};try{r=JSON.parse(json)}catch(e){}
+  if(r.text){said=r.text;const ta=document.getElementById('vtText');if(ta)ta.value=r.text;run()}
+  else if(r.error==='none')toast(L('มือถือนี้ไม่มีระบบพิมพ์ด้วยเสียง · พิมพ์แทนได้เลย','No voice typing on this phone · please type instead'))};
+ function init(){if(document.getElementById('vtCard'))return;
+  const ref=document.getElementById('rpCard')||document.querySelector('#food .food-repeat-card');if(!ref)return;
+  const c=document.createElement('div');c.className='vt-card';c.id='vtCard';ref.before(c);draw()}
+ init();if(!document.getElementById('vtCard'))setTimeout(init,500);
 })();
 </script>
 <!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
