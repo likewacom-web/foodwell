@@ -447,6 +447,10 @@ html{background:#101116}body{-webkit-tap-highlight-color:transparent;overscroll-
 <div class="page-title"><div><p>WEIGHT PLAN</p><h1>📉 แผนลดน้ำหนัก</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
 <div id="wpView"></div>
 </section>
+<section id="progress" class="page">
+<div class="page-title"><div><p>BODY PROGRESS</p><h1>📏 รอบเอว & รูปความเปลี่ยนแปลง</h1></div><button class="secondary-btn" type="button" data-go="home">หน้าหลัก</button></div>
+<div id="pgView"></div>
+</section>
 <section id="recipes" class="page">
 <div class="page-title"><div><p>MY RECIPES</p><h1>🍳 เมนูทำเอง</h1></div><button class="secondary-btn" type="button" data-go="food">กลับ</button></div>
 <div id="rcBody"></div>
@@ -2085,6 +2089,107 @@ go=function(p){originalGo(p);if(p==='home'){document.querySelectorAll('#home .we
   const ref=document.getElementById('rpCard')||document.querySelector('#food .food-repeat-card');if(!ref)return;
   const c=document.createElement('div');c.className='vt-card';c.id='vtCard';ref.before(c);draw()}
  init();if(!document.getElementById('vtCard'))setTimeout(init,500);
+})();
+</script>
+<!-- v133 Waist and weekly progress photos. Kept on this phone only: waist in localStorage (fw_waist_local), photos in
+ IndexedDB (meowfit_local/photos). Neither is part of the synced data (s), the backup file or Android's cloud backup. -->
+<style>
+.pg-card{margin:0 0 12px;padding:16px;border-radius:22px;background:var(--panel);border:1px solid var(--line)}
+.pg-card h3{margin:0 0 4px;font-size:17px}.pg-sub{font-size:12px;color:var(--muted);margin:0 0 10px}
+.pg-row{display:flex;gap:8px}.pg-row input{flex:1;min-width:0;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 12px;font:16px inherit;font-family:inherit}
+.pg-btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;font-size:14px;font-family:inherit;background:linear-gradient(135deg,#f7bfd0,#e887aa);color:#2b1820}
+.pg-btn.alt{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.pg-big{width:100%;padding:14px;font-size:15px}
+.pg-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pg-stat{padding:10px;border-radius:14px;background:var(--panel2);text-align:center}.pg-stat b{display:block;font-size:18px}.pg-stat small{font-size:11px;color:var(--muted)}
+.pg-spark{width:100%;height:70px;margin-top:10px}
+.pg-due{margin:0 0 10px;padding:10px 12px;border-radius:14px;background:#f4c76b26;color:#b7791f;font-size:13px;font-weight:700}
+.pg-due.ok{background:#2f9e6e1f;color:#2f9e6e}
+.pg-cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pg-cmp figure{margin:0}.pg-cmp img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;background:var(--panel2)}
+.pg-cmp figcaption{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
+.pg-cmp select{width:100%;margin-bottom:6px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px;font-family:inherit}
+.pg-diff{margin-top:8px;text-align:center;font-weight:800;font-size:14px}
+.pg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.pg-th{position:relative}.pg-th img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;display:block}
+.pg-th small{position:absolute;left:4px;bottom:4px;font-size:10px;background:#0009;color:#fff;border-radius:6px;padding:1px 5px}
+.pg-th button{position:absolute;right:3px;top:3px;border:0;border-radius:8px;background:#0008;color:#fff;font-size:12px;padding:2px 5px}
+.pg-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+</style>
+<script>
+(function(){
+ const L=(th,en)=>window.fwL?fwL(th,en):th,WK='fw_waist_local',DAY=864e5;
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const fmt=d=>new Date(d+'T12:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+ // Monday of the week, as YYYY-MM-DD
+ const weekOf=d=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()-((x.getDay()+6)%7));return localDay(x)};
+ // ---- waist (small, localStorage) ----
+ function waist(){try{return JSON.parse(localStorage.getItem(WK)||'[]')}catch(e){return []}}
+ function saveWaist(a){try{localStorage.setItem(WK,JSON.stringify(a))}catch(e){toast(L('บันทึกไม่สำเร็จ · พื้นที่ในเครื่องเต็ม','Could not save · storage is full'))}}
+ const waistNear=d=>{const a=waist().filter(x=>x.d<=d);return a.length?a[a.length-1].cm:null};
+ // ---- photos (IndexedDB) ----
+ let dbp=null;
+ function db(){return dbp||(dbp=new Promise((ok,no)=>{if(!window.indexedDB)return no(new Error('no IndexedDB'));const r=indexedDB.open('meowfit_local',1);
+  r.onupgradeneeded=()=>{r.result.createObjectStore('photos',{keyPath:'id'})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}))}
+ async function tx(mode,fn){const d=await db();return new Promise((ok,no)=>{const t=d.transaction('photos',mode),st=t.objectStore('photos');const r=fn(st);t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})}
+ // If this WebView can't open IndexedDB, keep (smaller) photos in localStorage instead: still on the phone only.
+ const LK='fw_progress_photos',lsGet=()=>{try{return JSON.parse(localStorage.getItem(LK)||'[]')}catch(e){return []}};
+ let useLS=false;
+ const store={
+  all:async()=>{if(!useLS)try{return (await tx('readonly',st=>st.getAll()))||[]}catch(e){useLS=true}return lsGet()},
+  put:async p=>{if(!useLS)try{return await tx('readwrite',st=>st.put(p))}catch(e){useLS=true}
+   p.img=await shrinkImage(p.img,600,.7);const a=lsGet().filter(x=>x.id!==p.id);a.push(p);localStorage.setItem(LK,JSON.stringify(a))},
+  del:async id=>{if(!useLS)try{return await tx('readwrite',st=>st.delete(id))}catch(e){useLS=true}
+   localStorage.setItem(LK,JSON.stringify(lsGet().filter(x=>x.id!==id)))}};
+ const allPhotos=async()=>(await store.all()).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.id-b.id);
+ let photos=[],fromId=null,toId=null;
+ async function load(){try{photos=await allPhotos()}catch(e){photos=[]}}
+ function spark(a){if(a.length<2)return '';const w=300,h=70,vs=a.map(x=>x.cm),mn=Math.min(...vs),mx=Math.max(...vs),r=(mx-mn)||1;
+  const pts=a.map((x,i)=>[i/(a.length-1)*w,h-6-(x.cm-mn)/r*(h-12)]);
+  return `<svg class="pg-spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="#e887aa" stroke-width="3" stroke-linejoin="round" points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>${pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="#e887aa"/>`).join('')}</svg>`}
+ function draw(){
+  const v=document.getElementById('pgView');if(!v)return;
+  const w=waist(),today=localDay(),last=w[w.length-1],first=w[0];
+  const thisWeek=photos.some(p=>weekOf(p.d)===weekOf(today));
+  let h=`<div class="pg-card"><h3>📏 ${L('รอบเอว','Waist')}</h3><div class="pg-sub">${L('วัดระดับสะดือ ตอนเช้าก่อนกินอาหาร จะเทียบได้แม่นที่สุด','Measure at the navel, in the morning before eating, for the fairest comparison')}</div>
+   <div class="pg-row"><input id="pgCm" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="${L('เช่น 82.5','e.g. 82.5')}" value="${last&&last.d===today?last.cm:''}"><span style="align-self:center;color:var(--muted)">cm</span><button type="button" class="pg-btn" id="pgSaveCm">${L('บันทึก','Save')}</button></div>`;
+  if(w.length){const ch=+(last.cm-first.cm).toFixed(1);
+   h+=`<div class="pg-stats"><div class="pg-stat"><b>${last.cm}</b><small>${L('ล่าสุด','Latest')} · ${fmt(last.d)}</small></div><div class="pg-stat"><b>${first.cm}</b><small>${L('เริ่มต้น','Start')} · ${fmt(first.d)}</small></div><div class="pg-stat"><b style="color:${ch<=0?'#2f9e6e':'#e8557a'}">${ch>0?'+':''}${ch}</b><small>cm ${L('เปลี่ยนไป','change')}</small></div></div>`+spark(w.slice(-20))}
+  h+='</div>';
+  h+=`<div class="pg-card"><h3>📸 ${L('รูปความเปลี่ยนแปลง','Progress photos')}</h3><div class="pg-sub">${L('ถ่ายสัปดาห์ละ 1 รูป ท่าเดิม ที่เดิม แสงเดิม แล้วเทียบก่อน–หลัง','One photo a week, same pose, place and light, then compare before and after')}</div>
+   <div class="pg-due${thisWeek?' ok':''}">${thisWeek?'✅ '+L('สัปดาห์นี้ถ่ายแล้ว','This week is done'):'📸 '+L('ยังไม่ได้ถ่ายรูปของสัปดาห์นี้','No photo for this week yet')}</div>
+   <button type="button" class="pg-btn pg-big" id="pgShot">📷 ${L('ถ่าย / เลือกรูปของวันนี้','Take / pick today’s photo')}</button>
+   <input type="file" id="pgFile" accept="image/*" style="display:none">`;
+  if(photos.length>=2){
+   const a=photos.find(p=>p.id===fromId)||photos[0],b=photos.find(p=>p.id===toId)||photos[photos.length-1];
+   const opt=sel=>photos.map(p=>`<option value="${p.id}"${p.id===sel.id?' selected':''}>${fmt(p.d)}</option>`).join('');
+   const days=Math.round((new Date(b.d)-new Date(a.d))/DAY),wa=a.waist??waistNear(a.d),wb=b.waist??waistNear(b.d);
+   h+=`<div class="pg-cmp"><figure><select id="pgFrom">${opt(a)}</select><img src="${a.img}" alt=""><figcaption>${L('ก่อน','Before')} · ${fmt(a.d)}${wa?` · ${wa} cm`:''}</figcaption></figure>
+    <figure><select id="pgTo">${opt(b)}</select><img src="${b.img}" alt=""><figcaption>${L('หลัง','After')} · ${fmt(b.d)}${wb?` · ${wb} cm`:''}</figcaption></figure></div>
+    <div class="pg-diff">${L(`ห่างกัน ${days} วัน`,`${days} days apart`)}${wa&&wb?` · ${L('รอบเอว','waist')} ${wb-wa>0?'+':''}${(wb-wa).toFixed(1)} cm`:''}</div>`}
+  if(photos.length)h+=`<div class="pg-grid">${photos.slice().reverse().map(p=>`<div class="pg-th"><img src="${p.img}" alt=""><small>${fmt(p.d)}</small><button type="button" data-del="${p.id}" aria-label="${L('ลบ','Delete')}">✕</button></div>`).join('')}</div>`;
+  h+=`<div class="pg-note">🔒 ${L('รูปและรอบเอวเก็บไว้ในมือถือเครื่องนี้เท่านั้น ไม่ซิงก์ ไม่ส่งขึ้นคลาวด์ และไม่รวมในไฟล์สำรองข้อมูล ถ้าถอนการติดตั้งแอปหรือล้างข้อมูลแอป รูปจะหายไปด้วย','Photos and waist stay on this phone only: never synced, uploaded or put in backup files. Uninstalling the app or clearing its data deletes them.')}</div></div>`;
+  v.innerHTML=h;
+  v.querySelector('#pgSaveCm').onclick=()=>{const cm=Math.round(Number(v.querySelector('#pgCm').value)*10)/10;
+   if(!(cm>=30&&cm<=250)){toast(L('ใส่รอบเอวเป็นเซนติเมตร (30–250)','Enter your waist in cm (30–250)'));return}
+   const a=waist().filter(x=>x.d!==today);a.push({d:today,cm});a.sort((x,y)=>x.d<y.d?-1:1);saveWaist(a);draw();toast(L(`บันทึกรอบเอว ${cm} cm ✅`,`Waist ${cm} cm saved ✅`))};
+  const file=v.querySelector('#pgFile');v.querySelector('#pgShot').onclick=()=>file.click();
+  file.onchange=()=>{const f=file.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{
+   try{const img=await shrinkImage(r.result,900,.8);const p={id:Date.now(),d:today,img,waist:waistNear(today)};
+    await store.put(p);await load();toId=null;draw();toast(L('เก็บรูปแล้ว 📸','Photo saved 📸'))}
+   catch(e){toast(L('เก็บรูปไม่สำเร็จ: ','Could not save the photo: ')+e.message)}};r.readAsDataURL(f);file.value=''};
+  const fs=v.querySelector('#pgFrom'),ts=v.querySelector('#pgTo');
+  if(fs)fs.onchange=()=>{fromId=Number(fs.value);draw()};if(ts)ts.onchange=()=>{toId=Number(ts.value);draw()};
+  v.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!confirm(L('ลบรูปนี้?','Delete this photo?')))return;
+   const id=Number(b.dataset.del);await store.del(id);if(fromId===id)fromId=null;if(toId===id)toId=null;await load();draw()});
+ }
+ const og=window.go;if(og)window.go=function(p){og(p);if(p==='progress'){load().then(draw);window.scrollTo({top:0})}};
+ // entry points next to the weight-plan buttons (Dashboard and the body card on the More page)
+ const entry=()=>{const b=document.createElement('button');b.type='button';b.className='wp-entry';
+  b.innerHTML='<span class="ic">📏</span><span><b>'+L('รอบเอว & รูปก่อน–หลัง','Waist & before/after photos')+'</b><small>'+L('ถ่ายรูปทุกสัปดาห์ เก็บในเครื่องเท่านั้น','A photo a week, kept on this phone only')+'</small></span><em>›</em>';b.onclick=()=>go('progress');return b};
+ function place(){document.querySelectorAll('.wp-entry:not(.pg-entry)').forEach(w=>{if(!w.nextElementSibling||!w.nextElementSibling.matches('.pg-entry')){const e=entry();e.classList.add('pg-entry');w.after(e)}})}
+ place();setTimeout(place,800);
+ window.fwOpenProgress=()=>go('progress');
 })();
 </script>
 <!-- v110 Home-made recipes: build from ingredients, per-serving nutrition, reuse from the food form -->
